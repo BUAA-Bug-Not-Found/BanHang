@@ -20,3 +20,4 @@ jobs:
           # eslint-args: '--quiet'
           extensions: 'js,jsx,ts,tsx'
           annotations: true
+          all-files: true
