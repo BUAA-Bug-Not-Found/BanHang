@@ -15,9 +15,4 @@ jobs:
         with:
           node-version: 20
       - run: npm ci # or yarn install
-      - uses: sibiraj-s/action-eslint@v3
-        with:
-          # eslint-args: '--quiet'
-          extensions: 'js,jsx,ts,tsx'
-          annotations: true
-          all-files: true
+      - run: node ./node_modules/.bin/eslint src
