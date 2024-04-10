@@ -15,4 +15,4 @@ jobs:
         with:
           node-version: 20
       - run: npm ci # or yarn install
-      - run: node ./node_modules/.bin/eslint src
+      - run: node ./node_modules/.bin/eslint vueproject/src
