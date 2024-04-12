@@ -1,2 +1,2 @@
 # BanHang
-### Open, Inclusive, and Shared
+### Open, Inclusive, and Shared  
