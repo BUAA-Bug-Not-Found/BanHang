@@ -52,6 +52,7 @@ def check_user(view_func):
                 if 'username' in inspect.signature(view_func).parameters:
                     kwargs['username'] = payload.get('username')
                 return view_func(request, *args, **kwargs)
+            return Response({'error': '无效token'}, status=401)
         except (IndexError, KeyError):
             return Response({'error': 'Invalid token format or missing payload data'}, status=401)
     
