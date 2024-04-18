@@ -1,3 +1,5 @@
-/node_modules
+node_modules
 info.txt
-www/*
+www
+.idea
+/vueproject/app-debug.apk
