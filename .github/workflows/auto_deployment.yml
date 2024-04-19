@@ -1,1 +1,16 @@
+name: auto_deployment
 
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+      - feature/lyh_auto_deployment
+
+jobs:
+  eslint:
+    runs-on: self-hosted
+    steps:
+      - run: schtasks /End /TN BanHang
+      - run: copy backend\fastapi D:\SoftWareEngineer\backend
+      - run: schtasks /Run /TN 
