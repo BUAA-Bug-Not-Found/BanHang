@@ -10,10 +10,11 @@ axios.defaults.timeout = 10000;
 axios.defaults.baseURL = isLocal? 'http://127.0.0.1:8000/': 'http://127.0.0.1:8000/';
 
 const app = createApp(App)
-app.mount('#app')
 
 //使用pinia进行状态管理
 const pinia = createPinia();
 app.use(pinia)
 
 app.use(router)
+
+app.mount('#app')
