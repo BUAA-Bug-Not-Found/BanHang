@@ -6,6 +6,7 @@ import importlib
 import pytest
 
 def regenerate_database():
+    orm.db.close()
     importlib.reload(orm)
     orm.generateDB()
 
