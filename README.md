@@ -39,8 +39,13 @@
    cd banhangApp
    cordova add platform android
    ```
+6. 安装组件
+   ```
+   npm install
+   ```
 6.  生成apk
-   ```powershell
+   ```
+   powershell
    cd vueproject
    buildapp.bat
    ```
