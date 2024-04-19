@@ -3,6 +3,10 @@ import App from './App.vue'
 import axios from "axios";
 import { createPinia } from "pinia";
 import router from './router'
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
 let isLocal = false
 axios.defaults.timeout = 10000;
@@ -16,5 +20,13 @@ const pinia = createPinia();
 app.use(pinia)
 
 app.use(router)
+
+//引用vuetify3 组件库
+const vuetify = createVuetify({
+    components,
+    directives,
+})
+
+app.use(vuetify)
 
 app.mount('#app')
