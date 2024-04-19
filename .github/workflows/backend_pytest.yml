@@ -1,6 +1,7 @@
 name: backend_pytest
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - dev
