@@ -7,8 +7,8 @@ on:
       - dev
 
 jobs:
-  auto_deployment:
-    runs-on: backend_pytest
+  backend_pytest:
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - run: if (Test-Path -Path D:\SoftWareEngineer\backend_test\fastapi){Remove-Item -Path D:\SoftWareEngineer\backend_test\fastapi -Force -Recurse}
