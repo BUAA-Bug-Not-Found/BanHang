@@ -22,7 +22,6 @@ class User(Model):
         database = db
         db_table = 'user'
 
-
 if __name__ == '__main__':
     # 暂时约定执行这部分代码的目的是重新生成整个数据库。
     # 修改模型后，记得在此处建表
