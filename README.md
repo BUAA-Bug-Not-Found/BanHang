@@ -17,7 +17,7 @@
    ```
 
 前端部署
-
+!!!路径中不要包含中文
 1. 安装Android Studio
 
 2. 安装SDK(在Android Studio的SDK Manager里面)
@@ -37,10 +37,9 @@
 5. 添加安卓平台
    ```
    cd banhangApp
-   cordova add platform Android
+   cordova add platform android
    ```
 6.  生成apk
-
    ```powershell
    cd vueproject
    buildapp.bat
