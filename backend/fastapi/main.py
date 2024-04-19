@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from backend.fastapi.banhang import user
+from banhang import user
 
 app = FastAPI()
 

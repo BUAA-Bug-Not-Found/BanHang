@@ -1,7 +1,6 @@
 import pytest
-import prepare
-# 一定写在前面
 from prepare import mock_user_data, new_database
+# 一定写在前面
 
 
 from fastapi.testclient import TestClient

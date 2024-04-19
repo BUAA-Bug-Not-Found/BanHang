@@ -1,6 +1,8 @@
 import os
 os.environ["BANHANG_TEST"] = "TRUE"
-import backend.fastapi.orm.orm as orm
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import orm.orm as orm
 import importlib
 import pytest
 
