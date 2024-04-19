@@ -2,7 +2,6 @@ from functools import wraps
 import inspect
 import jwt
 import time
-from rest_framework.response import Response
 
 
 KEY = "ORANGE IS THE BEST PRODUCT MANAGER IN THE WORLD!!!!!!!!!"
@@ -41,7 +40,7 @@ def check_user(view_func):
         auth_header = request.META.get('HTTP_AUTHORIZATION')
 
         if not auth_header:
-            return Response({'error': 'Token is missing'}, status=401)
+            return {'error': 'Token is missing'}
 
         try:
             token = auth_header.split(' ')[1]
@@ -52,8 +51,8 @@ def check_user(view_func):
                 if 'username' in inspect.signature(view_func).parameters:
                     kwargs['username'] = payload.get('username')
                 return view_func(request, *args, **kwargs)
-            return Response({'error': '无效token'}, status=401)
+            return {'error': '无效token'}
         except (IndexError, KeyError):
-            return Response({'error': 'Invalid token format or missing payload data'}, status=401)
+            return {'error': 'Invalid token format or missing payload data'}
     
     return _wrapped_view
