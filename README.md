@@ -34,8 +34,12 @@
    npm install -g cordova
    npm install -g plugman
    ```
-
-5.  生成apk
+5. 添加安卓平台
+   ```
+   cd banhangApp
+   cordova add platform Android
+   ```
+6.  生成apk
 
    ```powershell
    cd vueproject
