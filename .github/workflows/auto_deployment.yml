@@ -1,11 +1,9 @@
 name: auto_deployment
 
 on:
-  pull_request:
   push:
     branches:
       - dev
-      - feature/lyh_auto_deployment
 
 jobs:
   auto_deployment:
