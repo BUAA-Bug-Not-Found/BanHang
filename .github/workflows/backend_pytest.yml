@@ -7,11 +7,11 @@ on:
       - dev
 
 jobs:
-  backend_pytest:
+  prepare_files:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - run: if (Test-Path -Path D:\SoftWareEngineer\backend_test\fastapi){Remove-Item -Path D:\SoftWareEngineer\backend_test\fastapi -Force -Recurse}
       - run: Copy-Item -Path .\backend\fastapi -Destination D:\SoftWareEngineer\backend_test -Force -Recurse
-      - run: cd D:\SoftWareEngineer\backend_test\fastapi\tests
-      - run: pytest
+      - run: .\runBackend.bat
+        working-directory: D:\SoftWareEngineer\backend_test

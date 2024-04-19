@@ -1,15 +1,13 @@
 import pytest
-import prepare
+from prepare import *
 # 一定写在前面
-from prepare import mock_user_data, new_database
 
 
 from fastapi.testclient import TestClient
-from backend.fastapi.main import app
+from main import app
 
 client = TestClient(app)
 # 后文出现的该函数名会自动被pytest调用该函数并传入测试用例
-
 
 def test_register_success(mock_user_data, new_database):
     # 测试用户注册成功的情况

@@ -1,7 +1,5 @@
 import os
 import peewee
-import datetime
-
 current_work_dir = os.path.dirname(__file__)
 
 # 如果在服务器运行，可以通过设置该环境变量确认保存的位置，如果没有设置则在fastapi目录下创建一个。

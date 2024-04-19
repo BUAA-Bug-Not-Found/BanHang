@@ -1,10 +1,12 @@
-import os
+import os,sys
 os.environ["BANHANG_TEST"] = "TRUE"
-import backend.fastapi.orm.orm as orm
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import orm.orm as orm
 import importlib
 import pytest
 
 def regenerate_database():
+    orm.db.close()
     importlib.reload(orm)
     orm.generateDB()
 

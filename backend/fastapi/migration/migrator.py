@@ -3,7 +3,7 @@
 # 故暂时不启用
 
 from peewee_migrate import Router
-import backend.fastapi.orm.orm as model
+import orm.orm as model
 
 model.db.connect()
 router = Router(model.db)
