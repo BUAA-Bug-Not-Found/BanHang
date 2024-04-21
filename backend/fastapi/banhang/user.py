@@ -17,6 +17,8 @@ router = APIRouter()
 class loginRequest(BaseModel):
     username:str
     password:str
+class usernameRequest(BaseModel):
+    username:str
 
 @router.put("/banhang/login")
 def login(req:loginRequest, db: Session = Depends(get_db)):
@@ -33,3 +35,10 @@ def register(req:schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="user exists")
     crud.create_user(db, req)
     return {"response":"success"}
+
+@router.get("/banhang/check_username_registered")
+def check_username_registered(req:usernameRequest, db:Session = Depends(get_db)):
+    user = crud.get_user_by_username(db, req.username)
+    if user:
+        return {"response":"exists"}
+    return {"response":"valid"}
