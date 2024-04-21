@@ -18,7 +18,8 @@ class database_handler():
     def regenerate_database():
         for db in database_handler.dbs:
             db.close()
-        database_handler.engine
+        if database_handler.engine:
+            database_handler.engine.dispose()
         database_handler.engine = create_engine(
             database.SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
         )
