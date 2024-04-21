@@ -13,14 +13,19 @@ from main import app
 class database_handler():
     engine = None
     sessionmaker = None
+    dbs=[]
     @staticmethod
     def regenerate_database():
+        for db in database_handler.dbs:
+            db.close()
+        database_handler.engine
         database_handler.engine = create_engine(
             database.SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
         )
         recreate_sqlite_db(database_handler.engine)
         database_handler.sessionmaker = sessionmaker(autocommit=False, autoflush=False,
                                                      bind=database_handler.engine)
+        database_handler.dbs=[]
 
 
 
@@ -28,9 +33,12 @@ def override_get_db():
     # print("get test db")
     try:
         db = database_handler.sessionmaker()
+        database_handler.dbs.append(db)
         yield db
     finally:
         db.close()
+        database_handler.dbs.remove(db)
+
 
 
 app.dependency_overrides[database.get_db] = override_get_db
