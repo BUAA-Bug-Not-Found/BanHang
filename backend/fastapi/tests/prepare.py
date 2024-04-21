@@ -1,14 +1,49 @@
 import os,sys
 os.environ["BANHANG_TEST"] = "TRUE"
 sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import orm.orm as orm
-import importlib
 import pytest
+import orm.database as database
+from scripts.recreate_db import recreate_sqlite_db
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-def regenerate_database():
-    orm.db.close()
-    importlib.reload(orm)
-    orm.generateDB()
+from main import app
+
+
+class database_handler():
+    engine = None
+    sessionmaker = None
+    dbs=[]
+    @staticmethod
+    def regenerate_database():
+        for db in database_handler.dbs:
+            db.close()
+        if database_handler.engine:
+            database_handler.engine.dispose()
+        database_handler.engine = create_engine(
+            database.SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+        )
+        recreate_sqlite_db(database_handler.engine)
+        database_handler.sessionmaker = sessionmaker(autocommit=False, autoflush=False,
+                                                     bind=database_handler.engine)
+        database_handler.dbs=[]
+
+
+
+def override_get_db():
+    # print("get test db")
+    try:
+        db = database_handler.sessionmaker()
+        database_handler.dbs.append(db)
+        yield db
+    finally:
+        db.close()
+        database_handler.dbs.remove(db)
+
+
+
+app.dependency_overrides[database.get_db] = override_get_db
+
 
 @pytest.fixture
 def mock_user_data():
@@ -20,4 +55,4 @@ def mock_user_data():
 
 @pytest.fixture
 def new_database():
-    regenerate_database()
+    database_handler.regenerate_database()
