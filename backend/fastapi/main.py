@@ -3,8 +3,6 @@ from fastapi import FastAPI
 
 from banhang import user
 
-from orm.database import db_init, db_test
-
 from scripts import  recreate_db
 
 app = FastAPI()
