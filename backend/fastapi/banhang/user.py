@@ -36,7 +36,7 @@ def login(req:loginRequest, db: Session = Depends(get_db)):
 
     return{'set-cookie': generate_jwt_token(user.id, user.username), "isSuccess":True}
 
-@router.post("/register")
+@router.post("/registerUser")
 def register(req:registerRequest, db: Session = Depends(get_db)):
     if not crud.is_valid_checkCode(db, req.checkCode, req.email):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid check"})
