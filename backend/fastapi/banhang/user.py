@@ -33,7 +33,7 @@ class resetPasswordRequest(loginRequest):
 
 @router.put("/login")
 def login(req:loginRequest,response: Response, db: Session = Depends(get_db)):
-    user = crud.get_user_by_email(db, req.username)
+    user = crud.get_user_by_email(db, req.email)
     if not user or user.password != req.password:
         raise HTTPException(status_code=400, detail="Invalid username or password")
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username))
