@@ -20,7 +20,7 @@ async def unicorn_exception_handler(request: Request, exc: UniException):
     )
 
 app.include_router(user.router)
-
+DEBUG = True
 def main():
     recreate_db.upgrade_db()
     uvicorn.run(app, host="0.0.0.0", port=8000)
