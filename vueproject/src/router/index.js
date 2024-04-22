@@ -1,9 +1,21 @@
 import {createRouter, createWebHistory} from 'vue-router';
 
 import HelpCenter from "@/components/HelpCenter/HelpCenter.vue";
+import HomeIndex from "@/components/index.vue"
 
 const routes = [
-    { path: '/helpCenter', component: HelpCenter }
+    {
+        path: '/',
+        name: "index",
+        component: HomeIndex,
+        children: [
+            {
+                path: '/help_center',
+                name: "help_center",
+                component: HelpCenter
+            },
+        ]
+    },
 ]
 
 
