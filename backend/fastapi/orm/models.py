@@ -31,7 +31,7 @@ class Blog(Base):
 	context = Column(String, nullable=True)
 	# content_image = Column(String, nullable=True)  # 可以存储图片的路径
 	status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
-	create_time = Column(DateTime, server_default=func.now()) # 根据服务器时间自动生成
+	create_at = Column(DateTime, server_default=func.now()) # 根据服务器时间自动生成
 
 	# user = relationship("User", back_populates="blogs") # 自动推断使用外键 user_id 来关联 User 表
 	
