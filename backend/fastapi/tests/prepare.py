@@ -51,7 +51,8 @@ def mock_user_data():
     return {
         "username": "testuser",
         "password": "testpass",
-        "email": "testemail@test.com"
+        "email": "testemail@test.com",
+        "checkCode": "123456"
     }
 
 @pytest.fixture

@@ -1,3 +1,5 @@
+import os
+
 from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -23,10 +25,10 @@ class usernameRequest(BaseModel):
     username:str
 class emailRequest(BaseModel):
     email:str
-class registerRequest(schemas.UserCreate,usernameRequest):
+class registerRequest(schemas.UserCreate):
     checkCode:str
 
-@router.put("/banhang/login")
+@router.put("/login")
 def login(req:loginRequest, db: Session = Depends(get_db)):
     user = crud.get_user_by_username(db, req.username)
     if not user or user.password != req.password:
@@ -34,7 +36,7 @@ def login(req:loginRequest, db: Session = Depends(get_db)):
 
     return{'set-cookie': generate_jwt_token(user.id, user.username), "isSuccess":True}
 
-@router.put("/banhang/register")
+@router.post("/register")
 def register(req:registerRequest, db: Session = Depends(get_db)):
     if not crud.is_valid_checkCode(db, req.checkCode, req.email):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid check"})
@@ -54,10 +56,13 @@ def check_username_registered(req:usernameRequest, db:Session = Depends(get_db))
 @router.post("/sendCheckCode")
 def send_check_code(req: emailRequest, db:Session = Depends(get_db)):
     checkcode = random.choice(range(10000,100000))
+    if os.environ.get("CHECKCODE") is not None:
+        checkcode = int(os.environ.get("CHECKCODE"))
     if not is_valid_email(req.email):
         raise EXC.UniException(key = "isSuccess", value=False, others={"detail":"invalid email"})
     try:
-        MailSender.send(req.email, checkcode)
+        if os.environ.get("CHECKCODE") is None:
+            MailSender.send(req.email, checkcode)
         crud.create_checkcode_record(db, schemas.EmailCheck(email = req.email, checkcode = checkcode))
         return {"isSuccess":True}
     except:

@@ -36,8 +36,9 @@ def create_checkcode_record(db: Session, record: schemas.EmailCheck):
 def is_valid_checkCode(db: Session, checkcode: str, email:str):
     if not checkcode.isdigit():
         return False
+    checkcode = int(checkcode)
     if checkcode_rec := db.query(models.CheckCode).filter(models.CheckCode.email == email).first():
         return (datetime.datetime.now()<checkcode_rec.create_at+datetime.timedelta(minutes=10) and
-                checkcode_rec.checkcode == int(checkcode_rec))
+                checkcode_rec.checkcode == checkcode)
     return False
 
