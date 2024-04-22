@@ -23,6 +23,8 @@ class usernameRequest(BaseModel):
     username:str
 class emailRequest(BaseModel):
     email:str
+class registerRequest(schemas.UserCreate,usernameRequest):
+    checkCode:str
 
 @router.put("/banhang/login")
 def login(req:loginRequest, db: Session = Depends(get_db)):
@@ -30,14 +32,16 @@ def login(req:loginRequest, db: Session = Depends(get_db)):
     if not user or user.password != req.password:
         raise HTTPException(status_code=400, detail="Invalid username or password")
 
-    return{'token': generate_jwt_token(user.id, user.username)}
+    return{'set-cookie': generate_jwt_token(user.id, user.username), "isSuccess":True}
 
 @router.put("/banhang/register")
-def register(req:schemas.UserCreate, db: Session = Depends(get_db)):
+def register(req:registerRequest, db: Session = Depends(get_db)):
+    if not crud.is_valid_checkCode(db, req.checkCode, req.email):
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid check"})
     user = crud.get_user_by_username(db, req.username)
     if user:
         raise HTTPException(status_code=400, detail="user exists")
-    crud.create_user(db, req)
+    crud.create_user(db, schemas.UserCreate(username = req.username, password = req.password, email = req.email))
     return {"response":"success"}
 
 @router.get("/banhang/check_username_registered")

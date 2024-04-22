@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.orm import Session
 from orm import models,schemas
 
@@ -30,3 +32,12 @@ def create_checkcode_record(db: Session, record: schemas.EmailCheck):
     db.commit()
     db.refresh(db_check_rec)
     return db_check_rec
+
+def is_valid_checkCode(db: Session, checkcode: str, email:str):
+    if not checkcode.isdigit():
+        return False
+    if checkcode_rec := db.query(models.CheckCode).filter(models.CheckCode.email == email).first():
+        return (datetime.datetime.now()<checkcode_rec.create_at+datetime.timedelta(minutes=10) and
+                checkcode_rec.checkcode == int(checkcode_rec))
+    return False
+
