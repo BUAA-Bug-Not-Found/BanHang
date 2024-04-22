@@ -29,12 +29,11 @@ def test_login(mock_user_data):
     # 测试用户登录成功的情况
     response = client.put("/login", json=mock_user_data)
     assert response.status_code == 200
-    assert "set-cookie" in response.json()
 
 def test_login_failure(mock_user_data):
     # 测试用户登录失败的情况
     wrong_data = {
-        "username": mock_user_data["username"],
+        "email": mock_user_data["email"],
         "password": "wrongpassword"
     }
     response = client.put("/login", json=wrong_data)

@@ -42,3 +42,7 @@ def is_valid_checkCode(db: Session, checkcode: str, email:str):
                 checkcode_rec.checkcode == checkcode)
     return False
 
+def set_password_by_email(db: Session, password:str, email:str):
+    user = get_user_by_email(db, email)
+    user.password = password
+    db.commit()

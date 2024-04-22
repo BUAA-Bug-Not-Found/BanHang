@@ -1,10 +1,12 @@
 from functools import wraps
 import inspect
 from fastapi import Request
+from typing import Optional
 import jwt
 import time
 import inspect
 
+from fastapi import Cookie
 
 KEY = "ORANGE IS THE BEST PRODUCT MANAGER IN THE WORLD!!!!!!!!!"
 AGING = 8640000
@@ -74,3 +76,14 @@ def check_user(view_func):
     _wrapped_view.__signature__ = inspect.Signature(new_params)
 
     return _wrapped_view
+
+def authorize(Auth: Optional[str] = Cookie(None)):
+    none_ret = None
+    if not Auth:
+        return none_ret
+    payload = decodeToken(Auth)
+    if payload:
+        return payload
+    return none_ret
+
+
