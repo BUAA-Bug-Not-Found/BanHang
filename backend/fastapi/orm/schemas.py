@@ -8,3 +8,6 @@ class UserCreate(UserBase):
     password: str
     email: str = None
 
+class EmailCheck(BaseModel):
+    email:str
+    checkcode:int

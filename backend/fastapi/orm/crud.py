@@ -21,3 +21,12 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def create_checkcode_record(db: Session, record: schemas.EmailCheck):
+    if tmp := db.query(models.CheckCode).filter(models.CheckCode.email == record.email).first():
+        db.delete(tmp)
+    db_check_rec = models.CheckCode(email = record.email, checkcode = record.checkcode)
+    db.add(db_check_rec)
+    db.commit()
+    db.refresh(db_check_rec)
+    return db_check_rec
