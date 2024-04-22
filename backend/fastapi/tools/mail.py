@@ -10,11 +10,10 @@ from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_dm20151123 import models as dm_20151123_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_tea_util.client import Client as UtilClient
-import re
+import email_validator
 
-re_email = re.compile(r'^[a-zA-Z\.]+@[a-zA-Z0-9]+\.[a-zA-Z]{3}$')
 def is_valid_email(addr):
-    return re_email.match(addr)
+    return email_validator.validate_email(addr)
 
 class MailSender:
     def __init__(self):
