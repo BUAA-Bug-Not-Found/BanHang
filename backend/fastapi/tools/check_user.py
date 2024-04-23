@@ -50,12 +50,13 @@ def check_user(view_func):
     '''
     @wraps(view_func)
     def sync_wrapped_view(request: Request, *args, **kwargs):
-        cookie = request.headers.get('Authorization')
+        cookie = request.headers.get('Cookie')
+        payload = {}
         try:
-            token = cookie.split(' ')[1]
+            token = cookie[7:-1]
             payload = decodeToken(token)
         except:
-            payload = {}
+            pass
         if 'uid' in view_func.__code__.co_varnames:
             kwargs['uid'] = payload.get('uid')
         if 'username' in view_func.__code__.co_varnames:
