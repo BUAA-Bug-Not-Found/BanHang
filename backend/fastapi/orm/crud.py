@@ -52,10 +52,22 @@ def create_blog(db: Session, user_id: int, title: str, context: str, is_anonymou
                           title=title,
                           context=context,
                           is_anonymous=is_anonymous)
-    db.add(db_blog)
-    db.commit()
-    db.refresh(db_blog)
+    try:
+        db.add(db_blog)
+        db.commit()
+        db.refresh(db_blog)
+    except Exception as e:
+        db.rollback()
+        db_blog = None
+        # print("Error during commit: ", e)
     return db_blog
 
 def get_blog_by_blog_id(db: Session, blog_id: int):
     return db.query(models.Blog).filter(models.Blog.id == blog_id).first()
+
+def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
+    if asc:
+        return db.query(models.Blog).order_by(models.Blog.create_at.asc()).offset(offset).limit(limit).all()
+    else:
+        return db.query(models.Blog).order_by(models.Blog.create_at.desc()).offset(offset).limit(limit).all()
+    
