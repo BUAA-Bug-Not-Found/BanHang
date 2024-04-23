@@ -34,7 +34,7 @@ class Blog(Base):
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
     create_at = Column(DateTime, server_default=func.now()) # 根据服务器时间自动生成
 
-    # user = relationship("User", back_populates="blogs") # 自动推断使用外键 user_id 来关联 User 表
+    images = relationship("BlogImage", back_populates="blog")
 
 
 class BlogImage(Base):
@@ -45,6 +45,8 @@ class BlogImage(Base):
     image_url = Column(String, nullable=False)
     create_at = Column(DateTime, server_default=func.now()) # 根据服务器时间自动生成
 
+	blog = relationship("Blog", back_populates="images")
+	
 
 class BlogComment(Base):
     __tablename__ = 'blog_comments'
