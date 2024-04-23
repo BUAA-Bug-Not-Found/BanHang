@@ -47,7 +47,7 @@ def set_password_by_email(db: Session, password:str, email:str):
     user.password = password
     db.commit()
 
-def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymous: bool):
+def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymous: bool, image_urls: list[str]):
     db_blog = models.Blog(user_id=user_id,
                           title=title,
                           content=content,
@@ -56,10 +56,14 @@ def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymou
         db.add(db_blog)
         db.commit()
         db.refresh(db_blog)
+        db_images = []
+        for image_url in image_urls:
+            db_image = models.BlogImage(blog_id=db_blog.id, image_url=image_url)
+            db.add(db_image)
+            db_images.insert(db_image)
     except Exception as e:
         db.rollback()
         db_blog = None
-        # print("Error during commit: ", e)
     return db_blog
 
 def get_blog_by_blog_id(db: Session, blog_id: int):

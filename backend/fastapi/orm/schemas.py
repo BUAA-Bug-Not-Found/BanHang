@@ -17,11 +17,8 @@ class BlogBase(BaseModel):
     title: str
     content: str
     ifAnonymous: bool
-
-# 用于创建
-class BlogCreate(BlogBase):
-    user_id: int
-
+    imageList: list[str]
+    
 class BlogCommentBase(BaseModel):
     blogId: int
     commentContent: str
