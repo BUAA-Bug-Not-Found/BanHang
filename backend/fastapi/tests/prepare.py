@@ -57,7 +57,7 @@ def mock_user_data():
 
 @pytest.fixture
 def mock_blog_data():
-    # 提供一个模拟的用户数据
+    # 提供一个模拟的 Blog 数据
     return {
         "title": "blogTitle",
         "content": "blogContent",

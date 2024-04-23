@@ -8,7 +8,7 @@ from main import app
 
 client = TestClient(app)
 
-def test_upload(mock_blog_data,mock_user_data, new_database):
+def test_upload(mock_blog_data, mock_user_data, new_database):
     # 注册登录
     os.environ["CHECKCODE"] = mock_user_data["checkCode"]
     client.post("/sendCheckCode", json={"email": mock_user_data["email"]})
@@ -24,5 +24,5 @@ def test_upload(mock_blog_data,mock_user_data, new_database):
     assert len(blogs) == 1
     assert blogs[0]["title"] == mock_blog_data["title"]
     assert blogs[0]["content"] == mock_blog_data["content"]
-    assert blogs[0]["user_id"] == user_info["uid"]
+    assert blogs[0]["userId"] == user_info["uid"]
 

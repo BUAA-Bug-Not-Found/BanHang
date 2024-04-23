@@ -24,7 +24,7 @@ class BlogBase(BaseModel):
 class BlogShow(BaseModel):
     userId: int
     userName: str
-    userAvatarUrl: str
+    userAvatarUrl: Optional[str]
     blogId: int
     title: str
     content: str
@@ -39,7 +39,7 @@ class BlogCommentBase(BaseModel):
 class BlogCommentShow(BaseModel):
     userId: int
     userName: str
-    userAvatarUrl: str
+    userAvatarUrl: Optional[str]
     commentId: int
     commentContent: str
     time: datetime
