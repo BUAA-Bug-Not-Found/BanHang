@@ -44,8 +44,8 @@ class BlogImage(Base):
     blog_id = Column(Integer, ForeignKey('blogs.id'))
     image_url = Column(String, nullable=False)
     create_at = Column(DateTime, server_default=func.now()) # 根据服务器时间自动生成
-
-	blog = relationship("Blog", back_populates="images")
+    
+    blog = relationship("Blog", back_populates="images")
 	
 
 class BlogComment(Base):

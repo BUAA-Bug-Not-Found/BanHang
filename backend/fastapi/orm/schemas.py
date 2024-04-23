@@ -20,12 +20,11 @@ class BlogBase(BaseModel):
     content: str
     ifAnonymous: bool
     imageList: List[str]
-    
 
 class BlogShow(BaseModel):
     userId: int
     userName: str
-    userAvatarURL: str
+    userAvatarUrl: str
     blogId: int
     title: str
     content: str
@@ -40,7 +39,7 @@ class BlogCommentBase(BaseModel):
 class BlogCommentShow(BaseModel):
     userId: int
     userName: str
-    userAvatarURL: str
+    userAvatarUrl: str
     commentId: int
     commentContent: str
     time: datetime

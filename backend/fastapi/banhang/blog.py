@@ -14,7 +14,7 @@ class BlogPage(BaseModel):
 	pageno: int
 	pagesize: int
 
-@router.put("/blog/getBlogs", tags=["Blog"])
+@router.put("/blog/getBlogs", tags=["Blog"], response_model=List[schemas.BlogShow])
 def get_blog_by_page(blog_page: BlogPage,
 					 db: Session = Depends(get_db)):
 	offset = (blog_page.pageno - 1) * blog_page.pagesize
@@ -26,7 +26,7 @@ def get_blog_by_page(blog_page: BlogPage,
 		db_user = crud.get_user_by_id(db, db_blog.user_id)
 		blog = {}
 		blog['userId'] = db_user.id
-		blog['username'] = db_user.username
+		blog['userName'] = db_user.username
 		blog['userAvatarUrl'] = db_user.userAvatarURL
 		blog['blogId'] = db_blog.id
 		blog['title'] = db_blog.title
@@ -41,7 +41,7 @@ def get_blog_by_page(blog_page: BlogPage,
 class BlogId(BaseModel):
 	blogId: int
 
-@router.put("/blog/getBlogByBlogId", tags=["Blog"], response_model=schemas.BlogShow)
+@router.put("/blog/getBlogByBlogId", response_model=schemas.BlogShow, tags=["Blog"])
 def get_blog_by_blog_id(blog_id: BlogId,
 						db: Session = Depends(get_db)):
 	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
@@ -49,7 +49,7 @@ def get_blog_by_blog_id(blog_id: BlogId,
 	db_user = crud.get_user_by_id(db, db_blog.user_id)
 	blog = {}
 	blog['userId'] = db_user.id
-	blog['username'] = db_user.username
+	blog['userName'] = db_user.username
 	blog['userAvatarUrl'] = db_user.userAvatarURL
 	blog['blogId'] = db_blog.id
 	blog['title'] = db_blog.title
@@ -60,7 +60,7 @@ def get_blog_by_blog_id(blog_id: BlogId,
 		blog['imageList'].append(db_image.image_url)
 	return schemas.BlogShow(**blog)
 
-@router.put("/blog/uploadBlog", response_model=List[schemas.Blog], tags=["Blog"])
+@router.put("/blog/uploadBlog", tags=["Blog"])
 @check_user
 def create_blog(blog: schemas.BlogBase,
 				uid: int,
