@@ -1,7 +1,7 @@
 from functools import wraps
 import inspect
 from fastapi import Request
-from typing import Optional
+from typing import Optional,Annotated
 import jwt
 import time
 import inspect
@@ -73,7 +73,7 @@ def check_user(view_func):
 
     return wrapped_view
 
-def authorize(Auth: Optional[str] = Cookie(None)):
+def authorize(Auth: Annotated[Optional[str], Cookie()] = None):
     none_ret = None
     if not Auth:
         return none_ret

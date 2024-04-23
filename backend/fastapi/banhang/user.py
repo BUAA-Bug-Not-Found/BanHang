@@ -33,7 +33,7 @@ class resetPasswordRequest(loginRequest):
     checkCode:str
 class idAndUsernameResponse(BaseModel):
     username:str
-    id:int
+    uid:int
 
 class excResponse(BaseModel):
     isSuccess:bool = False
