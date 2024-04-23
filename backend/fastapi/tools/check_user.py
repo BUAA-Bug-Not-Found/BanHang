@@ -49,33 +49,41 @@ def check_user(view_func):
     如果cookie检测失败，参数中会被注入None，所以使用前记得检查None！
     '''
     @wraps(view_func)
-    async def _wrapped_view(request: Request, *args, **kwargs):
+    def update_kwargs(request: Request, **kwargs):
         cookie = request.headers.get('Authorization')
-        uid = None
-        username = None
         try:
             token = cookie.split(' ')[1]
-            payload = decodeToken(token)  # 假设这里是解码token的函数
-            if payload:
-                uid = payload['uid']
-                username = payload['username']
+            payload = decodeToken(token)
         except:
-            pass
+            payload = {}
         if 'uid' in view_func.__code__.co_varnames:
             kwargs['uid'] = payload['uid']
         if 'username' in view_func.__code__.co_varnames:
             kwargs['username'] = payload['username']
-        return await view_func(*args, **kwargs)
+        return kwargs
     
-    params = inspect.signature(_wrapped_view).parameters
+    async def async_wrapped_view(request: Request, *args, **kwargs):
+        kwargs.update(update_kwargs(request, **kwargs))
+        return await view_func(*args, **kwargs)
+
+    def sync_wrapped_view(request: Request, *args, **kwargs):
+        kwargs.update(update_kwargs(request, **kwargs))
+        return view_func(*args, **kwargs)
+    
+    import asyncio
+    if asyncio.iscoroutinefunction(view_func):
+        wrapped_view = async_wrapped_view
+    else:
+        wrapped_view = sync_wrapped_view
+    params = inspect.signature(wrapped_view).parameters
     new_params = {}
     for key, value in params.items():
         if key not in {'uid', 'username'}:
             new_params[key] = value
     new_params = list(new_params.values()) + [inspect.Parameter('request', inspect.Parameter.POSITIONAL_OR_KEYWORD, default=None, annotation=Request)]
-    _wrapped_view.__signature__ = inspect.Signature(new_params)
+    wrapped_view.__signature__ = inspect.Signature(new_params)
 
-    return _wrapped_view
+    return wrapped_view
 
 def authorize(Auth: Optional[str] = Cookie(None)):
     none_ret = None
