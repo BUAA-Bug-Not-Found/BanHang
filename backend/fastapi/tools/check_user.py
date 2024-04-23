@@ -57,9 +57,9 @@ def check_user(view_func):
         except:
             payload = {}
         if 'uid' in view_func.__code__.co_varnames:
-            kwargs['uid'] = payload['uid']
+            kwargs['uid'] = payload.get('uid')
         if 'username' in view_func.__code__.co_varnames:
-            kwargs['username'] = payload['username']
+            kwargs['username'] = payload.get('username')
         return kwargs
     
     async def async_wrapped_view(request: Request, *args, **kwargs):
