@@ -31,8 +31,9 @@ class registerRequest(schemas.UserCreate):
     checkCode:str
 class resetPasswordRequest(loginRequest):
     checkCode:str
-class idAndUsernameResponse(BaseModel):
+class userResponse(BaseModel):
     username:str
+    email:str
     uid:int
 
 class excResponse(BaseModel):
@@ -59,10 +60,11 @@ def register(req:registerRequest, db: Session = Depends(get_db)):
     crud.create_user(db, schemas.UserCreate(username = req.username, password = req.password, email = req.email))
     return {"isSuccess":True}
 
-@router.get("/check_login_state",tags=["注册登录"], response_model=idAndUsernameResponse,
+@router.get("/check_login_state",tags=["注册登录"], response_model=userResponse,
             responses={400: {"model": excResponse}})
-def check_login_state(current_user: Optional[dict] = Depends(authorize)):
+def check_login_state(current_user: Optional[dict] = Depends(authorize),db:Session = Depends(get_db)):
     if current_user:
+        current_user["email"] = crud.get_user_by_id(db,current_user["uid"]).email
         return current_user
     raise EXC.UniException(key = "isSuccess", value=False, others={"description":"user not login"})
 
