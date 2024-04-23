@@ -57,7 +57,7 @@ def register(req:registerRequest, db: Session = Depends(get_db)):
     if user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"user exists"})
     crud.create_user(db, schemas.UserCreate(username = req.username, password = req.password, email = req.email))
-    return {"response":"success"}
+    return {"isSuccess":True}
 
 @router.get("/check_login_state",tags=["注册登录"], response_model=idAndUsernameResponse,
             responses={400: {"model": excResponse}})
