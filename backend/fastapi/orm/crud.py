@@ -70,4 +70,18 @@ def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
         return db.query(models.Blog).order_by(models.Blog.create_at.asc()).offset(offset).limit(limit).all()
     else:
         return db.query(models.Blog).order_by(models.Blog.create_at.desc()).offset(offset).limit(limit).all()
-    
+
+def get_blog_comments_by_blog_id(db: Session, blog_id: int):
+    return db.query(models.BlogComment).filter(models.BlogComment.blog_id == blog_id).all()
+
+def create_blog_comment(db: Session, user_id: int, blog_id: int, context: str, is_anonymous: bool):
+    db_blog_comment = models.BlogComment(user_id=user_id, blog_id=blog_id, context=context, is_anonymous=is_anonymous)
+    try:
+        db.add(db_blog_comment)
+        db.commit()
+        db.refresh(db_blog_comment)
+    except Exception as e:
+        db.rollback()
+        db_blog_comment = None
+        # print("Error during commit: ", e)
+    return db_blog_comment

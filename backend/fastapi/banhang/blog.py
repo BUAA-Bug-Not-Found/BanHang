@@ -46,10 +46,22 @@ def create_blog(blog: schemas.BlogBase,
 		return {"response":"success"}
 
 @router.put("/blog/getCommentsByBlogId")
-def get_blog_comment_by_blog_id(db: Session = Depends(get_db)):
-	pass
+def get_blog_comments_by_blog_id(blog_id: BlogId,
+								 db: Session = Depends(get_db)):
+	comments = crud.get_blog_comments_by_blog_id(db, blog_id.blogId)
+	return comments
 
 @router.put("/blog/uploadComment")
-def create_blog_comment(db: Session = Depends(get_db)):
-	pass
-
+@check_user
+def create_blog_comment(blog_comment: schemas.BlogCommentBase,
+						uid: int,
+						db: Session = Depends(get_db)):
+	db_blog_comment = crud.create_blog_comment(db,
+					user_id=uid,
+					blog_id=blog_comment.blogId,
+					content=blog_comment.commentContent,
+					is_anonymous=blog_comment.ifAnonymous)
+	if db_blog_comment == None:
+		return {"response":"error"}
+	else:
+		return {"response":"success"}

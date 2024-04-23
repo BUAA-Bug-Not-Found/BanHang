@@ -21,3 +21,8 @@ class BlogBase(BaseModel):
 # 用于创建
 class BlogCreate(BlogBase):
     user_id: int
+
+class BlogCommentBase(BaseModel):
+    blogId: int
+    commentContent: str
+    ifAnonymous: bool
