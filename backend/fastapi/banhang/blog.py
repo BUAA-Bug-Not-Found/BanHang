@@ -27,7 +27,7 @@ def get_blog_by_page(blog_page: BlogPage,
 		blog = {}
 		blog['userId'] = db_user.id
 		blog['username'] = db_user.username
-		# blog['userAvatarUrl'] = 
+		blog['userAvatarUrl'] = db_user.userAvatarURL
 		blog['blogId'] = db_blog.id
 		blog['title'] = db_blog.title
 		blog['content'] = db_blog.content
@@ -50,7 +50,7 @@ def get_blog_by_blog_id(blog_id: BlogId,
 	blog = {}
 	blog['userId'] = db_user.id
 	blog['username'] = db_user.username
-	# blog['userAvatarUrl'] = 
+	blog['userAvatarUrl'] = db_user.userAvatarURL
 	blog['blogId'] = db_blog.id
 	blog['title'] = db_blog.title
 	blog['content'] = db_blog.content
@@ -86,7 +86,7 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
 		comment = {}
 		comment['userId'] = db_user.user_id
 		comment['userName'] = db_user.username
-		# comment['userAvatarUrl'] = 
+		comment['userAvatarUrl'] = db_user.userAvatarURL
 		comment['commentId'] = db_comment.id
 		comment['commentContent'] = db_comment.content
 		comment['time'] = db_comment.create_at
