@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from banhang import user, blog
+from banhang import user
 
 from scripts import  recreate_db
 
@@ -20,8 +20,6 @@ async def unicorn_exception_handler(request: Request, exc: UniException):
     )
 
 app.include_router(user.router)
-app.include_router(blog.router)
-
 DEBUG = True
 def main():
     recreate_db.upgrade_db()
