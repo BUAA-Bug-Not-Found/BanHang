@@ -39,3 +39,11 @@ def test_login_failure(mock_user_data):
     response = client.put("/login", json=wrong_data)
     assert response.status_code == 400
 
+def test_login_cookie(mock_user_data):
+    client.put("/login", json=mock_user_data)
+    res = client.get("check_login_state")
+    assert res.json()['email'] == mock_user_data["email"]
+    assert res.json()['username'] == mock_user_data["username"]
+    
+
+
