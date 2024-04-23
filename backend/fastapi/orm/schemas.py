@@ -12,3 +12,17 @@ class UserCreate(UserBase):
 class EmailCheck(BaseModel):
     email:str
     checkcode:int
+
+class BlogBase(BaseModel):
+    title: str
+    content: str
+    ifAnonymous: bool
+
+# 用于创建
+class BlogCreate(BlogBase):
+    user_id: int
+
+class BlogCommentBase(BaseModel):
+    blogId: int
+    commentContent: str
+    ifAnonymous: bool
