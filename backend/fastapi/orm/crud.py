@@ -46,3 +46,16 @@ def set_password_by_email(db: Session, password:str, email:str):
     user = get_user_by_email(db, email)
     user.password = password
     db.commit()
+
+def create_blog(db: Session, user_id: int, title: str, context: str, is_anonymous: bool):
+    db_blog = models.Blog(user_id=user_id,
+                          title=title,
+                          context=context,
+                          is_anonymous=is_anonymous)
+    db.add(db_blog)
+    db.commit()
+    db.refresh(db_blog)
+    return db_blog
+
+def get_blog_by_blog_id(db: Session, blog_id: int):
+    return db.query(models.Blog).filter(models.Blog.id == blog_id).first()
