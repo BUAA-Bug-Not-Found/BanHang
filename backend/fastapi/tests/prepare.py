@@ -56,5 +56,17 @@ def mock_user_data():
     }
 
 @pytest.fixture
+def mock_blog_data():
+    # 提供一个模拟的用户数据
+    return {
+        "title": "blogTitle",
+        "content": "blogContent",
+        "ifAnonymous": True,
+        "imageList": [
+            "string"
+        ]
+    }
+
+@pytest.fixture
 def new_database():
     database_handler.regenerate_database()
