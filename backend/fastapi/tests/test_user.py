@@ -15,7 +15,7 @@ def test_register_success(mock_user_data, new_database):
     # 测试用户注册成功的情况
     response = client.post("/registerUser", json=mock_user_data)
     assert response.status_code == 200
-    assert response.json() == {"response": "success"}
+    assert response.json() == {"isSuccess": True}
 
 def test_register_failure(mock_user_data, new_database):
     os.environ["CHECKCODE"] = mock_user_data["checkCode"]
