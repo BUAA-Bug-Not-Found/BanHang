@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from datetime import datetime
+from typing import List, Optional
 
 class UserBase(BaseModel):
     username: str
@@ -17,9 +19,27 @@ class BlogBase(BaseModel):
     title: str
     content: str
     ifAnonymous: bool
-    imageList: list[str]
-    
+    imageList: List[str]
+
+class BlogShow(BaseModel):
+    userId: int
+    userName: str
+    userAvatarUrl: Optional[str]
+    blogId: int
+    title: str
+    content: str
+    time: datetime
+    imageList: Optional[List[str]]
+
 class BlogCommentBase(BaseModel):
     blogId: int
     commentContent: str
     ifAnonymous: bool
+    
+class BlogCommentShow(BaseModel):
+    userId: int
+    userName: str
+    userAvatarUrl: Optional[str]
+    commentId: int
+    commentContent: str
+    time: datetime

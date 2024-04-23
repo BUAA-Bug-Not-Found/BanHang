@@ -75,6 +75,9 @@ def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
     else:
         return db.query(models.Blog).order_by(models.Blog.create_at.desc()).offset(offset).limit(limit).all()
 
+def get_blog_images_by_blog_id(db: Session, blog_id: int):
+    return db.query(models.BlogImage).filter(models.BlogImage.id == blog_id).all()
+
 def get_blog_comments_by_blog_id(db: Session, blog_id: int):
     return db.query(models.BlogComment).filter(models.BlogComment.blog_id == blog_id).all()
 
