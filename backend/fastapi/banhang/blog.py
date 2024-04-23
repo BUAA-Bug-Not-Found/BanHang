@@ -38,8 +38,8 @@ def create_blog(blog: schemas.BlogBase,
 	db_blog = crud.create_blog(db,
 					user_id=uid,
 					title=blog.title,
-					context=blog.context,
-					is_anonymous=blog.is_anonymous)
+					content=blog.content,
+					is_anonymous=blog.ifAnonymous)
 	if db_blog == None:
 		return {"response":"error"}
 	else:

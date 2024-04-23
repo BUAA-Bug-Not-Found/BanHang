@@ -15,8 +15,8 @@ class EmailCheck(BaseModel):
 
 class BlogBase(BaseModel):
     title: str
-    context: str
-    is_anonymous: bool
+    content: str
+    ifAnonymous: bool
 
 # 用于创建
 class BlogCreate(BlogBase):

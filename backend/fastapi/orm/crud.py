@@ -47,10 +47,10 @@ def set_password_by_email(db: Session, password:str, email:str):
     user.password = password
     db.commit()
 
-def create_blog(db: Session, user_id: int, title: str, context: str, is_anonymous: bool):
+def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymous: bool):
     db_blog = models.Blog(user_id=user_id,
                           title=title,
-                          context=context,
+                          content=content,
                           is_anonymous=is_anonymous)
     try:
         db.add(db_blog)
@@ -74,8 +74,8 @@ def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
 def get_blog_comments_by_blog_id(db: Session, blog_id: int):
     return db.query(models.BlogComment).filter(models.BlogComment.blog_id == blog_id).all()
 
-def create_blog_comment(db: Session, user_id: int, blog_id: int, context: str, is_anonymous: bool):
-    db_blog_comment = models.BlogComment(user_id=user_id, blog_id=blog_id, context=context, is_anonymous=is_anonymous)
+def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, is_anonymous: bool):
+    db_blog_comment = models.BlogComment(user_id=user_id, blog_id=blog_id, content=content, is_anonymous=is_anonymous)
     try:
         db.add(db_blog_comment)
         db.commit()
