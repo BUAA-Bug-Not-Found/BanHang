@@ -35,6 +35,16 @@ class Blog(Base):
 
 	# user = relationship("User", back_populates="blogs") # 自动推断使用外键 user_id 来关联 User 表
 
+
+class BlogImage(Base):
+	__tablename__ = 'blog_images'
+	
+	id = Column(Integer, primary_key=True, autoincrement=True)
+	blog_id = Column(Integer, ForeignKey('blogs.id'))
+	image_url = Column(String, nullable=False)
+	create_at = Column(DateTime, server_default=func.now()) # 根据服务器时间自动生成
+
+
 class BlogComment(Base):
 	__tablename__ = 'blog_comments'
 	
@@ -46,3 +56,4 @@ class BlogComment(Base):
 	# content_image = Column(String, nullable=True)  # 可以存储图片的路径
 	status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
 	create_at = Column(DateTime, server_default=func.now()) # 根据服务器时间自动生成
+

@@ -39,7 +39,8 @@ def create_blog(blog: schemas.BlogBase,
 					user_id=uid,
 					title=blog.title,
 					content=blog.content,
-					is_anonymous=blog.ifAnonymous)
+					is_anonymous=blog.ifAnonymous,
+					image_urls=blog.imageList)
 	if db_blog == None:
 		return {"response":"error"}
 	else:
