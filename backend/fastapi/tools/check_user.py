@@ -49,7 +49,7 @@ def check_user(view_func):
     如果cookie检测失败，参数中会被注入None，所以使用前记得检查None！
     '''
     @wraps(view_func)
-    def update_kwargs(request: Request, **kwargs):
+    def sync_wrapped_view(request: Request, *args, **kwargs):
         cookie = request.headers.get('Authorization')
         try:
             token = cookie.split(' ')[1]
@@ -60,21 +60,9 @@ def check_user(view_func):
             kwargs['uid'] = payload.get('uid')
         if 'username' in view_func.__code__.co_varnames:
             kwargs['username'] = payload.get('username')
-        return kwargs
-    
-    async def async_wrapped_view(request: Request, *args, **kwargs):
-        kwargs.update(update_kwargs(request, **kwargs))
-        return await view_func(*args, **kwargs)
-
-    def sync_wrapped_view(request: Request, *args, **kwargs):
-        kwargs.update(update_kwargs(request, **kwargs))
         return view_func(*args, **kwargs)
     
-    import asyncio
-    if asyncio.iscoroutinefunction(view_func):
-        wrapped_view = async_wrapped_view
-    else:
-        wrapped_view = sync_wrapped_view
+    wrapped_view = sync_wrapped_view
     params = inspect.signature(wrapped_view).parameters
     new_params = {}
     for key, value in params.items():
