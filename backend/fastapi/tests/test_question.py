@@ -17,7 +17,7 @@ def test_upload(mock_question_data, mock_user_data, new_database):
     res = client.post("/uploadQues", json = mock_question_data)
     assert res.status_code == 200
     # 检查blog是否存在
-    blogs = client.get("/getQuestions",params = {"PageNo": 1,"PageSize": 100}).json()
+    blogs = client.get("/getQuestions",params = {"pageNo": 1,"pageSize": 100}).json()
     assert len(blogs) == 1
     assert blogs[0]["userName"] == mock_user_data['username']
     assert blogs[0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
