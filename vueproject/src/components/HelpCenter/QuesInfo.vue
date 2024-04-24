@@ -267,7 +267,7 @@ export default {
             <v-col style="margin-left: 10px;">
             </v-col>
           </div>
-          <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px" v-html="question.quesContent"/>
+          <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px" v-dompurify-html="question.quesContent"/>
           <div style="margin-left: 10px;margin-bottom: 10px">
             <v-chip v-for="tag in disTags" size="small"
                     :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
@@ -349,7 +349,7 @@ export default {
             <v-col style="margin-left: 10px;">
             </v-col>
           </div>
-          <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px" v-html="question.quesContent"/>
+          <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px" v-dompurify-html="question.quesContent"/>
           <div style="margin-left: 10px;margin-bottom: 10px">
             <v-btn :prepend-icon="question.ifUserLike === 1 ?
                   'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"

@@ -69,7 +69,7 @@ export default {
       </v-col>
     </v-row>
     <v-row :justify="'center'" style="margin-bottom: 10px">
-      <v-col cols="11" style="margin-top: 3px" v-html="ans.ansContent"/>
+      <v-col cols="11" style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
     </v-row>
   </v-card>
 </template>

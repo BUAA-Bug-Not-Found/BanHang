@@ -8,6 +8,7 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css' // 引入vuetify icon
+import VueDOMPurifyHTML from 'vue-dompurify-html'
 
 let isLocal = false
 axios.defaults.timeout = 10000;
@@ -28,6 +29,6 @@ const vuetify = createVuetify({
     directives,
 })
 
-app.use(vuetify)
+app.use(vuetify).use(VueDOMPurifyHTML)
 
 app.mount('#app')

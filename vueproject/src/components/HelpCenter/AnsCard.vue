@@ -54,7 +54,7 @@ export default {
           <span style="font-size: 15px">{{ ans.userName }}</span>
           <span style="font-size: 12px;color: gray">回答于{{ ans.ansTime }}</span>
         </div>
-        <div style="margin-top: 3px" v-html="ans.ansContent"/>
+        <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
         <div style="margin-bottom: 5px">
           <v-btn
               :prepend-icon="ans.ifUserLike === 1 ?
