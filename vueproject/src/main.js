@@ -12,7 +12,7 @@ import '@mdi/font/css/materialdesignicons.css' // 引入vuetify icon
 let isLocal = false
 axios.defaults.timeout = 10000;
 //TODO:设置后端远程端口和本地端口
-axios.defaults.baseURL = isLocal? 'http://127.0.0.1:8000/': 'http://127.0.0.1:8000/';
+axios.defaults.baseURL = isLocal? 'http://127.0.0.1:8000/': ' http://127.0.0.1:8000/';
 
 const app = createApp(App)
 
