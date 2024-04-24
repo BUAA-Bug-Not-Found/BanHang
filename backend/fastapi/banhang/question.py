@@ -15,12 +15,6 @@ router = APIRouter()
 
 
 
-
-
-class QuestionPage(BaseModel):
-    PageNo: int = Query(0, description="页面号，从 1 开始计数")
-    PageSize: int = Query(10, description="每页问题数量")
-
 class QuestionContent(BaseModel):
     content: str
     imageList: List[str]
@@ -43,10 +37,12 @@ class GetQuestionsResponse(BaseModel):
 
 
 @router.get("/getQuestions", tags=["Question"], response_model=List[GetQuestionsResponse])
-def get_questions_by_page(PageNo: int = Query(0, description="页面号，从 1 开始计数"),
-                          PageSize: int = Query(10, description="每页问题数量"),
+def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 1 开始计数"),
+                          pageSize: int = Query(..., description="每页问题数量"),
                           db: Session = Depends(get_db),
                           current_user: Optional[dict] = Depends(authorize)):
+    if pageNo <= 0 or pageSize <= 0:
+        raise UniException(key="isSuccess", value=False, others={"description": "pageNo或pageSize小于等于零，不符合要求。"})
     offset = (PageNo - 1) * PageSize
     limit = PageSize
     db_questions = crud.get_questions(db, offset=offset, limit=limit, asc=False)
