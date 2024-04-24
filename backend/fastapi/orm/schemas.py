@@ -43,3 +43,10 @@ class BlogCommentShow(BaseModel):
     commentId: int
     commentContent: str
     time: datetime
+
+class QuestionCreate(BaseModel):
+    content:str
+    userId:int
+    questionTagids:List[int]
+    questionImageids:List[int]
+
