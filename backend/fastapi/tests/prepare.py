@@ -68,5 +68,15 @@ def mock_blog_data():
     }
 
 @pytest.fixture
+def mock_question_data():
+    return {
+        'quesContent':{
+            'content': 'can you help me???',
+            'imageList': []
+        },
+        'quesTags':['tag1','tag2']
+    }
+
+@pytest.fixture
 def new_database():
     database_handler.regenerate_database()
