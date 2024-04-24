@@ -54,7 +54,7 @@ import {useDisplay} from 'vuetify'
       匿名空间
     </v-btn>
 
-    <v-btn>
+    <v-btn @click="goto('/tool_box')">
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
@@ -112,7 +112,7 @@ import {useDisplay} from 'vuetify'
       匿名空间
     </v-btn>
 
-    <v-btn>
+    <v-btn @click="goto('/tool_box')">
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
