@@ -1,6 +1,7 @@
 import {createRouter, createWebHashHistory} from 'vue-router';
 
 import HelpCenter from "@/components/HelpCenter/HelpCenter.vue";
+import ToolBox from "@/components/ToolBox/ToolBox.vue"
 import HomeIndex from "@/components/index.vue"
 
 const routes = [
@@ -14,6 +15,11 @@ const routes = [
                 name: "help_center",
                 component: HelpCenter
             },
+            {
+                path: '/tool_box',
+                name: 'tool_box',
+                component: ToolBox
+            }
         ]
     },
 ]
