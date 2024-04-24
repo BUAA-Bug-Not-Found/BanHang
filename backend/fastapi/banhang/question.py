@@ -43,8 +43,8 @@ def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 
                           current_user: Optional[dict] = Depends(authorize)):
     if pageNo <= 0 or pageSize <= 0:
         raise UniException(key="isSuccess", value=False, others={"description": "pageNo或pageSize小于等于零，不符合要求。"})
-    offset = (PageNo - 1) * PageSize
-    limit = PageSize
+    offset = (pageNo - 1) * pageSize
+    limit = pageSize
     db_questions = crud.get_questions(db, offset=offset, limit=limit, asc=False)
     questions = []
     for question in db_questions:
