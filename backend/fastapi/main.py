@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from banhang import user, blog, question
+from banhang import user, blog, question, file
 
 from scripts import  recreate_db
 
@@ -22,6 +22,7 @@ async def unicorn_exception_handler(request: Request, exc: UniException):
 app.include_router(user.router)
 app.include_router(blog.router)
 app.include_router(question.router)
+app.include_router(file.router)
 
 DEBUG = True
 def main():

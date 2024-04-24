@@ -7,3 +7,5 @@ pytest==8.1.1
 alibabacloud_dm20151123==1.0.12
 email_validator==2.1.1
 psycopg2==2.9.9
+oss2
+python-multipart
