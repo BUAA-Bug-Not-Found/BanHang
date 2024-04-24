@@ -50,7 +50,21 @@ def mock_user_data():
     # 提供一个模拟的用户数据
     return {
         "username": "testuser",
-        "password": "testpass"
+        "password": "testpass",
+        "email": "testemail@test.com",
+        "checkCode": "123456"
+    }
+
+@pytest.fixture
+def mock_blog_data():
+    # 提供一个模拟的 Blog 数据
+    return {
+        "title": "blogTitle",
+        "content": "blogContent",
+        "ifAnonymous": True,
+        "imageList": [
+            "string"
+        ]
     }
 
 @pytest.fixture

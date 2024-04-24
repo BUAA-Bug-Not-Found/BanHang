@@ -1,6 +1,7 @@
-import {createRouter, createWebHistory} from 'vue-router';
+import {createRouter, createWebHashHistory} from 'vue-router';
 
 import HelpCenter from "@/components/HelpCenter/HelpCenter.vue";
+import ToolBox from "@/components/ToolBox/ToolBox.vue"
 import HomeIndex from "@/components/index.vue"
 import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
 
@@ -20,13 +21,18 @@ const routes = [
                 name: "QuesInfo",
                 component: QuesInfo
             },
+            {
+                path: '/tool_box',
+                name: 'tool_box',
+                component: ToolBox
+            }
         ]
     },
 ]
 
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes
 })
 
