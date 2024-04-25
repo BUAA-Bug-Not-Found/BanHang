@@ -3,6 +3,7 @@ import {createRouter, createWebHashHistory} from 'vue-router';
 import HelpCenter from "@/components/HelpCenter/HelpCenter.vue";
 import ToolBox from "@/components/ToolBox/ToolBox.vue"
 import HomeIndex from "@/components/index.vue"
+import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
 
 const routes = [
     {
@@ -11,9 +12,14 @@ const routes = [
         component: HomeIndex,
         children: [
             {
-                path: '/help_center',
-                name: "help_center",
+                path: '/Helpcenter',
+                name: "Helpcenter",
                 component: HelpCenter
+            },
+            {
+                path: '/QuesInfo/:qid',
+                name: "QuesInfo",
+                component: QuesInfo
             },
             {
                 path: '/tool_box',
