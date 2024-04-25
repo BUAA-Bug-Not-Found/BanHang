@@ -1,5 +1,5 @@
 <template>
-    <v-card @click="toggleContent" :class="{ 'expanded': isExpanded }">
+    <v-card @click="toggleContent">
         <v-card-title primary-title class="text-left">{{ title }}</v-card-title>
         <v-card-text class="text-left">
             {{ startTime }} - {{ endTime }}
@@ -9,7 +9,7 @@
                 </div>
                 <div style="width: 30%;">
                     <dProgress :percentage="calculateProgress()" :pcolor="getRank" :text-inside="true"
-                        strokeHeight="20" />
+                        :strokeHeight="20" />
                 </div>
             </div>
         </v-card-text>

@@ -1,6 +1,5 @@
 
 <template>
-  <h1>Here is ToolBox</h1>
   <SpocIndex></SpocIndex>
 </template>
 <script>
