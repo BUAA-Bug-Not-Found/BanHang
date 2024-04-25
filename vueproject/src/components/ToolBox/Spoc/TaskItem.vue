@@ -17,7 +17,7 @@
             <v-card-text :class="{ 'content': true }" class="text-left" v-if="!showContent" style="padding-bottom: 30px;">
                 {{ content }}
             </v-card-text>
-            <v-card-text :class="{ 'content': false }" class="text-left" v-if="showContent">
+            <v-card-text :class="{ 'content': false }" class="text-left" v-else>
                 <div v-html="content"></div>
             </v-card-text>
         </v-expand-transition>
