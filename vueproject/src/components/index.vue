@@ -1,31 +1,31 @@
 <script>
 import {useDisplay} from 'vuetify'
-  import { useRouter } from 'vue-router'
+import {useRouter} from 'vue-router'
+import {ref} from "vue";
 
-  export default {
-    name: 'HomeIndex',
-    setup() {
-      const display = useDisplay()
-      const isLogin = false
-      const user_name = "user1"
-      const search = () => {
-        console.log("search")
-      }
-
-      const router = useRouter()
-
-      const goto = (route) => {
-        router.push(route)
-      }
-
-      return {display, search, user_name, isLogin, goto}
+export default {
+  name: 'HomeIndex',
+  setup() {
+    const display = useDisplay()
+    const isLogin = false
+    const user_name = "user1"
+    const searchContent = ref("")
+    const search = () => {
+      console.log("search")
     }
 
+    const router = useRouter()
+
+    const goto = (route) => {
+      router.push(route)
+    }
+
+    return {display, search, user_name, isLogin, goto, searchContent}
+  }
 }
 </script>
 
 <template>
-  <h1 v-if="display.smAndDown.value">Home Center</h1>
   <v-app-bar :elevation="1"
              v-if="!display.smAndDown.value">
     <template v-slot:prepend>
@@ -40,21 +40,22 @@ import {useDisplay} from 'vuetify'
           variant="solo"
           hide-details
           single-line
+          v-model="searchContent"
           @keyup.enter="search"
           style="margin-left: 10px; margin-right: 10px"
       ></v-text-field>
     </v-col>
-    <v-btn @click="goto('/help_center')">
+    <v-btn @click="goto('/HelpCenter')">
       <v-icon>mdi-help-box</v-icon>
       互助中心
     </v-btn>
 
-    <v-btn>
+    <v-btn @click="goto('/blogList')">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名空间
     </v-btn>
 
-    <v-btn>
+    <v-btn @click="goto('/tool_box')">
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
@@ -65,23 +66,21 @@ import {useDisplay} from 'vuetify'
     <template v-slot:append>
       <v-col v-if="!isLogin">
         <v-avatar color="surface-variant" size="32" style="margin-right: 5px"></v-avatar>
-        {{user_name}}
+        {{ user_name }}
       </v-col>
       <v-col v-else>
         <v-btn elevation="2" color="blue-darken-2" variant="flat" class="text-none">Login</v-btn>
       </v-col>
     </template>
   </v-app-bar>
-
   <v-app-bar :elevation="1" density="compact"
              v-if="display.smAndDown.value">
     <v-avatar color="surface-variant" style="margin-left: 15px" size="32"></v-avatar>
-
     <v-col>
       <v-text-field
           append-inner-icon="mdi-magnify"
           density="compact"
-          class="w-75"
+          class="w-50"
           label="Search content"
           variant="outlined"
           hide-details
@@ -96,23 +95,23 @@ import {useDisplay} from 'vuetify'
       </v-badge>
     </template>
   </v-app-bar>
-  <router-view></router-view>
+  <router-view style="margin-top: 5px"></router-view>
   <v-bottom-navigation
       color="primary"
       active
       v-if="display.smAndDown.value"
   >
-    <v-btn @click="goto('/help_center')">
+    <v-btn @click="goto('/HelpCenter')">
       <v-icon>mdi-help-box</v-icon>
       互助中心
     </v-btn>
 
-    <v-btn>
+    <v-btn @click="goto('/blogList')">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名空间
     </v-btn>
 
-    <v-btn>
+    <v-btn @click="goto('/tool_box')">
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
@@ -124,5 +123,4 @@ import {useDisplay} from 'vuetify'
 </template>
 
 <style scoped>
-
 </style>
