@@ -1,5 +1,5 @@
 <template>
-    <v-card>
+    <v-card @click="toggleContent">
         <v-card-title primary-title class="text-left">{{ title }}</v-card-title>
         <v-card-text class="text-left">
             {{ startTime }} - {{ endTime }}
@@ -8,25 +8,19 @@
                     <span>剩余时间: {{ remainingHours }}小时</span>
                 </div>
                 <div style="width: 30%;">
-                    <dProgress :percentage="calculateProgress()" 
-                    :pcolor="getRank" 
-                    :text-inside="true" 
-                    strokeHeight="20" />
+                    <dProgress :percentage="calculateProgress()" :pcolor="getRank" :text-inside="true"
+                        :strokeHeight="20" />
                 </div>
             </div>
         </v-card-text>
         <v-expand-transition>
-            <v-card-text :class="{ 'content': !showContent }" class="text-left" v-if="!showContent">
+            <v-card-text :class="{ 'content': true }" class="text-left" v-if="!showContent" style="padding-bottom: 30px;">
                 {{ content }}
             </v-card-text>
-            <v-card-text :class="{ 'content': !showContent }" class="text-left">
+            <v-card-text :class="{ 'content': false }" class="text-left" v-if="showContent">
                 <div v-html="content"></div>
             </v-card-text>
         </v-expand-transition>
-
-        <v-btn text @click="toggleContent" class="btn-expand">
-            <v-icon>{{ showContent ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
-        </v-btn>
     </v-card>
 </template>
 
