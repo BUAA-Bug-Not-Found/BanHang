@@ -1,0 +1,272 @@
+<template>
+  <div class="blog-view">
+    <!-- 用户信息部分 -->
+    <div class="user-info">
+      <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
+      <span class="user-name">{{ userName }}</span>
+    </div>
+    <!-- 发帖时间 -->
+    <div class="time"> {{ time }}</div>
+
+    <!-- 内容部分 -->
+    <div class="title">
+      <p>{{ title }}</p>
+    </div>
+
+    <div class="content">
+      <p>{{ content }}</p>
+      <div class="image-list">
+        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>
+      </div>
+    </div>
+
+    <!-- 评论按钮 -->
+    <div v-if="!showCommentInput" class="comment-input">
+      <v-btn @click="toggleCommentInput" class="ma-2" color="blue">添加评论
+        <v-icon
+            icon="mdi-message-text"
+            end
+        ></v-icon>
+      </v-btn>
+    </div>
+    <!-- 评论输入框 -->
+    <div v-if="showCommentInput" class="comment-input">
+      <textarea v-model="newComment" placeholder="输入您的评论" class="comment-textarea"></textarea>
+      <div class="anonymous-and-addbutton">
+        <v-checkbox v-model="commentAnonymous" label="匿名发布" class="anonymous-checkbox"></v-checkbox>
+        <v-btn @click="addComment('')" class="ma-2" color="green">提交评论
+          <v-icon
+              icon="mdi-checkbox-marked-circle"
+              end
+          ></v-icon>
+        </v-btn>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 评论列表 -->
+  <CommentList :comments="comments"/>
+</template>
+
+<script>
+import CommentList from "@/components/AnonymousBlog/CommentList.vue";
+import {getBlogByBlogId, getCommentsByBlogId, uploadComment} from "@/components/AnonymousBlog/api";
+import {ElMessage} from "element-plus";
+import {useRouter} from "vue-router";
+
+export default {
+  name: "BlogView",
+  components: {CommentList},
+
+  data() {
+    return {
+      blogId: '',
+      userName: 'Alice',
+      userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
+      title: 'My First Blog!!!',
+      content: 'This is the first post.',
+      imageList: ['https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
+        'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO2.jpg',
+        'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO3.jpg',
+        'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO4.jpg'],
+      time: "2024.04.21-15:30",
+      tagList: [],
+      comments: [
+        {
+          blogId: '1',
+          commentId: '1',
+          userName: 'Alice',
+          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
+          content: 'This is the first comment.',
+          time: "2024.04.21-15:30",
+          replyToCommentId: ""
+        },
+        {
+          blogId: '1',
+          commentId: '2',
+          userName: 'Bob',
+          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO2.jpg',
+          content: 'This is the second comment.',
+          time: "2024.04.21-15:30",
+          replyToCommentId: "1"
+        },
+        {
+          blogId: '1',
+          commentId: '3',
+          userName: 'Charlie',
+          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO3.jpg',
+          content: 'This is the third comment.',
+          time: "2024.04.21-15:30",
+          replyToCommentId: ""
+        },
+      ],
+      showCommentInput: false,
+      newComment: '',
+      commentAnonymous: false
+    };
+  },
+
+  created() {
+    let router = useRouter();
+    this.blogId = router.currentRoute.value.params.id;
+    // todo this.fetchBlogInfo();
+    // todo this.fetchCommentInfo();
+  },
+
+  methods: {
+    fetchBlogInfo() {
+      // 该方法接受一个博客 ID，并返回博客信息
+      getBlogByBlogId(this.blogId).then(
+          (data) => {
+            this.userName = data.userName
+            this.userAvatarUrl = data.userAvatarUrl
+            this.title = data.title
+            this.content = data.content
+            this.imageList = data.imageList
+            this.time = data.time
+            this.tagList = data.tagList
+          }
+      )
+    },
+    fetchCommentInfo() {
+      // 发起后端数据请求，获取博客对应的评论信息
+      getCommentsByBlogId(this.blogId).then(
+          (data) => {
+            this.comments = data.comments.map(comment => ({
+              userName: comment.userName,
+              userAvatarURL: comment.userAvatarUrl,
+              blogId: this.blogId,
+              commentId: comment.commentId,
+              content: comment.content,
+              time: comment.time,
+              replyToCommentId: comment.replyToCommentId,
+            }));
+          }
+      )
+    },
+    toggleCommentInput() {
+      this.showCommentInput = !this.showCommentInput;
+    },
+    addComment(replyToId) {
+      // todo 提交评论的逻辑，读取评论和用户信息，存入数据库，同步加入 comments 列表
+      if (this.newComment.trim().length !== 0) {
+        let form = new FormData
+        form.append('blogId', this.blogId)
+        form.append('commentContent', this.newComment)
+        form.append('ifAnonymous', this.commentAnonymous)
+        form.append('replyToCommentId', replyToId)
+
+        uploadComment(form).then(
+            (res) => {
+              if (res.isSuccess === "true") {
+                ElMessage({
+                  message: '评论成功',
+                  showClose: true,
+                  type: 'success',
+                })
+              } else {
+                ElMessage({
+                  message: '评论失败，请修改内容或稍后再试',
+                  showClose: true,
+                  type: 'error',
+                })
+              }
+            }
+        )
+      }
+      this.newComment = '';
+      this.showCommentInput = false;
+    },
+  }
+};
+</script>
+
+<style scoped>
+.blog-view {
+  margin-top: 20px;
+  margin-left: 2%;
+  margin-right: 2%;
+  padding: 20px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  margin-bottom: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.user-name {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 24px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.content {
+  margin-top: 1%;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.image-list {
+  margin-top: 20px;
+}
+
+.blog-image {
+  max-height: 150px;
+  height: 100%;
+  width: auto;
+  margin-bottom: 10px;
+}
+
+.time {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.comment-input {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.comment-textarea {
+  resize: vertical; /* 可以垂直拉伸 */
+  min-height: 60px; /* 最小高度 */
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.anonymous-and-addbutton {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.anonymous-checkbox {
+  margin-left: 1%;
+}
+
+
+</style>
