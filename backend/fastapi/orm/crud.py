@@ -112,6 +112,8 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
     else:
         return db.query(models.Question).order_by(models.Question.create_at.desc()).offset(offset).limit(limit).all()
 
+def get_question_num(db:Session ):
+    return len(db.query(models.Question).all())
 
 def get_all_question_tags(db: Session):
     return db.query(models.QuestionTag.id).all()

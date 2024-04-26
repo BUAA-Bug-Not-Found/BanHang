@@ -71,7 +71,7 @@ def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 
         retquestion['likeSum'] = len(question.liked_users)
         retquestion['tagIdList'] = [tag.id for tag in question.tags]
         questions.append(retquestion)
-    return questions
+    return {"questions":questions, "quesSum":crud.get_question_num(db)}
 
 
 class QuestionContent(BaseModel):
