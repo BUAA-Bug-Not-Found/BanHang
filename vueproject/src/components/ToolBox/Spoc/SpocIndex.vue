@@ -76,12 +76,13 @@ export default {
     submitCookie() {
       this.cookie = this.inputCookie;
       localStorage.setItem("spocCookie", this.cookie)
+      this.taskList = []
+      localStorage.removeItem("spocCache")
       this.inputCookie = ""
       this.queryTasks();
     },
     queryTasks() {
       // 调用 ptest 插件的 coolMethod 方法
-      this.taskList = []
       if (typeof cordova !== 'undefined') {
           this.message = "Loading..."
           setTimeout(() => {
@@ -108,6 +109,7 @@ export default {
     errorCallback(error) {
       // 失败回调函数
       this.message = '错误'
+      this.taskList = []
     }
   }
 }
