@@ -23,6 +23,15 @@ app.include_router(user.router)
 app.include_router(blog.router)
 app.include_router(question.router)
 app.include_router(file.router)
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 DEBUG = True
 def main():
