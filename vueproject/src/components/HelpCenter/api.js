@@ -3,11 +3,11 @@ import axios from "axios";
 export function getQuestions(pageNo, pageSize) {
     return axios.request({
         url: '/getQuestions',
-        method: "post",
-        data: JSON.stringify({
+        params: {
             pageNo: pageNo,
             pageSize: pageSize,
-        })
+        },
+        method: "get",
     }).then(response => {
         return response.data
     })
