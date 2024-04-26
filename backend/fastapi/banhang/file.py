@@ -8,13 +8,14 @@ ACCESS_KEY_SECRET = os.getenv("ACCESS_KEY_SECRET")
 BUCKET_NAME = os.getenv("BUCKET_NAME")
 ENDPOINT = os.getenv("ENDPOINT")
 
-auth = oss2.Auth(ACCESS_KEY_ID, ACCESS_KEY_SECRET)
-bucket = oss2.Bucket(auth, ENDPOINT, BUCKET_NAME)
+
 
 router = APIRouter()
 
 @router.post("/uploadfile/", tags=['file'])
 async def upload_file(file: UploadFile):
+    auth = oss2.Auth(ACCESS_KEY_ID, ACCESS_KEY_SECRET)
+    bucket = oss2.Bucket(auth, ENDPOINT, BUCKET_NAME)
     file_content = await file.read()
     root, extension = os.path.splitext(file.filename)
     oss_name = uuid.uuid4().hex + extension
