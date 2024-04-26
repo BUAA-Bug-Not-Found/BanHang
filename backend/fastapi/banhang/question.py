@@ -35,8 +35,13 @@ class GetQuestionsResponse(BaseModel):
     likeSum: int
     tagIdList: List[int]
 
+class GetQuestionNewResponse(BaseModel):
+    questions:List[GetQuestionsResponse]
+    quesSum:int
 
-@router.get("/getQuestions", tags=["Question"], response_model=List[GetQuestionsResponse])
+
+
+@router.get("/getQuestions", tags=["Question"], response_model=GetQuestionNewResponse)
 def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 1 开始计数"),
                           pageSize: int = Query(..., description="每页问题数量"),
                           db: Session = Depends(get_db),
