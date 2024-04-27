@@ -8,7 +8,7 @@ import orm.crud as crud
 from pydantic import BaseModel
 from tools.check_user import check_user, authorize
 from typing import List, Optional, Union
-from banhang.user import successResponse
+from banhang.user import successResponse, excResponse
 from banhang.BanHangException import UniException
 
 router = APIRouter()
@@ -41,7 +41,8 @@ class GetQuestionNewResponse(BaseModel):
 
 
 
-@router.get("/getQuestions", tags=["Question"], response_model=GetQuestionNewResponse)
+@router.get("/getQuestions", tags=["Question"], response_model=GetQuestionNewResponse,
+            responses={400: {"model": excResponse}})
 def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 1 开始计数"),
                           pageSize: int = Query(..., description="每页问题数量"),
                           db: Session = Depends(get_db),
@@ -110,7 +111,8 @@ def check_question_image(images:List[int], db):
     if None in image_entities:
         raise UniException(key="isSuccess", value=False, others={"description": "包含不存在的imageid"})
 
-@router.post('/uploadQues', tags=["Question"], response_model=successResponse)
+@router.post('/uploadQues', tags=["Question"], response_model=successResponse,
+             responses={400: {"model": excResponse}})
 def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
@@ -127,7 +129,8 @@ def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
 
 class UpdateQuestion(UploadQuestion):
     quesId: int
-@router.post("/updateQues", tags=["Question"], response_model=successResponse)
+@router.post("/updateQues", tags=["Question"], response_model=successResponse,
+             responses={400: {"model": excResponse}})
 def update_question(question:UpdateQuestion, db:Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
     ques = crud.get_question_by_id(db, question.quesId)
