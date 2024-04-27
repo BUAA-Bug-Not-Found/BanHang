@@ -173,6 +173,7 @@ export default {
 </script>
 
 <template>
+
   <div v-if="!display.smAndDown.value">
     <v-row justify="center" style="margin-top: 10px">
       <v-col cols="2" style="margin-right: 10px">
@@ -286,6 +287,7 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
+
 </template>
 
 <style scoped>
