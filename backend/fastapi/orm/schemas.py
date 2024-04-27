@@ -61,3 +61,4 @@ class MessageShow(BaseModel):
     receiverId: int
     content: str
     time: datetime
+    read: bool
