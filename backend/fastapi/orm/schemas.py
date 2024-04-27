@@ -54,6 +54,19 @@ class QuestionCreate(BaseModel):
     questionTagids:List[int]
     questionImageids:List[int]
 
+class QuestionImageCreate(BaseModel):
+    questionId: int
+    imageUrl:str
+
+class QuestionCommentImageCreate(BaseModel):
+    questionCommentId: int
+    imageUrl:str
+
+class QuestionCommentCreat(BaseModel):
+    content:str
+    userId:int
+    questionCommentImageids: List[int]
+    questionId: int = 0
 class MessageShow(BaseModel):
     senderName: str
     senderId: int

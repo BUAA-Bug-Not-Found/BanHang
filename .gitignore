@@ -4,3 +4,5 @@ info.txt
 www
 .idea
 /vueproject/app-debug.apk
+/htmlcov
+.coverage
