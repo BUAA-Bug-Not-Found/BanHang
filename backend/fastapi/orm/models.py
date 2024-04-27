@@ -48,6 +48,8 @@ class Blog(Base):
 
     images = relationship("BlogImage", back_populates="blog")
     user = relationship("User", back_populates="blogs")
+    comments = relationship("BlogComment", back_populates="blog")
+    tags = relationship("BlogTag", secondary="blog_blog_tags", back_populates="blogs")
 
 
 class BlogImage(Base):
@@ -72,8 +74,25 @@ class BlogComment(Base):
     # content_image = Column(String, nullable=True)  # 可以存储图片的路径
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
     create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
+    reply_to_comment_id = Column(Integer, ForeignKey('blog_comments.id'), nullable=True)
 
     user = relationship("User", back_populates="blog_comments")
+    blog = relationship("Blog", back_populates="comments")
+
+    parent = relationship('BlogComment', remote_side=[id], back_populates='replies')
+    replies = relationship('BlogComment', back_populates='parent')
+
+class BlogTag(Base):
+    __tablename__ = 'blog_tags'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, unique=True, nullable=False)
+    blogs = relationship("Blog", secondary="blog_blog_tags", back_populates="tags")
+
+class BlogBlogTag(Base):
+    __tablename__ = 'blog_blog_tags'
+    blog_id = Column(Integer, ForeignKey('blogs.id'), primary_key=True)
+    blog_tag_id = Column(Integer, ForeignKey('blog_tags.id'), primary_key=True)
+
 
 class Question(Base):
     __tablename__ = 'questions'
@@ -140,6 +159,4 @@ class QuestionQuestionTag(Base):
     __tablename__ = 'question_question_tags'
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     question_tag_id = Column(Integer, ForeignKey('question_tags.id'), primary_key=True)
-
-
 
