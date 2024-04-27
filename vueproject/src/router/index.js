@@ -9,8 +9,6 @@
 //     { path: '/resetPassword', component: ResetPassword}
 // ]
 
-import {createRouter, createWebHistory} from 'vue-router';
-
 import HelpCenter from "@/components/HelpCenter/HelpCenter.vue";
 import HomeIndex from "@/components/index.vue";
 import PersonalCenter from "@/components/PersonalCenter/PersonalCenter";
