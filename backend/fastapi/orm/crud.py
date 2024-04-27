@@ -2,6 +2,8 @@ import datetime
 
 from sqlalchemy.orm import Session
 from orm import models, schemas
+from sqlalchemy import or_, and_
+from orm.models import Message, Conversation
 
 
 def get_user_by_id(db: Session, user_id: int):
@@ -165,3 +167,23 @@ def update_question(db: Session,qid:int,  questionCreat: schemas.QuestionCreate)
     db.commit()
     db.refresh(question)
     return question
+
+def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
+    return db.query(Conversation).filter(and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
+
+def create_conversation(db: Session, host_user_id: int, guest_user_id: int):
+    db_conversation = Conversation(host_user_id=host_user_id, guest_user_id=guest_user_id)
+    db.add(db_conversation)
+    db.commit()
+    db.refresh(db_conversation)
+    return db_conversation
+
+def get_recent_conversation(db: Session, user_id: int):
+    return db.query(Conversation).filter(Conversation.host_user_id == user_id).order_by(Conversation.update_at.desc()).all()
+
+def create_message(db: Session, sender_id: int, receiver_id: int, content: str):
+    db_message = Message(sender_id=sender_id, receiver_id=receiver_id, content=content)
+    db.add(db_message)
+    db.commit()
+    db.refresh(db_message)
+    return db_message

@@ -54,3 +54,10 @@ class QuestionCreate(BaseModel):
     questionTagids:List[int]
     questionImageids:List[int]
 
+class MessageShow(BaseModel):
+    senderName: str
+    senderId: int
+    receiverName: str
+    receiverId: int
+    content: str
+    time: datetime
