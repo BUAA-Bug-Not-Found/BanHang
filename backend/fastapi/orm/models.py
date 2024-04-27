@@ -181,9 +181,15 @@ class Conversation(Base):
 
     host_user = relationship("User", foreign_keys=[host_user_id])
     guest_user = relationship("User", foreign_keys=[guest_user_id])
-    messages = relationship("Message", secondary="conversation_messages")
+    messages = relationship("ConversationMessage", back_populates="conversation")
+
+from sqlalchemy.orm import Mapped
 
 class ConversationMessage(Base):
     __tablename__ = 'conversation_messages'
     conversation_id = Column(Integer, ForeignKey('conversations.id'), primary_key=True)
     message_id = Column(Integer, ForeignKey('messages.id'), primary_key=True)
+    is_read = Column(Boolean, default=False)
+
+    message = relationship("Message", foreign_keys=[message_id])
+    conversation = relationship("Conversation", back_populates="messages", foreign_keys=[conversation_id])
