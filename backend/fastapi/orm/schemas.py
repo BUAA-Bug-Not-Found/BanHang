@@ -66,4 +66,4 @@ class QuestionCommentCreat(BaseModel):
     content:str
     userId:int
     questionCommentImageids: List[int]
-    questionId: int
+    questionId: int = 0

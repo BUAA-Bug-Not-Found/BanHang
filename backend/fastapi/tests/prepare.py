@@ -79,5 +79,15 @@ def mock_question_data():
     }
 
 @pytest.fixture
+def mock_question_comment_data():
+    return {
+        'ansContent':{
+            'content': 'I can help you!',
+            'imageList': ["http://test.com/test1.jpg"]
+        },
+        'quesId': 1
+    }
+
+@pytest.fixture
 def new_database():
     database_handler.regenerate_database()

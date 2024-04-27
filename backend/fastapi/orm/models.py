@@ -164,6 +164,8 @@ class QuestionTag(Base):
     __tablename__ = 'question_tags'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True, nullable=False)
+    icon = Column(String, nullable=False, default='tagIcon')
+    color = Column(String, nullable=False, default='blue-darken-1')
     questions = relationship("Question", secondary="question_question_tags", back_populates="tags")
 
 class QuestionQuestionTag(Base):

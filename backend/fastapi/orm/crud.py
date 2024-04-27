@@ -138,6 +138,9 @@ def create_question_tag(db: Session, name: str):
 def get_question_tag_by_id(db: Session, id: int):
     return db.query(models.QuestionTag).filter(models.QuestionTag.id == id).first()
 
+def get_question_tag_all(db: Session):
+    return db.query(models.QuestionTag).all()
+
 def get_question_image_by_id(db: Session, id: int):
     return db.query(models.QuestionImage).filter(models.QuestionImage.id == id).first()
 
@@ -196,7 +199,7 @@ def create_question_comment_image(db: Session, image:schemas.QuestionCommentImag
 
 def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionCommentCreat)->models.QuestionComment:
     comment = models.QuestionComment(user_id = questionCommentCreat.userId,
-                                     question = get_question_by_id(questionCommentCreat.questionId),
+                                     question = get_question_by_id(db,questionCommentCreat.questionId),
                                      content = questionCommentCreat.content,
                                      images = [get_question_comment_image_by_id(db, imageid)
                                                for imageid in questionCommentCreat.questionCommentImageids])
@@ -208,9 +211,47 @@ def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionC
 def update_question_comment(db: Session,question_comment_id:int,
                             comment_create: schemas.QuestionCommentCreat):
     comment = get_question_comment_by_id(db, question_comment_id)
-    comment.content = comment.content
+    comment.content = comment_create.content
     comment.images = [get_question_comment_image_by_id(db, imageid)
                                          for imageid in comment_create.questionCommentImageids]
     db.commit()
     db.refresh(comment)
     return comment
+
+def set_ans_accept(db:Session, is_accepted: bool, question_comment_id:int):
+    comment = get_question_comment_by_id(db, question_comment_id)
+    comment.accepted = is_accepted
+    db.commit()
+    db.refresh(comment)
+    if db.query(models.QuestionComment)\
+        .filter(models.QuestionComment.question_id == comment.question_id
+                and models.QuestionComment.accepted == True).first():
+        comment.question.solved = True
+    else:
+        comment.question.solved = False
+    db.commit()
+    return comment
+
+def set_like_question(db:Session, user_id:int, question_id:int, is_like:bool):
+    question = get_question_by_id(db, question_id)
+    user = get_user_by_id(db, user_id)
+    if is_like:
+        if user not in question.liked_users:
+            question.liked_users.append(user)
+            db.commit()
+    else:
+        if user in question.liked_users:
+            question.liked_users.remove(user)
+            db.commit()
+
+def set_like_question_comment(db:Session, user_id:int, question_comment_id:int, is_like:bool):
+    comment = get_question_comment_by_id(db, question_comment_id)
+    user = get_user_by_id(db, user_id)
+    if is_like:
+        if user not in comment.liked_users:
+            comment.liked_users.append(user)
+            db.commit()
+    else:
+        if user in comment.liked_users:
+            comment.liked_users.remove(user)
+            db.commit()
