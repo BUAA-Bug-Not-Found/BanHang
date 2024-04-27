@@ -151,3 +151,17 @@ def create_question(db: Session, questionCreat: schemas.QuestionCreate):
     db.commit()
     db.refresh(question)
     return question
+
+def get_question_by_id(db: Session, id: int)->models.Question:
+    return db.query(models.Question).filter(models.Question.id == id).first()
+
+def update_question(db: Session,qid:int,  questionCreat: schemas.QuestionCreate):
+    question = get_question_by_id(db, qid)
+    question.content = questionCreat.content
+    question.images = [get_question_image_by_id(db, imageid)
+                                         for imageid in questionCreat.questionImageids]
+    question.tags = [get_question_tag_by_id(db, tagid)
+                                       for tagid in questionCreat.questionTagids]
+    db.commit()
+    db.refresh(question)
+    return question

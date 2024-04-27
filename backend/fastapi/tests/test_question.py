@@ -22,3 +22,14 @@ def test_upload(mock_question_data, mock_user_data, new_database):
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
 
+    mock_question_data["quesContent"]["content"] = "changed content"
+    mock_question_data['quesId'] = blogs['questions'][0]['quesId']
+    res = client.post("/updateQues", json = mock_question_data)
+    assert res.status_code == 200
+
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+
+

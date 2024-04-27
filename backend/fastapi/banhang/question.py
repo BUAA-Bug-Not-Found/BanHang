@@ -88,6 +88,27 @@ class UploadQuestion(BaseModel):
     quesContent: QuestionContent
     quesTags: Union[List[str], List[int]]
 
+def check_question_tag(tags:Union[List[str], List[int]], db ):
+    if len(tags) > 0:
+        if type(tags[0]) is int:
+            alltags = set(crud.get_all_question_tags(db))
+            for tag in tags:
+                if tag not in alltags:
+                    raise UniException(key="isSuccess", value=False,
+                                       others={"description": "包含不存在的tagid，可以尝试直接传入tag名，后端会自动创建"})
+        else:
+            tagid = []
+            for tag in tags:
+                if not crud.get_question_tag_by_name(db, tag):
+                    tagid.append(crud.create_question_tag(db, tag).id)
+            tags.clear()
+            for tag in tagid:
+                tags.append(tag)
+
+def check_question_image(images:List[int], db):
+    image_entities = [crud.get_question_image_by_id(imageid) for imageid in images]
+    if None in image_entities:
+        raise UniException(key="isSuccess", value=False, others={"description": "包含不存在的imageid"})
 
 @router.post('/uploadQues', tags=["Question"], response_model=successResponse)
 def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
@@ -95,23 +116,33 @@ def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
     if not current_user:
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
     tagid = question.quesTags
-    if len(question.quesTags) > 0:
-        if type(question.quesTags[0]) is int:
-            alltags = set(crud.get_all_question_tags(db))
-            for tag in question.quesTags:
-                if tag not in alltags:
-                    raise UniException(key="isSuccess", value=False,
-                                       others={"description": "包含不存在的tagid，可以尝试直接传入tag名，后端会自动创建"})
-        else:
-            tagid = []
-            for tag in question.quesTags:
-                if not crud.get_question_tag_by_name(db, tag):
-                    tagid.append(crud.create_question_tag(db, tag).id)
-    image_entities = [crud.get_question_image_by_id(imageid) for imageid in question.quesContent.imageList]
-    if None in image_entities:
-        raise UniException(key="isSuccess", value=False, others={"description": "包含不存在的imageid"})
+    check_question_tag(tagid,db)
+    check_question_image(question.quesContent.imageList,db)
+
     crud.create_question(db, schemas.QuestionCreate(content=question.quesContent.content,
                                                     userId=current_user["uid"],
                                                     questionTagids=tagid,
                                                     questionImageids=question.quesContent.imageList))
     return {"isSuccess": True}
+
+class UpdateQuestion(UploadQuestion):
+    quesId: int
+@router.post("/updateQues", tags=["Question"], response_model=successResponse)
+def update_question(question:UpdateQuestion, db:Session = Depends(get_db),
+                    current_user: Optional[dict] = Depends(authorize)):
+    ques = crud.get_question_by_id(db, question.quesId)
+    user = crud.get_user_by_id(db, current_user["uid"])
+    if not ques:
+        return UniException(key="isSuccess", value=False, others={"description": "不存在该id的问题"})
+    if user.privilege == 0 and current_user['uid']!= ques.user_id:
+        return UniException(key="isSuccess", value=False, others={"description":"用户无权更新该问题"})
+
+    check_question_tag(question.quesTags,db)
+    check_question_image(question.quesContent.imageList,db)
+
+    crud.update_question(db, question.quesId, schemas.QuestionCreate(content=question.quesContent.content,
+                                                    userId=current_user["uid"],
+                                                    questionTagids=question.quesTags,
+                                                    questionImageids=question.quesContent.imageList))
+    return {"isSuccess": True}
+
