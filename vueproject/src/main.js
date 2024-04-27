@@ -8,11 +8,12 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css' // 引入vuetify icon
+import VueDOMPurifyHTML from 'vue-dompurify-html'
 
-let isLocal = false
-axios.defaults.timeout = 10000;
+// let isLocal = false
+axios.defaults.timeout = 1000;
 //TODO:设置后端远程端口和本地端口
-axios.defaults.baseURL = isLocal? 'http://127.0.0.1:8000/': 'http://127.0.0.1:8000/';
+axios.defaults.baseURL = '/api';
 
 const app = createApp(App)
 
@@ -28,6 +29,6 @@ const vuetify = createVuetify({
     directives,
 })
 
-app.use(vuetify)
+app.use(vuetify).use(VueDOMPurifyHTML)
 
 app.mount('#app')

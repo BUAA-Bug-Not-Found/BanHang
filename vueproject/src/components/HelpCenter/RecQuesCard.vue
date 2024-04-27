@@ -1,0 +1,98 @@
+<script>
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import router from "@/router";
+
+export default {
+  name: "RecQuesCard",
+  props: ["question", "tags"],
+  setup(props) {
+    const truncate = (content) => {
+      const strippedContent = content.replace(/<[^>]*>/g, "");
+      if (strippedContent.length > 20) {
+        return `${strippedContent.slice(0, 20)}...`;
+      }
+      return strippedContent;
+    };
+
+    const disTags = ref([])
+
+    const init = () => {
+      for(let i = 0;i < props.question.tagIdList.length;i++) {
+        for(let j = 0; j < props.tags.length;j++) {
+          if (props.tags[j].tagId === props.question.tagIdList[i]) {
+            disTags.value.push(props.tags[j])
+          }
+        }
+      }
+    }
+
+    init()
+
+    const menuClick = ref(false);
+
+    function handleClickOutside(event) {
+      if (!event.composedPath().includes(this.$el)) {
+        menuClick.value = false;
+      }
+    }
+
+    onMounted(() => {
+      document.addEventListener("click", handleClickOutside);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener("click", handleClickOutside);
+    });
+
+    const goto = () => {
+      router.push("/QuesInfo/" + props.question.quesId);
+    }
+
+    return { truncate, menuClick, disTags, goto};
+  },
+};
+</script>
+
+<template>
+  <v-hover v-slot="{ isHovering, props }">
+    <v-card
+        class="mx-auto"
+        width="w-75"
+        :class="`cursor-pointer`"
+        :color="isHovering ? 'cyan-lighten-5' : undefined"
+        v-bind="props"
+        @click="goto()"
+    >
+      <v-row>
+        <v-col cols="3">
+          <v-avatar color="surface-variant" style="margin: 10px" size="40"></v-avatar>
+        </v-col>
+        <v-col cols="8" style="text-align: left;">
+          <div style="margin-top: 10px;">
+            {{ truncate(question.quesContent) }}
+          </div>
+          <div>
+            <v-btn :prepend-icon="question.ifUserLike === 1 ?
+                  'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"
+                   color="blue-grey-lighten-2">
+              {{ question.likeSum }}
+            </v-btn>
+            <v-btn variant="text" prepend-icon="mdi-reply" size="small" color="blue-grey-lighten-2">
+              {{ question.ansSum }}
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
+      <div style="margin-bottom: 10px;transform: translateX(5%)">
+        <v-chip v-for="tag in disTags" size="x-small" :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor">
+          <v-icon>{{tag.tagIcon}}</v-icon>
+          {{tag.tagName}}
+        </v-chip>
+      </div>
+    </v-card>
+  </v-hover>
+</template>
+
+<style scoped>
+
+</style>

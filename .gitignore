@@ -1,5 +1,8 @@
+my_database.db
 node_modules
 info.txt
 www
 .idea
 /vueproject/app-debug.apk
+/htmlcov
+.coverage

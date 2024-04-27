@@ -1,0 +1,18 @@
+name: auto_deployment
+
+on:
+  workflow_run:
+    workflows: ["backend_pytest"]
+    types:
+      - completed
+
+jobs:
+  auto_deployment:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - run: schtasks /End /TN BanHang
+      - run: if (Test-Path -Path D:\SoftWareEngineer\backend\fastapi){Remove-Item -Path D:\SoftWareEngineer\backend\fastapi -Force -Recurse}
+      - run: Copy-Item -Path .\backend\fastapi -Destination D:\SoftWareEngineer\backend -Force -Recurse
+      - run: schtasks /Run /TN BanHang

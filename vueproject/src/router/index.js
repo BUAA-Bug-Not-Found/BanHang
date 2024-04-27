@@ -20,16 +20,24 @@ import EditPersonalInfo from '@/components/PersonalCenter/EditPersonalInfo.vue';
 import LoginPage from '@/components/AccountManagement/LoginPage';
 import OthersCenter from '@/components/PersonalCenter/OthersCenter.vue';
 import InterestList from '@/components/PersonalCenter/InterestList.vue';
+import BlogList from "@/components/AnonymousBlog/BlogList.vue";
+import BlogView from "@/components/AnonymousBlog/BlogView.vue";
+import BlogNew from "@/components/AnonymousBlog/BlogNew.vue";
+import HomeIndex from "@/components/index.vue";
+import ToolBox from "@/components/ToolBox/ToolBox.vue";
+import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
+import {createRouter, createWebHashHistory} from 'vue-router';
 
 const routes = [
+
     {
         path: '/',
         name: "index",
         component: HomeIndex,
         children: [
             {
-                path: '/help_center',
-                name: "help_center",
+                path: '/Helpcenter',
+                name: "Helpcenter",
                 component: HelpCenter
             },
             {
@@ -66,17 +74,40 @@ const routes = [
                 path: '/interestList',
                 name: 'interestList',
                 component: InterestList
+            },
+            {
+                path: '/QuesInfo/:qid',
+                name: "QuesInfo",
+                component: QuesInfo
+            },
+            {
+                path: '/tool_box',
+                name: 'tool_box',
+                component: ToolBox
+            },
+            {
+                path: '/blogList',
+                name: "blogList",
+                component: BlogList
+            },
+            {
+                path: '/blogView/:id',
+                name: "blogView",
+                component: BlogView
+            },
+            {
+                path: '/blogNew',
+                name: "blogNew",
+                component: BlogNew
             }
         ]
     },
-    // {
-        
-    // }
+
 ]
 
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes
 })
 
