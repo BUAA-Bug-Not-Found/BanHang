@@ -23,7 +23,6 @@ import InterestList from '@/components/PersonalCenter/InterestList.vue';
 import BlogList from "@/components/AnonymousBlog/BlogList.vue";
 import BlogView from "@/components/AnonymousBlog/BlogView.vue";
 import BlogNew from "@/components/AnonymousBlog/BlogNew.vue";
-import HomeIndex from "@/components/index.vue";
 import ToolBox from "@/components/ToolBox/ToolBox.vue";
 import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
 import {createRouter, createWebHashHistory} from 'vue-router';
