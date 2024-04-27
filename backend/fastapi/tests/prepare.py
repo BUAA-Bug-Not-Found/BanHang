@@ -64,7 +64,8 @@ def mock_blog_data():
         "ifAnonymous": True,
         "imageList": [
             "string"
-        ]
+        ],
+        "tagList": []
     }
 
 @pytest.fixture
