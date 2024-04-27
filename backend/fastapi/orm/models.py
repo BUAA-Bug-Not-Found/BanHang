@@ -138,6 +138,17 @@ class QuestionComment(Base):
     user = relationship("User", back_populates="question_comments")
     liked_users = relationship("User", secondary="user_question_comment_likes",
                                back_populates="liked_question_comments")
+    images = relationship("QuestionCommentImage", back_populates="question_comment")
+
+class QuestionCommentImage(Base):
+    __tablename__ = 'question_comment_images'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    question_comment_id = Column(Integer, ForeignKey('question_comments.id'))
+    image_url = Column(String, nullable=False)
+    create_at = Column(DateTime, server_default=func.now())
+
+    question_comment = relationship("QuestionComment", back_populates="images")
 
 class UserQuestionCommentLike(Base):
     __tablename__ = 'user_question_comment_likes'

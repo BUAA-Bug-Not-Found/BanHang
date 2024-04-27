@@ -176,3 +176,41 @@ def create_question_image(db: Session, image:schemas.QuestionImageCreate)->model
     db.commit()
     db.refresh(question_image)
     return question_image
+
+def get_question_comment_by_id(db, id:int)->models.QuestionComment:
+    return db.query(models.QuestionComment).filter(models.QuestionComment.id == id).first()
+
+def get_question_comment_image_by_url(db: Session, url: str)->models.QuestionCommentImage:
+    return db.query(models.QuestionCommentImage).filter(models.QuestionCommentImage.image_url == url).first()
+
+def get_question_comment_image_by_id(db: Session, id: int)->models.QuestionCommentImage:
+    return db.query(models.QuestionCommentImage).filter(models.QuestionCommentImage.id == id).first()
+
+def create_question_comment_image(db: Session, image:schemas.QuestionCommentImageCreate)->models.QuestionImage:
+    question_image = models.QuestionCommentImage(image_url = image.imageUrl,
+                                          question_comment = get_question_comment_by_id(db, image.questionCommentId))
+    db.add(question_image)
+    db.commit()
+    db.refresh(question_image)
+    return question_image
+
+def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionCommentCreat)->models.QuestionComment:
+    comment = models.QuestionComment(user_id = questionCommentCreat.userId,
+                                     question = get_question_by_id(questionCommentCreat.questionId),
+                                     content = questionCommentCreat.content,
+                                     images = [get_question_comment_image_by_id(db, imageid)
+                                               for imageid in questionCommentCreat.questionCommentImageids])
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return comment
+
+def update_question_comment(db: Session,question_comment_id:int,
+                            comment_create: schemas.QuestionCommentCreat):
+    comment = get_question_comment_by_id(db, question_comment_id)
+    comment.content = comment.content
+    comment.images = [get_question_comment_image_by_id(db, imageid)
+                                         for imageid in comment_create.questionCommentImageids]
+    db.commit()
+    db.refresh(comment)
+    return comment

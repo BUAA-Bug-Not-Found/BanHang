@@ -170,3 +170,49 @@ def update_question(question:UpdateQuestion, db:Session = Depends(get_db),
                                                     questionImageids=question.quesContent.imageList))
     return {"isSuccess": True}
 
+
+class AnsContent(BaseModel):
+    content: str
+    imageList: List[str]
+
+class AnsQuestion(BaseModel):
+    quesId: int
+    ansContent: AnsContent
+
+def check_question_comment_image_to_id(images:List[str], db, questionCommentId:int):
+    retimage = []
+    for url in images:
+        if image:=crud.get_question_comment_image_by_url(db, url):
+            retimage.append(image.id)
+        else:
+            image = crud.create_question_comment_image(db, schemas.QuestionCommentImageCreate(
+                questionCommentId = questionCommentId,
+                imageUrl = url))
+            retimage.append(image.id)
+    images.clear()
+    for id in retimage:
+        images.append(id)
+
+@router.post("/answerQues", tags=["Question"], response_model=successResponse,
+             responses={400: {"model": excResponse}})
+def update_question(ans:AnsQuestion, db:Session = Depends(get_db),
+                    current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        return UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
+    if not crud.get_question_by_id(db, ans.quesId):
+        return UniException(key="isSuccess", value=False, others={"description": "问题id不存在"})
+    comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(
+        content=ans.ansContent.content,
+        userId = current_user['uid'],
+        questionCommentImageids = [],
+        questionId = ans.quesId
+    ))
+    check_question_comment_image_to_id(ans.ansContent.imageList, db, comment.id)
+    comment = crud.update_question_comment(db, comment.id, schemas.QuestionCommentCreat(
+        content=ans.ansContent.content,
+        userId = current_user['uid'],
+        questionCommentImageids = ans.ansContent.imageList,
+        questionId = ans.quesId
+    ))
+    return {"isSuccess": True}
+
