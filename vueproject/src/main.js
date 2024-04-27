@@ -3,6 +3,11 @@ import App from './App.vue'
 import axios from "axios";
 import { createPinia } from "pinia";
 import router from './router'
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+import '@mdi/font/css/materialdesignicons.css' // 引入vuetify icon
 
 let isLocal = false
 axios.defaults.timeout = 10000;
@@ -10,10 +15,19 @@ axios.defaults.timeout = 10000;
 axios.defaults.baseURL = isLocal? 'http://127.0.0.1:8000/': 'http://127.0.0.1:8000/';
 
 const app = createApp(App)
-app.mount('#app')
 
 //使用pinia进行状态管理
 const pinia = createPinia();
 app.use(pinia)
 
 app.use(router)
+
+//引用vuetify3 组件库
+const vuetify = createVuetify({
+    components,
+    directives,
+})
+
+app.use(vuetify)
+
+app.mount('#app')
