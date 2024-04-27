@@ -67,3 +67,11 @@ class QuestionCommentCreat(BaseModel):
     userId:int
     questionCommentImageids: List[int]
     questionId: int = 0
+class MessageShow(BaseModel):
+    senderName: str
+    senderId: int
+    receiverName: str
+    receiverId: int
+    content: str
+    time: datetime
+    read: bool

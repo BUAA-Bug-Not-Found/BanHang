@@ -173,3 +173,36 @@ class QuestionQuestionTag(Base):
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     question_tag_id = Column(Integer, ForeignKey('question_tags.id'), primary_key=True)
 
+class Message(Base):
+    __tablename__ = 'messages'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False) 
+    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    content = Column(String)
+    create_at = Column(DateTime, server_default=func.now())
+
+    sender = relationship("User", foreign_keys=[sender_id])
+    receiver = relationship("User", foreign_keys=[receiver_id])
+
+class Conversation(Base):
+    __tablename__ = 'conversations'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    host_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    guest_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    is_read = Column(Boolean, default=True)
+    update_at = Column(DateTime, server_default=func.now())
+
+    host_user = relationship("User", foreign_keys=[host_user_id])
+    guest_user = relationship("User", foreign_keys=[guest_user_id])
+    messages = relationship("ConversationMessage", back_populates="conversation")
+
+from sqlalchemy.orm import Mapped
+
+class ConversationMessage(Base):
+    __tablename__ = 'conversation_messages'
+    conversation_id = Column(Integer, ForeignKey('conversations.id'), primary_key=True)
+    message_id = Column(Integer, ForeignKey('messages.id'), primary_key=True)
+    is_read = Column(Boolean, default=False)
+
+    message = relationship("Message", foreign_keys=[message_id])
+    conversation = relationship("Conversation", back_populates="messages", foreign_keys=[conversation_id])

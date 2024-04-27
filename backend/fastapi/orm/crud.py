@@ -2,6 +2,8 @@ import datetime
 
 from sqlalchemy.orm import Session
 from orm import models, schemas
+from sqlalchemy import or_, and_
+from orm.models import Message, Conversation, ConversationMessage
 
 
 def get_user_by_id(db: Session, user_id: int):
@@ -255,3 +257,59 @@ def set_like_question_comment(db:Session, user_id:int, question_comment_id:int, 
         if user in comment.liked_users:
             comment.liked_users.remove(user)
             db.commit()
+def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
+    return db.query(Conversation).filter(and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
+
+def create_conversation(db: Session, host_user_id: int, guest_user_id: int):
+    db_conversation = Conversation(host_user_id=host_user_id, guest_user_id=guest_user_id)
+    db.add(db_conversation)
+    db.commit()
+    db.refresh(db_conversation)
+    return db_conversation
+
+def get_recent_conversation(db: Session, user_id: int):
+    return db.query(Conversation).filter(Conversation.host_user_id == user_id).order_by(Conversation.update_at.desc()).all()
+
+def create_message(db: Session, sender_id: int, receiver_id: int, content: str):
+    db_message = Message(sender_id=sender_id, receiver_id=receiver_id, content=content)
+    db.add(db_message)
+    db.commit()
+    db.refresh(db_message)
+    return db_message
+
+def create_conversation_message(db: Session, conversation_id: int, message_id: int):
+    db_conversation_message = models.ConversationMessage(conversation_id=conversation_id, message_id=message_id)
+    db.add(db_conversation_message)
+    db.commit()
+    db.refresh(db_conversation_message)
+    return db_conversation_message
+
+def send_message(db: Session, host_user_id: int, guest_user_id: int, content: str):
+    db_host_conversation = get_conversation(db, host_user_id, guest_user_id)
+    if (host_user_id != guest_user_id):
+        db_guest_conversation = get_conversation(db, guest_user_id, host_user_id)
+    if db_host_conversation == None:
+        db_host_conversation = create_conversation(db, host_user_id, guest_user_id)
+        if (host_user_id != guest_user_id):
+            db_guest_conversation = create_conversation(db, guest_user_id, host_user_id)
+    db_message = create_message(db, sender_id=host_user_id, receiver_id=guest_user_id, content=content)
+    try:
+        db.add(db_message)
+        db.commit()
+        db.refresh(db_message)
+        db_host_conversation.update_at = db_message.create_at
+        db_host_conversation.is_read = True
+        db.add(db_host_conversation)
+        db_assoiation = ConversationMessage(is_read=True, message_id = db_message.id, conversation_id = db_host_conversation.id)
+        db.add(db_assoiation)
+        if (host_user_id != guest_user_id):
+            db_guest_conversation.update_at = db_message.create_at
+            db_guest_conversation.is_read = False
+            db.add(db_guest_conversation)
+            db_assoiation = ConversationMessage(is_read=False, message_id = db_message.id, conversation_id = db_guest_conversation.id)
+            db.add(db_assoiation)
+        db.commit()
+        return True
+    except Exception as e:
+        db.rollback()
+        return False
