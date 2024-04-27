@@ -31,5 +31,4 @@ def test_upload(mock_question_data, mock_user_data, new_database):
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
-
-
+    assert blogs["questions"][0]["quesContent"]['imageList'] == mock_question_data["quesContent"]["imageList"]

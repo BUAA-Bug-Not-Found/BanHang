@@ -54,3 +54,7 @@ class QuestionCreate(BaseModel):
     questionTagids:List[int]
     questionImageids:List[int]
 
+class QuestionImageCreate(BaseModel):
+    questionId: int
+    imageUrl:str
+

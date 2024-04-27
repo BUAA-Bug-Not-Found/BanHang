@@ -73,7 +73,7 @@ def mock_question_data():
     return {
         'quesContent':{
             'content': 'can you help me???',
-            'imageList': []
+            'imageList': ["http://test.com/test.jpg"]
         },
         'quesTags':['tag1','tag2']
     }

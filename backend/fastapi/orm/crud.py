@@ -141,7 +141,7 @@ def get_question_tag_by_id(db: Session, id: int):
 def get_question_image_by_id(db: Session, id: int):
     return db.query(models.QuestionImage).filter(models.QuestionImage.id == id).first()
 
-def create_question(db: Session, questionCreat: schemas.QuestionCreate):
+def create_question(db: Session, questionCreat: schemas.QuestionCreate)->models.Question:
     question = models.Question(user_id = questionCreat.userId, content = questionCreat.content,
                                images = [get_question_image_by_id(db, imageid)
                                          for imageid in questionCreat.questionImageids],
@@ -165,3 +165,14 @@ def update_question(db: Session,qid:int,  questionCreat: schemas.QuestionCreate)
     db.commit()
     db.refresh(question)
     return question
+
+def get_question_image_by_url(db: Session, url: str)->models.QuestionImage:
+    return db.query(models.QuestionImage).filter(models.QuestionImage.image_url == url).first()
+
+def create_question_image(db: Session, image:schemas.QuestionImageCreate)->models.QuestionImage:
+    question_image = models.QuestionImage(image_url = image.imageUrl,
+                                          question = get_question_by_id(db, image.questionId))
+    db.add(question_image)
+    db.commit()
+    db.refresh(question_image)
+    return question_image

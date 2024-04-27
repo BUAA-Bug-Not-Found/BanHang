@@ -47,6 +47,9 @@ def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 
                           pageSize: int = Query(..., description="每页问题数量"),
                           db: Session = Depends(get_db),
                           current_user: Optional[dict] = Depends(authorize)):
+    """
+    imageList保存image的url
+    """
     if pageNo <= 0 or pageSize <= 0:
         raise UniException(key="isSuccess", value=False, others={"description": "pageNo或pageSize小于等于零，不符合要求。"})
     offset = (pageNo - 1) * pageSize
@@ -82,14 +85,14 @@ def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 
 
 class QuestionContent(BaseModel):
     content: str
-    imageList: List[int]
+    imageList: List[str]
 
 
 class UploadQuestion(BaseModel):
     quesContent: QuestionContent
     quesTags: Union[List[str], List[int]]
 
-def check_question_tag(tags:Union[List[str], List[int]], db ):
+def check_question_tag_to_id(tags:Union[List[str], List[int]], db):
     if len(tags) > 0:
         if type(tags[0]) is int:
             alltags = set(crud.get_all_question_tags(db))
@@ -106,25 +109,40 @@ def check_question_tag(tags:Union[List[str], List[int]], db ):
             for tag in tagid:
                 tags.append(tag)
 
-def check_question_image(images:List[int], db):
-    image_entities = [crud.get_question_image_by_id(imageid) for imageid in images]
-    if None in image_entities:
-        raise UniException(key="isSuccess", value=False, others={"description": "包含不存在的imageid"})
+def check_question_image_to_id(images:List[str], db, questionId:int):
+    retimage = []
+    for url in images:
+        if image:=crud.get_question_image_by_url(db, url):
+            retimage.append(image.id)
+        else:
+            image = crud.create_question_image(db, schemas.QuestionImageCreate(questionId = questionId,
+                                                                               imageUrl = url))
+            retimage.append(image.id)
+    images.clear()
+    for id in retimage:
+        images.append(id)
 
 @router.post('/uploadQues', tags=["Question"], response_model=successResponse,
              responses={400: {"model": excResponse}})
 def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
+    """
+        imageList保存image的url
+    """
     if not current_user:
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
     tagid = question.quesTags
-    check_question_tag(tagid,db)
-    check_question_image(question.quesContent.imageList,db)
-
-    crud.create_question(db, schemas.QuestionCreate(content=question.quesContent.content,
+    check_question_tag_to_id(tagid, db)
+    created_ques = crud.create_question(db, schemas.QuestionCreate(content=question.quesContent.content,
                                                     userId=current_user["uid"],
                                                     questionTagids=tagid,
-                                                    questionImageids=question.quesContent.imageList))
+                                                    questionImageids=[]))
+
+    check_question_image_to_id(question.quesContent.imageList, db, created_ques.id)
+    crud.update_question(db, created_ques.id, schemas.QuestionCreate(content=question.quesContent.content,
+                                                                     userId=current_user["uid"],
+                                                                     questionTagids=tagid,
+                                                                     questionImageids=question.quesContent.imageList))
     return {"isSuccess": True}
 
 class UpdateQuestion(UploadQuestion):
@@ -133,6 +151,9 @@ class UpdateQuestion(UploadQuestion):
              responses={400: {"model": excResponse}})
 def update_question(question:UpdateQuestion, db:Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
+    """
+        imageList保存image的url
+    """
     ques = crud.get_question_by_id(db, question.quesId)
     user = crud.get_user_by_id(db, current_user["uid"])
     if not ques:
@@ -140,8 +161,8 @@ def update_question(question:UpdateQuestion, db:Session = Depends(get_db),
     if user.privilege == 0 and current_user['uid']!= ques.user_id:
         return UniException(key="isSuccess", value=False, others={"description":"用户无权更新该问题"})
 
-    check_question_tag(question.quesTags,db)
-    check_question_image(question.quesContent.imageList,db)
+    check_question_tag_to_id(question.quesTags, db)
+    check_question_image_to_id(question.quesContent.imageList, db, question.quesId)
 
     crud.update_question(db, question.quesId, schemas.QuestionCreate(content=question.quesContent.content,
                                                     userId=current_user["uid"],
