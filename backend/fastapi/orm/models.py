@@ -1,20 +1,29 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime,Table
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 
 from orm.database import Base
 
 
+
+user_user_stars = Table(
+    'user_user_stars',
+    Base.metadata,
+    Column('user1', Integer, ForeignKey('users.id')),
+    Column('user2', Integer, ForeignKey('users.id'))
+)
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(32), unique=True, index=True, nullable=False)
+    username = Column(String(32), index=True, nullable=False)
     email = Column(String(128), nullable=False)
     password = Column(String(256), nullable=False)
     privilege = Column(Integer, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
     userAvatarURL = Column(String(256), nullable=True)
+    sign = Column(String, nullable=True, default = "")
 
     blogs = relationship("Blog", back_populates="user")
     blog_comments = relationship("BlogComment", back_populates="user")
@@ -24,6 +33,15 @@ class User(Base):
                                            back_populates="liked_users")
     liked_questions = relationship("Question", secondary="user_question_likes",
                                    back_populates="liked_users")
+    followed = relationship(
+        "User",
+        secondary=user_user_stars,
+        primaryjoin=(user_user_stars.c.user1 == id),
+        secondaryjoin=(user_user_stars.c.user2 == id),
+        lazy="dynamic",
+        backref=backref('followers', lazy='dynamic'))
+
+
 
 
 class CheckCode(Base):

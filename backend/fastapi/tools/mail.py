@@ -13,7 +13,10 @@ from alibabacloud_tea_util.client import Client as UtilClient
 import email_validator
 
 def is_valid_email(addr):
-    return email_validator.validate_email(addr)
+    try:
+        return email_validator.validate_email(addr)
+    except:
+        return False
 
 class MailSender:
     def __init__(self):
