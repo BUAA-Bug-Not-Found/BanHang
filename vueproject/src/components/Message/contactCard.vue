@@ -1,10 +1,7 @@
 <template>
-    <v-card class="box-card" shadow="never" @click="sendUserToParent">
-            <div class="profile-wrapper">
-                <img :src="avatar" alt="头像" class="profile-photo" />
-                <p class="name">{{ user_name }}</p>
-            </div>
-
+    <v-card class="box-card"  @click="sendUserToParent">
+        <img :src="avatar" alt="头像" class="profile-photo" />
+        <p class="name">{{ user_name }}</p>
     </v-card>
 </template>
   
@@ -42,17 +39,16 @@ export default {
 .box-card {
     border-radius: 0; /* 去除圆角 */
     height: 70px;
-    box-shadow: none;
+    align-items: center;
+    position: flex;
+    display: flex;
+    align-items: center;
 }
 
 .box-card:hover {
     filter: brightness(95%);
 }
 
-.profile-wrapper {
-  display: flex;
-  align-items: center;
-}
 
 .name {
   margin-left: 10px; /* 可根据需要调整头像和名字之间的间距 */

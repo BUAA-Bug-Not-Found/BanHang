@@ -1,14 +1,20 @@
 <template>
   <div v-if="this.curUserId == '0'">
+    <div v-if="this.contactList.lenth == 0">
+      您还没有联系人
+    </div>
     <contactCard v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
       :avatar="item.userAvatarUrl" @open-message="handleContactClicked" />
   </div>
 
-  <div v-else>
-    <v-btn @click="() => { this.curUserId = '0' }">
-      返回上一级
-    </v-btn>
-    <div class="message-container" ref="container" style="height: 85%;">
+  <div v-else style="height: 100%; display: flex; flex-direction: column;">
+    <div class="header-container">
+      <button @click="() => { this.curUserId = '0' }" style="align-items: start; margin-left: 20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px;"><title>step-backward</title><path d="M19,5V19H16V5M14,5V19L3,12" /></svg>
+      </button>
+      <h2 class="title">{{ this.curUserName }}</h2>
+    </div>
+    <div class="message-container" ref="container">
       <div v-for="message in messages" :key="message.id">
         <div v-if="message.sender_id == myId" class="message-right">
           <div style="display: flex;flex-direction: column;   align-items: flex-end; justify-content: flex-end;">
@@ -29,13 +35,12 @@
           </div>
         </div>
       </div>
-    <div style="display: flex; justify-content: space-between;margin-top: auto;">
-      <v-text-field v-model="inputMessage" style="flex: 1;height: 32x;"></v-text-field>
+    </div>
+    <div class="input">
+      <v-text-field v-model="inputMessage" style="flex: 1;height: 32x;padding: 0;" hide-details=true></v-text-field>
       <v-btn @click="submitMessage" color="primary" style="height: 54px;">发送</v-btn>
     </div>
-    </div>
   </div>
-
 </template>
 <script>
 /* eslint-disable */
@@ -65,7 +70,6 @@ export default {
   },
   mounted() {
     let cur_user = localStorage.getItem("MessageInterface")
-    console.log(cur_user)
     if (cur_user != null) {
       localStorage.removeItem("MessageInterface")
       cur_user = JSON.parse(cur_user)
@@ -136,13 +140,12 @@ export default {
 <style scoped>
 .message-container {
   /* 可根据实际需要设置高度 */
-  height: 420px;
   line-height: 1.5;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  flex: 1;
   overflow-y: auto;
-  padding-bottom: 70px;
+  background-color: rgb(227, 224, 224);
 }
 
 .message-right {
@@ -184,5 +187,24 @@ export default {
   color: #999;
   /* 颜色变淡 */
   margin-top: 5px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between; /* 按钮靠左，标题靠右 */
+  align-items: center; /* 元素垂直居中 */
+  height: 70px; /* 设置容器高度 */
+  background-color:rgb(205, 227, 234);
+}
+
+.title {
+  position: absolute;
+  left: 50%;
+  top:65px;
+  transform: translate(-50%, 0); /* 水平垂直居中 */
+}
+
+.input {
+  display: flex;
 }
 </style>

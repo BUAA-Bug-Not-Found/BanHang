@@ -97,7 +97,9 @@ export default {
       </v-btn>
     </template>
   </v-app-bar>
-  <router-view style="height: 50%;"></router-view>
+  <div :class="{ 'pc-router': !display.smAndDown.value, 'pe-router': display.smAndDown.value }">
+    <router-view ></router-view>
+  </div>
   <v-bottom-navigation
       color="primary"
       active
@@ -125,4 +127,11 @@ export default {
 </template>
 
 <style scoped>
+.pc-router {
+  margin-top: 48px;
+}
+.pe-router {
+  margin-top: 48px; 
+  height: calc(100% - 104px)
+}
 </style>
