@@ -23,6 +23,7 @@ import BlogView from "@/components/AnonymousBlog/BlogView.vue";
 import BlogNew from "@/components/AnonymousBlog/BlogNew.vue";
 import ToolBox from "@/components/ToolBox/ToolBox.vue";
 import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
+import MessageContainer from '@/components/Message/MessageContainer.vue';
 import {createRouter, createWebHashHistory} from 'vue-router';
 
 const routes = [
@@ -96,6 +97,11 @@ const routes = [
                 path: '/blogNew',
                 name: "blogNew",
                 component: BlogNew
+            },
+            {
+                path: '/message',
+                name: "message",
+                component: MessageContainer
             }
         ]
     },

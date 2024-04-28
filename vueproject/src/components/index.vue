@@ -90,9 +90,11 @@ export default {
       ></v-text-field>
     </v-col>
     <template v-slot:append>
-      <v-badge :content="17" style="margin-right: 10px">
-        <v-icon>mdi-email-outline</v-icon>
-      </v-badge>
+      <v-btn @click="goto('/message')">
+        <v-badge :content="0" style="margin-right: 10px">
+          <v-icon>mdi-email-outline</v-icon>
+        </v-badge>
+      </v-btn>
     </template>
   </v-app-bar>
   <router-view style="margin-top: 5px"></router-view>
