@@ -1,5 +1,5 @@
 <script>
-// import {getQuestions} from "@/components/HelpCenter/api";
+import {getQuestions} from "@/components/HelpCenter/api";
 import '@wangeditor/editor/dist/css/style.css'
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import QuesCard from "@/components/HelpCenter/QuesCard.vue";
@@ -99,12 +99,13 @@ export default {
         ]
     )
     const init = () => {
-      // getQuestions(1, pageSize).then(
-      //     (data) => {
-      //       quesSum.value = data.ques_sum
-      //       questions.value = data.questions
-      //     }
-      // )
+      getQuestions(1, pageSize.value).then(
+          (data) => {
+            quesSum.value = data.ques_sum
+            questions.value = data.questions
+            console.log(data.ques_sum)
+          }
+      )
     }
     init()
     const updatePage = () => {
@@ -172,6 +173,7 @@ export default {
 </script>
 
 <template>
+
   <div v-if="!display.smAndDown.value">
     <v-row justify="center" style="margin-top: 10px">
       <v-col cols="2" style="margin-right: 10px">
@@ -285,6 +287,7 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
+
 </template>
 
 <style scoped>

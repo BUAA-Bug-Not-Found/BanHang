@@ -11,6 +11,7 @@
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.12",
     "core-js": "^3.8.3",
+    "element-plus": "^2.7.2",
     "vue": "^3.2.13"
   },
   "devDependencies": {

@@ -20,6 +20,7 @@ class BlogBase(BaseModel):
     content: str
     ifAnonymous: bool
     imageList: List[str]
+    tagList: List[int]
 
 class BlogShow(BaseModel):
     userId: int
@@ -29,12 +30,14 @@ class BlogShow(BaseModel):
     title: str
     content: str
     time: datetime
-    imageList: Optional[List[str]]
+    imageList: List[str]
+    tagList: List[str]
 
 class BlogCommentBase(BaseModel):
     blogId: int
     commentContent: str
     ifAnonymous: bool
+    replyToCommentId: Optional[int] 
     
 class BlogCommentShow(BaseModel):
     userId: int
@@ -43,6 +46,7 @@ class BlogCommentShow(BaseModel):
     commentId: int
     commentContent: str
     time: datetime
+    replyToCommentId: Optional[int] 
 
 class QuestionCreate(BaseModel):
     content:str
@@ -50,3 +54,24 @@ class QuestionCreate(BaseModel):
     questionTagids:List[int]
     questionImageids:List[int]
 
+class QuestionImageCreate(BaseModel):
+    questionId: int
+    imageUrl:str
+
+class QuestionCommentImageCreate(BaseModel):
+    questionCommentId: int
+    imageUrl:str
+
+class QuestionCommentCreat(BaseModel):
+    content:str
+    userId:int
+    questionCommentImageids: List[int]
+    questionId: int = 0
+class MessageShow(BaseModel):
+    senderName: str
+    senderId: int
+    receiverName: str
+    receiverId: int
+    content: str
+    time: datetime
+    read: bool

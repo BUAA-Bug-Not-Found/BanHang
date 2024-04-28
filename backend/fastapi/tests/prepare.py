@@ -64,7 +64,8 @@ def mock_blog_data():
         "ifAnonymous": True,
         "imageList": [
             "string"
-        ]
+        ],
+        "tagList": []
     }
 
 @pytest.fixture
@@ -72,9 +73,19 @@ def mock_question_data():
     return {
         'quesContent':{
             'content': 'can you help me???',
-            'imageList': []
+            'imageList': ["http://test.com/test.jpg"]
         },
         'quesTags':['tag1','tag2']
+    }
+
+@pytest.fixture
+def mock_question_comment_data():
+    return {
+        'ansContent':{
+            'content': 'I can help you!',
+            'imageList': ["http://test.com/test1.jpg"]
+        },
+        'quesId': 1
     }
 
 @pytest.fixture

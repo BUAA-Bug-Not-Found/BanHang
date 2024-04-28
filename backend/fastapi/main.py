@@ -1,13 +1,14 @@
 import uvicorn
 from fastapi import FastAPI
 
-from banhang import user, blog, question, file
+from banhang import user, blog, question, file, message
 
 from scripts import  recreate_db
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from banhang.BanHangException import UniException
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
@@ -23,15 +24,16 @@ app.include_router(user.router)
 app.include_router(blog.router)
 app.include_router(question.router)
 app.include_router(file.router)
-from fastapi.middleware.cors import CORSMiddleware
+app.include_router(message.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:*","http://localhost","*"],
+    allow_origins=["http://lyhtool.tpddns.cn:8000", "http://127.0.0.1:8080", "http://127.0.0.1:8080","http://localhost:8080", "http://localhost"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 DEBUG = True
 def main():
