@@ -1,25 +1,39 @@
 <template>
   <div class="blog-card" @click="goToBlogCardView">
     <div class="user-info">
-      <div class="left-section">
-        <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
-        <div class="user-details">
-          <span class="user-name">{{ userName }}</span>
-          <span class="time">{{ time }}</span>
+      <v-col cols="5" style="text-align: left;">
+        <div class="left-section">
+          <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
+          <div class="user-details">
+            <span class="user-name">{{ userName }}</span>
+            <span class="time">{{ time }}</span>
+          </div>
         </div>
-      </div>
-      <div class="tag-container">
-        <v-chip
-            v-for="(tag, index) in this.tags.filter(tag => this.tagList.includes(tag.tagName))"
-            :key="index"
-            :color="tag.tagColor"
-            text-color="white"
-            label
-            outlined
-        >
-          {{ tag.tagName }}
-        </v-chip>
-      </div>
+      </v-col>
+      <v-col cols="7" style="text-align: left">
+        <div class="tag-container">
+          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"
+                 color="blue-grey-lighten-2">
+            {{ 1 }}
+          </v-btn>
+          <v-btn variant="text" prepend-icon="mdi-message-text" size="small" color="blue-grey-lighten-2">
+            {{ 2 }}
+          </v-btn>
+        </div>
+        <div class="tag-container">
+          <v-chip
+              v-for="(tag, index) in this.tags.filter(tag => this.tagList.includes(tag.tagId))"
+              size="x-small"
+              :key="index"
+              :color="tag.tagColor"
+              text-color="white"
+              label
+              outlined
+          >
+            {{ tag.tagName }}
+          </v-chip>
+        </div>
+      </v-col>
     </div>
     <div class="title">
       {{ title }}
@@ -36,7 +50,7 @@ export default {
 
   props: {
     blogId: {
-      type: String,
+      type: Number,
       required: true
     },
     userName: {
@@ -62,7 +76,7 @@ export default {
     tagList: {
       type: Array,
       required: true
-    }
+    },
   },
 
   data() {
@@ -135,8 +149,6 @@ export default {
 
 .user-info {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
 }
 
 .left-section {

@@ -19,10 +19,25 @@
       </div>
     </div>
 
-    <div class="tag-checkboxes">
-      <v-checkbox v-model="tagList" :label="tag.tagName" :value="tag.tagName" :color="tag.tagColor" v-for="tag in tags"
-                  :key="tag.tagId"></v-checkbox>
-    </div>
+    <v-select
+        v-model="tagList"
+        :items="tagNamesArray"
+        multiple
+        label="添加标签"
+        density="default"
+    >
+      <template v-slot:selection="{item}">
+        <v-chip size="x-small" :color="tags[tagNamesArray.indexOf(item.title)].tagColor">
+          <v-icon>{{ tags[tagNamesArray.indexOf(item.title)].tagIcon }}</v-icon>
+          {{ item.title }}
+        </v-chip>
+      </template>
+    </v-select>
+
+    <!--    <div class="tag-checkboxes">-->
+    <!--      <v-checkbox v-model="tagList" :label="tag.tagName" :value="tag.tagId" :color="tag.tagColor" v-for="tag in tags"-->
+    <!--                  :key="tag.tagId"></v-checkbox>-->
+    <!--    </div>-->
 
     <div class="anonymous_checkbox">
       <v-checkbox v-model="ifAnonymous" label="匿名发布"></v-checkbox>
@@ -42,7 +57,7 @@
 </template>
 
 <script>
-import {uploadBlog, uploadfile} from "@/components/AnonymousBlog/api";
+import {uploadBlog} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 
 export default {
@@ -55,6 +70,7 @@ export default {
       imagePreviews: [], // 图片预览数组，用于回显上传的图片
       ifAnonymous: false,  // 是否匿名
       tagList: [], //标签名列表
+      tagNamesArray: ['学习生活', '日常事务', '情感交流', '灌水吐槽', '寻欢作乐'],
       tags: [
         {
           tagId: 1,
@@ -94,29 +110,28 @@ export default {
     handleFileUpload(event) {
       const files = event.target.files;
       if (!files) return;
-
       // 遍历上传的图片文件，生成预览并存入图片预览数组
       for (let i = 0; i < files.length; i++) {
         const fileReader = new FileReader();
         fileReader.onload = (e) => {
           this.imagePreviews.push(e.target.result);
         };
-        // fileReader.readAsDataURL(files[i]);
+        fileReader.readAsDataURL(files[i]);
         let form = new FormData
         form.append("file", files[i])
-        uploadfile(form).then(
-            (res) => {
-              if (res.success === "true") {
-                this.images.push(res.fileUrl)
-              } else {
-                ElMessage({
-                  message: '部分图片传输失败',
-                  showClose: true,
-                  type: 'error',
-                })
-              }
-            }
-        )
+        // todo uploadfile(form).then(
+        //     (res) => {
+        //       if (res.success === "true") {
+        //         this.images.push(res.fileUrl)
+        //       } else {
+        //         ElMessage({
+        //           message: '部分图片传输失败',
+        //           showClose: true,
+        //           type: 'error',
+        //         })
+        //       }
+        //     }
+        // )
       }
     },
     // 移除已上传的图片
@@ -124,6 +139,19 @@ export default {
       this.imagePreviews.splice(index, 1);
       this.images.splice(index, 1);
     },
+
+    transNameListToIdList(tagList) {
+      let tagIds = [];
+
+      tagList.forEach(tagName => {
+        let tag = this.tags.find(tag => tag.tagName === tagName);
+        if (tag) {
+          tagIds.push(tag.tagId);
+        }
+      });
+      return tagIds
+    },
+
     // 提交帖子
     submitBlog() {
       // 弹出确认框，让用户确认是否提交
@@ -136,7 +164,7 @@ export default {
         form.append("content", this.content)
         form.append("imageList", this.images)
         form.append("ifAnonymous", this.ifAnonymous)
-        form.append("tagList", this.tagList)
+        form.append("tagList", this.transNameListToIdList(this.tagList))
         uploadBlog(form).then(
             (res) => {
               if (res.isSuccess === "true") {
