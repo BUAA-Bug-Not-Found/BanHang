@@ -4,6 +4,7 @@ from typing import Optional, List
 from fastapi import Depends, FastAPI, HTTPException, APIRouter, Response, Cookie
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy.sql.functions import user
 
 from banhang import blog
 from orm import crud,schemas
@@ -194,3 +195,38 @@ def set_star_state(req:SetStarRequest, db:Session = Depends(get_db),
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"无权修改别人的follow状态"})
     crud.set_star_state_by_email(db, req.email1, req.email2, is_followed=req.state)
     return successResponse()
+
+class UserResponse(BaseModel):
+    nickname:str
+    sign:str
+    url:str
+class UserSearchResponse(BaseModel):
+    users: List[UserResponse]
+    userSum: int
+
+class SearchQuestionsRequest(BaseModel):
+    searchContent:str
+    pageno:int
+    pagesize:int
+    nowSortMethod:str
+@router.post("/searchUserAPage", tags=["用户中心"], response_model=UserSearchResponse)
+def search_questions_by_content(req:SearchQuestionsRequest,db: Session = Depends(get_db),
+                      current_user: Optional[dict] = Depends(authorize)):
+    # try:
+    #     sort_mode = {'byRelation':1, 'byTime':2, 'byPopularity':3}[search_questions_request.nowSortMethod]
+    # except:
+    #     raise EXC.UniException(key="isSuccess", value=False,
+    #                        others={"description": "nowSortMethod参数错误，请检查。"})
+    # wordlist = [x.strip() for x in search_questions_request.searchContent.split(" ") if x != ""]
+    pageNo = req.pageno
+    pageSize = req.pagesize
+    if pageNo <= 0 or pageSize <= 0:
+        raise EXC.UniException(key="isSuccess", value=False,
+                           others={"description": "pageNo或pageSize小于等于零，不符合要求。"})
+    offset = (pageNo - 1) * pageSize
+    limit = pageSize
+    db_users= crud.search_user_by_word(db, req.searchContent, offset=offset, limit=limit)
+    users = [{'nickname':user.username, 'sign':user.sign, 'url':user.userAvatarURL if user.userAvatarURL else ""}
+             for user in db_users]
+    return {"users": users,
+            "userSum": crud.get_search_user_sum_by_word(db, req.searchContent, offset=offset, limit=limit)}

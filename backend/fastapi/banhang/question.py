@@ -402,3 +402,54 @@ def get_tags(db: Session = Depends(get_db)):
                       'tagIcon': tag.icon,
                       'tagColor': tag.color} for tag in crud.get_question_tag_all(db)
                      ]}
+
+class SearchQuestionsRequest(BaseModel):
+    searchContent:str
+    pageno:int
+    pagesize:int
+    nowSortMethod:str
+
+@router.post("/searchQuesAPage", tags=["Question"], response_model=GetQuestionsNewResponse)
+def search_questions_by_content(search_questions_request:SearchQuestionsRequest,db: Session = Depends(get_db),
+                      current_user: Optional[dict] = Depends(authorize)):
+    try:
+        sort_mode = {'byRelation':1, 'byTime':2, 'byPopularity':3}[search_questions_request.nowSortMethod]
+    except:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "nowSortMethod参数错误，请检查。"})
+    wordlist = [x.strip() for x in search_questions_request.searchContent.split(" ") if x != ""]
+    pageNo = search_questions_request.pageno
+    pageSize = search_questions_request.pagesize
+    if pageNo <= 0 or pageSize <= 0:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "pageNo或pageSize小于等于零，不符合要求。"})
+    offset = (pageNo - 1) * pageSize
+    limit = pageSize
+    db_questions= crud.search_question_by_word_list(db, wordlist, offset=offset, limit=limit, asc=sort_mode)
+    questions = []
+    for question in db_questions:
+        # quesId,userId,userName,
+        # quesContent,quesState,quesTime,
+        # ifUserLike, ansSum, likeSum,
+        # tagIdList
+        user = question.user
+        retquestion = {}
+        retquestion['quesId'] = question.id
+        retquestion['userId'] = user.id
+        retquestion['userName'] = user.username
+        retquestion['quesContent'] = {'content': question.content,
+                                      'imageList': [image.image_url for image in question.images]}
+        retquestion['quesState'] = 0 if question.delated else \
+            1 if question.archived else \
+                2 if not question.solved else \
+                    3
+        retquestion['quesTime'] = question.create_at
+        retquestion['ifUserLike'] = (
+            crud.get_user_by_id(db, current_user["uid"]) in question.liked_users if current_user else
+            False)
+        retquestion['ansSum'] = len(question.comments)
+        retquestion['likeSum'] = len(question.liked_users)
+        retquestion['tagIdList'] = [tag.id for tag in question.tags]
+        questions.append(retquestion)
+    return {"questions": questions,
+            "quesSum": crud.get_search_question_sum_by_word_list(db, wordlist, offset=offset, limit=limit, asc=2)}
