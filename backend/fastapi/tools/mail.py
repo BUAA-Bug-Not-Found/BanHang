@@ -47,13 +47,15 @@ class MailSender:
     ) -> None:
         client = MailSender.create_client()
         single_send_mail_request = dm_20151123_models.SingleSendMailRequest(
-            account_name='banhang@mail.lyhtool.com',
+            account_name='banhang@lyhtool.com',
             address_type=1,
             reply_to_address=False,
             to_address=addr,
             subject='伴航(BanHang)邮箱验证码',
-            html_body='',
-            text_body='验证码{}'.format(checkcode)
+            text_body='您的验证码是：{} \n请勿透露给其他人'.format(checkcode),
+            tag_name='checkcode',
+            from_alias='伴航团队',
+            click_trace='1'
         )
         runtime = util_models.RuntimeOptions()
         try:
