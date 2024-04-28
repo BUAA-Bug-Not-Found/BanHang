@@ -27,7 +27,7 @@ def get_recent_message_conversation(uid: int, db: Session = Depends(get_db)):
 		conversation['userId'] = db_conversation.guest_user.id
 		conversation['hasUnreadMessage'] = db_conversation.is_read
 		conversations.append(ConversationShow(**conversation))
-	return conversation
+	return conversations
 
 class MessageGet(BaseModel):
 	targetUserId: int
