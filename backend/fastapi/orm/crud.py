@@ -6,7 +6,7 @@ from sqlalchemy import or_, and_
 from orm.models import Message, Conversation, ConversationMessage
 
 
-def get_user_by_id(db: Session, user_id: int):
+def get_user_by_id(db: Session, user_id: int)->models.User:
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 
@@ -14,7 +14,7 @@ def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
 
-def get_user_by_email(db: Session, email: str):
+def get_user_by_email(db: Session, email: str)->models.User:
     return db.query(models.User).filter(models.User.email == email).first()
 
 
@@ -55,6 +55,32 @@ def set_password_by_email(db: Session, password: str, email: str):
     user.password = password
     db.commit()
 
+def set_sign_by_email(db: Session, email: str, sign: str):
+    user = get_user_by_email(db, email)
+    user.sign = sign
+    db.commit()
+    db.refresh(user)
+    return user
+
+def set_username_by_email(db: Session, email: str, username: str):
+    user = get_user_by_email(db, email)
+    user.username = username
+    db.commit()
+    db.refresh(user)
+    return user
+
+def set_star_state_by_email(db: Session, email1:str, email2:str, is_followed: bool):
+    user1 = get_user_by_email(db, email1)
+    user2 = get_user_by_email(db, email2)
+    if is_followed:
+        if user2 not in user1.followed:
+            user1.followed.append(user2)
+            db.commit()
+    else:
+        if user2 in user1.followed:
+            user1.followed.remove(user2)
+            db.commit()
+
 
 def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymous: bool, image_urls: list[str], tag_ids: list[int]):
     db_blog = models.Blog(user_id=user_id,
@@ -80,6 +106,9 @@ def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymou
 def get_blog_by_blog_id(db: Session, blog_id: int):
     return db.query(models.Blog).filter(models.Blog.id == blog_id).first()
 
+def get_blog_by_email(db: Session, email:str):
+    user = get_user_by_email(db, email)
+    return db.query(models.Blog).filter(models.Blog.user_id == user.id).all()
 
 def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
     if asc:
