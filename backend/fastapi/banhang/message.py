@@ -18,7 +18,7 @@ class ConversationShow(BaseModel):
 @router.post("/getReletedUser", tags=["Message"], response_model=List[ConversationShow])
 @check_user
 def get_recent_message_conversation(uid: int, db: Session = Depends(get_db)):
-	db_conversations = crud.get_recent_message_conversation(db, uid)
+	db_conversations = crud.get_recent_conversation(db, uid)
 	conversations = []
 	for db_conversation in db_conversations:
 		conversation = {}
