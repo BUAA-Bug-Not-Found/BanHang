@@ -25,6 +25,8 @@ import ToolBox from "@/components/ToolBox/ToolBox.vue";
 import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
 import MessageContainer from '@/components/Message/MessageContainer.vue';
 import {createRouter, createWebHashHistory} from 'vue-router';
+import SearchList from "@/components/AdvanceSearch/SearchList.vue";
+
 
 const routes = [
 
@@ -52,7 +54,7 @@ const routes = [
                 path: '/learnScroll',
                 name: '/learnScroll',
                 component: LearnScroll
-            }, 
+            },
             {
                 path: '/registerPage',
                 name: "registerPage",
@@ -102,6 +104,11 @@ const routes = [
                 path: '/message',
                 name: "message",
                 component: MessageContainer
+            }, {
+
+                path: '/searchList/:keywords',
+                name: "searchList",
+                component: SearchList
             }
         ]
     },

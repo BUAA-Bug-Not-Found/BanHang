@@ -31,7 +31,7 @@
     </div>
     <!-- 评论输入框 -->
     <div v-if="showCommentInput" class="comment-input">
-      <textarea v-model="newComment" placeholder="输入您的评论" class="comment-textarea"></textarea>
+      <v-text-field v-model="newComment" placeholder="输入您的评论"></v-text-field>
       <div class="anonymous-and-addbutton">
         <v-checkbox v-model="commentAnonymous" label="匿名发布" class="anonymous-checkbox"></v-checkbox>
         <v-btn @click="addComment('')" class="ma-2" color="green">提交评论
@@ -74,8 +74,8 @@ export default {
       tagList: [],
       comments: [
         {
-          blogId: '1',
-          commentId: '1',
+          blogId: 1,
+          commentId: 1,
           userName: 'Alice',
           userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
           content: 'This is the first comment.',
@@ -83,17 +83,17 @@ export default {
           replyToCommentId: ""
         },
         {
-          blogId: '1',
-          commentId: '2',
+          blogId: 1,
+          commentId: 2,
           userName: 'Bob',
           userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO2.jpg',
           content: 'This is the second comment.',
           time: "2024.04.21-15:30",
-          replyToCommentId: "1"
+          replyToCommentId: 1
         },
         {
-          blogId: '1',
-          commentId: '3',
+          blogId: 1,
+          commentId: 3,
           userName: 'Charlie',
           userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO3.jpg',
           content: 'This is the third comment.',
@@ -133,15 +133,16 @@ export default {
       // 发起后端数据请求，获取博客对应的评论信息
       getCommentsByBlogId(this.blogId).then(
           (data) => {
-            this.comments = data.comments.map(comment => ({
-              userName: comment.userName,
-              userAvatarURL: comment.userAvatarUrl,
-              blogId: this.blogId,
-              commentId: comment.commentId,
-              content: comment.content,
-              time: comment.time,
-              replyToCommentId: comment.replyToCommentId,
-            }));
+            this.comments = data.comments
+            // this.comments = data.comments.map(comment => ({
+            //   userName: comment.userName,
+            //   userAvatarURL: comment.userAvatarUrl,
+            //   blogId: this.blogId,
+            //   commentId: comment.commentId,
+            //   content: comment.content,
+            //   time: comment.time,
+            //   replyToCommentId: comment.replyToCommentId,
+            // }));
           }
       )
     },
@@ -247,15 +248,6 @@ export default {
   display: flex;
   flex-direction: column;
   margin-top: 10px;
-}
-
-.comment-textarea {
-  resize: vertical; /* 可以垂直拉伸 */
-  min-height: 60px; /* 最小高度 */
-  margin-bottom: 10px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 }
 
 .anonymous-and-addbutton {

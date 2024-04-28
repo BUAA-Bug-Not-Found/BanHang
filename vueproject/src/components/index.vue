@@ -21,6 +21,17 @@ export default {
     }
 
     return {display, search, user_name, isLogin, goto, searchContent}
+  },
+
+  methods: {
+    navigateToSearchList() {
+      if (this.searchContent.trim() !== '') {
+        this.$router.push({
+          name: 'searchList',
+          params: {keywords: this.searchContent.trim()}
+        });
+      }
+    }
   }
 }
 </script>
@@ -34,16 +45,19 @@ export default {
     <v-app-bar-title>伴航</v-app-bar-title>
     <v-col col="4">
       <v-text-field
-          append-inner-icon="mdi-magnify"
           density="compact"
-          label="Search content"
+          label="搜索"
           variant="solo"
           hide-details
           single-line
           v-model="searchContent"
           @keyup.enter="search"
           style="margin-left: 10px; margin-right: 10px"
-      ></v-text-field>
+      >
+        <template v-slot:append-inner>
+          <v-icon @click="navigateToSearchList">mdi-magnify</v-icon>
+        </template>
+      </v-text-field>
     </v-col>
     <v-btn @click="goto('/HelpCenter')">
       <v-icon>mdi-help-box</v-icon>
@@ -78,16 +92,20 @@ export default {
     <v-avatar color="surface-variant" style="margin-left: 15px" size="32"></v-avatar>
     <v-col>
       <v-text-field
-          append-inner-icon="mdi-magnify"
           density="compact"
           class="w-50"
-          label="Search content"
+          label="搜索"
           variant="outlined"
           hide-details
           single-line
+          v-model="searchContent"
           @keyup.enter="search"
           style="margin-left: 10px; margin-right: 10px"
-      ></v-text-field>
+      >
+        <template v-slot:append-inner>
+          <v-icon @click="navigateToSearchList">mdi-magnify</v-icon>
+        </template>
+      </v-text-field>
     </v-col>
     <template v-slot:append>
       <v-btn @click="goto('/message')">

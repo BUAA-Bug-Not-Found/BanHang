@@ -19,7 +19,7 @@ export default {
 
   props: {
     commentId: {
-      type: String,
+      type: Number,
       required: true
     },
     userName: {
