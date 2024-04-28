@@ -97,7 +97,7 @@ export default {
       </v-btn>
     </template>
   </v-app-bar>
-  <router-view style="margin-top: 5px"></router-view>
+  <router-view style="height: 50%;"></router-view>
   <v-bottom-navigation
       color="primary"
       active

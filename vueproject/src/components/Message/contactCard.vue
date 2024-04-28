@@ -1,7 +1,7 @@
 <template>
     <v-card class="box-card" shadow="never" @click="sendUserToParent">
             <div class="profile-wrapper">
-                <img :src="profile_photo" alt="头像" class="profile-photo" />
+                <img :src="avatar" alt="头像" class="profile-photo" />
                 <p class="name">{{ user_name }}</p>
             </div>
 
@@ -9,42 +9,21 @@
 </template>
   
 <script>
-import axios from 'axios';
 import { ElCard } from 'element-plus';
 /* eslint-disable */
 export default {
     name: "contactCard",
     props: {
         user_name: String,
-        user_id: String
-    },
-    data() {
-        return {
-            profile_photo: '/src/assets/image/default-avatar.png',
-        };
-    },
-    mounted() {
-        this.getProfilePhoto();
+        user_id: String,
+        avatar: String
     },
     components: {
         ElCard
     },
     methods: {
-        getProfilePhoto() {
-            return;
-            axios.post('/', { user_name: this.user_name })
-                .then(response => {
-                    if (response.data.profile_photo) {
-                        this.profile_photo = response.data.profile_photo;
-                        this.profile_photo = this.profile_photo.startsWith('/9j') ? 'data:image/jpg;base64,' + this.profile_photo : 'data:image/png;base64,' + this.profile_photo
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        },
         sendUserToParent() {
-            this.$emit('open-message', this.user_id);
+            this.$emit('open-message', this.user_id, this.user_name, this.avatar);
         },
     },
 };
