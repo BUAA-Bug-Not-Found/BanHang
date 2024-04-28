@@ -53,11 +53,12 @@ def test_login_cookie(mock_user_data):
     assert res.json()['email'] == mock_user_data["email"]
     assert res.json()['username'] == mock_user_data["username"]
     
-def test_follow(mock_user_data, new_database):
+def test_follow_and_search(mock_user_data, new_database):
     register_login_user(client, mock_user_data)
     user1 = client.get("check_login_state").json()
     assert user1['email'] == mock_user_data["email"]
     mock_user_data["email"] = "123"+mock_user_data["email"]
+    mock_user_data['username'] += '6666'
     register_login_user(client, mock_user_data)
     user2 = client.get("check_login_state").json()
     assert user2['email'] == mock_user_data["email"]
@@ -67,6 +68,32 @@ def test_follow(mock_user_data, new_database):
                                        'state':True})
     res = client.get("/queryStar", params={"email1": user2["email"], "email2": user1["email"]}).json()
     assert res['isStar'] == True
+
+    res = (client.post("/searchUserAPage",
+                      json={'searchContent':mock_user_data['username'][2:-4],
+                            'pageno':1,
+                            'pagesize':1,
+                            'nowSortMethod':'byTime'}
+                       ).json()
+           )
+    assert res['userSum'] == 2
+    res = (client.post("/searchUserAPage",
+                       json={'searchContent': '6666',
+                             'pageno': 1,
+                             'pagesize': 100,
+                             'nowSortMethod': 'byTime'}
+                       ).json()
+           )
+    assert res['userSum'] == 1
+    res = (client.post("/searchUserAPage",
+                       json={'searchContent': '123',
+                             'pageno': 1,
+                             'pagesize': 100,
+                             'nowSortMethod': 'byTime'}
+                       ).json()
+           )
+    assert res['userSum'] == 1
+
 
 def test_set_sign(mock_user_data, new_database):
     register_login_user(client, mock_user_data)

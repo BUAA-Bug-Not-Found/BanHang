@@ -24,6 +24,7 @@ class User(Base):
     privilege = Column(Integer, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
     userAvatarURL = Column(String(256), nullable=True)
     sign = Column(String, nullable=True, default = "")
+    create_at = Column(DateTime, server_default=func.now())
 
     blogs = relationship("Blog", back_populates="user")
     blog_comments = relationship("BlogComment", back_populates="user")
@@ -122,6 +123,7 @@ class Question(Base):
     delated = Column(Boolean, default=False)
     archived = Column(Boolean, default=False)
     solved = Column(Boolean, default=False)
+    liked_user_count = Column(Integer, default=0, nullable=False)
 
 
     images = relationship("QuestionImage", back_populates="question")
