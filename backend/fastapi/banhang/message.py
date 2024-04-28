@@ -18,16 +18,17 @@ class ConversationShow(BaseModel):
 @router.post("/getReletedUser", tags=["Message"], response_model=List[ConversationShow])
 @check_user
 def get_recent_message_conversation(uid: int, db: Session = Depends(get_db)):
-	db_conversations = crud.get_recent_message_conversation(db, uid)
+	db_conversations = crud.get_recent_conversation(db, uid)
 	conversations = []
 	for db_conversation in db_conversations:
 		conversation = {}
-		conversation['userAvatarUrl'] = db_conversation.guest_user.userAvatarURL
+		avatar = db_conversation.guest_user.userAvatarURL
+		conversation['userAvatarUrl'] = avatar if avatar is not None else ""
 		conversation['userName'] = db_conversation.guest_user.username
 		conversation['userId'] = db_conversation.guest_user.id
 		conversation['hasUnreadMessage'] = db_conversation.is_read
 		conversations.append(ConversationShow(**conversation))
-	return conversation
+	return conversations
 
 class MessageGet(BaseModel):
 	targetUserId: int
