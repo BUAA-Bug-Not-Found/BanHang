@@ -51,8 +51,8 @@ class MailSender:
             address_type=1,
             reply_to_address=False,
             to_address=addr,
-            subject='伴航(BanHang)邮箱验证码',
-            text_body='您的验证码是：{} \n请勿透露给其他人'.format(checkcode),
+            subject='关于使用伴航平台有关事项的通知',
+            text_body='欢迎使用本平台，请在页面上输入验证码{}。祝您有个美好的旅程。'.format(checkcode),
             tag_name='checkcode',
             from_alias='伴航团队',
             click_trace='1'
