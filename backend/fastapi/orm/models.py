@@ -21,7 +21,7 @@ class User(Base):
     username = Column(String(32), index=True, nullable=False)
     email = Column(String(128), nullable=False)
     password = Column(String(256), nullable=False)
-    privilege = Column(Integer, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
+    privilege = Column(Integer, nullable = False, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
     userAvatarURL = Column(String(256), nullable=False, default="")
     sign = Column(String, nullable=False, default = "")
     create_at = Column(DateTime, server_default=func.now())
