@@ -9,14 +9,17 @@
 
   <div v-else style="height: 100%; display: flex; flex-direction: column;">
     <div class="header-container">
-      <button @click="() => { this.curUserId = '0' }" style="align-items: start; margin-left: 20px;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px;"><title>step-backward</title><path d="M19,5V19H16V5M14,5V19L3,12" /></svg>
+      <button @click="() => { this.curUserId = 0 }" style="align-items: start; margin-left: 20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px;">
+          <title>step-backward</title>
+          <path d="M19,5V19H16V5M14,5V19L3,12" />
+        </svg>
       </button>
       <h2 class="title">{{ this.curUserName }}</h2>
     </div>
     <div class="message-container" ref="container">
       <div v-for="message in messages" :key="message.id">
-        <div v-if="message.sender_id == myId" class="message-right">
+        <div v-if="message.senderId == myId" class="message-right">
           <div style="display: flex;flex-direction: column;   align-items: flex-end; justify-content: flex-end;">
             <div class="time">{{ message.time }}</div>
             <div class="content">
@@ -57,7 +60,7 @@ export default {
     const store = userStateStore()
     return {
       contactList: [],
-      curUserId: "0",
+      curUserId: 0,
       curUserName: "",
       curAvatar: "",
       messages: [],
@@ -76,52 +79,45 @@ export default {
       this.curUserId = cur_user.user_id
       this.curUserName = cur_user.user_name
       this.curAvatar = cur_user.avatar
-      this.getMessages()
+      this.updateData()
     }
-    this.getRelatedPerson();
+    this.updateData();
   },
-  unmounted() {
+  beforeRouteLeave() {
     if (this.timer) {
       clearInterval(this.timer)
       this.timer = null;
     }
   },
   methods: {
-    getRelatedPerson() {
-      axios.post('/getReletedUser', {})
-        .then(response => {
-          this.contactList = response.data
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    },
-    getMessages() {
-      if (this.curUserId != "0") {
+    updateData() {
+      if (this.curUserId != 0) {
         axios.post('/getHistoryMessage', { targetUserId: this.curUserId })
           .then(response => {
             this.messages = response.data
           })
           .catch(error => {
             console.error(error);
-          }).finally(() => {
-            if (this.timer == null)
-              this.timer = setInterval(() => {
-                this.getMessages();
-              }, 1000);
           });
       } else {
-        if (this.timer) {
-          clearInterval(this.timer)
-          this.timer = null;
-        }
+        axios.post('/getReletedUser', {})
+          .then(response => {
+            this.contactList = response.data
+          })
+          .catch(error => {
+            console.error(error);
+          });
       }
+      if (this.timer == null)
+        this.timer = setInterval(() => {
+          this.updateData();
+        }, 1000);
     },
     handleContactClicked(user_id, user_name, avatar) {
       this.curUserId = user_id
       this.curUserName = user_name
       this.curAvatar = avatar
-      this.getMessages()
+      this.updateData()
     },
     submitMessage() {
       axios.post('/sendMessage', { targetUserId: this.curUserId, content: this.inputMessage })
@@ -191,17 +187,21 @@ export default {
 
 .header-container {
   display: flex;
-  justify-content: space-between; /* 按钮靠左，标题靠右 */
-  align-items: center; /* 元素垂直居中 */
-  height: 70px; /* 设置容器高度 */
-  background-color:rgb(205, 227, 234);
+  justify-content: space-between;
+  /* 按钮靠左，标题靠右 */
+  align-items: center;
+  /* 元素垂直居中 */
+  height: 70px;
+  /* 设置容器高度 */
+  background-color: rgb(205, 227, 234);
 }
 
 .title {
   position: absolute;
   left: 50%;
-  top:65px;
-  transform: translate(-50%, 0); /* 水平垂直居中 */
+  top: 65px;
+  transform: translate(-50%, 0);
+  /* 水平垂直居中 */
 }
 
 .input {

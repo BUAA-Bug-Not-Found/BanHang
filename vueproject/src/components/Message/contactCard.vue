@@ -12,7 +12,7 @@ export default {
     name: "contactCard",
     props: {
         user_name: String,
-        user_id: String,
+        user_id: Number,
         avatar: String
     },
     components: {
