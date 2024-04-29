@@ -53,7 +53,7 @@ async def upload_file(file: UploadFile):
     os.remove(oss_name)
     if result.status == 200:
         return {"response": "success",
-                "fileUrl": oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT + "/" + oss_name}
+                "fileUrl": "https://" + oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT + "/" + oss_name}
     else:
         return {"response": "error"}
 
