@@ -119,6 +119,7 @@ export default {
         fileReader.readAsDataURL(files[i]);
         let form = new FormData
         form.append("file", files[i])
+
         uploadfile(form).then(      //todo
             (res) => {
               if (res.success === "true") {

@@ -111,7 +111,7 @@ export default {
               content: comment.content,
               time: comment.time,
               replyToCommentId: comment.replyToCommentId,
-            }));
+            }))
           }
       )
     },
