@@ -1,5 +1,5 @@
 <script>
-import {getQuestions} from "@/components/HelpCenter/api";
+import {getQuestions, uploadFile, uploadQues} from "@/components/HelpCenter/api";
 import '@wangeditor/editor/dist/css/style.css'
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import QuesCard from "@/components/HelpCenter/QuesCard.vue";
@@ -7,10 +7,12 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {useDisplay} from "vuetify";
 import AppQuesCard from "@/components/HelpCenter/AppQuesCard.vue";
 import {ElMessage} from "element-plus";
+import router from "@/router";
+import {Plus} from "@element-plus/icons-vue";
 
 export default {
   name: "HelpCenter",
-  components: {AppQuesCard, Editor, Toolbar, QuesCard},
+  components: {Plus, AppQuesCard, Editor, Toolbar, QuesCard},
   setup() {
     const page = ref(1)
     const pageSize = ref(10)
@@ -22,7 +24,7 @@ export default {
     const toolbarConfig = {}
     const editorConfig = {placeholder: '请输入内容...'}
 
-    const imageList = []
+    const imageList = ref([])
 
     const selectTags = ref([])
 
@@ -111,6 +113,7 @@ export default {
           }
       )
     }
+
     init()
 
     // const updatePage = () => {
@@ -152,28 +155,45 @@ export default {
       return tags.value[index].tagIcon
     }
 
-    const handleChange = (uploadFile) => {
-      if (uploadFile.raw.type !== "image/jpeg" && uploadFile.raw.type !== "image/png") {
+    const handleChange = (file) => {
+      if (file.raw.type !== "image/jpeg" && file.raw.type !== "image/png") {
         ElMessage.error('Avatar picture must be JPG format!');
         return false;
       }
-      uploadFile(uploadFile).then((res) => {
+      uploadFile(file).then((res) => {
         if(res.response === 'success') {
           ElMessage.success("Avatar picture upload succeeded!")
-          imageList.push(res.fileUrl)
+          imageList.value.push(res.fileUrl)
         } else {
           ElMessage.error('Avatar picture upload failed!');
         }
-
       })
       return true;
     }
 
     const deleteImage = (index) => {
-      imageList.splice(index, 1);
+      imageList.value.splice(index, 1);
+    }
+
+    const uploadQuestion = () => {
+      if(valueHtml.value === '') {
+        ElMessage.error('问题内容不得为空');
+      } else{
+        uploadQues(valueHtml.value, imageList.value, selectTags.value).then(
+            (res) => {
+              if(res.isSuccess === 'true') {
+                ElMessage.success('问题发布成功');
+                router.go(0)
+              } else {
+                ElMessage.error('发布失败，请重新尝试');
+              }
+            }
+        )
+      }
     }
 
     const display = useDisplay()
+
     return {
       editorConfig,
       mode: 'default',
@@ -195,14 +215,14 @@ export default {
       display,
       imageList,
       handleChange,
-      deleteImage
+      deleteImage,
+      uploadQuestion
     }
   }
 }
 </script>
 
 <template>
-
   <div v-if="!display.smAndDown.value">
     <v-row justify="center" style="margin-top: 10px">
       <v-col cols="2" style="margin-right: 10px">
@@ -225,7 +245,6 @@ export default {
           </v-list-item>
         </v-list>
       </v-col>
-
       <v-col cols="8" style="margin-bottom: 25px">
         <QuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
                   :question="questions[index]" :tags="tags"/>
@@ -240,7 +259,6 @@ export default {
         </v-btn>
       </v-col>
       <v-col cols="2">
-
       </v-col>
     </v-row>
   </div>
@@ -276,6 +294,9 @@ export default {
             发布问题
           </v-col>
           <v-col cols="4">
+            <v-btn variant="text" @click="uploadQuestion">
+              发布
+            </v-btn>
             <v-btn variant="text" @click="sheet = !sheet">
               close
             </v-btn>
@@ -286,20 +307,19 @@ export default {
               <img :src="image" class="avatar">
           </v-col>
           <v-col>
-            <el-upload
-                class="avatar-uploader"
-                action="#"
-                :show-file-list="false"
-                :auto-upload="false"
-                :on-change="handleChange"
-                accept=".jpg,.png"
-            >
-              <v-icon class="avatar-uploader-icon">
-                mdi-plus
-              </v-icon>
-            </el-upload>
+            <el-form>
+              <el-upload
+                  class="avatar-uploader"
+                  action="#"
+                  :show-file-list="false"
+                  :auto-upload="false"
+                  :on-change="handleChange"
+                  accept=".jpg,.png"
+              >
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+              </el-upload>
+            </el-form>
           </v-col>
-
         </v-row>
 
         <div>
@@ -349,24 +369,32 @@ export default {
   transform: translateY(-86%);
 }
 
-.avatar-uploader .el-upload:hover {
-  border: 1px dashed #409EFF;
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
 }
+</style>
 
-.avatar {
-  width: 100%;
-  height: 0;
-  padding-bottom: 100%;
-}
-
-.avatar-uploader {
-  border: 1px dashed #d9d9d9;
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
   border-radius: 6px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  width: 100%;
-  height: 0;
-  padding-bottom: 100%;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>

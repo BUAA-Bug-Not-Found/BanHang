@@ -37,11 +37,25 @@ export function getAnsById(ansId) {
     })
 }
 
-export function uploadfFile(file) {
-    return axios.post('/uploadfile', file,
+export function uploadFile(file) {
+    return axios.post('/uploadfile', {
+            file: file
+        },
         {
             headers: {'Content-Type': 'multipart/form-data'}
         }).then(response => {
+        return response.data
+    })
+}
+
+export function uploadQues(content, imageList, quesTags) {
+    return axios.post('/uploadQues', {
+        quesContent: {
+            content: content,
+            imageList: imageList,
+        },
+        quesTags: quesTags
+    }).then(response => {
         return response.data
     })
 }
