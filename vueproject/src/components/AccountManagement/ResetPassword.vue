@@ -52,16 +52,16 @@ export default {
             this.barColor = "#42a300"
         },
         sendCheckCode() {
-            const buaaEmailPattern = /^[a-zA-Z0-9_-]+@(?:buaa\.edu\.cn)$/
+            // const buaaEmailPattern = /^[a-zA-Z0-9_-]+@(?:buaa\.edu\.cn)$/
             if (!this.email) {
                 this.mes = '邮箱不可为空'
                 this.barColor = '#FF0000'
-            } else if (!buaaEmailPattern.test(this.email)) {// 格式校验
-                this.mes = '请保证邮箱符合北航邮箱格式'
-                this.barColor = '#FF0000'
+            // } else if (!buaaEmailPattern.test(this.email)) {// 格式校验
+            //     this.mes = '请保证邮箱符合北航邮箱格式'
+            //     this.barColor = '#FF0000'
             } else {
                 trySendCheckCode(this.email).then((res) => {
-                    if (res.value) {
+                    if (res.isSuccess) {
                         this.mes = '发送成功 !'
                         this.barColor = '#42a300'
                     } else {
@@ -85,7 +85,7 @@ export default {
                 // 调用后端函数进行验证码验证
                 tryResetPassword(this.email, this.password1, this.checkCode)
                     .then((res) => {
-                        if (res.value) {
+                        if (res.isSuccess) {
                             this.setSuccessBarInfo("重置成功 !!")
                             router.push({path : '/loginPage'})
                         } else {
@@ -100,7 +100,6 @@ export default {
 <style scoped>
 .v-card {
     justify-content: center;
-    
 }
 
 .v-text-field {

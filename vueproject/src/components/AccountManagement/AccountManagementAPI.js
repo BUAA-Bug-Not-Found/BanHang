@@ -3,6 +3,10 @@ import axios from "axios";
 
 export function tryLogin(_email, _password) {
     // TODO 完善request中的数据
+    console.log({
+        "email": _email,
+        "password": _password
+    })
     return axios.request({
         url: "/login",
         method: "put",
@@ -14,6 +18,7 @@ export function tryLogin(_email, _password) {
         return reply.data
     }).catch(() => {
         // 错误处理 TODO
+        return {"isSuccess": false}
     })
 }
 
@@ -30,22 +35,24 @@ export function tryResetPassword(_email, _password, _checkCode) {
         return reply.data
     }).catch(() => {
         // 错误处理
+        return {"isSuccess": false}
     })
 }
 
 export function getUserInfos(_email) {
     return axios.request({
-        // TODO
         url: "/getInfoByEmail",
         method: "get",
-        data: {
+        params: { // 对于get类型的接口, 这里的变量值要用params
             "email": _email
         }
     }).then((reply) => {
         // 这个data是json格式的
         return reply.data
     }).catch(() => {
+        // console.log("getInfo 失败")
         // 错误处理 TODO
+        // return 
     })
 }
 
@@ -54,12 +61,12 @@ export function trySendCheckCode(_email) {
         url: "/sendCheckCode",
         method: "post",
         data: {
-            email: _email
+            "email": _email
         }
     }).then(reply => {
         return reply.data
     }).catch(() => {
-        // 错误处理
+        return {"isSuccess": false}
     })
 }
 
@@ -76,6 +83,6 @@ export function tryRegister(_username, _email, _password, _checkCode) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        // 错误处理 TODO
+        return {"isSuccess": false}
     })
 }

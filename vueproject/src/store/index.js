@@ -10,7 +10,8 @@ export const userStateStore = defineStore("user", {
             isAuthentic: false,
             email: "",
             nickname: "",
-            headImage: ""
+            headImage: "",
+            sign: ""
         }
     },
 
@@ -39,7 +40,7 @@ export const userStateStore = defineStore("user", {
     },
 
     actions: {
-        async login_store_info(accountInfo) {
+        async login_store_info(accountInfo, _email) {
             // this.user_id = accountInfo.user_id
             // this.user_name = accountInfo.user_name
             // if (accountInfo.profile_photo.substring(0, 3) === "/9j") {
@@ -51,9 +52,14 @@ export const userStateStore = defineStore("user", {
             // }
             // this.register_date = accountInfo.register_date
             // this.isAuthentic = true
-            this.email = accountInfo.email;
+            // console.log("accountInfo")
+            // console.log(accountInfo)
+            
+            this.email = _email;
             this.headImage = accountInfo.url;
             this.nickname = accountInfo.nickname;
+            this.sign = accountInfo.sign;
+            this.user_id = accountInfo.userId;
         },
         async reg_success_info(accountInfo) {
             this.user_name = accountInfo.user_name

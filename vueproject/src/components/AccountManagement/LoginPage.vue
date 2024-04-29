@@ -29,7 +29,6 @@
 <script>
 import router from '@/router';
 import {tryLogin, getUserInfos} from "./AccountManagementAPI.js";
-import { ref } from 'vue';
 import {userStateStore} from "../../store/index";
 
 export default {
@@ -57,19 +56,20 @@ export default {
             } else if (!this.password) {
                 this.setFailBarInfo("请输入密码")
             }
-            const match = ref(false);
             // 和数据库发送请求进行信息验证
             tryLogin(this.email, this.password).then((res) => {
-                match.value = Boolean(res.match === "true");
-            }).then(() => {
-                if (match.value) { // 用户信息验证成功
+                if (res.isSuccess) { // 用户信息验证成功
                     getUserInfos(this.email).then((ret) => {
                         const st = userStateStore();
                         // 存储用户信息
-                        st.login_store_info(ret);
+                        st.login_store_info(ret, this.email);
+                        // console.log('存储成功')
+                        console.log("测试store-> " + userStateStore().nickname)
+                        console.log("测试store-> " + userStateStore().sign)
+                        // console.log("测试store-> " + userStateStore())
                         // 跳转
-                        router.push({path: "/helpCenter"});
                         this.setSuccessBarInfo("登录成功!!")
+                        router.push({path: "/HelpCenter"});
                     })
                 } else { // 验证失败
                     this.setFailBarInfo("信息验证失败, 请重新输入!!")

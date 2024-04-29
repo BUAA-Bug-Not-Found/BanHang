@@ -59,6 +59,12 @@ export default {
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
+
+    <v-btn @click="goto('/personalCenter')">
+      <v-icon>mdi-account</v-icon>
+      用户中心
+    </v-btn>
+
     <div style="align-content: center">
       <v-divider style="height:20px" vertical></v-divider>
     </div>
@@ -73,6 +79,7 @@ export default {
       </v-col>
     </template>
   </v-app-bar>
+
   <v-app-bar :elevation="1" density="compact"
              v-if="display.smAndDown.value">
     <v-avatar color="surface-variant" style="margin-left: 15px" size="32"></v-avatar>
@@ -115,7 +122,7 @@ export default {
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
-    <v-btn>
+    <v-btn @click="goto('/personalCenter')">
       <v-icon>mdi-account</v-icon>
       用户中心
     </v-btn>

@@ -24,6 +24,7 @@ import BlogNew from "@/components/AnonymousBlog/BlogNew.vue";
 import ToolBox from "@/components/ToolBox/ToolBox.vue";
 import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
 import {createRouter, createWebHashHistory} from 'vue-router';
+import ResetPassword from "@/components/AccountManagement/ResetPassword.vue";
 
 const routes = [
 
@@ -63,7 +64,7 @@ const routes = [
                 component: LoginPage
             },
             {
-                path: '/othersCenter',
+                path: '/othersCenter/:e',
                 name: 'othersCenter',
                 component: OthersCenter
             },
@@ -96,6 +97,11 @@ const routes = [
                 path: '/blogNew',
                 name: "blogNew",
                 component: BlogNew
+            },
+            {
+                path: '/resetPassword',
+                name: "resetPassword",
+                component: ResetPassword
             }
         ]
     },

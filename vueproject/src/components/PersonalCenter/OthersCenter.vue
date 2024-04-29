@@ -43,16 +43,16 @@
             <!-- 该window展示匿名贴的内容 -->
             <v-window-item value="one">
               <v-list>
-                <v-list-item v-for="(post, index) in posts" :key="index" @click="clickItem" style="cursor: pointer;">
+                <v-list-item v-for="(content, index) in otherBlogs" :key="index" @click="clickItem" style="cursor: pointer;">
                   
-                  <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">这里是标题{{ index }}</span>
+                  <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</span>
                   <div style="text-align: center; font-size: 0px;">
-                    <img src="../../assets/nr/headImage.jpg" style=" margin-left: 10px; margin-top: 10px;"/>
+                    <img :src="firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                   </div>
 
                   <!-- 帖子的发表时间, 评论数量, 点赞数 -->
                   <div style="text-align: right; margin-top: 10px;">
-                    <v-text class="time" style=" margin-right: 5px;">2024-04-25 00:12</v-text>
+                    <v-text class="time" style=" margin-right: 5px;">{{ content.time }}</v-text>
                   </div>
                   <!-- 分隔线 -->
                   <v-divider style="margin-top: 0px;"></v-divider>
@@ -69,18 +69,32 @@
   </template>
   
   <script>
-//   import router from '@/router';
+  import router from '@/router';
   import {queryStar, setStarState} from '@/components/PersonalCenter/PersonalCenterAPI';
-import userStateStore from '../../store';
+  import userStateStore from '../../store';
+  import { getUserInfos } from '../AccountManagement/AccountManagementAPI';
+  import { getHelpBlogs } from './PersonalCenterAPI';
   export default {
+    created() {
+      this.otherEmail = router.currentRoute.value.params.e
+      // 拉取该用户的信息
+      getUserInfos(this.otherEmail).then((_infos) => {
+        this.infos = _infos
+      })
+      // 拉取该用户的互助贴
+      getHelpBlogs(this.otherEmail).then((_helpBlogs) => {
+        this.otherBlogs = _helpBlogs;
+      })
+    },
     data() {
       return {
         tab: 'one', // 这里指定一个默认值, 上面点了才会有效果
-        posts: [
-          { content: "这是第一条动态" },
-          { content: "这是第二条动态" },
-          { content: "这是第三条动态" },
-        ],
+        infos: {
+          "headUrl": "",
+          "nickname": "",
+          "sign": ""
+        },
+        otherBlogs: [],
         otherEmail: '', // TODO 这里要填充
         images: [
           'https://via.placeholder.com/150',

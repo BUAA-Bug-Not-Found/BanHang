@@ -33,7 +33,7 @@
 <script>
 // import { info } from 'console';
 // import ElMessage from 'element-plus';
-import { ref } from 'vue';
+// import { ref } from 'vue';
 // const checkCode = ref('')
 import { trySendCheckCode, tryRegister } from './AccountManagementAPI';
 
@@ -54,26 +54,26 @@ export default {
     
     methods: {
         sendCheckCode() {
-            console.log(this.email);
             // 调用后端函数, 向this.email发送验证码
             // 将验证码记录到const checkCode中
-            const buaaEmailPattern = /^[a-zA-Z0-9_-]+@(?:buaa\.edu\.cn)$/
+            // const buaaEmailPattern = /^[a-zA-Z0-9_-]+@(?:buaa\.edu\.cn)$/
 
             if (!this.email) {
                 this.mes = '邮箱不可为空'
                 this.barColor = '#FF0000'
-            } else if (!buaaEmailPattern.test(this.email)) {// 格式校验
-                this.mes = '请保证邮箱符合北航邮箱格式'
-                this.barColor = '#FF0000'
+            // } else if (!buaaEmailPattern.test(this.email)) {// 格式校验
+            //     this.mes = '请保证邮箱符合北航邮箱格式'
+            //     this.barColor = '#FF0000'
             } else {
-                const match1 = ref(false);
+                // console.log('debug-> ' + this.email);
                 trySendCheckCode(this.email).then((res) => {
-                    match1.value = Boolean(res.isSuccess === true)
-                }).then(() => {
-                    if (match1.value) {
+                    if (res.isSuccess) {
                         // 发送成功
                         this.mes = '发送成功 !'
                         this.barColor = '#42a300'        
+                    } else {
+                        this.mes = '发送失败 !'
+                        this.barColor = '#FF0000'
                     }
                 })
                 
@@ -82,13 +82,13 @@ export default {
         },
         register() {
             const infos = {
-                name: this.username,
+                "name": this.username,
                 pass1: this.password1,
                 pass2: this.password2,
                 toEmail: this.email,
                 inputCheckCode: this.checkCode
             }
-            console.log(infos)
+            // console.log(infos)
             if (!infos.name) {
                 this.mes = '昵称不可为空'
                 this.barColor = '#FF0000'
@@ -103,11 +103,15 @@ export default {
                 this.barColor = '#FF0000'
             } else {
                 // 注册账户
-                tryRegister(infos.name, infos.email, infos.pass1, infos.inputCheckCode)
+                // console.log("准备注册 !")
+                tryRegister(infos.name, infos.toEmail, infos.pass1, infos.inputCheckCode)
                     .then((res) => {
                         if (res.isSuccess) {
                             this.mes = '注册成功 !'
                             this.barColor = '#42a300'
+                        } else {
+                            this.mes = '注册失败 !'
+                            this.barColor = '#FF0000'
                         }
                     })
             }

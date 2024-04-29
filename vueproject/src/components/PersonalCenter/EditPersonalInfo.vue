@@ -43,12 +43,22 @@
 
 <script>
 import axios from "axios";
+import userStateStore from '../../store';
+import {setSign, setNickname} from "@/components/PersonalCenter/PersonalCenterAPI";
+import router from "@/router";
+// import { ref } from 'vue';
 
 export default {
     name: "EditPersonalInfo",
     mounted() {
         // console.log(this.$route.ps.id);
         console.log('自动执行函数')
+        console.log(userStateStore().nickname)
+        console.log(userStateStore().sign)
+        // 加载数据
+        this.nickname = userStateStore().nickname
+        this.sign = userStateStore().sign
+        this.headImage1 = userStateStore().headImage
     },
     data() {
         return {
@@ -80,7 +90,7 @@ export default {
                             // 回显图片, 将头像上传到服务器之后, 后台会返回一个图片url
                             this.headImage1 = res.fileUrl;
                             // 将该用户的头像的url修改为fileUrl
-
+                            console.log(this.headImage1)
                         } else {
                             // 头像上传失败
                         }
@@ -92,6 +102,23 @@ export default {
         save() {
             console.log(this.nickname);
             console.log(this.sign);
+            setSign(this.sign, userStateStore().email)
+                .then((res) => {
+                    if (res.isSuccess) {
+                        userStateStore().sign = this.sign
+                    }
+                })
+            setNickname(this.nickname, userStateStore().email)
+                .then((res) => {
+                    if (res.isSuccess) {
+                        console.log('失败')
+                        userStateStore().nickname = this.nickname;
+                    }
+                })
+            // 保存头像 TODO
+            // if (f1 && f2) {
+            router.push({path: "/personalCenter"});
+            // }
         },
         uploadfile(file) {
             return axios.post('/uploadfile', file,
