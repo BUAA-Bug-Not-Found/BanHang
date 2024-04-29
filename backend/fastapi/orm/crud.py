@@ -131,23 +131,22 @@ def get_blog_by_email(db: Session, email: str):
 
 
 def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
-    if asc:
-        return db.query(models.Blog).order_by(models.Blog.create_at.asc()).offset(offset).limit(limit).all()
-    else:
-        return db.query(models.Blog).order_by(models.Blog.create_at.desc()).offset(offset).limit(limit).all()
+    return (db.query(models.Blog)
+            .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
+            .offset(offset).limit(limit).all())
     
 def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False):
-    if asc:
-        return db.query(models.Blog).\
-            join(models.BlogTag, models.Blog.tags).\
-            filter(models.BlogTag.id == blog_tag_id).\
-            order_by(models.Blog.create_at.asc()).offset(offset).limit(limit).all()
-    else:
-        return db.query(models.Blog).\
-            join(models.BlogTag, models.Blog.tags).\
-            filter(models.BlogTag.id == blog_tag_id).\
-            order_by(models.Blog.create_at.desc()).offset(offset).limit(limit).all()
+    return (db.query(models.Blog).join(models.BlogTag, models.Blog.tags)
+            .filter(models.BlogTag.id == blog_tag_id)
+            .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
+            .offset(offset).limit(limit).all())
 
+def get_blogs_by_search_content(db: Session, search_content: str, offset: int, limit: int, asc: int):
+    word_list = [x.strip() for x in search_content.split(" ") if x != ""]
+    return (db.query(models.Blog)
+            .filter(or_(*[models.Blog.content.like(f"%{word}%") for word in word_list]))
+            .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
+            .offset(offset).limit(limit).all())
 
 def get_blog_images_by_blog_id(db: Session, blog_id: int):
     return db.query(models.BlogImage).filter(models.BlogImage.id == blog_id).all()
