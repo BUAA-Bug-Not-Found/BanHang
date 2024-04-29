@@ -13,13 +13,17 @@ router = APIRouter()
 class BlogPage(BaseModel):
 	pageno: int
 	pagesize: int
+	nowTag: int
 
 @router.post("/blog/getBlogs", tags=["Blog"], response_model=List[schemas.BlogShow])
 def get_blog_by_page(blog_page: BlogPage,
 					 db: Session = Depends(get_db)):
 	offset = (blog_page.pageno - 1) * blog_page.pagesize
 	limit = blog_page.pagesize
-	db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+	if blog_page.nowTag == -1:
+		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+	else:
+		db_blogs = crud.get_blogs_by_tag_id(db, blog_page.nowTag, offset, limit)
 	blogs = []
 	for db_blog in db_blogs:
 		db_images = db_blog.images
