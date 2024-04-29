@@ -74,7 +74,8 @@ export function getHelpBlogs(_email) {
         method: "get",
         params: {
             "email": _email
-        }
+        },
+        withCredentials: true
     }).then((reply) => {
         return reply.data
     }).catch(() => {
