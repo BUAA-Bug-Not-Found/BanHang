@@ -25,12 +25,9 @@ import ToolBox from "@/components/ToolBox/ToolBox.vue";
 import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
 import MessageContainer from '@/components/Message/MessageContainer.vue';
 import {createRouter, createWebHashHistory} from 'vue-router';
-<<<<<<< HEAD
 import ResetPassword from "@/components/AccountManagement/ResetPassword.vue";
-=======
 import SearchList from "@/components/AdvanceSearch/SearchList.vue";
 
->>>>>>> a7d8d624885455766025c45b8bf20fa320653dc7
 
 const routes = [
     {
@@ -104,20 +101,18 @@ const routes = [
                 component: BlogNew
             },
             {
-<<<<<<< HEAD
                 path: '/resetPassword',
                 name: "resetPassword",
                 component: ResetPassword
-=======
+            },
+            {
                 path: '/message',
                 name: "message",
                 component: MessageContainer
             }, {
-
                 path: '/searchList/:keywords',
                 name: "searchList",
                 component: SearchList
->>>>>>> a7d8d624885455766025c45b8bf20fa320653dc7
             }
         ]
     },
