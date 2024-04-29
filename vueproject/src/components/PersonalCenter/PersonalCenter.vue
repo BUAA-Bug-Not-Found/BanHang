@@ -1,5 +1,5 @@
 <template>
-    <>
+    <v-container>
       <div>
 
         <!-- <input id="fileInput" type="file" @change="handleFileUpload" accept="image/*" multiple class="image-upload-input"> -->
