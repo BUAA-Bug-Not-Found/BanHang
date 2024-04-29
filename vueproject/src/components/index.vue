@@ -85,7 +85,7 @@ export default {
 
     <template v-slot:append>
       <v-col v-if="!isLogin">
-        <v-avatar color="surface-variant" size="32" style="margin-right: 5px"></v-avatar>
+        <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="goto('/loginPage')"></v-avatar>
         {{ user_name }}
       </v-col>
       <v-col v-else>
@@ -96,7 +96,7 @@ export default {
 
   <v-app-bar :elevation="1" density="compact"
              v-if="display.smAndDown.value">
-    <v-avatar color="surface-variant" style="margin-left: 15px" size="32"></v-avatar>
+    <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="goto('/loginPage')"></v-avatar>
     <v-col>
       <v-text-field
           density="compact"
