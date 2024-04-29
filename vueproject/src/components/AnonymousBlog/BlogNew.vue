@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import {uploadBlog} from "@/components/AnonymousBlog/api";
+import {uploadBlog, uploadfile} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 
 export default {
@@ -119,19 +119,19 @@ export default {
         fileReader.readAsDataURL(files[i]);
         let form = new FormData
         form.append("file", files[i])
-        // todo uploadfile(form).then(
-        //     (res) => {
-        //       if (res.success === "true") {
-        //         this.images.push(res.fileUrl)
-        //       } else {
-        //         ElMessage({
-        //           message: '部分图片传输失败',
-        //           showClose: true,
-        //           type: 'error',
-        //         })
-        //       }
-        //     }
-        // )
+        uploadfile(form).then(      //todo
+            (res) => {
+              if (res.success === "true") {
+                this.images.push(res.fileUrl)
+              } else {
+                ElMessage({
+                  message: '部分图片传输失败',
+                  showClose: true,
+                  type: 'error',
+                })
+              }
+            }
+        )
       }
     },
     // 移除已上传的图片
@@ -159,15 +159,20 @@ export default {
       const confirmSubmit = window.confirm("确定要发布该帖吗？👀");
       if (confirmSubmit) {
         // 执行提交操作，比如将内容和图片上传到后端数据库
-        let form = new FormData
-        form.append("title", this.title)
-        form.append("content", this.content)
-        form.append("imageList", this.images)
-        form.append("ifAnonymous", this.ifAnonymous)
-        form.append("tagList", this.transNameListToIdList(this.tagList))
-        uploadBlog(form).then(
+        // let form = new FormData
+        // form.append("title", this.title)
+        // form.append("content", this.content)
+        // form.append("imageList", this.images)
+        // form.append("ifAnonymous", this.ifAnonymous)
+        // form.append("tagList", this.transNameListToIdList(this.tagList))
+        let json_set = {"title": this.title,
+                        "content": this.content,
+                        "imageList": this.images,
+                        "ifAnonymous": this.ifAnonymous,
+                        "tagList": this.transNameListToIdList(this.tagList)}
+        uploadBlog(json_set).then(
             (res) => {
-              if (res.isSuccess === "true") {
+              if (res.isSuccess == "true") {
                 ElMessage({
                   message: '帖子发布成功',
                   showClose: true,
