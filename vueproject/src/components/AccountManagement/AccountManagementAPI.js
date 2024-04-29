@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import {ElMessage} from "element-plus";
 
 export function tryLogin(_email, _password) {
     // TODO 完善request中的数据
@@ -86,3 +86,17 @@ export function tryRegister(_username, _email, _password, _checkCode) {
         return {"isSuccess": false}
     })
 }
+
+export function showTip(content, isSuccess) {
+    let t = 'error'
+    if (isSuccess == true) {
+        t = 'success'
+    }
+    ElMessage({
+        message: content,
+        showClose: true,
+        type: t
+    })
+}
+
+

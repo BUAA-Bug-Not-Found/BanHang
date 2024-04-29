@@ -1,9 +1,7 @@
 <template>
-    <>
+    <v-container>
       <div>
-
         <!-- <input id="fileInput" type="file" @change="handleFileUpload" accept="image/*" multiple class="image-upload-input"> -->
-
         <v-card style="margin-bottom: 20px; height: auto;">
             <!-- div好像是行内的 -->
             <div style="text-align: center;">
@@ -56,7 +54,7 @@
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                   </div>
                   <div style="text-align: right; margin-top: 10px;">
-                    <v-text class="time" style=" margin-right: 5px;">{{ content.time }}</v-text>
+                    <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>
                   <!-- 分隔线 -->
                   <v-divider style="margin-top: 0px;"></v-divider>
@@ -73,7 +71,7 @@
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                   </div>
                   <div style="text-align: right; margin-top: 10px;">
-                    <v-text class="time" style=" margin-right: 5px;">{{ content.time }}</v-text>
+                    <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>
                   <!-- 分隔线 -->
                   <v-divider style="margin-top: 0px;"></v-divider>
@@ -82,7 +80,6 @@
             </v-window-item>
           </v-window>
         </v-card-text>
-
 
       </v-card>
     </v-container>
@@ -154,7 +151,24 @@
       },
       clickMyInterest() {
         router.push({path: "/interestList"})
-      }
+      },
+      formatDateTime(dateTimeStr) {
+        // 创建 Date 对象
+        const dateTime = new Date(dateTimeStr);
+        
+        // 提取年月日时分秒
+        const year = dateTime.getFullYear();
+        const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+        const date = String(dateTime.getDate()).padStart(2, '0');
+        const hours = String(dateTime.getHours()).padStart(2, '0');
+        const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+        const seconds = String(dateTime.getSeconds()).padStart(2, '0');
+        
+        // 拼接成目标格式的字符串
+        const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
+        
+        return formattedDateTime;
+    }
     },
   };
   </script>

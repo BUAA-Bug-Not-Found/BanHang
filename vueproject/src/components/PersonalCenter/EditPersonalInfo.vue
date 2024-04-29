@@ -13,7 +13,7 @@
                 <div style="text-align: center;">
                     <!-- 头像 -->
                     <v-avatar size="80" style="margin-top: 40px; cursor: pointer;" @click="clickHeadImage">
-                        <img :src="this.headImage1" alt="Avatar">
+                        <img :src="headImage1" alt="Avatar">
                         <input v-show="false" id="fileInput" type="file" @change="handleFileUpload" ref="fileInput" accept="image/*" multiple>
                     </v-avatar>
                 </div>
@@ -44,27 +44,22 @@
 <script>
 import axios from "axios";
 import userStateStore from '../../store';
-import {setSign, setNickname} from "@/components/PersonalCenter/PersonalCenterAPI";
+import {setSign, setNickname, setHeadImage} from "@/components/PersonalCenter/PersonalCenterAPI";
 import router from "@/router";
 // import { ref } from 'vue';
 
 export default {
     name: "EditPersonalInfo",
     mounted() {
-        // console.log(this.$route.ps.id);
-        console.log('自动执行函数')
-        console.log(userStateStore().nickname)
-        console.log(userStateStore().sign)
         // 加载数据
         this.nickname = userStateStore().nickname
         this.sign = userStateStore().sign
-        this.headImage1 = userStateStore().headImage
     },
     data() {
         return {
             nickname: "默认",
             sign: "默认签名",
-            headImage1: "../../assets/nr/headImage.jpg",
+            headImage1: "https://banhang.oss-cn-beijing.aliyuncs.com/927eb856063e45368c424a4d22b6fffa.jpg",
             exchangeImage: ''
         }
         
@@ -75,28 +70,45 @@ export default {
         },
         handleFileUpload(event) {
             // 当用户点击了新的图片之后才会触发这个函数
-            console.log('处理文件上传');
+            // console.log('处理图片上传');
             const file = event.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.avatarSrc = e.target.result;
-                };
-                let form = new FormData;
+                // const reader = new FileReader();
+                // reader.onload = (e) => {
+                //     this.avatarSrc = e.target.result;
+                // };
+                let form = new FormData();
                 form.append("file", file);
-                this.uploadfile(form).then(
-                    (res) => {
-                        if (res.success === 'true') {
-                            // 回显图片, 将头像上传到服务器之后, 后台会返回一个图片url
-                            this.headImage1 = res.fileUrl;
-                            // 将该用户的头像的url修改为fileUrl
-                            console.log(this.headImage1)
-                        } else {
-                            // 头像上传失败
-                        }
+                axios({
+                    method: "post",
+                    url: "http://lyhtool.tpddns.cn:8000/uploadfile/",
+                    data: form,
+                    headers: {'Content-Type': 'multipart/form-data'}
+                }).then((res) => {
+                    if (res.response == true) {
+                        this.headImage1 = res.fileUrl; // 回显
+                    } else {
+                        // 图片上传失败给一个弹窗
+
                     }
-                )
-                reader.readAsDataURL(file);
+                })
+                // this.uploadfile(form).then(
+                //     (res) => {
+                //         console.log("上传图片！！！！！")
+                //         console.log(res)
+                //         console.log("上传图片！！！！！")
+                //         // == 表示是否相等(不严格), === 表示是否严格相等(考虑类型等)
+                //         if (res.response == true) {
+                //             // 回显图片, 将头像上传到服务器之后, 后台会返回一个图片url
+                //             this.headImage1 = res.fileUrl;
+                //             // 将该用户的头像的url修改为fileUrl
+                //             // console.log(this.headImagte1)
+                //         } else {
+                //             // 头像上传失败 TODO 错误处理
+                //         }
+                //     }
+                // )
+                // reader.readAsDataURL(file);
             }
         },
         save() {
@@ -111,22 +123,19 @@ export default {
             setNickname(this.nickname, userStateStore().email)
                 .then((res) => {
                     if (res.isSuccess) {
-                        console.log('失败')
                         userStateStore().nickname = this.nickname;
                     }
                 })
             // 保存头像 TODO
+            setHeadImage(userStateStore().email, this.headImage1)
+                .then((res) => {
+                    if (res.isSuccess) {
+                        userStateStore().headImage = this.headImage1;
+                    }
+                })
             // if (f1 && f2) {
             router.push({path: "/personalCenter"});
             // }
-        },
-        uploadfile(file) {
-            return axios.post('/uploadfile', file,
-                {
-                    headers: {'Content-Type': 'multipart/form-data'}
-                }).then(response => {
-                return response.data
-            })
         }
     },
 };
