@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from typing import Optional, List
 
 from fastapi import Depends, FastAPI, HTTPException, APIRouter, Response, Cookie
@@ -106,16 +107,18 @@ def reset_password(req:resetPasswordRequest, db:Session = Depends(get_db)):
     return {"response":"success"}
 
 class UserInfoResponse(BaseModel):
-    nickname:str
-    sign:str
-    url:str
+    nickname: str
+    sign: str
+    url: str
+    user_id: int
 @router.get("/getInfoByEmail", tags=['用户中心'],response_model=UserInfoResponse,
             responses={400: {"model": excResponse}})
 def get_info_by_email(email:str, db:Session = Depends(get_db)):
     user = crud.get_user_by_email(db, email)
     if not user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
-    return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else ""}
+    return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
+            'user_id':user.id}
 
 class SetSignRequest(BaseModel):
     email:str
@@ -152,6 +155,7 @@ def set_nickname_by_email(req:SetNicknameRequest,current_user: Optional[dict] = 
 class GetAnonyBlogResponse(BaseModel):
     blogTitle:str
     firstPhotoUrl:str
+    time: datetime
 @router.get("/getAnonyBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse],
             responses={400: {"model": excResponse}})
 def get_anonyBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
@@ -164,8 +168,26 @@ def get_anonyBlogs_by_email(email:str,current_user: Optional[dict] = Depends(aut
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
     blogs = crud.get_blog_by_email(db, email)
     return [GetAnonyBlogResponse(blogTitle = blog.title,
-                                 firstPhotoUrl = blog.images[0].image_url if len(blog.images) > 0 else "")
+                                 firstPhotoUrl = blog.images[0].image_url if len(blog.images) > 0 else "",
+                                 time = blog.create_at)
             for blog in blogs]
+
+@router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse],
+            responses={400: {"model": excResponse}})
+def get_helpBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
+                            db:Session = Depends(get_db)):
+    if not current_user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
+    user = crud.get_user_by_email(db, email)
+    current_user_instance = crud.get_user_by_id(db, current_user['uid'])
+    if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
+    questions = crud.get_questions_by_email(db, email)
+    return [GetAnonyBlogResponse(blogTitle = question.content,
+                                 firstPhotoUrl = question.images[0].image_url if len(question.images) > 0 else "",
+                                 time = question.create_at)
+            for question in questions]
+
 class QueryStarResponse(BaseModel):
     isStar: bool
 @router.get("/queryStar", tags=["用户中心"], response_model=QueryStarResponse,
@@ -230,3 +252,33 @@ def search_questions_by_content(req:SearchQuestionsRequest,db: Session = Depends
              for user in db_users]
     return {"users": users,
             "userSum": crud.get_search_user_sum_by_word(db, req.searchContent, offset=offset, limit=limit)}
+
+class FansResponse(BaseModel):
+    email: str
+    headUrl: str
+    nickname: str
+class getFansResponse(BaseModel):
+    fans: List[FansResponse]
+
+@router.get("/getFansByEmail", tags=['用户中心'], response_model=getFansResponse)
+def get_fans_by_email(email:str,db: Session = Depends(get_db),
+                      current_user: Optional[dict] = Depends(authorize)):
+    user = crud.get_user_by_email(db, email)
+    if user is None:
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
+    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username}
+            for fan in user.followers]
+    return {'fans':fans}
+
+class getStarsResponse(BaseModel):
+    stars: List[FansResponse]
+
+@router.get("/getStarsByEmail", tags=['用户中心'], response_model=getStarsResponse)
+def get_stars_by_email(email:str, db: Session = Depends(get_db),
+                      current_user: Optional[dict] = Depends(authorize)):
+    user = crud.get_user_by_email(db, email)
+    if user is None:
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
+    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username}
+            for fan in user.followed]
+    return {'stars':fans}

@@ -68,6 +68,12 @@ def test_follow_and_search(mock_user_data, new_database):
                                        'state':True})
     res = client.get("/queryStar", params={"email1": user2["email"], "email2": user1["email"]}).json()
     assert res['isStar'] == True
+    res = client.get("/getFansByEmail", params={'email': user1['email']}).json()
+    assert len(res['fans']) == 1
+    assert res['fans'][0]['email'] == user2['email']
+    res = client.get("/getStarsByEmail", params={'email': user2['email']}).json()
+    assert len(res['stars']) == 1
+    assert res['stars'][0]['email'] == user1['email']
 
     res = (client.post("/searchUserAPage",
                       json={'searchContent':mock_user_data['username'][2:-4],

@@ -295,6 +295,9 @@ def get_search_question_sum_by_word_list(db: Session, word_list: List[str], offs
             models.Question.create_at.desc()).all())
     )
 
+def get_questions_by_email(db: Session, email: str) -> List[models.Question]:
+    return db.query(models.Question).filter(models.Question.user.email == email).all()
+
 
 def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionCommentCreat) -> models.QuestionComment:
     comment = models.QuestionComment(user_id=questionCommentCreat.userId,
