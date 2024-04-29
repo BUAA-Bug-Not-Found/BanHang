@@ -1,5 +1,5 @@
 <template>
-  <div class="comment-card" v-show="replyToCommentId.length === 0">
+  <div class="comment-card" v-show="replyToCommentId === null">
     <div class="user-info">
       <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
       <div class="user-details">
@@ -10,7 +10,7 @@
     <div class="content" @click="showInput">
       {{ content }}
     </div>
-    <div v-show="replyToCommentId.length === 0 && replies.length > 0" class="expand-button">
+    <div v-show="replyToCommentId === null && replies.length > 0" class="expand-button">
       <button @click="toggleReplies">{{ isOpen ? '收起回复' : '展开回复' }}</button>
     </div>
     <div v-show="isOpen && replies.length > 0">
@@ -65,7 +65,7 @@ export default {
       required: true
     },
     replyToCommentId: {
-      type: String,
+      type: Number,
       required: true
     },
     replies: {
@@ -91,14 +91,19 @@ export default {
     sendReply() {
       // 将回复内容和是否匿名发送提交给后端或其他逻辑处理
       if (this.replyContent.trim().length > 0) {
-        let form = new FormData
-        form.append('blogId', this.blogId)
-        form.append('commentContent', this.replyContent)
-        form.append('ifAnonymous', this.isAnonymous)
-        form.append('replyToCommentId', this.commentId)
-        uploadComment(form).then(
+        // let form = new FormData
+        // form.append('blogId', this.blogId)
+        // form.append('commentContent', this.replyContent)
+        // form.append('ifAnonymous', this.isAnonymous)
+        // form.append('replyToCommentId', this.commentId)
+
+        let json_set = {'blogId': this.blogId,
+                        'commentContent': this.replyContent,
+                        'ifAnonymous': this.isAnonymous,
+                        'replyToCommentId': this.commentId}
+        uploadComment(json_set).then(
             (res) => {
-              if (res.isSuccess === "true") {
+              if (res.isSuccess == true) {
                 ElMessage({
                   message: '评论成功',
                   showClose: true,

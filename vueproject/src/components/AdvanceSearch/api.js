@@ -4,6 +4,7 @@ export function searchBlogAPage(searchContent, pageno, pagesize, nowSortMethod) 
     return axios.request({
         url: '/search/searchBlogAPage',
         method: "post",
+        headers: {'Content-Type': 'application/json'},
         data: JSON.stringify({
             searchContent: searchContent,
             pageno: pageno,
@@ -17,8 +18,9 @@ export function searchBlogAPage(searchContent, pageno, pagesize, nowSortMethod) 
 
 export function searchQuesAPage(searchContent, pageno, pagesize, nowSortMethod) {
     return axios.request({
-        url: '/search/searchQuesAPage',
+        url: '/searchQuesAPage',
         method: "post",
+        headers: {'Content-Type': 'application/json'},
         data: JSON.stringify({
             searchContent: searchContent,
             pageno: pageno,
@@ -32,8 +34,9 @@ export function searchQuesAPage(searchContent, pageno, pagesize, nowSortMethod) 
 
 export function searchUserAPage(searchContent, pageno, pagesize, nowSortMethod) {
     return axios.request({
-        url: '/search/searchUserAPage',
+        url: '/searchUserAPage',
         method: "post",
+        headers: {'Content-Type': 'application/json'},
         data: JSON.stringify({
             searchContent: searchContent,
             pageno: pageno,

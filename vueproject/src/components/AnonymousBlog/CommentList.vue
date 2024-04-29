@@ -30,7 +30,7 @@ export default {
   methods: {
     getReplies(commentId) {
       // 根据 commentId 计算该评论的回复列表
-      return this.comments.filter(comment => comment.replyToCommentId === commentId);
+      return this.comments.filter(comment => comment.replyToCommentId == commentId);
     }
   }
 }
