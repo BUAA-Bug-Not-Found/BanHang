@@ -50,7 +50,6 @@
                   <img :src="firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                 </div>
 
-<<<<<<< Updated upstream
                 <!-- 帖子的发表时间, 评论数量, 点赞数 -->
                 <div style="text-align: right; margin-top: 10px;">
                   <v-text class="time" style=" margin-right: 5px;">{{ content.time }}</v-text>
