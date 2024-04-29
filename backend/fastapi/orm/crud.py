@@ -135,6 +135,18 @@ def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
         return db.query(models.Blog).order_by(models.Blog.create_at.asc()).offset(offset).limit(limit).all()
     else:
         return db.query(models.Blog).order_by(models.Blog.create_at.desc()).offset(offset).limit(limit).all()
+    
+def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False):
+    if asc:
+        return db.query(models.Blog).\
+            join(models.BlogTag, models.Blog.tags).\
+            filter(models.BlogTag.id == blog_tag_id).\
+            order_by(models.Blog.create_at.asc()).offset(offset).limit(limit).all()
+    else:
+        return db.query(models.Blog).\
+            join(models.BlogTag, models.Blog.tags).\
+            filter(models.BlogTag.id == blog_tag_id).\
+            order_by(models.Blog.create_at.desc()).offset(offset).limit(limit).all()
 
 
 def get_blog_images_by_blog_id(db: Session, blog_id: int):
