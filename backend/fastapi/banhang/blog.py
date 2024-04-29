@@ -42,7 +42,7 @@ def get_blog_by_page(blog_page: BlogPage,
 			blog['imageList'].append(db_image.image_url)
 		blog['tagList'] = []
 		for db_tag in db_tags:
-			blog['tagList'].append(db_tag.names)
+			blog['tagList'].append(db_tag.id)
 		blogs.append(schemas.BlogShow(**blog))
 	return blogs
 
@@ -69,7 +69,7 @@ def get_blog_by_blog_id(blog_id: BlogId,
 		blog['imageList'].append(db_image.image_url)
 	blog['tagList'] = []
 	for db_tag in db_tags:
-		blog['tagList'].append(db_tag.names)
+		blog['tagList'].append(db_tag.id)
 	return schemas.BlogShow(**blog)
 
 @router.post("/blog/uploadBlog", tags=["Blog"])
@@ -159,6 +159,6 @@ def get_blogs_advanced(blog_page_advanced: BlogPage,
 			blog['imageList'].append(db_image.image_url)
 		blog['tagList'] = []
 		for db_tag in db_tags:
-			blog['tagList'].append(db_tag.names)
+			blog['tagList'].append(db_tag.id)
 		blogs.append(schemas.BlogShow(**blog))
 	return blogs
