@@ -97,7 +97,7 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
 	for db_comment in db_comments:
 		db_user = crud.get_user_by_id(db, db_comment.user_id)
 		comment = {}
-		comment['userId'] = db_user.user_id
+		comment['userId'] = db_user.id
 		comment['userName'] = db_user.username
 		comment['userAvatarUrl'] = db_user.userAvatarURL
 		comment['commentId'] = db_comment.id
