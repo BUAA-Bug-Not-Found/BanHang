@@ -131,7 +131,7 @@ class BlogPageAdvanced(BaseModel):
 	
 	
 @router.post("/search/searchBlogAPage", tags=["Blog"], response_model=List[schemas.BlogShow])
-def get_blogs_advanced(blog_page_advanced: BlogPage,
+def get_blogs_advanced(blog_page_advanced: BlogPageAdvanced,
 					 db: Session = Depends(get_db)):
 	offset = (blog_page_advanced.pageno - 1) * blog_page_advanced.pagesize
 	limit = blog_page_advanced.pagesize
