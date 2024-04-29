@@ -125,3 +125,20 @@ export function getFans(_email) {
         
     })
 }
+
+export function setHeadImage(_email, _url) {
+    // 
+    return axios.request({
+        // 
+        url: "/setHeadImageByEmail",
+        method: "post",
+        data: {
+            "email": _email,
+            "url": _url
+        }
+    }).then((reply) => {
+        return reply.data
+    }).catch(() => {
+        
+    })
+}
