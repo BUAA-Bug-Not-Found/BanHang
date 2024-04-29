@@ -22,8 +22,8 @@ class User(Base):
     email = Column(String(128), nullable=False)
     password = Column(String(256), nullable=False)
     privilege = Column(Integer, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
-    userAvatarURL = Column(String(256), nullable=True)
-    sign = Column(String, nullable=True, default = "")
+    userAvatarURL = Column(String(256), nullable=False, default="")
+    sign = Column(String, nullable=False, default = "")
     create_at = Column(DateTime, server_default=func.now())
 
     blogs = relationship("Blog", back_populates="user")
@@ -60,7 +60,7 @@ class Blog(Base):
     user_id = Column(Integer, ForeignKey('users.id'))  # 实际的数据库关系是通过外键来维护的
     is_anonymous = Column(Boolean, default=False)
     title = Column(String, nullable=False)
-    content = Column(String, nullable=True)
+    content = Column(String, nullable=False, default="")
     # content_image = Column(String, nullable=True)  # 可以存储图片的路径
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
     create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
@@ -89,7 +89,7 @@ class BlogComment(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     blog_id = Column(Integer, ForeignKey('blogs.id'))
     is_anonymous = Column(Boolean, default=False)
-    content = Column(String, nullable=True)
+    content = Column(String, nullable=False, default="")
     # content_image = Column(String, nullable=True)  # 可以存储图片的路径
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
     create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
@@ -118,7 +118,7 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    content = Column(String, nullable=True)
+    content = Column(String, nullable=False, default="")
     create_at = Column(DateTime, server_default=func.now())
     delated = Column(Boolean, default=False)
     archived = Column(Boolean, default=False)
