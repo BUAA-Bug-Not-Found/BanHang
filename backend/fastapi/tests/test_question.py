@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from prepare import *
 # 一定写在前面
@@ -84,4 +86,18 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert ans["ifExist"] == True
     assert ans["question"]["quesState"] == 3
 
+    time.sleep(1)
+    mock_question_data["quesContent"]['content'] = "new question content"
+    res = client.post("/uploadQues", json=mock_question_data)
+    assert res.status_code == 200
+    # 检查blog是否存在
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 2
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
 
+    blogs = client.post("/searchQuesAPage", json={'searchContent':"new", 'pageno':1, 'pagesize':100,
+                                                  'nowSortMethod':'byTime'})
+    assert blogs.status_code == 200
+    assert blogs.json()['quesSum'] == 1
+    assert blogs.json()['questions'][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']

@@ -36,3 +36,12 @@ export function getAnsById(ansId) {
         return response.data
     })
 }
+
+export function uploadfFile(file) {
+    return axios.post('/uploadfile', file,
+        {
+            headers: {'Content-Type': 'multipart/form-data'}
+        }).then(response => {
+        return response.data
+    })
+}

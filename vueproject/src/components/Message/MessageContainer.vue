@@ -1,0 +1,210 @@
+<template>
+  <div v-if="this.curUserId == '0'">
+    <div v-if="this.contactList.lenth == 0">
+      您还没有联系人
+    </div>
+    <contactCard v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
+      :avatar="item.userAvatarUrl" @open-message="handleContactClicked" />
+  </div>
+
+  <div v-else style="height: 100%; display: flex; flex-direction: column;">
+    <div class="header-container">
+      <button @click="() => { this.curUserId = 0 }" style="align-items: start; margin-left: 20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px;">
+          <title>step-backward</title>
+          <path d="M19,5V19H16V5M14,5V19L3,12" />
+        </svg>
+      </button>
+      <h2 class="title">{{ this.curUserName }}</h2>
+    </div>
+    <div class="message-container" ref="container">
+      <div v-for="message in messages" :key="message.id">
+        <div v-if="message.senderId == myId" class="message-right">
+          <div style="display: flex;flex-direction: column;   align-items: flex-end; justify-content: flex-end;">
+            <div class="time">{{ message.time }}</div>
+            <div class="content">
+              {{ message.content }}
+            </div>
+          </div>
+          <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
+        </div>
+        <div v-else class="message-left">
+          <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
+          <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
+            <div class="time">{{ message.time }}</div>
+            <div class="content">
+              {{ message.content }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="input">
+      <v-text-field v-model="inputMessage" style="flex: 1;height: 32x;padding: 0;" hide-details=true></v-text-field>
+      <v-btn @click="submitMessage" color="primary" style="height: 54px;">发送</v-btn>
+    </div>
+  </div>
+</template>
+<script>
+/* eslint-disable */
+import contactCard from './contactCard.vue';
+import axios from 'axios';
+import userStateStore from '@/store';
+
+export default {
+  name: "MessageContainer",
+  components: {
+    contactCard,
+  },
+  data() {
+    const store = userStateStore()
+    return {
+      contactList: [],
+      curUserId: 0,
+      curUserName: "",
+      curAvatar: "",
+      messages: [],
+      messageLoaded: false,
+      inputMessage: "",
+      timer: null,
+      myAvatar: store.profile_photo,
+      myId: store.user_id
+    };
+  },
+  mounted() {
+    let cur_user = localStorage.getItem("MessageInterface")
+    if (cur_user != null) {
+      localStorage.removeItem("MessageInterface")
+      cur_user = JSON.parse(cur_user)
+      this.curUserId = cur_user.user_id
+      this.curUserName = cur_user.user_name
+      this.curAvatar = cur_user.avatar
+      this.updateData()
+    }
+    this.updateData();
+  },
+  beforeRouteLeave() {
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null;
+    }
+  },
+  methods: {
+    updateData() {
+      if (this.curUserId != 0) {
+        axios.post('/getHistoryMessage', { targetUserId: this.curUserId })
+          .then(response => {
+            this.messages = response.data
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      } else {
+        axios.post('/getReletedUser', {})
+          .then(response => {
+            this.contactList = response.data
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
+      if (this.timer == null)
+        this.timer = setInterval(() => {
+          this.updateData();
+        }, 1000);
+    },
+    handleContactClicked(user_id, user_name, avatar) {
+      this.curUserId = user_id
+      this.curUserName = user_name
+      this.curAvatar = avatar
+      this.updateData()
+    },
+    submitMessage() {
+      axios.post('/sendMessage', { targetUserId: this.curUserId, content: this.inputMessage })
+        .then(response => {
+          this.inputMessage = ""
+        })
+        .catch(error => {
+          console.error(error);
+        })
+    }
+  }
+}
+</script>
+
+
+<style scoped>
+.message-container {
+  /* 可根据实际需要设置高度 */
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  background-color: rgb(227, 224, 224);
+}
+
+.message-right {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-end;
+  text-align: left;
+}
+
+.message-left {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.content {
+  background-color: antiquewhite;
+  padding: 5px;
+  border-radius: 10px;
+  font-weight: bold;
+  word-wrap: break-word;
+  max-width: 400px;
+}
+
+.profile-photo {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+.time {
+  font-size: 12px;
+  /* 字体变小 */
+  color: #999;
+  /* 颜色变淡 */
+  margin-top: 5px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  /* 按钮靠左，标题靠右 */
+  align-items: center;
+  /* 元素垂直居中 */
+  height: 70px;
+  /* 设置容器高度 */
+  background-color: rgb(205, 227, 234);
+}
+
+.title {
+  position: absolute;
+  left: 50%;
+  top: 65px;
+  transform: translate(-50%, 0);
+  /* 水平垂直居中 */
+}
+
+.input {
+  display: flex;
+}
+</style>

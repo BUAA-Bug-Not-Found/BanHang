@@ -13,7 +13,10 @@ from alibabacloud_tea_util.client import Client as UtilClient
 import email_validator
 
 def is_valid_email(addr):
-    return email_validator.validate_email(addr)
+    try:
+        return email_validator.validate_email(addr)
+    except:
+        return False
 
 class MailSender:
     def __init__(self):
@@ -44,13 +47,15 @@ class MailSender:
     ) -> None:
         client = MailSender.create_client()
         single_send_mail_request = dm_20151123_models.SingleSendMailRequest(
-            account_name='banhang@mail.lyhtool.com',
+            account_name='banhang@lyhtool.com',
             address_type=1,
             reply_to_address=False,
             to_address=addr,
-            subject='伴航(BanHang)邮箱验证码',
-            html_body='',
-            text_body='验证码{}'.format(checkcode)
+            subject='关于使用伴航平台有关事项的通知',
+            text_body='欢迎使用本平台，请在页面上输入验证码{}。祝您有个美好的旅程。'.format(checkcode),
+            tag_name='checkcode',
+            from_alias='伴航团队',
+            click_trace='1'
         )
         runtime = util_models.RuntimeOptions()
         try:

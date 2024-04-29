@@ -6,6 +6,7 @@ import QuesCard from "@/components/HelpCenter/QuesCard.vue";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {useDisplay} from "vuetify";
 import AppQuesCard from "@/components/HelpCenter/AppQuesCard.vue";
+import {ElMessage} from "element-plus";
 
 export default {
   name: "HelpCenter",
@@ -20,6 +21,8 @@ export default {
 
     const toolbarConfig = {}
     const editorConfig = {placeholder: '请输入内容...'}
+
+    const imageList = []
 
     const selectTags = ref([])
 
@@ -98,34 +101,37 @@ export default {
           }
         ]
     )
+
     const init = () => {
       getQuestions(1, pageSize.value).then(
           (data) => {
-            quesSum.value = data.ques_sum
-            questions.value = data.questions
-            console.log(data.ques_sum)
+            quesSum.value = data.quesSum
+            //questions.value = data.questions
+            console.log(data.quesSum)
           }
       )
     }
     init()
-    const updatePage = () => {
-      console.log(page.value)
-      console.log(questions)
-      // getQuestions(page.value, pageSize).then(
-      //     (data) => {
-      //       quesSum.value = data.ques_sum
-      //       questions.value = data.questions
-      //     }
-      // )
-    }
+
+    // const updatePage = () => {
+    //   console.log(page.value)
+    //   console.log(questions)
+    //   // getQuestions(page.value, pageSize).then(
+    //   //     (data) => {
+    //   //       quesSum.value = data.ques_sum
+    //   //       questions.value = data.questions
+    //   //     }
+    //   // )
+    // }
+
     const getMore = () => {
       page.value = page.value + 1
-      // getQuestions(page.value, pageSize).then(
-      //     (data) => {
-      //       quesSum.value = data.ques_sum
-      //       questions.value.concat(data.questions)
-      //     }
-      // )
+      getQuestions(page.value, pageSize).then(
+          (data) => {
+            quesSum.value = data.quesSum
+            questions.value.concat(data.questions)
+          }
+      )
     }
 
     onBeforeUnmount(() => {
@@ -146,6 +152,27 @@ export default {
       return tags.value[index].tagIcon
     }
 
+    const handleChange = (uploadFile) => {
+      if (uploadFile.raw.type !== "image/jpeg" && uploadFile.raw.type !== "image/png") {
+        ElMessage.error('Avatar picture must be JPG format!');
+        return false;
+      }
+      uploadFile(uploadFile).then((res) => {
+        if(res.response === 'success') {
+          ElMessage.success("Avatar picture upload succeeded!")
+          imageList.push(res.fileUrl)
+        } else {
+          ElMessage.error('Avatar picture upload failed!');
+        }
+
+      })
+      return true;
+    }
+
+    const deleteImage = (index) => {
+      imageList.splice(index, 1);
+    }
+
     const display = useDisplay()
     return {
       editorConfig,
@@ -158,7 +185,6 @@ export default {
       quesSum,
       pageSize,
       getMore,
-      updatePage,
       valueHtml,
       handleCreated,
       sheet,
@@ -166,7 +192,10 @@ export default {
       tagNamesArray,
       findTagColor,
       findTagIcon,
-      display
+      display,
+      imageList,
+      handleChange,
+      deleteImage
     }
   }
 }
@@ -252,6 +281,26 @@ export default {
             </v-btn>
           </v-col>
         </v-row>
+        <v-row justify="space-around">
+          <v-col v-for="(image,index) in imageList" :key="'image' + index" :cols="3" style="margin-right: 15px">
+              <img :src="image" class="avatar">
+          </v-col>
+          <v-col>
+            <el-upload
+                class="avatar-uploader"
+                action="#"
+                :show-file-list="false"
+                :auto-upload="false"
+                :on-change="handleChange"
+                accept=".jpg,.png"
+            >
+              <v-icon class="avatar-uploader-icon">
+                mdi-plus
+              </v-icon>
+            </el-upload>
+          </v-col>
+
+        </v-row>
 
         <div>
           <v-select
@@ -269,19 +318,20 @@ export default {
             </template>
           </v-select>
         </div>
+
         <div style="border: 1px solid #ccc">
-          <Toolbar
-              style="border-bottom: 1px solid #ccc"
-              :editor="editorRef"
-              :defaultConfig="toolbarConfig"
-              :mode="mode"
-          />
           <Editor
               style="height: 350px; overflow-y: hidden;"
               v-model="valueHtml"
               :defaultConfig="editorConfig"
               :mode="mode"
               @onCreated="handleCreated"
+          />
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef"
+              :defaultConfig="toolbarConfig"
+              :mode="mode"
           />
         </div>
       </v-card-text>
@@ -297,5 +347,26 @@ export default {
   top: 86%;
   right: 2%;
   transform: translateY(-86%);
+}
+
+.avatar-uploader .el-upload:hover {
+  border: 1px dashed #409EFF;
+}
+
+.avatar {
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+}
+
+.avatar-uploader {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
 }
 </style>

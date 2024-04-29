@@ -196,7 +196,8 @@ export default {
     const toolbarConfig = {
       excludeKeys: ['undo', 'redo', 'todo', 'fontSize', 'fontFamily',
         'lineHeight', 'group-justify', 'group-video',
-        'group-indent', 'bgColor', 'bulletedList', 'italic'],
+        'group-indent', 'bgColor', 'bulletedList', 'italic','group-image'
+      ],
     }
     const editorConfig = {placeholder: '请输入内容...'}
 
@@ -208,7 +209,7 @@ export default {
 
     const handleCreated = (editor) => {
       editorRef.value = editor // 记录 editor 实例，重要！
-      console.log(editor.getAllMenuKeys)
+      console.log(editor.getAllMenuKeys())
     }
 
     return {

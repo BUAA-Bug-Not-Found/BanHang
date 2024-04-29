@@ -13,13 +13,17 @@ router = APIRouter()
 class BlogPage(BaseModel):
 	pageno: int
 	pagesize: int
+	nowTag: int
 
 @router.post("/blog/getBlogs", tags=["Blog"], response_model=List[schemas.BlogShow])
 def get_blog_by_page(blog_page: BlogPage,
 					 db: Session = Depends(get_db)):
 	offset = (blog_page.pageno - 1) * blog_page.pagesize
 	limit = blog_page.pagesize
-	db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+	if blog_page.nowTag == -1:
+		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+	else:
+		db_blogs = crud.get_blogs_by_tag_id(db, blog_page.nowTag, offset, limit)
 	blogs = []
 	for db_blog in db_blogs:
 		db_images = db_blog.images
@@ -38,7 +42,7 @@ def get_blog_by_page(blog_page: BlogPage,
 			blog['imageList'].append(db_image.image_url)
 		blog['tagList'] = []
 		for db_tag in db_tags:
-			blog['tagList'].append(db_tag.names)
+			blog['tagList'].append(db_tag.id)
 		blogs.append(schemas.BlogShow(**blog))
 	return blogs
 
@@ -65,7 +69,7 @@ def get_blog_by_blog_id(blog_id: BlogId,
 		blog['imageList'].append(db_image.image_url)
 	blog['tagList'] = []
 	for db_tag in db_tags:
-		blog['tagList'].append(db_tag.names)
+		blog['tagList'].append(db_tag.id)
 	return schemas.BlogShow(**blog)
 
 @router.post("/blog/uploadBlog", tags=["Blog"])
@@ -118,3 +122,43 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
 		return {"response":"error"}
 	else:
 		return {"response":"success"}
+	
+class BlogPageAdvanced(BaseModel):
+	searchContent: str
+	nowSortMethod: str
+	pageno: int
+	pagesize: int
+	
+	
+@router.post("/search/searchBlogAPage", tags=["Blog"], response_model=List[schemas.BlogShow])
+def get_blogs_advanced(blog_page_advanced: BlogPageAdvanced,
+					 db: Session = Depends(get_db)):
+	offset = (blog_page_advanced.pageno - 1) * blog_page_advanced.pagesize
+	limit = blog_page_advanced.pagesize
+	if  blog_page_advanced.nowSortMethod == "byRelation":
+		db_blogs = crud.get_blogs_by_search_content(db, blog_page_advanced.searchContent, offset, limit, asc=False)
+	elif blog_page_advanced.nowSortMethod == "byTime":
+		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+	elif blog_page_advanced.nowSortMethod == "byPopularity":
+		db_blogs = []
+	blogs = []
+	for db_blog in db_blogs:
+		db_images = db_blog.images
+		db_user = db_blog.user
+		db_tags = db_blog.tags
+		blog = {}
+		blog['userId'] = db_user.id
+		blog['userName'] = db_user.username
+		blog['userAvatarUrl'] = db_user.userAvatarURL
+		blog['blogId'] = db_blog.id
+		blog['title'] = db_blog.title
+		blog['content'] = db_blog.content
+		blog['time'] = db_blog.create_at
+		blog['imageList'] = []
+		for db_image in db_images:
+			blog['imageList'].append(db_image.image_url)
+		blog['tagList'] = []
+		for db_tag in db_tags:
+			blog['tagList'].append(db_tag.id)
+		blogs.append(schemas.BlogShow(**blog))
+	return blogs

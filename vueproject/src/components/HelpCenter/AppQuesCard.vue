@@ -8,8 +8,8 @@ export default {
   setup(props) {
     const truncate = (content) => {
       const strippedContent = content.replace(/<[^>]*>/g, "");
-      if (strippedContent.length > 20) {
-        return `${strippedContent.slice(0, 20)}...`;
+      if (strippedContent.length > 15) {
+        return `${strippedContent.slice(0, 15)}...`;
       }
       return strippedContent;
     };
@@ -65,15 +65,15 @@ export default {
         @click="goto()"
     >
       <v-row>
-        <v-col cols="1" style="margin-right: 8px">
+        <v-col cols="1" style="min-width: 50px">
           <v-avatar color="surface-variant" style="margin-top: 15px;margin-left: 10px" size="33"></v-avatar>
         </v-col>
-        <v-col cols="6" style="text-align: left;">
+        <v-col cols="5" style="text-align: left;">
           <div style="margin-top: 10px;">
             {{ truncate(question.quesContent) }}
           </div>
           <div style="font-size: 12px;color: grey">
-            {{ question.userName }}发表于{{ question.quesTime }}
+            {{ question.userName }} {{ question.quesTime }}
           </div>
         </v-col>
         <v-col cols="4" style="text-align: right;margin-top: 3px">

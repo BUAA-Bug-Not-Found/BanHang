@@ -3,30 +3,29 @@
 
     <v-navigation-drawer align="start" width="160">
       <v-list dense>
+        <v-list-item>
+          <v-btn @click="goToNewBlog" class="w-100" color="blue">发帖
+            <v-icon
+                icon="mdi-send"
+                end
+            ></v-icon>
+          </v-btn>
+        </v-list-item>
         <v-list-item v-for="tag in tags" :key="tag.tagId">
           <v-list-item-content>
-            <v-btn @click="swithConcernedTag(tag.tagName)" class="ma-1">{{ tag.tagName }}
+            <v-btn @click="swithConcernedTag(tag.tagId)" class="w-100">{{ tag.tagName }}
               <v-icon
-                  :icon= "tag.tagIcon"
+                  :icon="tag.tagIcon"
                   :color="tag.tagColor"
                   end
               ></v-icon>
             </v-btn>
-
-<!--            <v-icon :color="tag.tagColor">{{ tag.tagIcon }}</v-icon>-->
-<!--            <v-list-item-title>{{ tag.tagName }}</v-list-item-title>-->
           </v-list-item-content>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <v-main style="min-height: 300px;" align="start">
-      <v-btn @click="goToNewBlog" class="ma-5" color="blue">发帖
-        <v-icon
-            icon="mdi-send"
-            end
-        ></v-icon>
-      </v-btn>
       <div class="blog-list">
         <BlogShow
             v-for="(post, index) in blogs"
@@ -42,6 +41,15 @@
 
         <button @click="loadMore" class="load-more-button">加载更多</button>
       </div>
+
+      <div v-if="useDisplay().smAndDown.value" class="left-buttons">
+        <div>
+          <v-btn :icon="'mdi-plus'"
+                 color="light-blue-darken-1"
+                 size="small" @click="goToNewBlog"
+          />
+        </div>
+      </div>
     </v-main>
   </v-layout>
 
@@ -50,6 +58,7 @@
 <script>
 import BlogShow from './BlogShow.vue';
 import {getBlogs} from "@/components/AnonymousBlog/api";
+import {useDisplay} from "vuetify";
 
 export default {
   name: 'BlogList',
@@ -63,36 +72,36 @@ export default {
       //todo 调试
       blogs: [
         {
-          blogId: '1',
+          blogId: 1,
           userName: 'Alice',
           userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
           title: 'My First Blog!!!',
           content: 'This is the first post.',
           time: "2024.04.21-15:30",
-          tagList: ["学习生活", "情感交流"]
+          tagList: [1, 3]
         },
         {
-          blogId: '2',
+          blogId: 2,
           userName: 'Bob',
           userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO2.jpg',
           title: 'My Second Blog!!!',
           content: 'This is the second post.',
           time: "2024.04.21-15:30",
-          tagList: ["学习生活", "日常事务"]
+          tagList: [1, 2]
         },
         {
-          blogId: '3',
+          blogId: 3,
           userName: 'Charlie',
           userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO3.jpg',
           title: 'My Third Blog!!!',
           content: 'This is the third post.',
           time: "2024.04.21-15:30",
-          tagList: ["学习生活", "灌水吐槽", "寻欢作乐"]
+          tagList: [1, 4, 5]
         }
       ],
       pageno: 1,
       pagesize: 15,
-      nowtag: "",
+      nowtag: -1,
       tags: [
         {
           tagId: 1,
@@ -124,31 +133,34 @@ export default {
           tagIcon: 'mdi-emoticon-outline',
           tagColor: 'purple-darken-1'
         },
-      ]
+      ],
+
     };
   },
 
   created() {
-    this.nowtag = ""
+    this.nowtag = -1
     this.pageno = 1
     // todo this.blogs = []
     // todo this.fetchBlogListAPage();
   },
 
   methods: {
+    useDisplay,
     fetchBlogListAPage() {
       // 发起后端数据请求，获取一页的博客简要信息
       getBlogs(this.pageno, this.pagesize, this.nowtag).then(
           (data) => {
-            this.blogs = this.blogs.concat(data.map(blog => ({
-              userName: blog.userName,
-              userAvatarUrl: blog.userAvatarUrl,
-              blogId: blog.blogId,
-              title: blog.title,
-              content: blog.content,
-              time: blog.time,
-              tagList: blog.tagList
-            })));
+            this.blogs.concat(data.blogs)
+            // this.blogs = this.blogs.concat(data.blogs.map(blog => ({
+            //   userName: blog.userName,
+            //   userAvatarUrl: blog.userAvatarUrl,
+            //   blogId: blog.blogId,
+            //   title: blog.title,
+            //   content: blog.content,
+            //   time: blog.time,
+            //   tagList: blog.tagList
+            // })));
           }
       )
     },
@@ -195,6 +207,14 @@ export default {
 
 .load-more-button:hover {
   background-color: #0056b3;
+}
+
+.left-buttons {
+  position: fixed;
+  z-index: 888;
+  top: 80%;
+  right: 2%;
+  transform: translateY(-50%);
 }
 
 </style>

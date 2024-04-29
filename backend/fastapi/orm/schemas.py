@@ -31,7 +31,7 @@ class BlogShow(BaseModel):
     content: str
     time: datetime
     imageList: List[str]
-    tagList: List[str]
+    tagList: List[int]
 
 class BlogCommentBase(BaseModel):
     blogId: int

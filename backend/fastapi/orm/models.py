@@ -1,20 +1,30 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime,Table
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 
 from orm.database import Base
 
 
+
+user_user_stars = Table(
+    'user_user_stars',
+    Base.metadata,
+    Column('user1', Integer, ForeignKey('users.id')),
+    Column('user2', Integer, ForeignKey('users.id'))
+)
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(32), unique=True, index=True, nullable=False)
+    username = Column(String(32), index=True, nullable=False)
     email = Column(String(128), nullable=False)
     password = Column(String(256), nullable=False)
-    privilege = Column(Integer, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
-    userAvatarURL = Column(String(256), nullable=True)
+    privilege = Column(Integer, nullable = False, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
+    userAvatarURL = Column(String(256), nullable=False, default="")
+    sign = Column(String, nullable=False, default = "")
+    create_at = Column(DateTime, server_default=func.now())
 
     blogs = relationship("Blog", back_populates="user")
     blog_comments = relationship("BlogComment", back_populates="user")
@@ -24,6 +34,15 @@ class User(Base):
                                            back_populates="liked_users")
     liked_questions = relationship("Question", secondary="user_question_likes",
                                    back_populates="liked_users")
+    followed = relationship(
+        "User",
+        secondary=user_user_stars,
+        primaryjoin=(user_user_stars.c.user1 == id),
+        secondaryjoin=(user_user_stars.c.user2 == id),
+        lazy="dynamic",
+        backref=backref('followers', lazy='dynamic'))
+
+
 
 
 class CheckCode(Base):
@@ -38,13 +57,12 @@ class Blog(Base):
     __tablename__ = 'blogs'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id'))  # 实际的数据库关系是通过外键来维护的
-    is_anonymous = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # 实际的数据库关系是通过外键来维护的
+    is_anonymous = Column(Boolean, nullable=False, default=False)
     title = Column(String, nullable=False)
-    content = Column(String, nullable=True)
-    # content_image = Column(String, nullable=True)  # 可以存储图片的路径
+    content = Column(String, nullable=False, default="")
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
-    create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
 
     images = relationship("BlogImage", back_populates="blog")
     user = relationship("User", back_populates="blogs")
@@ -56,9 +74,9 @@ class BlogImage(Base):
     __tablename__ = 'blog_images'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    blog_id = Column(Integer, ForeignKey('blogs.id'))
+    blog_id = Column(Integer, ForeignKey('blogs.id'), nullable=False)
     image_url = Column(String, nullable=False)
-    create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
 
     blog = relationship("Blog", back_populates="images")
 
@@ -67,13 +85,12 @@ class BlogComment(Base):
     __tablename__ = 'blog_comments'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    blog_id = Column(Integer, ForeignKey('blogs.id'))
-    is_anonymous = Column(Boolean, default=False)
-    content = Column(String, nullable=True)
-    # content_image = Column(String, nullable=True)  # 可以存储图片的路径
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    blog_id = Column(Integer, ForeignKey('blogs.id'), nullable=False)
+    is_anonymous = Column(Boolean, default=False, nullable=False)
+    content = Column(String, nullable=False, default="")
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
-    create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
     reply_to_comment_id = Column(Integer, ForeignKey('blog_comments.id'), nullable=True)
 
     user = relationship("User", back_populates="blog_comments")
@@ -99,11 +116,12 @@ class Question(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    content = Column(String, nullable=True)
+    content = Column(String, nullable=False, default="")
     create_at = Column(DateTime, server_default=func.now())
     delated = Column(Boolean, default=False)
     archived = Column(Boolean, default=False)
     solved = Column(Boolean, default=False)
+    liked_user_count = Column(Integer, default=0, nullable=False)
 
 
     images = relationship("QuestionImage", back_populates="question")
@@ -178,8 +196,8 @@ class Message(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     sender_id = Column(Integer, ForeignKey('users.id'), nullable=False) 
     receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    content = Column(String)
-    create_at = Column(DateTime, server_default=func.now())
+    content = Column(String, nullable=False, default="")
+    create_at = Column(DateTime, nullable=False, server_default=func.now())
 
     sender = relationship("User", foreign_keys=[sender_id])
     receiver = relationship("User", foreign_keys=[receiver_id])
@@ -189,20 +207,18 @@ class Conversation(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     host_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     guest_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    is_read = Column(Boolean, default=True)
-    update_at = Column(DateTime, server_default=func.now())
+    is_read = Column(Boolean, nullable=False, default=True)
+    update_at = Column(DateTime, nullable=False, server_default=func.now())
 
     host_user = relationship("User", foreign_keys=[host_user_id])
     guest_user = relationship("User", foreign_keys=[guest_user_id])
     messages = relationship("ConversationMessage", back_populates="conversation")
 
-from sqlalchemy.orm import Mapped
-
 class ConversationMessage(Base):
     __tablename__ = 'conversation_messages'
     conversation_id = Column(Integer, ForeignKey('conversations.id'), primary_key=True)
     message_id = Column(Integer, ForeignKey('messages.id'), primary_key=True)
-    is_read = Column(Boolean, default=False)
+    is_read = Column(Boolean, nullable=False, default=False)
 
     message = relationship("Message", foreign_keys=[message_id])
     conversation = relationship("Conversation", back_populates="messages", foreign_keys=[conversation_id])

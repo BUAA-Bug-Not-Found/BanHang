@@ -17,7 +17,7 @@
       <ReplyList :comments="replies"/>
     </div>
     <div v-show="isInputVisible" class="reply-input">
-      <textarea v-model="replyContent" placeholder="请输入回复内容"></textarea>
+      <v-text-field v-model="replyContent" placeholder="请输入回复内容"></v-text-field>
       <label>
         <input type="checkbox" v-model="isAnonymous"/>匿名发送
       </label>
@@ -41,11 +41,11 @@ export default {
   components: {ReplyList},
   props: {
     blogId: {
-      type: String,
+      type: Number,
       required: true
     },
     commentId: {
-      type: String,
+      type: Number,
       required: true
     },
     userName: {
