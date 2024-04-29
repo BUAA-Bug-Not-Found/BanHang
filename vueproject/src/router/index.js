@@ -29,7 +29,6 @@ import SearchList from "@/components/AdvanceSearch/SearchList.vue";
 
 
 const routes = [
-
     {
         path: '/',
         name: "index",
