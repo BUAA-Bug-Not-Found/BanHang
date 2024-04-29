@@ -57,13 +57,12 @@ class Blog(Base):
     __tablename__ = 'blogs'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id'))  # 实际的数据库关系是通过外键来维护的
-    is_anonymous = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # 实际的数据库关系是通过外键来维护的
+    is_anonymous = Column(Boolean, nullable=False, default=False)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False, default="")
-    # content_image = Column(String, nullable=True)  # 可以存储图片的路径
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
-    create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
 
     images = relationship("BlogImage", back_populates="blog")
     user = relationship("User", back_populates="blogs")
@@ -75,9 +74,9 @@ class BlogImage(Base):
     __tablename__ = 'blog_images'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    blog_id = Column(Integer, ForeignKey('blogs.id'))
+    blog_id = Column(Integer, ForeignKey('blogs.id'), nullable=False)
     image_url = Column(String, nullable=False)
-    create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
 
     blog = relationship("Blog", back_populates="images")
 
@@ -86,13 +85,12 @@ class BlogComment(Base):
     __tablename__ = 'blog_comments'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    blog_id = Column(Integer, ForeignKey('blogs.id'))
-    is_anonymous = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    blog_id = Column(Integer, ForeignKey('blogs.id'), nullable=False)
+    is_anonymous = Column(Boolean, default=False, nullable=False)
     content = Column(String, nullable=False, default="")
-    # content_image = Column(String, nullable=True)  # 可以存储图片的路径
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
-    create_at = Column(DateTime, server_default=func.now())  # 根据服务器时间自动生成
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
     reply_to_comment_id = Column(Integer, ForeignKey('blog_comments.id'), nullable=True)
 
     user = relationship("User", back_populates="blog_comments")
