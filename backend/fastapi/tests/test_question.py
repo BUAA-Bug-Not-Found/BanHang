@@ -23,6 +23,12 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+    idlist = blogs["questions"][0]['tagIdList']
+
+    blogs = client.get('/getQuestionsByTagId', params = {"pageNo": 1,"pageSize": 100, 'tagId':idlist[0]}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
 
     # 测试update问题
     mock_question_data["quesContent"]["content"] = "changed content"
