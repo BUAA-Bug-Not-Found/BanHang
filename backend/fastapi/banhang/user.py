@@ -318,8 +318,8 @@ def set_head_image_by_email(req:SetUserHeadUrlRequest, db: Session = Depends(get
 
 
 @router.get("/getEmailByUserId", tags=['用户中心'])
-def get_email_by_id(email:str, db: Session = Depends(get_db)):
-    user = crud.get_user_by_email(db, email)
+def get_email_by_id(userId:str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_id(db, userId)
     if user is None:
-        return {'email':''}
-    return {'email':user.email}
+        return {'userEmail':''}
+    return {'userEmail':user.email}
