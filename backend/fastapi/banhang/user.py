@@ -60,9 +60,8 @@ def login(req:loginRequest,request:Request, response: Response, db: Session = De
     if not user or (user.password != req.password and update_password_to_hash(req.password) != user.password):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password"})
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
-                        samesite='none' if True or 'Origin' in request.headers
-                                           and request.headers['Origin'].startswith("https") else "lax",
-                        secure= True or 'Origin' in request.headers and request.headers['Origin'].startswith("https") )
+                        samesite='none',
+                        secure= False if os.environ.get("CHECKCODE") is not None else True )
     return {"isSuccess":True}
 
 @router.put("/logout",tags=["注册登录"], response_model=successResponse,
