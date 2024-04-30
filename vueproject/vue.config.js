@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const { defineConfig } = require('@vue/cli-service')
 module.exports = {
     chainWebpack: (config) => {

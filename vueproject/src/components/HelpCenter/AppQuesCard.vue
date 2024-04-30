@@ -1,6 +1,7 @@
 <script>
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
+import {setLikeQuesApi} from "@/components/HelpCenter/api";
 
 export default {
   name: "AppQuesCard",
@@ -48,7 +49,34 @@ export default {
       router.push("/QuesInfo/" + props.question.quesId);
     }
 
-    return {truncate, menuClick, disTags, goto};
+    const userLike = ref(props.question.ifUserLike)
+
+    const likeSum = ref(props.question.likeSum)
+
+    const setLikeQues = () => {
+      setLikeQuesApi(props.question.quesId, userLike.value ? 0 : 1).then(
+          (res) => {
+            if (res.isSuccess === true) {
+              if (userLike.value) {
+                likeSum.value--
+              } else {
+                likeSum.value++
+              }
+              userLike.value = !userLike.value;
+            }
+          }
+      )
+    }
+
+    return {
+      truncate,
+      menuClick,
+      disTags,
+      goto,
+      userLike,
+      likeSum,
+      setLikeQues
+    };
   },
 };
 </script>
@@ -59,16 +87,14 @@ export default {
         class="mx-auto"
         width="w-75"
         style="text-align: left"
-        :class="`cursor-pointer`"
         :color="isHovering ? 'cyan-lighten-5' : undefined"
         v-bind="props"
-        @click="goto()"
     >
       <v-row>
         <v-col cols="1" style="min-width: 50px">
           <v-avatar color="surface-variant" style="margin-top: 15px;margin-left: 10px" size="33"></v-avatar>
         </v-col>
-        <v-col cols="5" style="text-align: left;">
+        <v-col cols="5" style="text-align: left;" :class="`cursor-pointer`" @click="goto()">
           <div style="margin-top: 10px;">
             {{ truncate(question.quesContent.content) }}
           </div>
@@ -77,10 +103,10 @@ export default {
           </div>
         </v-col>
         <v-col cols="4" style="text-align: right;margin-top: 3px">
-          <v-btn :prepend-icon="question.ifUserLike === 1 ?
+          <v-btn :prepend-icon=" !userLike ?
                   'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="x-small"
-                 color="blue-grey-lighten-2">
-            {{ question.likeSum }}
+                 color="blue-grey-lighten-2" @click="setLikeQues">
+            {{ likeSum }}
           </v-btn>
           <v-btn variant="text" prepend-icon="mdi-reply" size="x-small" color="blue-grey-lighten-2">
             {{ question.ansSum }}

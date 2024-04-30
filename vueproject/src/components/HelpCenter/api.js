@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export function getQuestions(pageNo, pageSize) {
+export function getQuestionsApi(pageNo, pageSize) {
     return axios.request({
         url: '/getQuestions',
         params: {
@@ -13,7 +13,7 @@ export function getQuestions(pageNo, pageSize) {
     })
 }
 
-export function getQuesById(quesId) {
+export function getQuesByIdApi(quesId) {
     return axios.request({
         url: '/getQuesById',
         params: {
@@ -25,7 +25,7 @@ export function getQuesById(quesId) {
     })
 }
 
-export function getTags() {
+export function getTagsApi() {
     return axios.request({
         url: '/getTags',
         method: 'get'
@@ -34,7 +34,7 @@ export function getTags() {
     })
 }
 
-export function getAnsById(ansId) {
+export function getAnsByIdApi(ansId) {
     return axios.request({
         url: '/getAnsById',
         method: "post",
@@ -46,7 +46,7 @@ export function getAnsById(ansId) {
     })
 }
 
-export function uploadFile(file) {
+export function uploadFileApi(file) {
     return axios.post('/uploadfile', {
             file: file
         },
@@ -57,7 +57,7 @@ export function uploadFile(file) {
     })
 }
 
-export function uploadQues(content, imageList, quesTags) {
+export function uploadQuesApi(content, imageList, quesTags) {
     return axios.post('/uploadQues', {
         quesContent: {
             content: content,
@@ -69,7 +69,7 @@ export function uploadQues(content, imageList, quesTags) {
     })
 }
 
-export function getQuestionsByTagId(pageNo, pageSize, tagId) {
+export function getQuestionsByTagIdApi(pageNo, pageSize, tagId) {
     return axios.request({
         url: '/getQuestionsByTagId',
         params: {
@@ -78,6 +78,33 @@ export function getQuestionsByTagId(pageNo, pageSize, tagId) {
             tagId: tagId
         },
         method: "get",
+    }).then(response => {
+        return response.data
+    })
+}
+
+export function setLikeQuesApi(quesId, setType) {
+    return axios.request({
+        url: '/setLikeQues',
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        data: JSON.stringify({
+            quesId: quesId,
+            setType: setType
+        })
+    }).then(response => {
+        return response.data
+    })
+}
+
+export function setLikeAnsApi(ansId, setType) {
+    return axios.request({
+        url: '/setLikeAns',
+        method: 'post',
+        data: JSON.stringify({
+            ansId: ansId,
+            setType: setType
+        })
     }).then(response => {
         return response.data
     })
