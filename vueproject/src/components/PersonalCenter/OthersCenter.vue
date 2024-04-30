@@ -90,7 +90,7 @@ export default {
       this.otherBlogs = _helpBlogs;
     })
     // 检查登录状态
-    queryStar(s.email, this.otherEmail).then((res) => {
+    queryStar(userStateStore().email, this.otherEmail).then((res) => {
       this.isStar = res.isStar
     })
   },
@@ -124,7 +124,7 @@ export default {
               // 收到回复
               if (res.isSuccess) {
                 // 成功设置
-                if (tmp) {
+                if (this.isStar) {
                   // 取消关注的信息
                   this.isStar = false
                   showTip("成功取消关注!", true)
