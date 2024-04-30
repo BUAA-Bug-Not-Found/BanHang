@@ -165,7 +165,7 @@ def set_nickname_by_email(req:SetNicknameRequest,current_user: Optional[dict] = 
     current_user_instance = crud.get_user_by_id(db, current_user['uid'])
     if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
-    if not checkNickname(req.username):
+    if not checkNickname(req.nickname):
         raise EXC.UniException(key="isSuccess", value=False,
                                others={"description": "用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
     user = crud.set_username_by_email(db, req.email, req.nickname)
