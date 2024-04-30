@@ -21,7 +21,7 @@
         </button>
         <h2 class="title">{{ this.curUserName }}</h2>
       </div>
-      <div class="message-container" ref="container">
+      <div :class="{'message-container-pc': !display.smAndDown.valueOf(), 'message-container-pe': display.smAndDown.valueOf() }" ref="container">
         <div v-for="message in messages" :key="message.id">
           <div v-if="message.senderId == myId" class="message-right">
             <div style="display: flex;flex-direction: column;   align-items: flex-end; justify-content: flex-end;">
@@ -76,7 +76,8 @@ export default {
       timer: null,
       myAvatar: store.profile_photo,
       myId: store.user_id,
-      display: useDisplay()
+      display: useDisplay(),
+      init: false,
     };
   },
   mounted() {
@@ -88,9 +89,10 @@ export default {
       this.curUserName = cur_user.user_name
       this.curAvatar = cur_user.avatar
       this.updateData()
+    } else {
+      console.log(this.display.smAndDown.valueOf())
+      this.updateData();
     }
-    console.log(this.display.smAndDown.valueOf())
-    this.updateData();
   },
   beforeRouteLeave() {
     if (this.timer) {
@@ -111,6 +113,10 @@ export default {
           axios.post('/getHistoryMessage', { targetUserId: this.curUserId })
             .then(response => {
               this.messages = response.data
+              if (!this.init) {
+                this.scrollToBottom()
+                this.init=true
+              }
             })
             .catch(error => {
               console.error(error);
@@ -134,6 +140,7 @@ export default {
       this.curUserId = user_id
       this.curUserName = user_name
       this.curAvatar = avatar
+      this.init = false
       this.updateData()
     },
     submitMessage() {
@@ -144,6 +151,14 @@ export default {
         .catch(error => {
           console.error(error);
         })
+    },
+    scrollToBottom() {
+        var container = this.$refs.container;
+        if (container) {
+          this.$nextTick(() => {
+            container.scrollTop = container.scrollHeight;
+          });
+        }
     }
   }
 }
@@ -158,7 +173,7 @@ export default {
   height: 70px;
   background-color: rgb(205, 227, 234);
 }
-.message-container {
+.message-container-pe {
   /* 可根据实际需要设置高度 */
   display: flex;
   flex-direction: column;
@@ -166,6 +181,17 @@ export default {
   flex-grow: 1;
   overflow-y: auto;
   max-height: calc(100vh - 56px - 56px - 70px - 54px + 3px);
+  background-color: rgb(238, 238, 238);
+}
+
+.message-container-pc {
+  /* 可根据实际需要设置高度 */
+  display: flex;
+  flex-direction: column;
+  flex:1;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 64px - 56px - 70px + 3px);
   background-color: rgb(238, 238, 238);
 }
 .input {
