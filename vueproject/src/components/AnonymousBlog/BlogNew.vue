@@ -122,7 +122,7 @@ export default {
 
         uploadfile(form).then(      //todo
             (res) => {
-              if (res.success === "true") {
+              if (res.response == "success") {
                 this.images.push(res.fileUrl)
               } else {
                 ElMessage({
@@ -173,7 +173,7 @@ export default {
                         "tagList": this.transNameListToIdList(this.tagList)}
         uploadBlog(json_set).then(
             (res) => {
-              if (res.isSuccess == "true") {
+              if (res.response == "success") {
                 ElMessage({
                   message: '帖子发布成功',
                   showClose: true,
