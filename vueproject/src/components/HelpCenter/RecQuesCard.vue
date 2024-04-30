@@ -69,7 +69,7 @@ export default {
         </v-col>
         <v-col cols="8" style="text-align: left;">
           <div style="margin-top: 10px;">
-            {{ truncate(question.quesContent) }}
+            {{ truncate(question.quesContent.content) }}
           </div>
           <div>
             <v-btn :prepend-icon="question.ifUserLike === 1 ?

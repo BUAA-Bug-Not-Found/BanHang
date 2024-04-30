@@ -16,10 +16,19 @@ export function getQuestions(pageNo, pageSize) {
 export function getQuesById(quesId) {
     return axios.request({
         url: '/getQuesById',
-        method: "post",
-        data: JSON.stringify({
+        params: {
             quesId: quesId
-        })
+        },
+        method: "get",
+    }).then(response => {
+        return response.data
+    })
+}
+
+export function getTags() {
+    return axios.request({
+        url: '/getTags',
+        method: 'get'
     }).then(response => {
         return response.data
     })
@@ -55,6 +64,20 @@ export function uploadQues(content, imageList, quesTags) {
             imageList: imageList,
         },
         quesTags: quesTags
+    }).then(response => {
+        return response.data
+    })
+}
+
+export function getQuestionsByTagId(pageNo, pageSize, tagId) {
+    return axios.request({
+        url: '/getQuestionsByTagId',
+        params: {
+            pageNo: pageNo,
+            pageSize: pageSize,
+            tagId: tagId
+        },
+        method: "get",
     }).then(response => {
         return response.data
     })
