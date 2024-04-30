@@ -36,8 +36,6 @@
             <v-icon style="color: #4caf50;">mdi-checkbox-marked-circle</v-icon>
         </v-btn>
     </v-card>
-    
-    
     </div>
 </template>
 
@@ -97,6 +95,8 @@ export default {
                         // 图片上传失败给一个弹窗
                         showTip("图片上传失败, 请重新尝试!", false)
                     }
+                }).catch(() => {
+                    showTip("图片上传失败, 请重新尝试!", false)
                 })
             }
         },
@@ -118,6 +118,8 @@ export default {
             // 保存头像 TODO
             setHeadImage(userStateStore().email, this.headImage1)
                 .then((res) => {
+                    console.log("保存头像!!")
+                    console.log(res)
                     if (res.isSuccess) {
                         userStateStore().headImage = this.headImage1;
                     }

@@ -52,7 +52,7 @@ export function getUserInfos(_email) {
     }).catch(() => {
         // console.log("getInfo 失败")
         // 错误处理 TODO
-        // return 
+        return false
     })
 }
 

@@ -10,7 +10,7 @@
                 <v-icon color="blue">mdi-chat</v-icon>
               </v-btn>
               <v-btn icon @click="clickHeart">
-                <v-icon color="red">mdi-heart</v-icon>
+                <v-icon :class="{'redHeart': isStar, 'greyHeart': !isStar}" color="red">mdi-heart</v-icon>
               </v-btn>
             </v-toolbar>
           </div>
@@ -79,11 +79,19 @@ export default {
     this.otherEmail = router.currentRoute.value.params.e
     // 拉取该用户的信息
     getUserInfos(this.otherEmail).then((_infos) => {
-      this.infos = _infos
+      if (_infos === false) {
+        showTip("应用出错!", false)
+      } else {
+        this.infos = _infos
+      }
     })
     // 拉取该用户的互助贴
     getHelpBlogs(this.otherEmail).then((_helpBlogs) => {
       this.otherBlogs = _helpBlogs;
+    })
+    // 检查登录状态
+    queryStar(s.email, this.otherEmail).then((res) => {
+      this.isStar = res.isStar
     })
   },
   data() {
@@ -96,6 +104,7 @@ export default {
       },
       otherBlogs: [],
       otherEmail: '', // TODO 这里要填充
+      isStar: false,
       images: [
         'https://via.placeholder.com/150',
         'https://via.placeholder.com/150',
@@ -110,27 +119,24 @@ export default {
     // 可以添加其他方法
     clickHeart() {
       const s = userStateStore()
-      // 关注/取消关注
-      queryStar(s.email, this.otherEmail).then((res) => {
-          // 本来关注了, 现在取消
-          let tmp = res.isStar
-          setStarState(s.email, this.otherEmail, !res.isStar)
+      setStarState(s.email, this.otherEmail, !this.isStar)
             .then((res) => {
               // 收到回复
               if (res.isSuccess) {
                 // 成功设置
                 if (tmp) {
                   // 取消关注的信息
+                  this.isStar = false
                   showTip("成功取消关注!", true)
                 } else {
                   // 加上关注的信息
+                  this.isStar = true
                   showTip("成功关注!", true)
                 }
               } else {
                 showTip("操作失败!", false)
               }
             })
-      })
     }, 
     clickChat() {
       // 跳转到聊天窗口, 传递一个参数
@@ -155,4 +161,13 @@ color: gray;
 font-size: 10px;
 color: gray;
 }
+
+.redHeart {
+  color: red;
+}
+
+.greyHeart {
+  color: grey;
+}
+
 </style>
