@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'pc-container': !display.smAndDown.valueOf(), 'pe-container': display.smAndDown.valueOf() }">
+  <v-card :class="{ 'pc-container': !display.smAndDown.valueOf(), 'pe-container': display.smAndDown.valueOf() }">
     <div v-if="this.myId == 1">
       <div>您还没有登陆</div>
     </div>
@@ -11,12 +11,12 @@
         :avatar="item.userAvatarUrl" @open-message="handleContactClicked" />
     </div>
 
-    <div v-else style="height: 100%; display: flex; flex-direction: column;">
+    <div v-else style="height: 100%; display: flex; flex-direction: column;;">
       <div class="header-container">
         <button @click="() => { this.curUserId = 0 }" style="align-items: start; margin-left: 20px;">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px;">
-            <title>step-backward</title>
-            <path d="M19,5V19H16V5M14,5V19L3,12" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40px" height="45px" style="margin-top: 3px;">
+            <title>chevron-left</title>
+            <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
           </svg>
         </button>
         <h2 class="title">{{ this.curUserName }}</h2>
@@ -30,10 +30,10 @@
                 {{ message.content }}
               </div>
             </div>
-            <img src="@/assets/logo.png" class="profile-photo" />
+            <img :src="myAvatar" class="profile-photo" />
           </div>
           <div v-else class="message-left">
-            <img src="@/assets/logo.png" class="profile-photo" />
+            <img :src="curAvatar" class="profile-photo" />
             <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
               <div class="time">{{ message.time }}</div>
               <div class="content">
@@ -48,7 +48,7 @@
         <v-btn @click="submitMessage" color="primary" style="height: 54px;">发送</v-btn>
       </div>
     </div>
-  </div>
+  </v-card>
 
 </template>
 <script>
@@ -151,16 +151,28 @@ export default {
 
 
 <style scoped>
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+  background-color: rgb(205, 227, 234);
+}
 .message-container {
   /* 可根据实际需要设置高度 */
-  line-height: 1.5;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex:1;
+  flex-grow: 1;
   overflow-y: auto;
-  background-color: rgb(227, 224, 224);
+  max-height: calc(100vh - 56px - 56px - 70px - 54px + 3px);
+  background-color: rgb(238, 238, 238);
 }
-
+.input {
+  height: 56px;
+  display: flex;
+  background-color: white;
+}
 .message-right {
   display: flex;
   flex-direction: row;
@@ -202,37 +214,28 @@ export default {
   margin-top: 5px;
 }
 
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  /* 按钮靠左，标题靠右 */
-  align-items: center;
-  /* 元素垂直居中 */
-  height: 70px;
-  /* 设置容器高度 */
-  background-color: rgb(205, 227, 234);
-}
 
 .title {
   position: absolute;
   left: 50%;
-  top: 65px;
+  top: 20px;
   transform: translate(-50%, 0);
   /* 水平垂直居中 */
 }
 
-.input {
-  display: flex;
-}
+
 
 .pc-container {
   width: 600px;
   margin-left: calc(50vw - 300px);
   height: calc(100vh - 65px);
+  z-index: inherit;
+  background-color: rgb(238, 238, 238);
 }
 
 .pe-container {
   width: 100%;
   height: 100%;
+  max-height: 100%;
 }
 </style>

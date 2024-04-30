@@ -45,6 +45,7 @@ export default {
 </script>
 
 <template>
+  <img v-if="!display.smAndDown.value" src='@/assets/images/background.png' style="position: fixed;width: 100%;height: 100%;">
   <v-app-bar :elevation="1"
              v-if="!display.smAndDown.value">
     <template v-slot:prepend>
@@ -162,8 +163,6 @@ export default {
 <style scoped>
 .pc-router {
   margin-top: 63px;
-  background-image: url('@/assets/images/background.png');
-  background-size: 100% 100%;
   height: calc(100vh - 64px);
 }
 .pe-router {
