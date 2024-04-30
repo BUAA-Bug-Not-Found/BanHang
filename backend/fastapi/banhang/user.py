@@ -283,3 +283,17 @@ def get_stars_by_email(email:str, db: Session = Depends(get_db),
     fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username}
             for fan in user.followed]
     return {'stars':fans}
+
+class SetUserHeadUrlRequest(emailRequest):
+    url:str
+
+@router.post("/setHeadImageByEmail", tags=['用户中心'], response_model=successResponse)
+def set_head_image_by_email(req:SetUserHeadUrlRequest, db: Session = Depends(get_db),
+                            current_user: Optional[dict] = Depends(authorize)):
+    user = crud.get_user_by_email(db, req.email)
+    cur_user = crud.get_user_by_id(db, current_user['uid'])
+    if user is None or (req.email != cur_user.email and cur_user.privilege == 0):
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户不存在" if not user else "用户无权限"})
+    crud.set_user_head_url_by_email(db, req.email, req.url)
+    return successResponse()

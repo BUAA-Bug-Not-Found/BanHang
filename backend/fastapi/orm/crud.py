@@ -43,6 +43,13 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
+def set_user_head_url_by_email(db: Session, email:str, url):
+    user = get_user_by_email(db, email)
+    user.userAvatarURL = url
+    db.commit()
+    db.refresh(user)
+    return user
+
 
 def create_checkcode_record(db: Session, record: schemas.EmailCheck):
     if tmp := db.query(models.CheckCode).filter(models.CheckCode.email == record.email).first():
