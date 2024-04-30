@@ -55,7 +55,16 @@
   </div>
   <div v-if="this.nowSearchObj==='user'">
 <!--    todo 显示用户列表 -->
-
+    <div>
+      <UserShow
+        v-for="(post, index) in searchUserList"
+        :key="index"
+        :nickname="post.nickname"
+        :sign="post.sign"
+        :email="post.email"
+        :headImage="post.headImage"
+      />
+    </div>
   </div>
 
   <button @click="loadMore" class="load-more-button">加载更多</button>
@@ -64,18 +73,12 @@
 <script>
 import {searchBlogAPage, searchQuesAPage, searchUserAPage} from "@/components/AdvanceSearch/api";
 import BlogShow from "@/components/AnonymousBlog/BlogShow.vue";
+import UserShow from "@/components/PersonalCenter/UserShow.vue";
 import {useRouter} from "vue-router";
 
 export default {
   name: "searchList",
-  components: {BlogShow},
-
-  props:{
-    keywords:{
-      type: String,
-      required: true
-    }
-  },
+  components: {BlogShow, UserShow},
 
   data() {
     return {
@@ -84,7 +87,24 @@ export default {
       nowSortMethod: "",
       searchBlogList: [],
       searchQuesList: [],
-      searchUserList: [],
+      searchUserList: [{
+        nickname: "nr",
+        email: "21371455@buaa.edu.cn",
+        headImage: "",
+        sign: "还没有签名"
+      },
+      {
+        nickname: "nr",
+        email: "21371455@buaa.edu.cn",
+        headImage: "",
+        sign: "还没有签名"
+      },
+      {
+        nickname: "nr",
+        email: "21371455@buaa.edu.cn",
+        headImage: "",
+        sign: "还没有签名"
+      }],
       quesPageSize: 15,
       blogPageSize: 15,
       userPageSize: 15,
@@ -102,11 +122,13 @@ export default {
     this.nowSortMethod = "byRelation"
     this.searchQuesList = []
     this.searchBlogList = []
-    this.searchUserList = []
+    // this.searchUserList = []
     this.quesPageNo = 1
     this.blogPageNo = 1
     this.userPageNo = 1
     this.searchQues()   //todo
+    console.log("this.searchUserList")
+    console.log(this.searchUserList)
   },
   methods: {
     searchBlogs() {
