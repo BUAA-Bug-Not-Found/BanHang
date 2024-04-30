@@ -11,6 +11,7 @@
             ></v-icon>
           </v-btn>
         </v-list-item>
+
         <v-list-item v-for="tag in tags" :key="tag.tagId">
           <v-list-item-content>
             <v-btn @click="swithConcernedTag(tag.tagId)" class="w-100">{{ tag.tagName }}
@@ -22,6 +23,7 @@
             </v-btn>
           </v-list-item-content>
         </v-list-item>
+
       </v-list>
     </v-navigation-drawer>
 

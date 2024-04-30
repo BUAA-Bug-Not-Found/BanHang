@@ -125,3 +125,10 @@ def test_set_nickname(mock_user_data, new_database):
     assert res.status_code == 200
     res = client.get("/getInfoByEmail", params={'email': mock_user_data['email']})
     assert res.json()['nickname'] == 'testnickname'
+
+def test_set_head_url(mock_user_data, new_database):
+    register_login_user(client, mock_user_data)
+    client.post("/setHeadImageByEmail", json={'email':mock_user_data['email'],
+                                              'url':"http://newavator.url"})
+    res = client.get("/getInfoByEmail", params={'email': mock_user_data['email']}).json()
+    assert res['url'] == 'http://newavator.url'
