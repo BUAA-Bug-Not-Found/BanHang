@@ -63,12 +63,19 @@
 
 <script>
 import {searchBlogAPage, searchQuesAPage, searchUserAPage} from "@/components/AdvanceSearch/api";
-import {useRouter} from "vue-router";
 import BlogShow from "@/components/AnonymousBlog/BlogShow.vue";
+import {useRouter} from "vue-router";
 
 export default {
   name: "searchList",
   components: {BlogShow},
+
+  props:{
+    keywords:{
+      type: String,
+      required: true
+    }
+  },
 
   data() {
     return {
@@ -88,7 +95,9 @@ export default {
   },
   created() {
     let router = useRouter()
-    this.searchContent = router.currentRoute.value.keywords
+    this.searchContent = router.currentRoute.value.params.keywords
+    // this.searchContent = this.$props.keywords
+    // console.log(this.searchContent)
     this.nowSearchObj = "ques"
     this.nowSortMethod = "byRelation"
     this.searchQuesList = []
@@ -97,13 +106,23 @@ export default {
     this.quesPageNo = 1
     this.blogPageNo = 1
     this.userPageNo = 1
-    // todo this.searchQues()
+    this.searchQues()   //todo
   },
   methods: {
     searchBlogs() {
       searchBlogAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
-            this.searchBlogList.concat(data.blogs)
+            // this.searchBlogList = this.searchBlogList.concat(data.blogs)
+            this.searchBlogList = this.searchBlogList.concat(data.map(blog => ({
+              userName: blog.userName,
+              userAvatarUrl: blog.userAvatarUrl,
+              blogId: blog.blogId,
+              title: blog.title,
+              content: blog.content,
+              time: blog.time,
+              tagList: blog.tagList
+            })));
+            console.log(this.searchBlogList)
           }
       )
     },
@@ -111,7 +130,20 @@ export default {
     searchQues() {
       searchQuesAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
-            this.searchQuesList.concat(data.questions)
+             this.searchQuesList = this.searchQuesList.concat(data.questions)
+
+            // this.searchQuesList = this.searchQuesList.concat(data.map(ques => ({
+            //   quesId: ques.quesId,
+            //   userId: ques.userId,
+            //   userName: ques.userName,
+            //   quesContent: ques.quesContent,
+            //   quesState: ques.quesState,
+            //   quesTime: ques.quesTime,
+            //   ifUserLike: ques.ifUserLike,
+            //   ansSum: ques.ansSum,
+            //   likeSum: ques.likeSum,
+            //   tagIdList: ques.tagIdList
+            // })));
           }
       )
     },
@@ -119,7 +151,12 @@ export default {
     searchUsers() {
       searchUserAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
-            this.searchUserList.concat(data.users)
+            this.searchUserList = this.searchUserList.concat(data.users)
+            // this.searchUserList = this.searchUserList.concat(data.map(user =>({
+            //   nickname: user.nickname,
+            //   sign: user.sign,
+            //   url: user.url
+            // })));
           }
       )
     },
@@ -127,10 +164,13 @@ export default {
     loadMore() {
       if (this.nowSearchObj === "user") {
         this.searchUsers()
+        this.userPageNo += 1
       } else if (this.nowSearchObj === "blog") {
         this.searchBlogs()
+        this.blogPageNo += 1
       } else {
         this.searchQues()
+        this.quesPageNo += 1
       }
     },
 

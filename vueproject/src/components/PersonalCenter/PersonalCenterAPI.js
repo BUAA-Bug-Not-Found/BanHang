@@ -74,7 +74,8 @@ export function getHelpBlogs(_email) {
         method: "get",
         params: {
             "email": _email
-        }
+        },
+        withCredentials: true
     }).then((reply) => {
         return reply.data
     }).catch(() => {
@@ -118,6 +119,23 @@ export function getFans(_email) {
         method: "get",
         params: {
             "email": _email
+        }
+    }).then((reply) => {
+        return reply.data
+    }).catch(() => {
+        
+    })
+}
+
+export function setHeadImage(_email, _url) {
+    // 
+    return axios.request({
+        // 
+        url: "/setHeadImageByEmail",
+        method: "post",
+        data: {
+            "email": _email,
+            "url": _url
         }
     }).then((reply) => {
         return reply.data

@@ -34,7 +34,7 @@
       <v-text-field v-model="newComment" placeholder="输入您的评论"></v-text-field>
       <div class="anonymous-and-addbutton">
         <v-checkbox v-model="commentAnonymous" label="匿名发布" class="anonymous-checkbox"></v-checkbox>
-        <v-btn @click="addComment('')" class="ma-2" color="green">提交评论
+        <v-btn @click="addComment(null)" class="ma-2" color="green">提交评论
           <v-icon
               icon="mdi-checkbox-marked-circle"
               end
@@ -62,45 +62,14 @@ export default {
   data() {
     return {
       blogId: '',
-      userName: 'Alice',
-      userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
-      title: 'My First Blog!!!',
-      content: 'This is the first post.',
-      imageList: ['https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
-        'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO2.jpg',
-        'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO3.jpg',
-        'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO4.jpg'],
-      time: "2024.04.21-15:30",
+      userName: '',
+      userAvatarUrl: '',
+      title: '',
+      content: '',
+      imageList: [],
+      time: "",
       tagList: [],
-      comments: [
-        {
-          blogId: 1,
-          commentId: 1,
-          userName: 'Alice',
-          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
-          content: 'This is the first comment.',
-          time: "2024.04.21-15:30",
-          replyToCommentId: ""
-        },
-        {
-          blogId: 1,
-          commentId: 2,
-          userName: 'Bob',
-          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO2.jpg',
-          content: 'This is the second comment.',
-          time: "2024.04.21-15:30",
-          replyToCommentId: 1
-        },
-        {
-          blogId: 1,
-          commentId: 3,
-          userName: 'Charlie',
-          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO3.jpg',
-          content: 'This is the third comment.',
-          time: "2024.04.21-15:30",
-          replyToCommentId: ""
-        },
-      ],
+      comments: [],
       showCommentInput: false,
       newComment: '',
       commentAnonymous: false
@@ -110,8 +79,8 @@ export default {
   created() {
     let router = useRouter();
     this.blogId = router.currentRoute.value.params.id;
-    // todo this.fetchBlogInfo();
-    // todo this.fetchCommentInfo();
+    this.fetchBlogInfo(); //todo
+    this.fetchCommentInfo();  //todo
   },
 
   methods: {
@@ -133,16 +102,16 @@ export default {
       // 发起后端数据请求，获取博客对应的评论信息
       getCommentsByBlogId(this.blogId).then(
           (data) => {
-            this.comments = data.comments
-            // this.comments = data.comments.map(comment => ({
-            //   userName: comment.userName,
-            //   userAvatarURL: comment.userAvatarUrl,
-            //   blogId: this.blogId,
-            //   commentId: comment.commentId,
-            //   content: comment.content,
-            //   time: comment.time,
-            //   replyToCommentId: comment.replyToCommentId,
-            // }));
+            // this.comments = data.comments
+            this.comments = data.map(comment => ({
+              userName: comment.userName,
+              userAvatarURL: comment.userAvatarUrl,
+              blogId: this.blogId,
+              commentId: comment.commentId,
+              content: comment.content,
+              time: comment.time,
+              replyToCommentId: comment.replyToCommentId,
+            }))
           }
       )
     },
@@ -152,15 +121,19 @@ export default {
     addComment(replyToId) {
       // todo 提交评论的逻辑，读取评论和用户信息，存入数据库，同步加入 comments 列表
       if (this.newComment.trim().length !== 0) {
-        let form = new FormData
-        form.append('blogId', this.blogId)
-        form.append('commentContent', this.newComment)
-        form.append('ifAnonymous', this.commentAnonymous)
-        form.append('replyToCommentId', replyToId)
+        // let form = new FormData
+        // form.append('blogId', this.blogId)
+        // form.append('commentContent', this.newComment)
+        // form.append('ifAnonymous', this.commentAnonymous)
+        // form.append('replyToCommentId', replyToId)
 
-        uploadComment(form).then(
+        let json_set = {'blogId': this.blogId,
+                        'commentContent': this.newComment,
+                        'ifAnonymous': this.commentAnonymous,
+                        'replyToCommentId': replyToId}
+        uploadComment(json_set).then(
             (res) => {
-              if (res.isSuccess === "true") {
+              if (res.isSuccess == true) {
                 ElMessage({
                   message: '评论成功',
                   showClose: true,
@@ -178,6 +151,7 @@ export default {
       }
       this.newComment = '';
       this.showCommentInput = false;
+      this.fetchCommentInfo();
     },
   }
 };

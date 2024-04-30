@@ -70,35 +70,7 @@ export default {
   data() {
     return {
       //todo 调试
-      blogs: [
-        {
-          blogId: 1,
-          userName: 'Alice',
-          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO1.jpg',
-          title: 'My First Blog!!!',
-          content: 'This is the first post.',
-          time: "2024.04.21-15:30",
-          tagList: [1, 3]
-        },
-        {
-          blogId: 2,
-          userName: 'Bob',
-          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO2.jpg',
-          title: 'My Second Blog!!!',
-          content: 'This is the second post.',
-          time: "2024.04.21-15:30",
-          tagList: [1, 2]
-        },
-        {
-          blogId: 3,
-          userName: 'Charlie',
-          userAvatarUrl: 'https://argithun-blog-1321510384.cos.ap-beijing.myqcloud.com/OO3.jpg',
-          title: 'My Third Blog!!!',
-          content: 'This is the third post.',
-          time: "2024.04.21-15:30",
-          tagList: [1, 4, 5]
-        }
-      ],
+      blogs: [],
       pageno: 1,
       pagesize: 15,
       nowtag: -1,
@@ -141,8 +113,8 @@ export default {
   created() {
     this.nowtag = -1
     this.pageno = 1
-    // todo this.blogs = []
-    // todo this.fetchBlogListAPage();
+    this.blogs = []   //todo
+    this.fetchBlogListAPage(); //todo
   },
 
   methods: {
@@ -151,16 +123,16 @@ export default {
       // 发起后端数据请求，获取一页的博客简要信息
       getBlogs(this.pageno, this.pagesize, this.nowtag).then(
           (data) => {
-            this.blogs.concat(data.blogs)
-            // this.blogs = this.blogs.concat(data.blogs.map(blog => ({
-            //   userName: blog.userName,
-            //   userAvatarUrl: blog.userAvatarUrl,
-            //   blogId: blog.blogId,
-            //   title: blog.title,
-            //   content: blog.content,
-            //   time: blog.time,
-            //   tagList: blog.tagList
-            // })));
+            // this.blogs.concat(data.blogs)
+            this.blogs = this.blogs.concat(data.map(blog => ({
+              userName: blog.userName,
+              userAvatarUrl: blog.userAvatarUrl,
+              blogId: blog.blogId,
+              title: blog.title,
+              content: blog.content,
+              time: blog.time,
+              tagList: blog.tagList
+            })));
           }
       )
     },

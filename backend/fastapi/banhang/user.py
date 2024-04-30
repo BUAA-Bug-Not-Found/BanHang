@@ -49,8 +49,8 @@ def login(req:loginRequest,response: Response, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
     if not user or user.password != req.password:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password"})
-    response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username))
-    return{"isSuccess":True}
+    response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username), samesite='none',secure=True)
+    return {"isSuccess":True}
 
 @router.put("/logout",tags=["注册登录"], response_model=successResponse,
             responses={400: {"model": excResponse}})
