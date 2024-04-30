@@ -82,32 +82,6 @@ export default {
 
   data() {
     return {
-      searchUserList: [
-        {
-          nickname: "nr",
-          email: "21371455@buaa.edu.cn",
-          headImage: "",
-          sign: "还没有签名"  
-        },
-        {
-          nickname: "nr",
-          email: "21371455@buaa.edu.cn",
-          headImage: "",
-          sign: "还没有签名"  
-        },
-        {
-          nickname: "nr",
-          email: "21371455@buaa.edu.cn",
-          headImage: "",
-          sign: "还没有签名"  
-        }
-      ]
-    }
-  },
-
-
-  data() {
-    return {
       searchContent: "",
       nowSearchObj: "",
       nowSortMethod: "",
