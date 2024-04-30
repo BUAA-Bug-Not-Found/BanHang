@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 from typing import Optional, List
 import hashlib
@@ -44,6 +45,11 @@ class excResponse(BaseModel):
     isSuccess:bool = False
     discription:str
 
+def checkNickname(nickname:str)->bool:
+    r = '^[0-9a-zA-Z-_\u4e00-\u9fa5]*$'
+    result = re.match(r, nickname)
+    return result is not None
+
 def update_password_to_hash(password:str)->str:
     return hashlib.sha256((password+"banhang").encode()).hexdigest()
 
@@ -54,9 +60,8 @@ def login(req:loginRequest,request:Request, response: Response, db: Session = De
     if not user or (user.password != req.password and update_password_to_hash(req.password) != user.password):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password"})
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
-                        samesite='none' if 'Origin' in request.headers
-                                           and request.headers['Origin'].startswith("https") else "lax",
-                        secure= 'Origin' in request.headers and request.headers['Origin'].startswith("https") )
+                        samesite='none',
+                        secure= False if os.environ.get("CHECKCODE") is not None else True )
     return {"isSuccess":True}
 
 @router.put("/logout",tags=["注册登录"], response_model=successResponse,
@@ -73,6 +78,9 @@ def register(req:registerRequest, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
     if user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"user exists"})
+    if not checkNickname(req.username):
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description":"用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
     crud.create_user(db, schemas.UserCreate(username = req.username, password = update_password_to_hash(req.password),
                                             email = req.email))
     return {"isSuccess":True}
@@ -157,6 +165,9 @@ def set_nickname_by_email(req:SetNicknameRequest,current_user: Optional[dict] = 
     current_user_instance = crud.get_user_by_id(db, current_user['uid'])
     if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
+    if not checkNickname(req.nickname):
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
     user = crud.set_username_by_email(db, req.email, req.nickname)
     return successResponse()
 
