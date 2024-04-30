@@ -91,3 +91,26 @@ export function uploadComment(commentData) {
         return response.data
     })
 }
+
+export function getALlBlogTags() {
+    return axios.request({
+        url: '/blog/getAllBlogTags',
+        method: "post",
+        headers: {'Content-Type': 'application/json'},
+    }).then(response => {
+        return response.data
+    })
+}
+
+export function getCommentNumByBlogId(blogId) {
+    return axios.request({
+        url: '/blog/getCommentNumByBlogId',
+        method: "post",
+        headers: {'Content-Type': 'application/json'},
+        data: JSON.stringify({
+            blogId: blogId
+        })
+    }).then(response => {
+        return response.data
+    })
+}

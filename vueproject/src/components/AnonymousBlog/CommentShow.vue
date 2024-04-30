@@ -1,5 +1,5 @@
 <template>
-  <div class="comment-card" v-show="replyToCommentId === null">
+  <v-card class="comment-card" v-show="replyToCommentId === null">
     <div class="user-info">
       <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
       <div class="user-details">
@@ -28,7 +28,7 @@
         ></v-icon>
       </v-btn>
     </div>
-  </div>
+  </v-card>
 </template>
 
 <script>
