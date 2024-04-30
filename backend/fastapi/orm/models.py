@@ -22,8 +22,9 @@ class User(Base):
     email = Column(String(128), nullable=False)
     password = Column(String(256), nullable=False)
     privilege = Column(Integer, nullable = False, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
-    userAvatarURL = Column(String(256), nullable=False, default="")
-    sign = Column(String, nullable=False, default = "")
+    userAvatarURL = Column(String(256), nullable=False,
+                           default="https://banhang.oss-cn-beijing.aliyuncs.com/3bda01f4fce948d88ee72babced0a3c0.png")
+    sign = Column(String, nullable=False, default = "快来设置个性签名叭~~")
     create_at = Column(DateTime, server_default=func.now())
 
     blogs = relationship("Blog", back_populates="user")
