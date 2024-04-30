@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from typing import Optional, List
+import hashlib
 
 from fastapi import Depends, FastAPI, HTTPException, APIRouter, Response, Cookie, Request
 from sqlalchemy.orm import Session
@@ -43,11 +44,14 @@ class excResponse(BaseModel):
     isSuccess:bool = False
     discription:str
 
+def update_password_to_hash(password:str)->str:
+    return hashlib.sha256((password+"banhang").encode()).hexdigest()
+
 @router.put("/login",tags=["注册登录"], response_model=successResponse,
             responses={400: {"model": excResponse}})
 def login(req:loginRequest,request:Request, response: Response, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
-    if not user or user.password != req.password:
+    if not user or (user.password != req.password and update_password_to_hash(req.password) != user.password):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password"})
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
                         samesite='none' if 'Origin' in request.headers
@@ -69,7 +73,8 @@ def register(req:registerRequest, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
     if user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"user exists"})
-    crud.create_user(db, schemas.UserCreate(username = req.username, password = req.password, email = req.email))
+    crud.create_user(db, schemas.UserCreate(username = req.username, password = update_password_to_hash(req.password),
+                                            email = req.email))
     return {"isSuccess":True}
 
 @router.get("/check_login_state",tags=["注册登录"], response_model=userResponse,

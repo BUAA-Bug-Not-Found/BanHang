@@ -424,7 +424,7 @@ def get_question_answer_by_id(ansId: int, db: Session = Depends(get_db),
         ansContent=answer.content,
         ansState=0 if answer.delated else 1 if not answer.accepted else 2,
         ansTime=answer.create_at,
-        ifUserLike=current_user and answer in crud.get_user_by_id(db, current_user['uid']).liked_question_comments,
+        ifUserLike=current_user is not None and answer in crud.get_user_by_id(db, current_user['uid']).liked_question_comments,
         likeSum=len(answer.liked_users)
     )
 
