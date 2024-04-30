@@ -6,7 +6,7 @@
       <span class="user-name">{{ userName }}</span>
     </div>
     <!-- 发帖时间 -->
-    <div class="time"> {{ time }}</div>
+    <div class="time"> {{ formatDate(time) }}</div>
 
     <!-- 内容部分 -->
     <div class="title">
@@ -84,6 +84,16 @@ export default {
   },
 
   methods: {
+    formatDate(time) {
+      let date = new Date(Date.parse(time))
+      let year = date.getFullYear();
+      let month = ('0' + (date.getMonth() + 1)).slice(-2); // 月份从0开始，需要加1，并且保证两位数
+      let day = ('0' + date.getDate()).slice(-2); // 保证两位数
+      let hours = ('0' + date.getHours()).slice(-2); // 保证两位数
+      let minutes = ('0' + date.getMinutes()).slice(-2); // 保证两位数
+
+      return `${year}.${month}.${day}-${hours}:${minutes}`
+    },
     fetchBlogInfo() {
       // 该方法接受一个博客 ID，并返回博客信息
       getBlogByBlogId(this.blogId).then(
@@ -108,7 +118,7 @@ export default {
               userAvatarURL: comment.userAvatarUrl,
               blogId: this.blogId,
               commentId: comment.commentId,
-              content: comment.content,
+              content: comment.commentContent,
               time: comment.time,
               replyToCommentId: comment.replyToCommentId,
             }))
@@ -133,12 +143,13 @@ export default {
                         'replyToCommentId': replyToId}
         uploadComment(json_set).then(
             (res) => {
-              if (res.isSuccess == true) {
+              if (res.response == "success") {
                 ElMessage({
                   message: '评论成功',
                   showClose: true,
                   type: 'success',
                 })
+                this.fetchCommentInfo();
               } else {
                 ElMessage({
                   message: '评论失败，请修改内容或稍后再试',
@@ -151,7 +162,6 @@ export default {
       }
       this.newComment = '';
       this.showCommentInput = false;
-      this.fetchCommentInfo();
     },
   }
 };
