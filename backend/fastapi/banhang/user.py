@@ -119,7 +119,7 @@ def reset_password(req:resetPasswordRequest, db:Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
     if not user:
         raise EXC.UniException(key="isSuccess", value=False, others={"description":"用户不存在"})
-    crud.set_password_by_email(db, req.password, req.email)
+    crud.set_password_by_email(db, update_password_to_hash(req.password), req.email)
     return {"response":"success"}
 
 class UserInfoResponse(BaseModel):
