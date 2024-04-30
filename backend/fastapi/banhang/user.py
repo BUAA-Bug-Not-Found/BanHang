@@ -299,3 +299,11 @@ def set_head_image_by_email(req:SetUserHeadUrlRequest, db: Session = Depends(get
                                others={"description": "用户不存在" if not user else "用户无权限"})
     crud.set_user_head_url_by_email(db, req.email, req.url)
     return successResponse()
+
+
+@router.get("/getEmailByUserId", tags=['用户中心'])
+def get_email_by_id(email:str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_email(db, email)
+    if user is None:
+        return {'email':''}
+    return {'email':user.email}
