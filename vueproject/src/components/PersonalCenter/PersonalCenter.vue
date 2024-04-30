@@ -14,6 +14,10 @@
                 <v-btn icon @click="clickUpdateInfo">
                   <v-icon color="blue">mdi-pencil</v-icon>
                 </v-btn>
+
+                <v-btn icon @click="clickQuitLogin">
+                  <v-icon color="grey">mdi-logout</v-icon>
+                </v-btn>
               </v-toolbar>
             </div>
             
@@ -152,6 +156,11 @@
       clickMyInterest() {
         router.push({path: "/interestList"})
       },
+      clickQuitLogin() {
+        // 注销登录信息
+        
+        router.push({path: "/loginPage"})
+      },
       formatDateTime(dateTimeStr) {
         // 创建 Date 对象
         const dateTime = new Date(dateTimeStr);
@@ -179,7 +188,6 @@
   font-size: 20px;
   font-weight: bold;
 }
-
 .signature {
   font-size: 12px;
   color: gray;
