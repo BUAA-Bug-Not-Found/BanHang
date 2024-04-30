@@ -1,58 +1,62 @@
 <template>
-  <div v-if="this.myId == 1">
-    <div>您还没有登陆</div>
-  </div>
-  <div v-else-if="this.curUserId == 0">
-    <div v-if="this.contactList.lenth == 0">
-      您还没有联系人
+  <div :class="{ 'pc-container': !display.smAndDown.valueOf(), 'pe-container': display.smAndDown.valueOf() }">
+    <div v-if="this.myId == 1">
+      <div>您还没有登陆</div>
     </div>
-    <contactCard v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
-      :avatar="item.userAvatarUrl" @open-message="handleContactClicked" />
-  </div>
+    <div v-else-if="this.curUserId == 0">
+      <div v-if="this.contactList.lenth == 0">
+        您还没有联系人
+      </div>
+      <contactCard v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
+        :avatar="item.userAvatarUrl" @open-message="handleContactClicked" />
+    </div>
 
-  <div v-else style="height: 100%; display: flex; flex-direction: column;">
-    <div class="header-container">
-      <button @click="() => { this.curUserId = 0 }" style="align-items: start; margin-left: 20px;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px;">
-          <title>step-backward</title>
-          <path d="M19,5V19H16V5M14,5V19L3,12" />
-        </svg>
-      </button>
-      <h2 class="title">{{ this.curUserName }}</h2>
-    </div>
-    <div class="message-container" ref="container">
-      <div v-for="message in messages" :key="message.id">
-        <div v-if="message.senderId == myId" class="message-right">
-          <div style="display: flex;flex-direction: column;   align-items: flex-end; justify-content: flex-end;">
-            <div class="time">{{ message.time }}</div>
-            <div class="content">
-              {{ message.content }}
+    <div v-else style="height: 100%; display: flex; flex-direction: column;">
+      <div class="header-container">
+        <button @click="() => { this.curUserId = 0 }" style="align-items: start; margin-left: 20px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px;">
+            <title>step-backward</title>
+            <path d="M19,5V19H16V5M14,5V19L3,12" />
+          </svg>
+        </button>
+        <h2 class="title">{{ this.curUserName }}</h2>
+      </div>
+      <div class="message-container" ref="container">
+        <div v-for="message in messages" :key="message.id">
+          <div v-if="message.senderId == myId" class="message-right">
+            <div style="display: flex;flex-direction: column;   align-items: flex-end; justify-content: flex-end;">
+              <div class="time">{{ message.time }}</div>
+              <div class="content">
+                {{ message.content }}
+              </div>
             </div>
+            <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
           </div>
-          <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
-        </div>
-        <div v-else class="message-left">
-          <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
-          <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
-            <div class="time">{{ message.time }}</div>
-            <div class="content">
-              {{ message.content }}
+          <div v-else class="message-left">
+            <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
+            <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
+              <div class="time">{{ message.time }}</div>
+              <div class="content">
+                {{ message.content }}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="input">
-      <v-text-field v-model="inputMessage" style="flex: 1;height: 32x;padding: 0;" hide-details=true></v-text-field>
-      <v-btn @click="submitMessage" color="primary" style="height: 54px;">发送</v-btn>
+      <div class="input">
+        <v-text-field v-model="inputMessage" style="flex: 1;height: 32x;padding: 0;" hide-details=true></v-text-field>
+        <v-btn @click="submitMessage" color="primary" style="height: 54px;">发送</v-btn>
+      </div>
     </div>
   </div>
+
 </template>
 <script>
 /* eslint-disable */
 import contactCard from './contactCard.vue';
 import axios from 'axios';
 import userStateStore from '@/store';
+import { useDisplay } from 'vuetify'
 
 export default {
   name: "MessageContainer",
@@ -71,7 +75,8 @@ export default {
       inputMessage: "",
       timer: null,
       myAvatar: store.profile_photo,
-      myId: store.user_id
+      myId: store.user_id,
+      display: useDisplay()
     };
   },
   mounted() {
@@ -84,7 +89,7 @@ export default {
       this.curAvatar = cur_user.avatar
       this.updateData()
     }
-    console.log(this.myId)
+    console.log(this.display.smAndDown.valueOf())
     this.updateData();
   },
   beforeRouteLeave() {
@@ -93,24 +98,32 @@ export default {
       this.timer = null;
     }
   },
+  unmounted() {
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null;
+    }
+  },
   methods: {
     updateData() {
-      if (this.curUserId != 0) {
-        axios.post('/getHistoryMessage', { targetUserId: this.curUserId })
-          .then(response => {
-            this.messages = response.data
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      } else {
-        axios.post('/getReletedUser', {})
-          .then(response => {
-            this.contactList = response.data
-          })
-          .catch(error => {
-            console.error(error);
-          });
+      if (this.myId != 1) {
+        if (this.curUserId != 0) {
+          axios.post('/getHistoryMessage', { targetUserId: this.curUserId })
+            .then(response => {
+              this.messages = response.data
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        } else {
+          axios.post('/getReletedUser', {})
+            .then(response => {
+              this.contactList = response.data
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
       }
       if (this.timer == null)
         this.timer = setInterval(() => {
@@ -210,5 +223,15 @@ export default {
 
 .input {
   display: flex;
+}
+
+.pc-container {
+  width: 600px;
+  margin-left: calc(50vw - 300px);
+  height: calc(100vh - 65px);
+}
+
+.pe-container {
+  width: 100%;
 }
 </style>
