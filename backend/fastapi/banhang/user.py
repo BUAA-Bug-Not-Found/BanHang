@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import Depends, FastAPI, HTTPException, APIRouter, Response, Cookie
+from fastapi import Depends, FastAPI, HTTPException, APIRouter, Response, Cookie, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from sqlalchemy.sql.functions import user
@@ -45,12 +45,14 @@ class excResponse(BaseModel):
 
 @router.put("/login",tags=["注册登录"], response_model=successResponse,
             responses={400: {"model": excResponse}})
-def login(req:loginRequest,response: Response, db: Session = Depends(get_db)):
+def login(req:loginRequest,request:Request, response: Response, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
     if not user or user.password != req.password:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password"})
-    response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username), samesite='none',
-                        secure= False if os.environ.get("CHECKCODE") is not None else True)
+    response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
+                        samesite='none' if 'Origin' in request.headers
+                                           and request.headers['Origin'].startswith("https") else "lax",
+                        secure= 'Origin' in request.headers and request.headers['Origin'].startswith("https") )
     return {"isSuccess":True}
 
 @router.put("/logout",tags=["注册登录"], response_model=successResponse,
