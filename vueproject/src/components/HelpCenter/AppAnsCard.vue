@@ -25,7 +25,7 @@ export default {
           ansState: '1',
           ansTime: '2024-4-24 13:42',
           ifUserLike: 0,
-          likeSum: '10'
+          likeSum: 10
         })
     init()
 

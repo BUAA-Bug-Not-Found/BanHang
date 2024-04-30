@@ -7,7 +7,8 @@ export default {
   props: ["question", "tags"],
   setup(props) {
     const truncate = (content) => {
-      const strippedContent = content.replace(/<[^>]*>/g, "");
+      console.log(content)
+      const strippedContent = String(content).replace(/<[^>]*>/g, "")
       if (strippedContent.length > 20) {
         return `${strippedContent.slice(0, 20)}...`;
       }
@@ -69,7 +70,7 @@ export default {
         </v-col>
         <v-col cols="7" style="text-align: left;">
           <div style="margin-top: 10px;">
-            {{ truncate(question.quesContent) }}
+            {{ truncate(question.quesContent.content) }}
           </div>
           <div style="font-size: 12px;color: grey">
             {{ question.userName }}发表于{{ question.quesTime }}
