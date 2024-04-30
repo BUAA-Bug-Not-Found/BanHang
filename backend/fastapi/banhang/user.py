@@ -301,9 +301,11 @@ def set_head_image_by_email(req:SetUserHeadUrlRequest, db: Session = Depends(get
     return successResponse()
 
 
-@router.get("/getEmailByUserId", tags=['用户中心'])
-def get_email_by_id(userId:str, db: Session = Depends(get_db)):
+@router.get("/getInfoByUserId", tags=['用户中心'],response_model=UserInfoResponse,
+            responses={400: {"model": excResponse}})
+def get_info_by_id(userId:int, db:Session = Depends(get_db)):
     user = crud.get_user_by_id(db, userId)
-    if user is None:
-        return {'userEmail':''}
-    return {'userEmail':user.email}
+    if not user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
+    return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
+            'user_id':user.id}
