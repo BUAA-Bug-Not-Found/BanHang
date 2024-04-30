@@ -1,5 +1,5 @@
 <template>
-  <div class="blog-view">
+  <v-card class="blog-view">
     <!-- 用户信息部分 -->
     <div class="user-info">
       <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
@@ -43,7 +43,7 @@
       </div>
     </div>
 
-  </div>
+  </v-card>
 
   <!-- 评论列表 -->
   <CommentList :comments="comments"/>

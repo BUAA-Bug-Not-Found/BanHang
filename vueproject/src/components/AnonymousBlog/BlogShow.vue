@@ -51,13 +51,13 @@
         :class="`cursor-pointer`"
         :color="isHovering ? 'cyan-lighten-5' : undefined"
         v-bind="props"
-        @click="goToBlogCardView"
     >
       <v-row>
         <v-col cols="1" style="min-width: 50px">
-          <v-avatar color="surface-variant" style="margin-top: 15px;margin-left: 10px" size="33"></v-avatar>
+          <v-avatar color="surface-variant" style="margin-top: 15px;margin-left: 10px" size="33" :image="userAvatarUrl">
+          </v-avatar>
         </v-col>
-        <v-col cols="5" style="text-align: left;">
+        <v-col cols="5" style="text-align: left;" @click="goToBlogCardView">
           <div style="margin-top: 10px;">
             {{ truncatedContent }}
           </div>
@@ -71,7 +71,7 @@
             {{ 1 }}
           </v-btn>
           <v-btn variant="text" prepend-icon="mdi-message-text" size="small" color="blue-grey-lighten-2">
-            {{ 2 }}
+            {{ this.commentNum }}
           </v-btn>
         </v-col>
       </v-row>
@@ -92,7 +92,6 @@
       </div>
     </v-card>
   </v-hover>
-
 </template>
 
 <script>
@@ -128,6 +127,10 @@ export default {
       type: Array,
       required: true
     },
+    commentNum: {
+      type: Number,
+      required: true
+    }
   },
 
   data() {

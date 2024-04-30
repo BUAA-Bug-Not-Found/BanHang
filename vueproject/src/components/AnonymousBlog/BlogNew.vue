@@ -1,5 +1,5 @@
 <template>
-  <div class="blog-new">
+  <v-card class="blog-new">
     <input v-model="title" placeholder="输入您的标题(不超过50个字符)" class="title-input" maxlength="50">
     <!-- 文字编辑区域 -->
     <textarea v-model="content" placeholder="输入您的帖子内容" class="content-textarea"></textarea>
@@ -52,13 +52,15 @@
         ></v-icon>
       </v-btn>
     </div>
-  </div>
+  </v-card>
 
 </template>
 
 <script>
-import {uploadBlog, uploadfile} from "@/components/AnonymousBlog/api";
+import {uploadBlog} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
+import axios from "axios";
+import {showTip} from "@/components/AccountManagement/AccountManagementAPI";
 
 export default {
   name: "BlogNew",
@@ -120,19 +122,24 @@ export default {
         let form = new FormData
         form.append("file", files[i])
 
-        uploadfile(form).then(      //todo
-            (res) => {
-              if (res.response == "success") {
-                this.images.push(res.fileUrl)
-              } else {
-                ElMessage({
-                  message: '部分图片传输失败',
-                  showClose: true,
-                  type: 'error',
-                })
-              }
-            }
-        )
+        // todo this.images
+        axios({
+          method: "post",
+          url: "https://banhang.lyhtool.com:8000/uploadfile/",
+          data: form,
+          headers: {'Content-Type': 'multipart/form-data'}
+        }).then((res) => {
+          const data = res.data
+          if (data.response == 'success') {
+            console.log(data.fileUrl)
+            this.images.push(data.fileUrl)
+          } else {
+            showTip("图片上传失败, 请重新尝试!", false)
+          }
+        }).catch(() => {
+          showTip("图片上传失败, 请重新尝试!", false)
+        })
+
       }
     },
     // 移除已上传的图片
@@ -166,11 +173,13 @@ export default {
         // form.append("imageList", this.images)
         // form.append("ifAnonymous", this.ifAnonymous)
         // form.append("tagList", this.transNameListToIdList(this.tagList))
-        let json_set = {"title": this.title,
-                        "content": this.content,
-                        "imageList": this.images,
-                        "ifAnonymous": this.ifAnonymous,
-                        "tagList": this.transNameListToIdList(this.tagList)}
+        let json_set = {
+          "title": this.title,
+          "content": this.content,
+          "imageList": this.images,
+          "ifAnonymous": this.ifAnonymous,
+          "tagList": this.transNameListToIdList(this.tagList)
+        }
         uploadBlog(json_set).then(
             (res) => {
               if (res.response == "success") {

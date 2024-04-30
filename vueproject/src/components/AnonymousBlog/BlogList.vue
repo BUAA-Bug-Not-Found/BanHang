@@ -1,7 +1,7 @@
 <template>
   <v-layout class="rounded rounded-md">
 
-    <v-navigation-drawer align="start" width="160">
+    <v-navigation-drawer align="start" width="160" style="position: fixed; margin-top: 60px">
       <v-list dense>
         <v-list-item>
           <v-btn @click="goToNewBlog" class="w-100" color="blue">发帖
@@ -27,7 +27,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main style="min-height: 300px;" align="start">
+    <v-main style="min-height: 300px; height: 100%; overflow: auto" align="start">
       <div class="blog-list">
         <BlogShow
             v-for="(post, index) in blogs"
@@ -39,6 +39,7 @@
             :content="post.content"
             :time="post.time"
             :tag-list="post.tagList"
+            :comment-num="post.commentNum"
         />
 
         <button @click="loadMore" class="load-more-button">加载更多</button>
@@ -133,7 +134,8 @@ export default {
               title: blog.title,
               content: blog.content,
               time: blog.time,
-              tagList: blog.tagList
+              tagList: blog.tagList,
+              commentNum: blog.commentNum
             })));
           }
       )
