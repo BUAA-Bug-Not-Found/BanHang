@@ -92,9 +92,7 @@ export default {
     </div>
     <template v-slot:append>
       <v-btn @click="goto('/message')">
-        <v-badge :content="0" style="margin-right: 10px">
           <v-icon>mdi-email-outline</v-icon>
-        </v-badge>
       </v-btn>
       <v-col v-if="!isLogin">
         <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()"></v-avatar>
@@ -128,9 +126,7 @@ export default {
     </v-col>
     <template v-slot:append>
       <v-btn @click="goto('/message')">
-        <v-badge :content="0" style="margin-right: 10px">
-          <v-icon>mdi-email-outline</v-icon>
-        </v-badge>
+        <v-icon>mdi-email-outline</v-icon>
       </v-btn>
     </template>
   </v-app-bar>
@@ -165,7 +161,10 @@ export default {
 
 <style scoped>
 .pc-router {
-  margin-top: 64px;
+  margin-top: 63px;
+  background-image: url('@/assets/images/background.png');
+  background-size: 100% 100%;
+  height: calc(100vh - 64px);
 }
 .pe-router {
   margin-top: 48px; 

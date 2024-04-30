@@ -30,10 +30,10 @@
                 {{ message.content }}
               </div>
             </div>
-            <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
+            <img src="@/assets/logo.png" class="profile-photo" />
           </div>
           <div v-else class="message-left">
-            <img src="@/assets/logo.png" alt="头像" class="profile-photo" />
+            <img src="@/assets/logo.png" class="profile-photo" />
             <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
               <div class="time">{{ message.time }}</div>
               <div class="content">
@@ -233,5 +233,6 @@ export default {
 
 .pe-container {
   width: 100%;
+  height: 100%;
 }
 </style>
