@@ -192,6 +192,9 @@ def get_questions_by_tag_id(db: Session, offset: int = 0, limit: int = 10, asc: 
     else:
         return sorted(questions, key=lambda q: q.create_at)[offset:offset+limit]
 
+def get_question_sum_by_tag_id(db: Session, tag_id):
+    return len(get_question_tag_by_id(db, tag_id).questions)
+
 def get_question_num(db: Session):
     return len(db.query(models.Question).all())
 
