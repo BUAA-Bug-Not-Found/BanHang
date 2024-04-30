@@ -1,5 +1,5 @@
 <script>
-import {getQuestions, getQuestionsByTagId, getTags, uploadFile, uploadQues} from "@/components/HelpCenter/api";
+import {getQuestionsApi, getQuestionsByTagIdApi, getTagsApi, uploadFileApi, uploadQuesApi} from "@/components/HelpCenter/api";
 import '@wangeditor/editor/dist/css/style.css'
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import QuesCard from "@/components/HelpCenter/QuesCard.vue";
@@ -39,7 +39,7 @@ export default {
     const getMore = () => {
       page.value = page.value + 1
       if (lastIndex.value !== 0) {
-        getQuestionsByTagId(page.value, pageSize.value, tags.value[lastIndex].tagId).then(
+        getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex].tagId).then(
             (data) => {
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
@@ -47,7 +47,7 @@ export default {
             }
         )
       } else {
-        getQuestions(page.value, pageSize.value).then(
+        getQuestionsApi(page.value, pageSize.value).then(
             (data) => {
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
@@ -60,7 +60,7 @@ export default {
 
     const init = () => {
       getMore()
-      getTags().then(
+      getTagsApi().then(
           (data) => {
             console.log(data.tags)
             tags.value = data.tags
@@ -102,7 +102,7 @@ export default {
         ElMessage.error('Avatar picture must be JPG format!');
         return false;
       }
-      uploadFile(file).then((res) => {
+      uploadFileApi(file).then((res) => {
         if (res.response === 'success') {
           ElMessage.success("Avatar picture upload succeeded!")
           imageList.value.push(res.fileUrl)
@@ -118,10 +118,10 @@ export default {
     }
 
     const uploadQuestion = () => {
-      if (valueHtml.value === '') {
+      if (String(valueHtml.value).replace(/<[^>]*>/g, "") === '') {
         ElMessage.error('问题内容不得为空');
       } else {
-        uploadQues(valueHtml.value, imageList.value, selectTags.value).then(
+        uploadQuesApi(valueHtml.value, imageList.value, selectTags.value).then(
             (res) => {
               console.log(res.isSuccess)
               if (res.isSuccess === true) {
@@ -136,6 +136,14 @@ export default {
     }
 
     const display = useDisplay()
+
+    const findTagColor = (index) => {
+      return tags.value[index + 1].tagColor
+    }
+
+    const findTagIcon = (index) => {
+      return tags.value[index + 1].tagIcon
+    }
 
     return {
       editorConfig,
@@ -158,7 +166,9 @@ export default {
       handleChange,
       deleteImage,
       uploadQuestion,
-      shiftIndex
+      shiftIndex,
+      findTagColor,
+      findTagIcon
     }
   }
 }
@@ -270,7 +280,7 @@ export default {
         <div>
           <v-select
               v-model="selectTags"
-              :items="tagNamesArray"
+              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray.slice(1, tagNamesArray.length)"
               multiple
               label="添加标签"
               density="default"

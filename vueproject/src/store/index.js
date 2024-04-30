@@ -98,6 +98,14 @@ export const userStateStore = defineStore("user", {
         async logout() {
             this.isAuthentic = false
             localStorage.clear()
+        },
+        async resetUserInfo() {
+            this.email = ""
+            this.headImage = ""
+            this.nickname = ""
+            this.sign = ""
+            this.user_id = 1
+            localStorage.clear()
         }
     }
 })

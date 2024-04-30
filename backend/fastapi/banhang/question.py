@@ -84,6 +84,53 @@ def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 
     return {"questions": questions, "quesSum": crud.get_question_num(db)}
 
 
+@router.get("/getQuestionsByTagId", tags=["Question"], response_model=GetQuestionsNewResponse,
+            responses={400: {"model": excResponse}})
+def get_questions_by_tag_id(pageNo: int = Query(..., description="页面号，从 1 开始计数"),
+                          pageSize: int = Query(..., description="每页问题数量"),
+                            tagId: int = Query(..., description="标签id"),
+                          db: Session = Depends(get_db),
+                          current_user: Optional[dict] = Depends(authorize)):
+    """
+    imageList保存image的url
+    """
+    if pageNo <= 0 or pageSize <= 0:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "pageNo或pageSize小于等于零，不符合要求。"})
+    if not crud.get_question_tag_by_id(db, tagId):
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "标签不存在。"})
+    offset = (pageNo - 1) * pageSize
+    limit = pageSize
+    db_questions = crud.get_questions_by_tag_id(db, offset=offset, limit=limit, asc=False, tag_id=tagId)
+    questions = []
+    for question in db_questions:
+        # quesId,userId,userName,
+        # quesContent,quesState,quesTime,
+        # ifUserLike, ansSum, likeSum,
+        # tagIdList
+        user = question.user
+        retquestion = {}
+        retquestion['quesId'] = question.id
+        retquestion['userId'] = user.id
+        retquestion['userName'] = user.username
+        retquestion['quesContent'] = {'content': question.content,
+                                      'imageList': [image.image_url for image in question.images]}
+        retquestion['quesState'] = 0 if question.delated else \
+            1 if question.archived else \
+                2 if not question.solved else \
+                    3
+        retquestion['quesTime'] = question.create_at
+        retquestion['ifUserLike'] = (
+            crud.get_user_by_id(db, current_user["uid"]) in question.liked_users if current_user else
+            False)
+        retquestion['ansSum'] = len(question.comments)
+        retquestion['likeSum'] = len(question.liked_users)
+        retquestion['tagIdList'] = [tag.id for tag in question.tags]
+        questions.append(retquestion)
+    return {"questions": questions, "quesSum": crud.get_question_num(db)}
+
+
 class QuestionContent(BaseModel):
     content: str
     imageList: List[str]
@@ -315,7 +362,7 @@ def set_answer_like(set_like_answer: setLikeAnswer, db: Session = Depends(get_db
 class QuestionResponse(BaseModel):
     userId: int
     userName: str
-    quesContent: str
+    quesContent: QuestionContent
     quesState: int
     quesTime: datetime
     ifUserLike: bool
@@ -338,10 +385,10 @@ def get_question_by_id(quesId: int, db: Session = Depends(get_db),
     question_response = QuestionResponse(
         userId=question.user_id,
         userName=crud.get_user_by_id(db, question.user_id).username,
-        quesContent=question.content,
+        quesContent={'content':question.content, 'imageList':[image.image_url for image in question.images]},
         quesState=0 if question.delated else 1 if question.archived else 2 if not question.solved else 3,
         quesTime=question.create_at,
-        ifUserLike=current_user and question in crud.get_user_by_id(db, current_user['uid']).liked_questions,
+        ifUserLike=current_user is not None and question in crud.get_user_by_id(db, current_user['uid']).liked_questions,
         likeSum=len(question.liked_users),
         tagIdList=[tag.id for tag in question.tags],
         ansIdList=[ans.id for ans in question.comments]

@@ -6,8 +6,8 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import RecQuesCard from "@/components/HelpCenter/RecQuesCard.vue";
 import {useDisplay} from "vuetify";
 import AppAnsCard from "@/components/HelpCenter/AppAnsCard.vue";
-import {getTags} from "@/components/HelpCenter/api";
-import {getQuesById} from "@/components/HelpCenter/api";
+import {getTagsApi, setLikeQuesApi} from "@/components/HelpCenter/api";
+import {getQuesByIdApi} from "@/components/HelpCenter/api";
 
 export default {
   name: "QuesInfo",
@@ -45,7 +45,7 @@ export default {
 
     const selectTags = ref([])
 
-    const tags = ref()
+    const tags = ref([])
 
     const recommendQues = ref([
       {
@@ -119,11 +119,12 @@ export default {
       let router = useRouter()
       qid.value = router.currentRoute.value.params.qid
       console.log(qid.value)
-      getQuesById(qid.value).then(
+      getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
-            console.log(question.value)
-            getTags().then(
+            userLike.value = res.question.ifUserLike
+            likeSum.value = res.question.likeSum
+            getTagsApi().then(
                 (data) => {
                   tags.value = data.tags
                   for (let i = 0; i < question.value.tagIdList.length; i++) {
@@ -167,6 +168,25 @@ export default {
       console.log(editor.getAllMenuKeys())
     }
 
+    const userLike = ref(false)
+
+    const likeSum = ref(0)
+
+    const setLikeQues = () => {
+      setLikeQuesApi(qid.value, userLike.value ? 0 : 1).then(
+          (res) => {
+            if (res.isSuccess === true) {
+              if (userLike.value) {
+                likeSum.value--
+              } else {
+                likeSum.value++
+              }
+              userLike.value = !userLike.value;
+            }
+          }
+      )
+    }
+
     return {
       truncate,
       disTags,
@@ -183,7 +203,10 @@ export default {
       editorRef,
       editorConfig,
       recommendQues,
-      display
+      display,
+      userLike,
+      likeSum,
+      setLikeQues
     };
   },
 };
@@ -195,17 +218,26 @@ export default {
       <div class="left-buttons">
         <!-- 点赞 -->
         <div>
-          <v-badge :content="question.likeSum" color="red-lighten-1" offset-x="5" offset-y="5">
-            <v-btn :icon="question.ifUserLike === 1 ?
+          <v-btn :icon="!userLike ?
+              'mdi-thumb-up-outline' : 'mdi-thumb-up'"
+                 color="light-blue-darken-1"
+                 size="small" @click="setLikeQues"
+                 v-if="likeSum === 0"
+          />
+          <v-badge v-else :content="likeSum" color="red-lighten-1" offset-x="5" offset-y="5">
+            <v-btn :icon="!userLike ?
               'mdi-thumb-up-outline' : 'mdi-thumb-up'"
                    color="light-blue-darken-1"
-                   size="small"
+                   size="small" @click="setLikeQues"
             />
           </v-badge>
         </div>
         <!-- 评论 -->
         <div style="margin-top: 25px">
-          <v-badge :content="question.ansSum" color="red-lighten-1" offset-x="5" offset-y="5">
+          <a href="javascript:void(0)" @click="goAnchor('comment')" v-if="question.ansSum !== 0">
+            <v-btn icon="mdi-message-reply-outline" size="small" color="light-blue-darken-1"/>
+          </a>
+          <v-badge v-else :content="question.ansSum" color="red-lighten-1" offset-x="5" offset-y="5">
             <a href="javascript:void(0)" @click="goAnchor('comment')">
               <v-btn icon="mdi-message-reply-outline" size="small" color="light-blue-darken-1"/>
             </a>
@@ -225,7 +257,7 @@ export default {
               </v-col>
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
-                 v-dompurify-html="question.quesContent"/>
+                 v-dompurify-html="question.quesContent.content"/>
             <div style="margin-left: 10px;margin-bottom: 10px">
               <v-chip v-for="tag in disTags" size="small"
                       :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
@@ -308,12 +340,12 @@ export default {
               </v-col>
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
-                 v-dompurify-html="question.quesContent"/><!-- TODO-->
+                 v-dompurify-html="question.quesContent.content"/>
             <div style="margin-left: 10px;margin-bottom: 10px">
-              <v-btn :prepend-icon="question.ifUserLike === 1 ?
+              <v-btn :prepend-icon=" !userLike ?
                   'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"
-                     color="blue-grey-lighten-2">
-                {{ question.likeSum }}
+                     color="blue-grey-lighten-2" @click="setLikeQues">
+                {{ likeSum }}
               </v-btn>
               <v-btn variant="text" prepend-icon="mdi-reply" size="small" color="blue-grey-lighten-2">
                 {{ question.ansSum }}

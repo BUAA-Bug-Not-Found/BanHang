@@ -1,39 +1,3 @@
-<!-- 本文件是关注列表页面 -->
-
-<!-- <template>
-    <v-container>
-        <v-card>
-            <v-tabs v-model="tab" color="red darken-4" fixed-tabs>
-                <v-tab value="one">我的关注</v-tab>
-                <v-tab value="two">我的粉丝</v-tab>
-            </v-tabs>
-            <v-card-text>
-                <v-window v-model="tab">
-                        <v-window-item value="one">
-                            <v-list>
-                                    <v-list-item v-for="(star, index) in stars" :key="index">
-                                            <div style="text-align: left;">
-                                                <v-avatar size="30" style="margin-top: 10px;">
-                                                    <img src='../../assets/nr/headImage.jpg' alt="Avatar">
-                                                </v-avatar>
-                                            </div>
-                                            <span>12312</span>
-                                            <divider></divider>
-                                    </v-list-item>
-                            </v-list>
-                        </v-window-item>
-                </v-window>
-            </v-card-text>
-        </v-card>
-
-        <v-window v-model="tab">
-            <v-window-item value="two">
-            </v-window-item>
-        </v-window>
-
-    </v-container>
-
-</template> -->
 <template>
     <v-container>
       

@@ -184,6 +184,13 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
     else:
         return db.query(models.Question).order_by(models.Question.create_at.desc()).offset(offset).limit(limit).all()
 
+def get_questions_by_tag_id(db: Session, offset: int = 0, limit: int = 10, asc: bool = False, tag_id: int = 1):
+    tag = get_question_tag_by_id(db, tag_id)
+    questions = [q for q in tag.questions]
+    if asc:
+        return sorted(questions, key=lambda q: q.create_at)[offset:offset+limit]
+    else:
+        return sorted(questions, key=lambda q: q.create_at)[offset:offset+limit]
 
 def get_question_num(db: Session):
     return len(db.query(models.Question).all())
@@ -209,7 +216,7 @@ def create_question_tag(db: Session, name: str):
     return tag
 
 
-def get_question_tag_by_id(db: Session, id: int):
+def get_question_tag_by_id(db: Session, id: int)->models.QuestionTag:
     return db.query(models.QuestionTag).filter(models.QuestionTag.id == id).first()
 
 

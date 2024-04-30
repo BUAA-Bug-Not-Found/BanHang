@@ -36,8 +36,6 @@
             <v-icon style="color: #4caf50;">mdi-checkbox-marked-circle</v-icon>
         </v-btn>
     </v-card>
-    
-    
     </div>
 </template>
 
@@ -46,6 +44,7 @@ import axios from "axios";
 import userStateStore from '../../store';
 import {setSign, setNickname, setHeadImage} from "@/components/PersonalCenter/PersonalCenterAPI";
 import router from "@/router";
+import { showTip } from "../AccountManagement/AccountManagementAPI";
 // import { ref } from 'vue';
 
 export default {
@@ -62,7 +61,6 @@ export default {
             headImage1: "https://banhang.oss-cn-beijing.aliyuncs.com/927eb856063e45368c424a4d22b6fffa.jpg",
             exchangeImage: ''
         }
-        
     },
     methods: {
         clickHeadImage() {
@@ -79,36 +77,27 @@ export default {
                 // };
                 let form = new FormData();
                 form.append("file", file);
+                console.log("超时？")
                 axios({
                     method: "post",
-                    url: "http://lyhtool.tpddns.cn:8000/uploadfile/",
+                    url: "https://banhang.lyhtool.com:8000/uploadfile/",
                     data: form,
                     headers: {'Content-Type': 'multipart/form-data'}
                 }).then((res) => {
-                    if (res.response == true) {
-                        this.headImage1 = res.fileUrl; // 回显
+                    const data = res.data
+                    console.log("pass!!")
+                    console.log(res.data)
+                    console.log("pass!!")
+                    if (data.response == 'success') {
+                        console.log("成功上传图片: " + data.fileUrl)
+                        this.headImage1 = data.fileUrl; // 回显
                     } else {
                         // 图片上传失败给一个弹窗
-
+                        showTip("图片上传失败, 请重新尝试!", false)
                     }
+                }).catch(() => {
+                    showTip("图片上传失败, 请重新尝试!", false)
                 })
-                // this.uploadfile(form).then(
-                //     (res) => {
-                //         console.log("上传图片！！！！！")
-                //         console.log(res)
-                //         console.log("上传图片！！！！！")
-                //         // == 表示是否相等(不严格), === 表示是否严格相等(考虑类型等)
-                //         if (res.response == true) {
-                //             // 回显图片, 将头像上传到服务器之后, 后台会返回一个图片url
-                //             this.headImage1 = res.fileUrl;
-                //             // 将该用户的头像的url修改为fileUrl
-                //             // console.log(this.headImagte1)
-                //         } else {
-                //             // 头像上传失败 TODO 错误处理
-                //         }
-                //     }
-                // )
-                // reader.readAsDataURL(file);
             }
         },
         save() {
@@ -129,6 +118,8 @@ export default {
             // 保存头像 TODO
             setHeadImage(userStateStore().email, this.headImage1)
                 .then((res) => {
+                    console.log("保存头像!!")
+                    console.log(res)
                     if (res.isSuccess) {
                         userStateStore().headImage = this.headImage1;
                     }
@@ -144,4 +135,3 @@ export default {
 <style scoped>
 
 </style>
-  
