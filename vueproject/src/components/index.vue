@@ -2,6 +2,7 @@
 import {useDisplay} from 'vuetify'
 import {useRouter} from 'vue-router'
 import {ref} from "vue";
+import userStateStore from '@/store';
 
 export default {
   name: 'HomeIndex',
@@ -30,6 +31,13 @@ export default {
           name: 'searchList',
           params: {keywords: this.searchContent.trim()}
         });
+      }
+    },
+    gotoLoginOrPersonalIndex() {
+      if (userStateStore().user_id != 1) {
+        this.goto('/personalCenter')
+      } else {
+        this.goto('/loginPage')
       }
     }
   }
@@ -74,7 +82,7 @@ export default {
       工具箱
     </v-btn>
 
-    <v-btn @click="goto('/personalCenter')">
+    <v-btn @click="gotoLoginOrPersonalIndex()">
       <v-icon>mdi-account</v-icon>
       用户中心
     </v-btn>
@@ -82,10 +90,12 @@ export default {
     <div style="align-content: center">
       <v-divider style="height:20px" vertical></v-divider>
     </div>
-
     <template v-slot:append>
+      <v-btn @click="goto('/message')">
+          <v-icon>mdi-email-outline</v-icon>
+      </v-btn>
       <v-col v-if="!isLogin">
-        <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="goto('/loginPage')"></v-avatar>
+        <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()"></v-avatar>
         {{ user_name }}
       </v-col>
       <v-col v-else>
@@ -96,7 +106,7 @@ export default {
 
   <v-app-bar :elevation="1" density="compact"
              v-if="display.smAndDown.value">
-    <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="goto('/loginPage')"></v-avatar>
+    <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="gotoLoginOrPersonalIndex()"></v-avatar>
     <v-col>
       <v-text-field
           density="compact"
@@ -116,9 +126,7 @@ export default {
     </v-col>
     <template v-slot:append>
       <v-btn @click="goto('/message')">
-        <v-badge :content="0" style="margin-right: 10px">
-          <v-icon>mdi-email-outline</v-icon>
-        </v-badge>
+        <v-icon>mdi-email-outline</v-icon>
       </v-btn>
     </template>
   </v-app-bar>
@@ -144,7 +152,7 @@ export default {
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
-    <v-btn @click="goto('/personalCenter')">
+    <v-btn @click="gotoLoginOrPersonalIndex()">
       <v-icon>mdi-account</v-icon>
       用户中心
     </v-btn>
@@ -153,7 +161,10 @@ export default {
 
 <style scoped>
 .pc-router {
-  margin-top: 48px;
+  margin-top: 63px;
+  background-image: url('@/assets/images/background.png');
+  background-size: 100% 100%;
+  height: calc(100vh - 64px);
 }
 .pe-router {
   margin-top: 48px; 

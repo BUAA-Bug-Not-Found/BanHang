@@ -1,6 +1,6 @@
 <template>
     <v-card class="box-card"  @click="sendUserToParent">
-        <img :src="avatar" alt="头像" class="profile-photo" />
+        <img :src="avatar" class="profile-photo" />
         <p class="name">{{ user_name }}</p>
     </v-card>
 </template>

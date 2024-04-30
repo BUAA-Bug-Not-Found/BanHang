@@ -5,6 +5,8 @@ on:
     workflows: ["backend_pytest"]
     types:
       - completed
+    branches:
+      - 'dev'
 
 jobs:
   auto_deployment:

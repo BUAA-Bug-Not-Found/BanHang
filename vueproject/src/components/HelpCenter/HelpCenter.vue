@@ -1,5 +1,5 @@
 <script>
-import {getQuestions, uploadFile, uploadQues} from "@/components/HelpCenter/api";
+import {getQuestions, getQuestionsByTagId, getTags, uploadFile, uploadQues} from "@/components/HelpCenter/api";
 import '@wangeditor/editor/dist/css/style.css'
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import QuesCard from "@/components/HelpCenter/QuesCard.vue";
@@ -14,7 +14,7 @@ export default {
   name: "HelpCenter",
   components: {Plus, AppQuesCard, Editor, Toolbar, QuesCard},
   setup() {
-    const page = ref(1)
+    const page = ref(0)
     const pageSize = ref(10)
     const quesSum = ref(4)
     const valueHtml = ref('')
@@ -28,113 +28,63 @@ export default {
 
     const selectTags = ref([])
 
-    const tags = ref([
-      {
-        tagId: 1,
-        tagName: "学业生活",
-        tagIcon: 'mdi-clock',
-        tagColor: 'blue-darken-1',
-      },
-      {
-        tagId: 2,
-        tagName: "日常事务",
-        tagIcon: 'mdi-account',
-        tagColor: 'cyan-darken-1',
-      },
-      {
-        tagId: 3,
-        tagName: "情感交流",
-        tagIcon: 'mdi-flag',
-        tagColor: 'red-darken-1',
+    const tags = ref([])
+
+    const tagNamesArray = ref([])
+
+    const lastIndex = ref(0)
+
+    const questions = ref([])
+
+    const getMore = () => {
+      page.value = page.value + 1
+      if (lastIndex.value !== 0) {
+        getQuestionsByTagId(page.value, pageSize.value, tags.value[lastIndex].tagId).then(
+            (data) => {
+              quesSum.value = data.quesSum
+              questions.value = questions.value.concat(data.questions)
+              console.log(questions.value)
+            }
+        )
+      } else {
+        getQuestions(page.value, pageSize.value).then(
+            (data) => {
+              quesSum.value = data.quesSum
+              questions.value = questions.value.concat(data.questions)
+              console.log(questions.value)
+              console.log(data.questions)
+            }
+        )
       }
-    ])
-
-    const tagNamesArray = ref(['学习生活', '日常生活', '情感交流'])
-
-    const questions = ref(
-        [
-          {
-            quesId: 1,
-            userId: 1,
-            userName: "test_user",
-            quesContent: "test_question1",
-            quesState: 1,
-            quesTime: "2024/4/22 14:03",
-            ifUserLike: 1,
-            ansSum: 20,
-            likeSum: 10,
-            tagIdList: [1, 2]
-          },
-          {
-            quesId: 2,
-            userId: 1,
-            userName: "test_user",
-            quesContent: "test_question2",
-            quesState: 2,
-            quesTime: "2024/4/22 14:03",
-            ifUserLike: 0,
-            ansSum: 20,
-            likeSum: 10,
-            tagIdList: [3]
-          },
-          {
-            quesId: 3,
-            userId: 1,
-            userName: "test_user",
-            quesContent: "test_question3",
-            quesState: 3,
-            quesTime: "2024/4/22 14:03",
-            ifUserLike: 0,
-            ansSum: 2,
-            likeSum: 10,
-            tagIdList: [3]
-          },
-          {
-            quesId: 4,
-            userId: 1,
-            userName: "test_user",
-            quesContent: "test_question4",
-            quesState: 3,
-            quesTime: "2024/4/22 14:03",
-            ifUserLike: 0,
-            ansSum: 2,
-            likeSum: 10,
-            tagIdList: [1]
-          }
-        ]
-    )
+    }
 
     const init = () => {
-      getQuestions(1, pageSize.value).then(
+      getMore()
+      getTags().then(
           (data) => {
-            quesSum.value = data.quesSum
-            //questions.value = data.questions
-            console.log(data.quesSum)
+            console.log(data.tags)
+            tags.value = data.tags
+            tags.value.unshift({
+              tagId: 0,
+              tagName: "全部",
+              tagIcon: 'mdi-home-circle',
+              tagColor: 'indigo-lighten-4',
+            })
+            for (let i = 0; i < tags.value.length; i++) {
+              tagNamesArray.value.push(tags.value[i].tagName)
+            }
           }
       )
     }
 
     init()
 
-    // const updatePage = () => {
-    //   console.log(page.value)
-    //   console.log(questions)
-    //   // getQuestions(page.value, pageSize).then(
-    //   //     (data) => {
-    //   //       quesSum.value = data.ques_sum
-    //   //       questions.value = data.questions
-    //   //     }
-    //   // )
-    // }
-
-    const getMore = () => {
-      page.value = page.value + 1
-      getQuestions(page.value, pageSize).then(
-          (data) => {
-            quesSum.value = data.quesSum
-            questions.value.concat(data.questions)
-          }
-      )
+    const shiftIndex = (index) => {
+      if (index !== lastIndex.value) {
+        page.value = 0
+        lastIndex.value = index
+        getMore()
+      }
     }
 
     onBeforeUnmount(() => {
@@ -147,21 +97,13 @@ export default {
       editorRef.value = editor // 记录 editor 实例，重要！
     }
 
-    const findTagColor = (index) => {
-      return tags.value[index].tagColor
-    }
-
-    const findTagIcon = (index) => {
-      return tags.value[index].tagIcon
-    }
-
     const handleChange = (file) => {
       if (file.raw.type !== "image/jpeg" && file.raw.type !== "image/png") {
         ElMessage.error('Avatar picture must be JPG format!');
         return false;
       }
       uploadFile(file).then((res) => {
-        if(res.response === 'success') {
+        if (res.response === 'success') {
           ElMessage.success("Avatar picture upload succeeded!")
           imageList.value.push(res.fileUrl)
         } else {
@@ -176,12 +118,13 @@ export default {
     }
 
     const uploadQuestion = () => {
-      if(valueHtml.value === '') {
+      if (valueHtml.value === '') {
         ElMessage.error('问题内容不得为空');
-      } else{
+      } else {
         uploadQues(valueHtml.value, imageList.value, selectTags.value).then(
             (res) => {
-              if(res.isSuccess === 'true') {
+              console.log(res.isSuccess)
+              if (res.isSuccess === true) {
                 ElMessage.success('问题发布成功');
                 router.go(0)
               } else {
@@ -210,13 +153,12 @@ export default {
       sheet,
       selectTags,
       tagNamesArray,
-      findTagColor,
-      findTagIcon,
       display,
       imageList,
       handleChange,
       deleteImage,
-      uploadQuestion
+      uploadQuestion,
+      shiftIndex
     }
   }
 }
@@ -237,11 +179,12 @@ export default {
               :value="item"
               color="primary"
               style="text-align: left;"
+              @click="shiftIndex(i)"
           >
             <v-icon :icon="item.tagIcon" size="20" :color="item.tagColor"></v-icon>
             <span style="font-size: 13px;margin-left: 5px">
-            {{ item.tagName }}
-          </span>
+              {{ item.tagName }}
+            </span>
           </v-list-item>
         </v-list>
       </v-col>
@@ -266,17 +209,17 @@ export default {
     <div class="left-buttons">
       <!-- 点赞 -->
       <div>
-          <v-btn :icon="'mdi-plus'"
-                 color="light-blue-darken-1"
-                 size="small" @click="sheet = !sheet"
-          />
+        <v-btn :icon="'mdi-plus'"
+               color="light-blue-darken-1"
+               size="small" @click="sheet = !sheet"
+        />
       </div>
       <!-- 评论 -->
     </div>
     <v-row>
       <v-col cols="12" style="margin-bottom: 25px">
         <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
-                  :question="questions[index]" :tags="tags"/>
+                     :question="questions[index]" :tags="tags"/>
         <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
           加载更多
         </v-btn>
@@ -304,7 +247,7 @@ export default {
         </v-row>
         <v-row justify="space-around">
           <v-col v-for="(image,index) in imageList" :key="'image' + index" :cols="3" style="margin-right: 15px">
-              <img :src="image" class="avatar">
+            <img :src="image" class="avatar">
           </v-col>
           <v-col>
             <el-form>
@@ -316,7 +259,9 @@ export default {
                   :on-change="handleChange"
                   accept=".jpg,.png"
               >
-                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+                <el-icon class="avatar-uploader-icon">
+                  <Plus/>
+                </el-icon>
               </el-upload>
             </el-form>
           </v-col>
@@ -332,8 +277,8 @@ export default {
           >
             <template v-slot:selection="{item, index}">
               <v-chip size="x-small" :color="findTagColor(index)">
-                <v-icon>{{findTagIcon(index)}}</v-icon>
-                {{item.title}}
+                <v-icon>{{ findTagIcon(index) }}</v-icon>
+                {{ item.title }}
               </v-chip>
             </template>
           </v-select>

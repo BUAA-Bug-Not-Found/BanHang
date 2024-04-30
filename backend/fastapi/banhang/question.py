@@ -315,7 +315,7 @@ def set_answer_like(set_like_answer: setLikeAnswer, db: Session = Depends(get_db
 class QuestionResponse(BaseModel):
     userId: int
     userName: str
-    quesContent: str
+    quesContent: QuestionContent
     quesState: int
     quesTime: datetime
     ifUserLike: bool
@@ -338,7 +338,7 @@ def get_question_by_id(quesId: int, db: Session = Depends(get_db),
     question_response = QuestionResponse(
         userId=question.user_id,
         userName=crud.get_user_by_id(db, question.user_id).username,
-        quesContent=question.content,
+        quesContent={'content':question.content, 'imageList':[image.image_url for image in question.images]},
         quesState=0 if question.delated else 1 if question.archived else 2 if not question.solved else 3,
         quesTime=question.create_at,
         ifUserLike=current_user and question in crud.get_user_by_id(db, current_user['uid']).liked_questions,
