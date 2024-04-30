@@ -17,6 +17,7 @@ import 'element-plus/dist/index.css'
 axios.defaults.timeout = 1000;
 //TODO:设置后端远程端口和本地端口
 axios.defaults.baseURL = "https://banhang.lyhtool.com:8000";
+axios.defaults.withCredentials=true
 
 const app = createApp(App)
 

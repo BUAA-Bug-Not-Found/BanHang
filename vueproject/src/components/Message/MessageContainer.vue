@@ -1,5 +1,8 @@
 <template>
-  <div v-if="this.curUserId == '0'">
+  <div v-if="this.myId == 1">
+    <div>您还没有登陆</div>
+  </div>
+  <div v-else-if="this.curUserId == 0">
     <div v-if="this.contactList.lenth == 0">
       您还没有联系人
     </div>
@@ -81,6 +84,7 @@ export default {
       this.curAvatar = cur_user.avatar
       this.updateData()
     }
+    console.log(this.myId)
     this.updateData();
   },
   beforeRouteLeave() {

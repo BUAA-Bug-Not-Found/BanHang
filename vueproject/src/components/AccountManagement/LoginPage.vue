@@ -64,8 +64,10 @@ export default {
                         // 存储用户信息
                         st.login_store_info(ret, this.email);
                         // console.log('存储成功')
+                        console.log(ret)
                         console.log("测试store-> " + userStateStore().nickname)
                         console.log("测试store-> " + userStateStore().sign)
+                        console.log("测试store-> " + userStateStore().user_id)
                         // console.log("测试store-> " + userStateStore())
                         // 跳转
                         this.setSuccessBarInfo("登录成功!!")

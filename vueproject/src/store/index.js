@@ -59,7 +59,7 @@ export const userStateStore = defineStore("user", {
             this.headImage = accountInfo.url;
             this.nickname = accountInfo.nickname;
             this.sign = accountInfo.sign;
-            this.user_id = accountInfo.userId;
+            this.user_id = accountInfo.user_id;
         },
         async reg_success_info(accountInfo) {
             this.user_name = accountInfo.user_name
