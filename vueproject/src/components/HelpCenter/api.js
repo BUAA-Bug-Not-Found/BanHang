@@ -58,12 +58,17 @@ export function uploadFileApi(file) {
 }
 
 export function uploadQuesApi(content, imageList, quesTags) {
-    return axios.post('/uploadQues', {
-        quesContent: {
-            content: content,
-            imageList: imageList,
-        },
-        quesTags: quesTags
+    return axios.request({
+        url: 'uploadQues',
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        data: JSON.stringify({
+            quesContent: {
+                content: content,
+                imageList: imageList,
+            },
+            quesTags: quesTags
+        })
     }).then(response => {
         return response.data
     })
@@ -101,11 +106,62 @@ export function setLikeAnsApi(ansId, setType) {
     return axios.request({
         url: '/setLikeAns',
         method: 'post',
+        headers: {'Content-Type': 'application/json'},
         data: JSON.stringify({
             ansId: ansId,
             setType: setType
         })
     }).then(response => {
+        return response.data
+    })
+}
+
+export function uploadAnsApi(quesId, content, imageList) {
+    return axios.request(
+        {
+            url: '/answerQues',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                quesId: quesId,
+                ansContent: {
+                    content: content,
+                    imageList: imageList
+                },
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function getAnsById(ansId) {
+    return axios.request(
+        {
+            url: '/getAnsById',
+            params: {
+                ansId: ansId
+            },
+            method: 'get',
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function setAnsLikeAPI(ansId, ansType) {
+    return axios.request(
+        {
+            url: '/setAnsLike',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                    ansId: ansId,
+                    setType: ansType
+                }
+            )
+        }
+    ).then(response => {
         return response.data
     })
 }

@@ -1,6 +1,6 @@
 <script>
 import {ref} from "vue";
-// import {getAnsById} from "@/components/HelpCenter/api";
+import {getAnsById} from "@/components/HelpCenter/api";
 
 export default {
   name: "AppAnsCard",
@@ -8,25 +8,15 @@ export default {
   setup(props) {
 
     const init = () => {
-      // getAnsById(props.ansId).then((res) => {
-      //   ans.value = res.ans
-      // })
+      getAnsById(props.ansId).then((res) => {
+        ans.value = res.answer
+      })
     }
 
     const ansIdRef = ref(props.ansId)
 
-    const ans = ref(
-        {
-          userId: 1,
-          userName: 'testuser_ans',
-          ansContent: "<h3>Lorem ipsum dolor sit amet consectetur adipisicing elit.</h3> \" +\n" +
-              "          \"Commodi, ratione debitis quis est labore voluptatibus! Eaque cupiditate minima, \" +\n" +
-              "          \"at placeat totam, magni doloremque veniam neque porro libero rerum unde voluptatem!\"",
-          ansState: '1',
-          ansTime: '2024-4-24 13:42',
-          ifUserLike: 0,
-          likeSum: 10
-        })
+    const ans = ref()
+
     init()
 
     return {ans, ansIdRef};

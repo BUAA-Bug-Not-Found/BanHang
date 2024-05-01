@@ -1,5 +1,11 @@
 <script>
-import {getQuestionsApi, getQuestionsByTagIdApi, getTagsApi, uploadFileApi, uploadQuesApi} from "@/components/HelpCenter/api";
+import {
+  getQuestionsApi,
+  getQuestionsByTagIdApi,
+  getTagsApi,
+  uploadFileApi,
+  uploadQuesApi
+} from "@/components/HelpCenter/api";
 import '@wangeditor/editor/dist/css/style.css'
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import QuesCard from "@/components/HelpCenter/QuesCard.vue";
@@ -39,11 +45,12 @@ export default {
     const getMore = () => {
       page.value = page.value + 1
       if (lastIndex.value !== 0) {
-        getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex].tagId).then(
+        getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex.value].tagId).then(
             (data) => {
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
               console.log(questions.value)
+              console.log(quesSum.value)
             }
         )
       } else {
@@ -51,8 +58,6 @@ export default {
             (data) => {
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
-              console.log(questions.value)
-              console.log(data.questions)
             }
         )
       }
@@ -62,7 +67,6 @@ export default {
       getMore()
       getTagsApi().then(
           (data) => {
-            console.log(data.tags)
             tags.value = data.tags
             tags.value.unshift({
               tagId: 0,
@@ -83,6 +87,7 @@ export default {
       if (index !== lastIndex.value) {
         page.value = 0
         lastIndex.value = index
+        questions.value = []
         getMore()
       }
     }
@@ -226,15 +231,13 @@ export default {
       </div>
       <!-- 评论 -->
     </div>
-    <v-row>
-      <v-col cols="12" style="margin-bottom: 25px">
-        <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
-                     :question="questions[index]" :tags="tags"/>
-        <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
-          加载更多
-        </v-btn>
-      </v-col>
-    </v-row>
+    <v-col cols="12" style="margin-bottom: 25px">
+      <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
+                   :question="questions[index]" :tags="tags"/>
+      <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
+        加载更多
+      </v-btn>
+    </v-col>
   </div>
   <v-bottom-sheet v-model="sheet" inset>
     <v-card

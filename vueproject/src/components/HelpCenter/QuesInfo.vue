@@ -6,12 +6,15 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import RecQuesCard from "@/components/HelpCenter/RecQuesCard.vue";
 import {useDisplay} from "vuetify";
 import AppAnsCard from "@/components/HelpCenter/AppAnsCard.vue";
-import {getTagsApi, setLikeQuesApi} from "@/components/HelpCenter/api";
+import {getTagsApi, setLikeQuesApi, uploadAnsApi} from "@/components/HelpCenter/api";
 import {getQuesByIdApi} from "@/components/HelpCenter/api";
+import {ElMessage} from "element-plus";
+import router from "@/router";
+import UserStateStore from "@/store";
 
 export default {
   name: "QuesInfo",
-  components: {AppAnsCard, RecQuesCard, Editor, Toolbar, AnsCard},
+  components: {AppAnsCard, AnsCard, RecQuesCard, Editor, Toolbar},
   data() {
     return {
       top: false,
@@ -109,8 +112,6 @@ export default {
     const disTags = ref([])
     const qid = ref(0)
 
-    const replyHtml = ref("");
-
     const question = ref(null)
 
     const answers = ref()
@@ -118,7 +119,6 @@ export default {
     const init = () => {
       let router = useRouter()
       qid.value = router.currentRoute.value.params.qid
-      console.log(qid.value)
       getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
@@ -172,19 +172,46 @@ export default {
 
     const likeSum = ref(0)
 
-    const setLikeQues = () => {
-      setLikeQuesApi(qid.value, userLike.value ? 0 : 1).then(
+    const replyHtml = ref("");
+
+    const imageList = ref([])
+
+    const uploadAnswer = () => {
+      if (String(replyHtml.value).replace(/<[^>]*>/g, "") === '') {
+        ElMessage.error("不能上传空白答案")
+      }
+      uploadAnsApi(qid.value, replyHtml.value, imageList.value).then(
           (res) => {
             if (res.isSuccess === true) {
-              if (userLike.value) {
-                likeSum.value--
-              } else {
-                likeSum.value++
-              }
-              userLike.value = !userLike.value;
+              ElMessage.success("回答已上传")
+              replyHtml.value = ''
+              imageList.value = []
+              router.go(0)
+            } else {
+              ElMessage.error("回答失败，请稍后再试")
             }
           }
       )
+    }
+
+    const setLikeQues = () => {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+      } else {
+        setLikeQuesApi(qid.value, userLike.value ? 0 : 1).then(
+            (res) => {
+              if (res.isSuccess === true) {
+                if (userLike.value) {
+                  likeSum.value--
+                } else {
+                  likeSum.value++
+                }
+                userLike.value = !userLike.value;
+              }
+            }
+        )
+      }
     }
 
     return {
@@ -206,7 +233,8 @@ export default {
       display,
       userLike,
       likeSum,
-      setLikeQues
+      setLikeQues,
+      uploadAnswer
     };
   },
 };
@@ -272,7 +300,11 @@ export default {
             <div id="comment"
                  style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
               <span style="font-weight: bold;font-size: 20px">评论 </span>
-              <span><v-btn prepend-icon="mdi-reply" color="primary">发送回复</v-btn></span>
+              <span>
+                <v-btn prepend-icon="mdi-reply" color="primary" @click="uploadAnswer">
+                  发送回复
+                </v-btn>
+              </span>
             </div>
             <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
               <Toolbar
@@ -293,7 +325,9 @@ export default {
               <span style="font-weight: bold;font-size: 20px">全部评论 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
-            <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans-' + ans" :index="index"/>
+            <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
+                     :ansId="ans" :index="index"/>
+            <div style="height: 100px"></div>
           </v-card>
         </v-col>
         <v-col cols="3">
@@ -384,13 +418,14 @@ export default {
               <span style="font-weight: bold;font-size: 20px">全部评论 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
-            <AppAnsCard v-for="(ans,index) in question.ansIdList" :key="'ans-' + ans" :index="index"/>
+            <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
+              <AppAnsCard :ansId="ans" :index="index"/>
+            </div>
+
           </v-card>
         </v-col>
       </v-row>
-      <div style="height: 200px">
-
-      </div>
+      <div style="height: 200px"></div>
     </div>
   </div>
 </template>

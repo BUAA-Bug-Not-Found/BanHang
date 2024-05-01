@@ -2,6 +2,8 @@
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
 import {setLikeQuesApi} from "@/components/HelpCenter/api";
+import UserStateStore from "@/store"
+import {ElMessage} from "element-plus";
 
 export default {
   name: "QuesCard",
@@ -55,18 +57,25 @@ export default {
     }
 
     const setLikeQues = () => {
-      setLikeQuesApi(props.question.quesId, userLike.value ? 0 : 1).then(
-          (res) => {
-            if (res.isSuccess === true) {
-              if (userLike.value) {
-                likeSum.value--
+      const state = UserStateStore()
+      if(!state.email) {
+        ElMessage.error("请先登录")
+      } else {
+        setLikeQuesApi(props.question.quesId, userLike.value ? 0 : 1).then(
+            (res) => {
+              if (res.isSuccess === true) {
+                if (userLike.value) {
+                  likeSum.value--
+                } else {
+                  likeSum.value++
+                }
+                userLike.value = !userLike.value;
               } else {
-                likeSum.value++
+                ElMessage.error("点赞失败，请稍后再试")
               }
-              userLike.value = !userLike.value;
             }
-          }
-      )
+        )
+      }
     }
 
     return {
