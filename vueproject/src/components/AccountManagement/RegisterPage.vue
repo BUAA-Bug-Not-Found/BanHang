@@ -17,7 +17,7 @@
 
 <script>
 import router from '@/router';
-import { trySendCheckCode, tryRegister, showTip } from './AccountManagementAPI';
+import { trySendCheckCode, tryRegister, showTip, hashPassword, isNicknameFormatOk, isPasswordFormatOk, PASSWORD_FORMAT_TIP, NICKNAME_FORMAT_TIP } from './AccountManagementAPI';
 
 export default {
     name : "RegisterPage", 
@@ -69,9 +69,13 @@ export default {
                 showTip("请确认密码", false)
             } else if (infos.pass1 !== infos.pass2) {
                 showTip("两次输入的密码不相等, 请重新输入", false)
+            } else if (!isNicknameFormatOk(infos.name)) {
+                showTip(NICKNAME_FORMAT_TIP, false)
+            } else if (!isPasswordFormatOk(infos.pass1)) {
+                showTip(PASSWORD_FORMAT_TIP, false)
             } else {
                 // 注册账户
-                tryRegister(infos.name, infos.toEmail, infos.pass1, infos.inputCheckCode)
+                tryRegister(infos.name, infos.toEmail, hashPassword(infos.pass1), infos.inputCheckCode)
                     .then((res) => {
                         if (res.isSuccess) {
                             showTip("注册成功", true)
@@ -85,7 +89,6 @@ export default {
     }
 }
 </script>
-
 
 <style scoped>
     .v-text-field {

@@ -2,10 +2,13 @@ import axios from "axios";
 
 export function queryStar(_a, _b) {
     // a b email
+    console.log("query参数: ")
+    console.log(_a)
+    console.log(_b)
     return axios.request({
         url: "/queryStar",
-        method: "post",
-        data: {
+        method: "get",
+        params: {
             "email1": _a,
             "email2": _b
         }
@@ -33,9 +36,7 @@ export function setStarState(_a, _b, _state) {
 }
 
 export function setNickname(_a, _email) {
-    // 
     return axios.request({
-        // 
         url: "/setNicknameByEmail",
         method: "post",
         data: {
@@ -96,7 +97,6 @@ export function getWaterBlogs(_email) {
         
     })
 }
-
 
 export function getStars(_email) {
     // 

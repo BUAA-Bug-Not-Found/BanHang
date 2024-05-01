@@ -25,7 +25,7 @@
 
 <script>
 import router from '@/router';
-import {tryLogin, getUserInfos, showTip} from "./AccountManagementAPI.js";
+import { getUserInfos, showTip, tryLogin, hashPassword} from "./AccountManagementAPI.js";
 import {userStateStore} from "../../store/index";
 import "element-plus/dist/index.css";
 
@@ -44,8 +44,29 @@ export default {
             } else if (!this.password) {
                 showTip("请输入密码", false)
             } else {
-                // 和数据库发送请求进行信息验证
-                tryLogin(this.email, this.password).then((res) => {
+                // // 和数据库发送请求拿到密文密码, 然后拿用户输入的明文和密文进行比对
+                // getPasswordByEmail(this.email).then((res) => {
+                //     if (res === false) {
+                //         showTip("登录异常", false)
+                //     } else {
+                //         const darkPass = res.password
+                //         // 明暗文进行比对
+                //         if (hashTool.compareSync(this.password, darkPass)) {
+                //             getUserInfos(this.email).then((ret) => {
+                //                 const st = userStateStore();
+                //                 // 存储用户信息
+                //                 st.login_store_info(ret, this.email);
+                //                 showTip("登录成功 !", true)
+                //                 router.push({path: "/HelpCenter"});
+                                
+                //             })
+                //         } else {
+                //             showTip("信息验证失败, 请重新输入!!", false)
+                //         }
+                //     }
+                // })
+                
+                tryLogin(this.email, hashPassword(this.password)).then((res) => {
                     if (res.isSuccess) { // 用户信息验证成功
                         getUserInfos(this.email).then((ret) => {
                             const st = userStateStore();

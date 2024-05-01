@@ -16,7 +16,7 @@
 
 <script>
 import router from '@/router';
-import { tryResetPassword, trySendCheckCode, showTip } from './AccountManagementAPI';
+import { tryResetPassword, trySendCheckCode, showTip, hashPassword, isPasswordFormatOk, PASSWORD_FORMAT_TIP } from './AccountManagementAPI';
 export default {
     data() {
         return {
@@ -51,11 +51,13 @@ export default {
                 showTip("请确认密码", false)
             } else if (this.password1 !== this.password2) {
                 showTip("两次输入的密码不一致, 请重新输入", false)
+            } else if (!isPasswordFormatOk(this.password1)) {
+                showTip(PASSWORD_FORMAT_TIP, false)
             } else if (!this.checkCode) {
                 showTip("请输入验证码", false)
             } else {
                 // 调用后端函数进行验证码验证
-                tryResetPassword(this.email, this.password1, this.checkCode)
+                tryResetPassword(this.email, hashPassword(this.password1), this.checkCode)
                     .then((res) => {
                         if (res.isSuccess) {
                             showTip("重置成功 !!", true)

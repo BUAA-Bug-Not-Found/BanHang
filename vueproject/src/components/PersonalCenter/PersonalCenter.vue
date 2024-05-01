@@ -1,7 +1,6 @@
 <template>
     <v-container>
       <div>
-        <!-- <input id="fileInput" type="file" @change="handleFileUpload" accept="image/*" multiple class="image-upload-input"> -->
         <v-card style="margin-bottom: 20px; height: auto;">
             <!-- div好像是行内的 -->
             <div style="text-align: center;">
@@ -22,10 +21,11 @@
             </div>
             
             <div style="text-align: center;">
-              <!-- 头像 -->
-              <v-avatar size="80" style="margin-top: 10px;">
-                <img :src=headUrl alt="Avatar">
-              </v-avatar>
+              <v-avatar color="surface-variant"
+             style="margin-top: 15px;margin-left: 10px"
+              size="80"
+              :image="headUrl">
+            </v-avatar>
             </div>
             <div style="margin-top: 10px;">
               <span class="nickname">{{ nickname }}</span>
@@ -45,7 +45,6 @@
           <v-tab value="one">匿名贴</v-tab>
           <v-tab value="two">互助贴</v-tab>
         </v-tabs>
-        <!-- <span v-if="helpBlogs.length === 2">测试v-if</span> -->
         
         <v-card-text>
           <v-window v-model="tab">
@@ -93,19 +92,17 @@
   import router from '@/router';
   import userStateStore from '../../store';
   import {getHelpBlogs, getWaterBlogs} from "./PersonalCenterAPI";
-
+  import { showTip } from '../AccountManagement/AccountManagementAPI';
+  
   export default {
     created() {
-      // 切入本页面后自动执行本函数
-      // 加载数据
       // 为什么不会立即回显???? TODO
-      // console.log("这里是personCenter的mounted!!")
-      // console.log(this.helpBlogs.length)
       this.headUrl = userStateStore().headImage;
       this.nickname = userStateStore().nickname;
       this.email = userStateStore().email;
       this.sign = userStateStore().sign;
       if (!this.email) {
+        showTip("请首先登陆", false)
         router.replace({path: "loginPage"})
       }
       // console.log("user.sign-> " + this.sign)
@@ -163,7 +160,6 @@
         // 注销登录信息
         userStateStore().resetUserInfo()
         router.replace({path: "/loginPage"})
-        // router.push({path: "/loginPage"})
       },
       formatDateTime(dateTimeStr) {
         // 创建 Date 对象

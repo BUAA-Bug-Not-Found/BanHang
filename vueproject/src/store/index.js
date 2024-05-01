@@ -74,7 +74,6 @@ export const userStateStore = defineStore("user", {
             this.nickname = ""
             this.sign = ""
             this.user_id = 1
-            
         }
     }
 })

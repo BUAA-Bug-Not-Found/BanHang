@@ -11,7 +11,9 @@
     "@element-plus/icons-vue": "^2.3.1",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.12",
+    "bcryptjs": "^2.4.3",
     "core-js": "^3.8.3",
+    "crypto-js": "^4.2.0",
     "element-plus": "^2.7.2",
     "vue": "^3.2.13"
   },
