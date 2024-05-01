@@ -47,12 +47,14 @@ export function getAnsByIdApi(ansId) {
 }
 
 export function uploadFileApi(file) {
-    return axios.post('/uploadfile', {
-            file: file
-        },
-        {
-            headers: {'Content-Type': 'multipart/form-data'}
-        }).then(response => {
+    let form = new FormData
+    form.append("file", file)
+    return axios({
+        method: "post",
+        url: "https://banhang.lyhtool.com:8000/uploadfile/",
+        data: form,
+        headers: {'Content-Type': 'multipart/form-data'}
+    }).then(response => {
         return response.data
     })
 }
