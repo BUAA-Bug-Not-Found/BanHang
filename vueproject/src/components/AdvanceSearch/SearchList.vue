@@ -50,6 +50,7 @@
           :content="post.content"
           :time="post.time"
           :tag-list="post.tagList"
+          :user-id="post.userId"
       />
     </div>
   </div>
@@ -128,7 +129,8 @@ export default {
               title: blog.title,
               content: blog.content,
               time: blog.time,
-              tagList: blog.tagList
+              tagList: blog.tagList,
+              userId: blog.userId
             })));
             console.log(this.searchBlogList)
           }
