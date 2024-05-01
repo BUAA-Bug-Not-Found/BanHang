@@ -4,17 +4,17 @@
     <div>
         <v-card> 
         <v-toolbar density="compact" style="background-color:aliceblue;">
-            <!-- <v-spacer></v-spacer> -->
-            <!-- <span style="">编辑资料</span> -->
             <v-spacer></v-spacer>
         </v-toolbar>
         <div style="margin-top: 10px;">
             <v-card-text>
                 <div style="text-align: center;">
-                    <!-- 头像 -->
-                    <v-avatar size="80" style="margin-top: 40px; cursor: pointer;" @click="clickHeadImage">
-                        <img :src="headImage1" alt="Avatar">
-                        <input v-show="false" id="fileInput" type="file" @change="handleFileUpload" ref="fileInput" accept="image/*" multiple>
+                    <input v-show="false" id="fileInput" type="file" @change="handleFileUpload" ref="fileInput" accept="image/*" multiple>
+                    <v-avatar color="surface-variant"
+                    style="margin-top: 15px;margin-left: 10px; cursor: pointer;"
+                    size="80"
+                    :image="headImage1"
+                    @click="clickHeadImage">
                     </v-avatar>
                 </div>
                 <v-card style="margin-top: 18px;">
@@ -45,14 +45,18 @@ import userStateStore from '../../store';
 import {setSign, setNickname, setHeadImage} from "@/components/PersonalCenter/PersonalCenterAPI";
 import router from "@/router";
 import { showTip } from "../AccountManagement/AccountManagementAPI";
-// import { ref } from 'vue';
 
 export default {
     name: "EditPersonalInfo",
-    mounted() {
+    created() {
         // 加载数据
         this.nickname = userStateStore().nickname
         this.sign = userStateStore().sign
+        this.headImage1 = userStateStore().headImage
+        if (!userStateStore().email) {
+            showTip("请首先登陆", false)
+            router.replace({path: "loginPage"})
+        }
     },
     data() {
         return {
@@ -68,16 +72,10 @@ export default {
         },
         handleFileUpload(event) {
             // 当用户点击了新的图片之后才会触发这个函数
-            // console.log('处理图片上传');
             const file = event.target.files[0];
             if (file) {
-                // const reader = new FileReader();
-                // reader.onload = (e) => {
-                //     this.avatarSrc = e.target.result;
-                // };
                 let form = new FormData();
                 form.append("file", file);
-                console.log("超时？")
                 axios({
                     method: "post",
                     url: "https://banhang.lyhtool.com:8000/uploadfile/",
@@ -85,9 +83,6 @@ export default {
                     headers: {'Content-Type': 'multipart/form-data'}
                 }).then((res) => {
                     const data = res.data
-                    console.log("pass!!")
-                    console.log(res.data)
-                    console.log("pass!!")
                     if (data.response == 'success') {
                         console.log("成功上传图片: " + data.fileUrl)
                         this.headImage1 = data.fileUrl; // 回显
@@ -115,17 +110,15 @@ export default {
                         userStateStore().nickname = this.nickname;
                     }
                 })
-            // 保存头像 TODO
+            // 保存头像
             setHeadImage(userStateStore().email, this.headImage1)
                 .then((res) => {
-                    console.log("保存头像!!")
-                    console.log(res)
                     if (res.isSuccess) {
                         userStateStore().headImage = this.headImage1;
+                        router.push({path: "/personalCenter"});
                     }
                 })
             // if (f1 && f2) {
-            router.push({path: "/personalCenter"});
             // }
         }
     },

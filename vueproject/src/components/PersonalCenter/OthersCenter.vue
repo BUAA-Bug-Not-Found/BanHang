@@ -76,6 +76,10 @@ import { getUserInfos, showTip } from '../AccountManagement/AccountManagementAPI
 import { getHelpBlogs } from './PersonalCenterAPI';
 export default {
   created() {
+    if (!userStateStore().email) {
+      showTip("请首先登陆", false)
+      router.replace({path: "loginPage"})
+    }
     this.otherEmail = router.currentRoute.value.params.e
     // 拉取该用户的信息
     getUserInfos(this.otherEmail).then((_infos) => {
@@ -89,9 +93,11 @@ export default {
     getHelpBlogs(this.otherEmail).then((_helpBlogs) => {
       this.otherBlogs = _helpBlogs;
     })
-    // 检查登录状态
+    // 当用户没有登陆的时候，这时候是无法正常queryStar的
     queryStar(userStateStore().email, this.otherEmail).then((res) => {
       this.isStar = res.isStar
+    }).catch(() => {
+      showTip("queryStar异常了！", false)
     })
   },
   data() {
