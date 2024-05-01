@@ -28,7 +28,7 @@ export default {
     const sheet = ref(false)
 
     const toolbarConfig = {}
-    const editorConfig = {placeholder: '请输入内容...'}
+    const editorConfig = {placeholder: '请输入问题内容...'}
 
     const imageList = ref([])
 
@@ -42,6 +42,14 @@ export default {
 
     const questions = ref([])
 
+    const reviseMode = ref(false)
+
+    const reviseHtml = ref('')
+
+    const reviseImgList = ref([])
+
+    const reviseTagList = ref([])
+
     const getMore = () => {
       page.value = page.value + 1
       if (lastIndex.value !== 0) {
@@ -49,8 +57,6 @@ export default {
             (data) => {
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
-              console.log(questions.value)
-              console.log(quesSum.value)
             }
         )
       } else {
@@ -107,7 +113,7 @@ export default {
         ElMessage.error('Avatar picture must be JPG format!');
         return false;
       }
-      uploadFileApi(file).then((res) => {
+      uploadFileApi(file.raw).then((res) => {
         if (res.response === 'success') {
           ElMessage.success("Avatar picture upload succeeded!")
           imageList.value.push(res.fileUrl)
@@ -173,7 +179,11 @@ export default {
       uploadQuestion,
       shiftIndex,
       findTagColor,
-      findTagIcon
+      findTagIcon,
+      reviseMode,
+      reviseHtml,
+      reviseImgList,
+      reviseTagList
     }
   }
 }
@@ -258,12 +268,24 @@ export default {
             </v-btn>
           </v-col>
         </v-row>
-        <v-row justify="space-around">
-          <v-col v-for="(image,index) in imageList" :key="'image' + index" :cols="3" style="margin-right: 15px">
-            <img :src="image" class="avatar">
+        <v-row>
+          <v-col v-for="(image,index) in imageList" :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+                >
+            <div class="avatar-wrapper">
+              <el-image
+                  class="avatar"
+                  :src="image"
+                  :zoom-rate="1.2"
+                  :max-scale="7"
+                  :min-scale="0.2"
+                  :preview-src-list="imageList"
+                  :initial-index="4"
+                  :fit="'cover'"
+              />
+            </div>
           </v-col>
-          <v-col>
-            <el-form>
+          <v-col :cols="display.smAndDown.value? 4 : 3">
+            <el-form style="width: 100%">
               <el-upload
                   class="avatar-uploader"
                   action="#"
@@ -326,12 +348,6 @@ export default {
   right: 2%;
   transform: translateY(-86%);
 }
-
-.avatar-uploader .avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
-}
 </style>
 
 <style>
@@ -340,7 +356,12 @@ export default {
   border-radius: 6px;
   cursor: pointer;
   position: relative;
+
   overflow: hidden;
+  height: 0;
+  padding: 0;
+  padding-bottom: 100%;
+  width: 100%;
   transition: var(--el-transition-duration-fast);
 }
 
@@ -348,11 +369,33 @@ export default {
   border-color: var(--el-color-primary);
 }
 
+.avatar-wrapper{
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding: 0;
+  padding-bottom: 100%;
+}
+
+.avatar {
+  position: absolute !important;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  overflow: hidden;
+}
+
 .el-icon.avatar-uploader-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   font-size: 28px;
   color: #8c939d;
-  width: 178px;
-  height: 178px;
+  width: 100%;
+  height: 100%;
   text-align: center;
 }
 </style>
