@@ -62,8 +62,11 @@
         :nickname="post.nickname"
         :sign="post.sign"
         :email="post.email"
-        :headImage="post.headImage"
-      />
+        :headImage="post.url"
+      >
+      <!-- <v-divider style="margin-top: 0px;"></v-divider> -->
+
+    </UserShow>
     </div>
   </div>
 
@@ -87,24 +90,7 @@ export default {
       nowSortMethod: "",
       searchBlogList: [],
       searchQuesList: [],
-      searchUserList: [{
-        nickname: "nr",
-        email: "21371455@buaa.edu.cn",
-        headImage: "",
-        sign: "还没有签名"
-      },
-      {
-        nickname: "nr",
-        email: "21371455@buaa.edu.cn",
-        headImage: "",
-        sign: "还没有签名"
-      },
-      {
-        nickname: "nr",
-        email: "21371455@buaa.edu.cn",
-        headImage: "",
-        sign: "还没有签名"
-      }],
+      searchUserList: [],
       quesPageSize: 15,
       blogPageSize: 15,
       userPageSize: 15,
@@ -122,7 +108,7 @@ export default {
     this.nowSortMethod = "byRelation"
     this.searchQuesList = []
     this.searchBlogList = []
-    // this.searchUserList = []
+    this.searchUserList = []
     this.quesPageNo = 1
     this.blogPageNo = 1
     this.userPageNo = 1
@@ -153,7 +139,6 @@ export default {
       searchQuesAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
              this.searchQuesList = this.searchQuesList.concat(data.questions)
-
             // this.searchQuesList = this.searchQuesList.concat(data.map(ques => ({
             //   quesId: ques.quesId,
             //   userId: ques.userId,
@@ -171,8 +156,30 @@ export default {
     },
 
     searchUsers() {
+      // this.searchUserList = [{
+      //   nickname: "nr",
+      //   email: "1052683403@qq.com",
+      //   url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
+      //   sign: "还没有签名"
+      // },
+      // {
+      //   nickname: "nr",
+      //   url: "21371455@buaa.edu.cn",
+      //   headImage: "",
+      //   sign: "还没有签名"
+      // },
+      // {
+      //   nickname: "nr",
+      //   url: "21371455@buaa.edu.cn",
+      //   headImage: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
+      //   sign: "还没有签名"
+      // }]
       searchUserAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
+            console.log("--->")
+            console.log(data.users)
+            console.log("<---")
+            // data.users是一个列表
             this.searchUserList = this.searchUserList.concat(data.users)
             // this.searchUserList = this.searchUserList.concat(data.map(user =>({
             //   nickname: user.nickname,
