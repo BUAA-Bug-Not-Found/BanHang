@@ -77,6 +77,8 @@ export const userStateStore = defineStore("user", {
             this.nickname = accountInfo.nickname;
             this.sign = accountInfo.sign;
             this.user_id = accountInfo.user_id;
+            this.user_name = this.nickname;
+            this.profile_photo = this.headImage;
             if (isApp) {
                 localStorage.setItem("userInfo", JSON.stringify({
                     user_id: this.user_id,
