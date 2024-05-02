@@ -108,7 +108,7 @@ export default {
     },
     errorCallback(error) {
       // 失败回调函数
-      this.message = '错误'
+      this.message = 'Cookie未设置或错误'
       this.taskList = []
     }
   }

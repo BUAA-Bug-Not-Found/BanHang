@@ -2,7 +2,7 @@ import {defineStore} from "pinia";
 import mitt from "mitt" 
 
 export const $bus = mitt();
-let isApp = false;
+export const isApp = false;
 export const userStateStore = defineStore("user", {
     state: () => {
         if (isApp) {

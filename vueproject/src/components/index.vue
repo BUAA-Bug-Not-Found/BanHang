@@ -4,6 +4,7 @@ import {useRouter} from 'vue-router'
 import {ref} from "vue";
 import userStateStore from '@/store';
 import { $bus } from '@/store';
+import { isApp } from '@/store';
 
 export default {
   name: 'HomeIndex',
@@ -30,7 +31,17 @@ export default {
       avatar.value = data.avatar
     }
     $bus.on('updateIndexData', updateData);
-    return {display, search, user_name, isLogin, avatar, goto, searchContent, updateData}
+
+    const downloadApk = () => {
+      const url = '/path/to/your/app.apk'; // 替换为实际的 APK 文件路径
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'app.apk';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    return {display, search, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp}
   },
   unmounted() {
     $bus.off('updateIndexData', this.updateData)
@@ -126,7 +137,7 @@ export default {
     <v-col>
       <v-text-field
           density="compact"
-          class="w-50"
+          class="w-80"
           label="搜索"
           variant="outlined"
           hide-details
@@ -140,6 +151,7 @@ export default {
         </template>
       </v-text-field>
     </v-col>
+    <v-btn v-if="!isApp" color="primary" @click="downloadApk">Download APK</v-btn>
     <template v-slot:append>
       <v-btn @click="goto('/message')">
         <v-icon>mdi-email-outline</v-icon>
