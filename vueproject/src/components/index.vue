@@ -3,13 +3,17 @@ import {useDisplay} from 'vuetify'
 import {useRouter} from 'vue-router'
 import {ref} from "vue";
 import userStateStore from '@/store';
+import { $bus } from '@/store';
 
 export default {
   name: 'HomeIndex',
   setup() {
+    const store = userStateStore()
     const display = useDisplay()
-    const isLogin = false
-    const user_name = "user1"
+    const isLogin = ref(store.isAuthentic);
+    const user_name = ref(store.user_name);
+    const avatar = ref(store.headImage);
+
     const searchContent = ref("")
     const search = () => {
       console.log("search")
@@ -20,10 +24,17 @@ export default {
     const goto = (route) => {
       router.push(route)
     }
-
-    return {display, search, user_name, isLogin, goto, searchContent}
+    const updateData = (data) => {
+      isLogin.value = data.isLogin
+      user_name.value = data.user_name
+      avatar.value = data.avatar
+    }
+    $bus.on('updateIndexData', updateData);
+    return {display, search, user_name, isLogin, avatar, goto, searchContent, updateData}
   },
-
+  unmounted() {
+    $bus.off('updateIndexData', this.updateData)
+  },
   methods: {
     navigateToSearchList() {
       if (this.searchContent.trim() !== '') {
@@ -95,19 +106,23 @@ export default {
       <v-btn @click="goto('/message')">
           <v-icon>mdi-email-outline</v-icon>
       </v-btn>
-      <v-col v-if="!isLogin">
-        <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()"></v-avatar>
+      <v-col v-if="isLogin">
+        <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()">
+          <v-img :src="this.avatar"/>
+        </v-avatar>
         {{ user_name }}
       </v-col>
       <v-col v-else>
-        <v-btn elevation="2" color="blue-darken-2" variant="flat" class="text-none">Login</v-btn>
+        <v-btn elevation="2" color="blue-darken-2" variant="flat" class="text-none" @click="gotoLoginOrPersonalIndex()">Login</v-btn>
       </v-col>
     </template>
   </v-app-bar>
 
   <v-app-bar :elevation="1" density="compact"
              v-if="display.smAndDown.value">
-    <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="gotoLoginOrPersonalIndex()"></v-avatar>
+    <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="gotoLoginOrPersonalIndex()">
+      <v-img :src="this.avatar"/>
+    </v-avatar>
     <v-col>
       <v-text-field
           density="compact"
