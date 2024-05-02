@@ -3,8 +3,6 @@ import {ref} from "vue";
 import {getAnsById, setAnsLikeAPI} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
-// import {getAnsById} from "@/components/HelpCenter/api";
-// import {getAnsById} from "@/components/HelpCenter/api";
 
 export default {
   name: "AnsCard",
