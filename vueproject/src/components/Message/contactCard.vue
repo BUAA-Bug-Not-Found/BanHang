@@ -43,6 +43,7 @@ export default {
     position: flex;
     display: flex;
     align-items: center;
+    padding: 10px;
 }
 
 .box-card:hover {
