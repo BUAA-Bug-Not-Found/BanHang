@@ -522,6 +522,9 @@ class AnswerIdRequest(BaseModel):
 @router.post("/delAnswer", tags=["Question"], response_model=successResponse)
 def del_answer(req: AnswerIdRequest, db: Session = Depends(get_db),
                  current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "用户未登录，请先登录。"})
     comment = crud.get_question_comment_by_id(db, req.ansId)
     if not comment:
         raise UniException(key="isSuccess", value=False,
@@ -533,5 +536,16 @@ def del_answer(req: AnswerIdRequest, db: Session = Depends(get_db),
     return successResponse()
 
 @router.post("/solveQuestion", tags=["Question"], response_model=successResponse)
-def solve_question(req: QuestionIdRequest, db: Session = Depends(get_db),current_user: Optional[dict] = Depends(authorize)):
-    pass
+def solve_question(req: QuestionIdRequest, db: Session = Depends(get_db),
+                   current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "用户未登录，请先登录。"})
+    question = crud.get_question_by_id(db, req.quesId)
+    if not question:
+        raise UniException(key="isSuccess", value=False, others={"description": "questionId不存在。"})
+    if question.user_id != current_user['uid'] and crud.get_user_by_id(db, current_user['uid']).privilege==0:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "用户无权限"})
+    crud.set_question_solved(db, req.quesId)
+    return successResponse()

@@ -263,6 +263,10 @@ def update_question(db: Session, qid: int, questionCreat: schemas.QuestionCreate
     db.refresh(question)
     return question
 
+def set_question_solved(db: Session, qid: int):
+    question = get_question_by_id(db, qid)
+    question.solved = True
+    db.commit()
 
 def get_question_image_by_url(db: Session, url: str) -> models.QuestionImage:
     return db.query(models.QuestionImage).filter(models.QuestionImage.image_url == url).first()

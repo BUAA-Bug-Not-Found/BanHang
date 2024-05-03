@@ -144,3 +144,25 @@ def test_delete_question_and_comment(mock_question_data, mock_user_data, new_dat
     ans = client.get("/getQuesById", params={"quesId": blogs['questions'][0]["quesId"]}).json()
     assert ans["ifExist"] == True
     assert len(ans['question']['ansIdList']) == 0
+
+
+def test_solved_question(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
+    # 注册登录
+    register_login_user(client, mock_user_data)
+    # 上传blog
+    res = client.post("/uploadQues", json=mock_question_data)
+    assert res.status_code == 200
+    # 检查blog是否存在
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+
+    # 标记问题solved
+    res = client.post('/solveQuestion', json={'quesId': blogs['questions'][0]['quesId']})
+    assert res.status_code == 200
+
+    #检查是否解决
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["quesState"] == 3
