@@ -3,13 +3,18 @@ import {useDisplay} from 'vuetify'
 import {useRouter} from 'vue-router'
 import {ref} from "vue";
 import userStateStore from '@/store';
+import { $bus } from '@/store';
+import { isApp } from '@/store';
 
 export default {
   name: 'HomeIndex',
   setup() {
+    const store = userStateStore()
     const display = useDisplay()
-    const isLogin = false
-    const user_name = "user1"
+    const isLogin = ref(store.isAuthentic);
+    const user_name = ref(store.user_name);
+    const avatar = ref(store.headImage);
+
     const searchContent = ref("")
     const search = () => {
       console.log("search")
@@ -20,10 +25,27 @@ export default {
     const goto = (route) => {
       router.push(route)
     }
+    const updateData = (data) => {
+      isLogin.value = data.isLogin
+      user_name.value = data.user_name
+      avatar.value = data.avatar
+    }
+    $bus.on('updateIndexData', updateData);
 
-    return {display, search, user_name, isLogin, goto, searchContent}
+    const downloadApk = () => {
+      const url = '/path/to/your/app.apk'; // 替换为实际的 APK 文件路径
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'app.apk';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    return {display, search, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp}
   },
-
+  unmounted() {
+    $bus.off('updateIndexData', this.updateData)
+  },
   methods: {
     navigateToSearchList() {
       if (this.searchContent.trim() !== '') {
@@ -95,23 +117,27 @@ export default {
       <v-btn @click="goto('/message')">
           <v-icon>mdi-email-outline</v-icon>
       </v-btn>
-      <v-col v-if="!isLogin">
-        <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()"></v-avatar>
+      <v-col v-if="isLogin">
+        <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()">
+          <v-img :src="this.avatar"/>
+        </v-avatar>
         {{ user_name }}
       </v-col>
       <v-col v-else>
-        <v-btn elevation="2" color="blue-darken-2" variant="flat" class="text-none">Login</v-btn>
+        <v-btn elevation="2" color="blue-darken-2" variant="flat" class="text-none" @click="gotoLoginOrPersonalIndex()">Login</v-btn>
       </v-col>
     </template>
   </v-app-bar>
 
   <v-app-bar :elevation="1" density="compact"
              v-if="display.smAndDown.value">
-    <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="gotoLoginOrPersonalIndex()"></v-avatar>
+    <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="gotoLoginOrPersonalIndex()">
+      <v-img :src="this.avatar"/>
+    </v-avatar>
     <v-col>
       <v-text-field
           density="compact"
-          class="w-50"
+          class="w-80"
           label="搜索"
           variant="outlined"
           hide-details
@@ -125,6 +151,7 @@ export default {
         </template>
       </v-text-field>
     </v-col>
+    <v-btn v-if="!isApp" color="primary" @click="downloadApk">Download APK</v-btn>
     <template v-slot:append>
       <v-btn @click="goto('/message')">
         <v-icon>mdi-email-outline</v-icon>

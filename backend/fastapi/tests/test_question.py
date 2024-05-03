@@ -107,3 +107,40 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert blogs.status_code == 200
     assert blogs.json()['quesSum'] == 1
     assert blogs.json()['questions'][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+
+def test_delete_question_and_comment(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
+    # 注册登录
+    register_login_user(client, mock_user_data)
+    # 上传blog
+    res = client.post("/uploadQues", json=mock_question_data)
+    assert res.status_code == 200
+    # 检查blog是否存在
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+    idlist = blogs["questions"][0]['tagIdList']
+
+    res = client.post("/delQuestion", json={"quesId":blogs['questions'][0]['quesId']})
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 0
+
+    # 重新上传
+    res = client.post("/uploadQues", json=mock_question_data)
+    assert res.status_code == 200
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    # answer
+    mock_question_comment_data['quesId'] = blogs['questions'][0]['quesId']
+    res = client.post("/answerQues", json=mock_question_comment_data)
+    assert res.status_code == 200
+    ans = client.get("/getQuesById", params={"quesId": blogs['questions'][0]["quesId"]}).json()
+    assert ans["ifExist"] == True
+    assert len(ans['question']['ansIdList']) == 1
+    answerid = ans['question']['ansIdList'][0]
+
+    # delete answer_id
+    res = client.post("/delAnswer", json={"ansId": answerid})
+    ans = client.get("/getQuesById", params={"quesId": blogs['questions'][0]["quesId"]}).json()
+    assert ans["ifExist"] == True
+    assert len(ans['question']['ansIdList']) == 0

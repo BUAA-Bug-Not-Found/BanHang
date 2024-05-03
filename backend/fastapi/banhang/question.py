@@ -144,7 +144,7 @@ class UploadQuestion(BaseModel):
 def check_question_tag_to_id(tags: Union[List[str], List[int]], db):
     if len(tags) > 0:
         if type(tags[0]) is int:
-            alltags = set(crud.get_all_question_tags(db))
+            alltags = set([t.id for t in crud.get_all_question_tags(db)])
             for tag in tags:
                 if tag not in alltags:
                     raise UniException(key="isSuccess", value=False,
@@ -500,3 +500,38 @@ def search_questions_by_content(search_questions_request:SearchQuestionsRequest,
         questions.append(retquestion)
     return {"questions": questions,
             "quesSum": crud.get_search_question_sum_by_word_list(db, wordlist, offset=offset, limit=limit, asc=2)}
+
+
+class QuestionIdRequest(BaseModel):
+    quesId: int
+@router.post("/delQuestion", tags=["Question"], response_model=successResponse)
+def del_question(req: QuestionIdRequest, db: Session = Depends(get_db),
+                 current_user: Optional[dict] = Depends(authorize)):
+    question = crud.get_question_by_id(db, req.quesId)
+    if not question:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "questionId不存在，请检查。"})
+    if question.user_id != current_user['uid'] and crud.get_user_by_id(db, current_user['uid']).privilege==0:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "用户无权限"})
+    crud.delete_question_by_id(db, req.quesId)
+    return successResponse()
+
+class AnswerIdRequest(BaseModel):
+    ansId: int
+@router.post("/delAnswer", tags=["Question"], response_model=successResponse)
+def del_answer(req: AnswerIdRequest, db: Session = Depends(get_db),
+                 current_user: Optional[dict] = Depends(authorize)):
+    comment = crud.get_question_comment_by_id(db, req.ansId)
+    if not comment:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "ansId不存在，请检查。"})
+    if comment.user_id != current_user['uid'] and crud.get_user_by_id(db, current_user['uid']).privilege==0:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "用户无权限"})
+    crud.delete_question_comment_by_id(db, req.ansId)
+    return successResponse()
+
+@router.post("/solveQuestion", tags=["Question"], response_model=successResponse)
+def solve_question(req: QuestionIdRequest, db: Session = Depends(get_db),current_user: Optional[dict] = Depends(authorize)):
+    pass

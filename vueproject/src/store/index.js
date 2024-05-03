@@ -1,5 +1,8 @@
 import {defineStore} from "pinia";
-let isApp = false
+import mitt from "mitt" 
+
+export const $bus = mitt();
+export const isApp = false;
 export const userStateStore = defineStore("user", {
     state: () => {
         if (isApp) {
@@ -21,8 +24,8 @@ export const userStateStore = defineStore("user", {
         }
         return {
             user_id: 1,
-            user_name: "admin",
-            profile_photo: "src/assets/image/default-avatar.png",
+            user_name: "未登录",
+            profile_photo: "src/assets/images/default-avatar.png",
             register_date: "default",
             isAuthentic: false,
             email: "",
@@ -77,6 +80,14 @@ export const userStateStore = defineStore("user", {
             this.nickname = accountInfo.nickname;
             this.sign = accountInfo.sign;
             this.user_id = accountInfo.user_id;
+            this.user_name = this.nickname;
+            this.profile_photo = this.headImage;
+            this.isAuthentic = true;
+            $bus.emit("updateIndexData", {
+                isLogin: true,
+                user_name: this.user_name,
+                avatar: this.headImage,
+            })
             if (isApp) {
                 localStorage.setItem("userInfo", JSON.stringify({
                     user_id: this.user_id,
@@ -97,6 +108,11 @@ export const userStateStore = defineStore("user", {
         },
         async logout() {
             this.isAuthentic = false
+            $bus.emit("updateIndexData", {
+                isLogin: false,
+                user_name: '未登录',
+                avatar: "src/assets/images/default-avatar.png",
+            })
             localStorage.clear()
         },
         async resetUserInfo() {
