@@ -15,9 +15,11 @@ import AppQuesCard from "@/components/HelpCenter/AppQuesCard.vue";
 import {ElMessage} from "element-plus";
 import router from "@/router";
 import {Plus} from "@element-plus/icons-vue";
+import userStateStore from "../../store";
 
 export default {
   name: "HelpCenter",
+  methods: {userStateStore},
   components: {Plus, AppQuesCard, Editor, Toolbar, QuesCard},
   setup() {
     const page = ref(0)
@@ -134,7 +136,6 @@ export default {
       } else {
         uploadQuesApi(valueHtml.value, imageList.value, selectTags.value).then(
             (res) => {
-              console.log(res.isSuccess)
               if (res.isSuccess === true) {
                 ElMessage.success('问题发布成功');
                 router.go(0)
@@ -155,6 +156,8 @@ export default {
     const findTagIcon = (index) => {
       return tags.value[index + 1].tagIcon
     }
+
+    const recommendQues = ref([])
 
     return {
       editorConfig,
@@ -183,7 +186,8 @@ export default {
       reviseMode,
       reviseHtml,
       reviseImgList,
-      reviseTagList
+      reviseTagList,
+      recommendQues
     }
   }
 }
@@ -226,8 +230,7 @@ export default {
           加载更多
         </v-btn>
       </v-col>
-      <v-col cols="2">
-      </v-col>
+      <v-col cols="2"></v-col>
     </v-row>
   </div>
   <div v-else>

@@ -4,9 +4,11 @@ import router from "@/router";
 import {setLikeQuesApi} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "AppQuesCard",
+  components: {UserAvatar},
   props: ["question", "tags"],
   setup(props) {
     const truncate = (content) => {
@@ -99,7 +101,7 @@ export default {
     >
       <v-row>
         <v-col cols="1" style="min-width: 50px">
-          <v-avatar color="surface-variant" style="margin-top: 15px;margin-left: 10px" size="33"></v-avatar>
+          <UserAvatar :userId="question.userId"></UserAvatar>
         </v-col>
         <v-col cols="5" style="text-align: left;" :class="`cursor-pointer`" @click="goto()">
           <div style="margin-top: 10px;">

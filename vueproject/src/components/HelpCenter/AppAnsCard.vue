@@ -3,9 +3,11 @@ import {ref} from "vue";
 import {getAnsById, setAnsLikeAPI} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "AppAnsCard",
+  components: {UserAvatar},
   props: ["ansId", "index"],
   setup(props) {
 
@@ -74,8 +76,8 @@ export default {
         elevation="0"
     >
       <v-row>
-        <v-col cols="1">
-          <v-avatar color="surface-variant" style="margin: 10px;" size="40"/>
+        <v-col cols="1" style="margin-left: 10px;margin-right: 10px">
+          <UserAvatar :userId="ans.userId"/>
         </v-col>
         <v-col cols="10">
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
@@ -98,9 +100,6 @@ export default {
             </v-btn>
           </div>
         </v-col>
-      </v-row>
-      <v-row :justify="'center'" style="margin-bottom: 10px">
-        <v-col cols="11" style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
       </v-row>
     </v-card>
   </div>

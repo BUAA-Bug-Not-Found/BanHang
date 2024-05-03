@@ -4,10 +4,13 @@ import router from "@/router";
 import {setLikeQuesApi} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store"
 import {ElMessage} from "element-plus";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "QuesCard",
+  components: {UserAvatar},
   props: ["question", "tags"],
+  emits: ["editQues"],
   setup(props) {
     const truncate = (content) => {
       console.log(content)
@@ -78,6 +81,15 @@ export default {
       }
     }
 
+    const editQues = () => {
+
+    }
+
+    const delQues = () => {
+
+    }
+
+
     return {
       truncate,
       menuClick,
@@ -85,7 +97,9 @@ export default {
       goto,
       setLikeQues,
       userLike,
-      likeSum
+      likeSum,
+      delQues,
+      editQues
     };
   },
 };
@@ -95,19 +109,21 @@ export default {
   <v-hover v-slot="{ isHovering, props }">
     <v-card
         class="mx-auto"
-        width="w-75"
+        style="width: 90%"
         :color="isHovering ? 'cyan-lighten-5' : undefined"
         v-bind="props"
     >
       <v-row>
-        <v-col cols="1">
-          <v-avatar color="surface-variant" style="margin: 10px" size="40"></v-avatar>
+        <v-col cols="2">
+          <div style="display:flex; justify-content: end;align-content: center">
+            <UserAvatar :userId="question.userId"></UserAvatar>
+          </div>
         </v-col>
         <v-col cols="7" style="text-align: left;" :class="`cursor-pointer`" @click="goto()">
           <div style="margin-top: 10px;">
             {{ truncate(question.quesContent.content) }}
           </div>
-          <div style="font-size: 12px;color: grey">
+          <div style="font-size: 12px;color: grey;margin-bottom: 5px">
             {{ question.userName }}发表于{{ question.quesTime }}
           </div>
         </v-col>
@@ -136,10 +152,10 @@ export default {
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item density="compact">
+                <v-list-item density="compact" @click="delQues">
                   删除
                 </v-list-item>
-                <v-list-item>
+                <v-list-item @click="editQues">
                   修改
                 </v-list-item>
                 <v-list-item>
@@ -159,6 +175,10 @@ export default {
       </v-row>
     </v-card>
   </v-hover>
+
+  <v-dialog>
+
+  </v-dialog>
 </template>
 
 <style scoped>

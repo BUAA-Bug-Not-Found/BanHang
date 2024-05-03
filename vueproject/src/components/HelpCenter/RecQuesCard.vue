@@ -1,15 +1,17 @@
 <script>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import router from "@/router";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "RecQuesCard",
+  components: {UserAvatar},
   props: ["question", "tags"],
   setup(props) {
     const truncate = (content) => {
       const strippedContent = content.replace(/<[^>]*>/g, "");
-      if (strippedContent.length > 20) {
-        return `${strippedContent.slice(0, 20)}...`;
+      if (strippedContent.length > 10) {
+        return `${strippedContent.slice(0, 10)}...`;
       }
       return strippedContent;
     };
@@ -46,6 +48,7 @@ export default {
 
     const goto = () => {
       router.push("/QuesInfo/" + props.question.quesId);
+      router.go(0)
     }
 
     return { truncate, menuClick, disTags, goto};
@@ -64,11 +67,11 @@ export default {
         @click="goto()"
     >
       <v-row>
-        <v-col cols="3">
-          <v-avatar color="surface-variant" style="margin: 10px" size="40"></v-avatar>
+        <v-col cols="3" style="display: flex;justify-content: end;margin-top: 8px">
+          <UserAvatar :userId="question.userId" style="padding-left: 8px"></UserAvatar>
         </v-col>
-        <v-col cols="8" style="text-align: left;">
-          <div style="margin-top: 10px;">
+        <v-col cols="9" style="text-align: left;">
+          <div style="margin-top: 10px;font-size: 13px">
             {{ truncate(question.quesContent.content) }}
           </div>
           <div>
