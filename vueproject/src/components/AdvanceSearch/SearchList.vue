@@ -35,7 +35,11 @@
 
   <v-divider></v-divider>
   <div v-if="this.nowSearchObj==='ques'">
-<!--    todo 显示问题列表 -->
+    <div class="blog-list">
+      <PlainQuesCard style="margin-bottom: 5px" v-for="ques in searchQuesList" :key="ques.quesId"
+                     :tags="tags"
+                     :question="ques"/>
+    </div>
 
   </div>
   <div v-if="this.nowSearchObj==='blog'">
@@ -54,19 +58,19 @@
     </div>
   </div>
   <div v-if="this.nowSearchObj==='user'">
-<!--    todo 显示用户列表 -->
+    <!--    todo 显示用户列表 -->
     <div>
       <UserShow
-        v-for="(post, index) in searchUserList"
-        :key="index"
-        :nickname="post.nickname"
-        :sign="post.sign"
-        :email="post.email"
-        :headImage="post.url"
+          v-for="(post, index) in searchUserList"
+          :key="index"
+          :nickname="post.nickname"
+          :sign="post.sign"
+          :email="post.email"
+          :headImage="post.url"
       >
-      <!-- <v-divider style="margin-top: 0px;"></v-divider> -->
+        <!-- <v-divider style="margin-top: 0px;"></v-divider> -->
 
-    </UserShow>
+      </UserShow>
     </div>
   </div>
 
@@ -78,10 +82,12 @@ import {searchBlogAPage, searchQuesAPage, searchUserAPage} from "@/components/Ad
 import BlogShow from "@/components/AnonymousBlog/BlogShow.vue";
 import UserShow from "@/components/PersonalCenter/UserShow.vue";
 import {useRouter} from "vue-router";
+import {getTagsApi} from "@/components/HelpCenter/api";
+import PlainQuesCard from "@/components/HelpCenter/PlainQuesCard.vue";
 
 export default {
   name: "searchList",
-  components: {BlogShow, UserShow},
+  components: {PlainQuesCard, BlogShow, UserShow},
 
   data() {
     return {
@@ -97,6 +103,7 @@ export default {
       quesPageNo: 1,
       blogPageNo: 1,
       userPageNo: 1,
+      tags: [],
     }
   },
   created() {
@@ -109,6 +116,7 @@ export default {
     this.searchQuesList = []
     this.searchBlogList = []
     this.searchUserList = []
+    this.tags = []
     this.quesPageNo = 1
     this.blogPageNo = 1
     this.userPageNo = 1
@@ -138,7 +146,12 @@ export default {
     searchQues() {
       searchQuesAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
-             this.searchQuesList = this.searchQuesList.concat(data.questions)
+            this.searchQuesList = this.searchQuesList.concat(data.questions)
+            getTagsApi().then(
+                (data) => {
+                  this.tags = data.tags
+                }
+            )
             // this.searchQuesList = this.searchQuesList.concat(data.map(ques => ({
             //   quesId: ques.quesId,
             //   userId: ques.userId,
@@ -224,7 +237,6 @@ export default {
       this.userPageNo = 1
       this.loadMore()
     }
-
   }
 }
 </script>
