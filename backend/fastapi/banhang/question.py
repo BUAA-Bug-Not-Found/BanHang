@@ -144,7 +144,7 @@ class UploadQuestion(BaseModel):
 def check_question_tag_to_id(tags: Union[List[str], List[int]], db):
     if len(tags) > 0:
         if type(tags[0]) is int:
-            alltags = set(crud.get_all_question_tags(db))
+            alltags = set([t.id for t in crud.get_all_question_tags(db)])
             for tag in tags:
                 if tag not in alltags:
                     raise UniException(key="isSuccess", value=False,
