@@ -127,6 +127,7 @@ class UserInfoResponse(BaseModel):
     sign: str
     url: str
     user_id: int
+    email: str
 @router.get("/getInfoByEmail", tags=['用户中心'],response_model=UserInfoResponse,
             responses={400: {"model": excResponse}})
 def get_info_by_email(email:str, db:Session = Depends(get_db)):
@@ -134,7 +135,7 @@ def get_info_by_email(email:str, db:Session = Depends(get_db)):
     if not user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
     return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
-            'user_id':user.id}
+            'user_id':user.id, 'email': user.email}
 
 class SetSignRequest(BaseModel):
     email:str
