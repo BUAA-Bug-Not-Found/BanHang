@@ -1,7 +1,7 @@
 <script>
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
-import {setLikeQuesApi} from "@/components/HelpCenter/api";
+import {delQuestionAPI, setLikeQuesApi} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
@@ -10,7 +10,8 @@ export default {
   name: "AppQuesCard",
   components: {UserAvatar},
   props: ["question", "tags"],
-  setup(props) {
+  emits: ["editQues", 'delQues'],
+  setup(props, context) {
     const truncate = (content) => {
       const strippedContent = String(content).replace(/<[^>]*>/g, "");
       if (strippedContent.length > 15) {
@@ -77,6 +78,24 @@ export default {
       }
     }
 
+    const delQues = () => {
+      delQuestionAPI(props.question.quesId).then(
+          (res) => {
+            if(res.isSuccess === true) {
+              ElMessage.success('问题已删除')
+              context.emit("delQues", {index: props.index})
+              delDialog.value = false
+            } else {
+              ElMessage.error('删除失败，请稍后再试')
+            }
+          }
+      )
+    }
+
+    const delDialog = ref(false)
+
+    const isUser = ref(UserStateStore().getUserId === props.question.userId);
+
     return {
       truncate,
       menuClick,
@@ -84,7 +103,10 @@ export default {
       goto,
       userLike,
       likeSum,
-      setLikeQues
+      setLikeQues,
+      delQues,
+      delDialog,
+      isUser
     };
   },
 };
@@ -135,13 +157,13 @@ export default {
               </v-btn>
             </template>
             <v-list>
-              <v-list-item density="compact">
+              <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
                 删除
               </v-list-item>
-              <v-list-item>
+              <v-list-item density="compact" v-if="isUser">
                 修改
               </v-list-item>
-              <v-list-item>
+              <v-list-item density="compact">
                 举报
               </v-list-item>
             </v-list>
@@ -159,6 +181,34 @@ export default {
       </div>
     </v-card>
   </v-hover>
+
+  <v-dialog
+      v-model="delDialog"
+      width="auto"
+  >
+    <v-card
+        max-width="400"
+        min-width="200"
+        prepend-icon="mdi-delete-clock"
+        text="你的问题将会被删除，确认嘛？"
+        title="删除问题"
+    >
+      <template v-slot:actions>
+        <v-btn
+            variant="flat"
+            density="compact"
+            text="确认"
+            color="red-darken-1"
+            @click="delQues"
+        ></v-btn>
+
+        <v-btn
+            text="取消"
+            @click="delDialog = false"
+        ></v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

@@ -47,8 +47,11 @@ export default {
     });
 
     const goto = () => {
-      router.push("/QuesInfo/" + props.question.quesId);
-      router.go(0)
+      router.push("/QuesInfo/" + props.question.quesId).then(
+          ()=>{
+            router.go(0)
+          }
+      )
     }
 
     return { truncate, menuClick, disTags, goto};
