@@ -246,6 +246,11 @@ def create_question(db: Session, questionCreat: schemas.QuestionCreate) -> model
 def get_question_by_id(db: Session, id: int) -> models.Question:
     return db.query(models.Question).filter(models.Question.id == id).first()
 
+def delete_question_by_id(db: Session,id: int):
+    question = get_question_by_id(db, id)
+    db.delete(question)
+    db.commit()
+
 
 def update_question(db: Session, qid: int, questionCreat: schemas.QuestionCreate):
     question = get_question_by_id(db, qid)
@@ -292,6 +297,11 @@ def create_question_comment_image(db: Session, image: schemas.QuestionCommentIma
     db.commit()
     db.refresh(question_image)
     return question_image
+
+def delete_question_comment_by_id(db: Session,id: int):
+    comment = get_question_comment_by_id(db, id)
+    db.delete(comment)
+    db.commit()
 
 
 def search_question_by_word_list(db: Session, word_list: List[str], offset: int, limit: int, asc: int):
