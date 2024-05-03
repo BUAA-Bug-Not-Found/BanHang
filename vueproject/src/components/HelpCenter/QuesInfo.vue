@@ -66,8 +66,6 @@ export default {
 
     const question = ref(null)
 
-    const answers = ref()
-
     async function fetchAdvise() {
       for (let i = 0; i < question.value.tagIdList.length; i++) {
         let response = await getQuestionsByTagIdApi(1, 10, question.value.tagIdList[i])
@@ -212,6 +210,10 @@ export default {
 
     const isUser = ref(false);
 
+    const delAns = (index) => {
+      question.value.ansIdList.splice(index,1)
+    }
+
     return {
       truncate,
       disTags,
@@ -221,7 +223,6 @@ export default {
       tags,
       goAnchor,
       mode: 'default',
-      answers,
       replyHtml,
       handleCreated,
       toolbarConfig,
@@ -236,7 +237,8 @@ export default {
       init,
       delQues,
       delDialog,
-      isUser
+      isUser,
+      delAns
     };
   },
 };
@@ -343,7 +345,7 @@ export default {
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
             <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
-                     :ansId="ans" :index="index"/>
+                     :ansId="ans" :index="index" @delAns="delAns"/>
             <div style="height: 100px"></div>
           </v-card>
         </v-col>
@@ -432,7 +434,7 @@ export default {
             <div id="comment"
                  style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
               <span style="font-weight: bold;font-size: 20px">评论 </span>
-              <span><v-btn prepend-icon="mdi-reply" color="primary">发送回复</v-btn></span>
+              <span><v-btn prepend-icon="mdi-reply" color="primary" @click="uploadAnswer">发送回复</v-btn></span>
             </div>
             <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
               <Toolbar
@@ -454,9 +456,8 @@ export default {
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
             <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
-              <AppAnsCard :ansId="ans" :index="index"/>
+              <AppAnsCard :ansId="ans" :index="index" @delAns="delAns"/>
             </div>
-
           </v-card>
         </v-col>
       </v-row>

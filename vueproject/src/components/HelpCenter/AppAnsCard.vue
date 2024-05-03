@@ -1,6 +1,6 @@
 <script>
 import {ref} from "vue";
-import {getAnsById, setAnsLikeAPI} from "@/components/HelpCenter/api";
+import {delAnswerAPI, getAnsById, setAnsLikeAPI} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
@@ -9,7 +9,8 @@ export default {
   name: "AppAnsCard",
   components: {UserAvatar},
   props: ["ansId", "index"],
-  setup(props) {
+  emits: ["delAns", "editAns"],
+  setup(props, context) {
 
     const init = () => {
       getAnsById(props.ansId).then(
@@ -17,6 +18,7 @@ export default {
             ans.value = res.answer
             userLike.value = res.answer.ifUserLike
             likeSum.value = res.answer.likeSum
+            isUser.value = UserStateStore().getUserId === ans.value.userId
           }
       )
     }
@@ -52,12 +54,33 @@ export default {
       }
     }
 
+    const delDialog = ref(false)
+
+    const isUser = ref(false)
+
+    const delAnswer = () => {
+      delAnswerAPI(props.ansId).then(
+          (res) => {
+            if(res.isSuccess === true) {
+              ElMessage.success("删除成功")
+              context.emit("delAns", {index: props.index})
+              delDialog.value = false
+            } else {
+              ElMessage.error("删除失败，请稍后再试")
+            }
+          }
+      )
+    }
+
     return {
       ans,
       ansIdRef,
       setAnsLike,
       userLike,
-      likeSum
+      likeSum,
+      delDialog,
+      isUser,
+      delAnswer
     };
   },
 };
@@ -98,11 +121,48 @@ export default {
                 :prepend-icon="'mdi-reply'" variant="text" size="small"
                 color="blue-grey-lighten-2">
             </v-btn>
+            <v-btn v-if="isUser"
+                :icon="'mdi-delete-circle'" variant="text" size="small"
+                color="blue-grey-lighten-2"
+                @click="delDialog = !delDialog">
+            </v-btn>
+            <v-btn v-if="isUser"
+                :icon="'mdi-file-edit'" variant="text" size="small"
+                color="blue-grey-lighten-2">
+            </v-btn>
           </div>
         </v-col>
       </v-row>
     </v-card>
   </div>
+  <v-dialog
+      v-model="delDialog"
+      width="auto"
+  >
+    <v-card
+        max-width="400"
+        min-width="200"
+        prepend-icon="mdi-delete-clock"
+        text="你的回答将会被删除，确认嘛？"
+        title="删除回答"
+    >
+      <template v-slot:actions>
+        <v-btn
+            variant="flat"
+            density="compact"
+            text="确认"
+            color="red-darken-1"
+            @click="delAnswer"
+        ></v-btn>
+
+        <v-btn
+            text="取消"
+            density="compact"
+            @click="delDialog = false"
+        ></v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
