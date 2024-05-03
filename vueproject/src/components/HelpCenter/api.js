@@ -181,3 +181,65 @@ export function getInfoByUserIdAPI(userId) {
         return response.data
     })
 }
+
+export function delQuestionAPI(quesId) {
+    return axios.request(
+        {
+            url: '/delQuestion',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                    quesId: quesId
+                }
+            )
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function delAnswerAPI(ansId) {
+    return axios.request(
+        {
+            url: '/delAnswer',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                    ansId: ansId
+                }
+            )
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function solveQuesAPI(quesId) {
+    return axios.request(
+        {
+            url: '/solveQuestion',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                    quesId: quesId
+                }
+            )
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function acceptAnswer(ansId) {
+    return axios.request(
+        {
+            url: '/acceptAnswer',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                    ansId: ansId
+                }
+            )
+        }
+    )
+}

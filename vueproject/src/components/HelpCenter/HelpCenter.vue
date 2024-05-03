@@ -13,9 +13,9 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import {useDisplay} from "vuetify";
 import AppQuesCard from "@/components/HelpCenter/AppQuesCard.vue";
 import {ElMessage} from "element-plus";
-import router from "@/router";
 import {Plus} from "@element-plus/icons-vue";
 import userStateStore from "../../store";
+import router from "@/router";
 
 export default {
   name: "HelpCenter",
@@ -134,7 +134,16 @@ export default {
       if (String(valueHtml.value).replace(/<[^>]*>/g, "") === '') {
         ElMessage.error('问题内容不得为空');
       } else {
-        uploadQuesApi(valueHtml.value, imageList.value, selectTags.value).then(
+        let uploadTags = []
+        for(let i = 0;i < selectTags.value.length;i++) {
+          for(let j =  0;j < tags.value.length; j++) {
+            if(tags.value[j].tagName === selectTags.value[i]) {
+              uploadTags.push(tags.value[j].tagId)
+              break;
+            }
+          }
+        }
+        uploadQuesApi(valueHtml.value, imageList.value, uploadTags).then(
             (res) => {
               if (res.isSuccess === true) {
                 ElMessage.success('问题发布成功');
@@ -158,6 +167,10 @@ export default {
     }
 
     const recommendQues = ref([])
+
+    const delQuestion = (id) => {
+      questions.value.splice(id, 1)
+    }
 
     return {
       editorConfig,
@@ -187,7 +200,8 @@ export default {
       reviseHtml,
       reviseImgList,
       reviseTagList,
-      recommendQues
+      recommendQues,
+      delQuestion
     }
   }
 }
@@ -219,6 +233,8 @@ export default {
       </v-col>
       <v-col cols="8" style="margin-bottom: 25px">
         <QuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
+                  :index="index"
+                  @delQues="delQuestion"
                   :question="questions[index]" :tags="tags"/>
         <!--      <v-pagination-->
         <!--          v-model="page"-->
@@ -246,6 +262,8 @@ export default {
     </div>
     <v-col cols="12" style="margin-bottom: 25px">
       <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
+                   :index="index"
+                   @delQues="delQuestion"
                    :question="questions[index]" :tags="tags"/>
       <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
         加载更多

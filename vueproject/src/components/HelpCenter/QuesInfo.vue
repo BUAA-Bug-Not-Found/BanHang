@@ -7,6 +7,7 @@ import RecQuesCard from "@/components/HelpCenter/RecQuesCard.vue";
 import {useDisplay} from "vuetify";
 import AppAnsCard from "@/components/HelpCenter/AppAnsCard.vue";
 import {
+  delQuestionAPI,
   getQuestionsApi,
   getQuestionsByTagIdApi,
   getTagsApi,
@@ -68,22 +69,22 @@ export default {
     const answers = ref()
 
     async function fetchAdvise() {
-      for(let i = 0;i < question.value.tagIdList.length;i++) {
+      for (let i = 0; i < question.value.tagIdList.length; i++) {
         let response = await getQuestionsByTagIdApi(1, 10, question.value.tagIdList[i])
         recommendQues.value = recommendQues.value.concat(response.questions);
-        if(recommendQues.value.length > 5) {
+        if (recommendQues.value.length > 5) {
           break
         }
       }
-      if(recommendQues.value.length < 5) {
-        let response= await getQuestionsApi(1, 5)
+      if (recommendQues.value.length < 5) {
+        let response = await getQuestionsApi(1, 5)
         recommendQues.value = recommendQues.value.concat(response.questions);
       }
-      if(recommendQues.value.length > 5) {
+      if (recommendQues.value.length > 5) {
         recommendQues.value.slice(0, 5)
       }
-      for(let i = 0;i < recommendQues.value.length;i++) {
-        if(recommendQues.value[i].quesId == qid.value) {
+      for (let i = 0; i < recommendQues.value.length; i++) {
+        if (recommendQues.value[i].quesId == qid.value) {
           recommendQues.value.splice(i, 1)
           break;
         }
@@ -98,12 +99,12 @@ export default {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
-            try{
+            try {
               fetchAdvise()
             } catch (e) {
               console.log(e)
             }
-            
+            isUser.value = UserStateStore().getUserId === question.value.userId
             getTagsApi().then(
                 (data) => {
                   tags.value = data.tags
@@ -145,7 +146,6 @@ export default {
 
     const handleCreated = (editor) => {
       editorRef.value = editor // 记录 editor 实例，重要！
-      console.log(editor.getAllMenuKeys())
     }
 
     const userLike = ref(false)
@@ -194,6 +194,24 @@ export default {
       }
     }
 
+    const delQues = () => {
+      delQuestionAPI(qid.value).then(
+          (res) => {
+            if(res.isSuccess === true) {
+              ElMessage.success('问题已删除')
+              router.push('/HelpCenter')
+              delDialog.value = false
+            } else {
+              ElMessage.error('删除失败，请稍后再试')
+            }
+          }
+      )
+    }
+
+    const delDialog = ref(false)
+
+    const isUser = ref(false);
+
     return {
       truncate,
       disTags,
@@ -214,7 +232,11 @@ export default {
       userLike,
       likeSum,
       setLikeQues,
-      uploadAnswer
+      uploadAnswer,
+      init,
+      delQues,
+      delDialog,
+      isUser
     };
   },
 };
@@ -261,7 +283,9 @@ export default {
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
                 <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
               </v-col>
-              <v-col style="margin-left: 10px;">
+              <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
+                <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
+                <v-btn variant="text" icon="mdi-book-edit" size="large"></v-btn>
               </v-col>
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
@@ -345,7 +369,8 @@ export default {
               <span style="font-weight: bold; font-size: 15px">推荐问题 </span>
             </div>
             <v-divider></v-divider>
-            <RecQuesCard v-for="ques in recommendQues" :key="'rec-' + ques.quesId" :tags="tags" :question="ques"/>
+            <RecQuesCard v-for="ques in recommendQues" :key="'rec-' + ques.quesId" :tags="tags"
+                         @init="init" :question="ques"/>
           </v-card>
         </v-col>
       </v-row>
@@ -365,7 +390,9 @@ export default {
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
                 <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
               </v-col>
-              <v-col style="margin-left: 10px;">
+              <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
+                <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
+                <v-btn variant="text" icon="mdi-book-edit" size="large"></v-btn>
               </v-col>
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
@@ -436,6 +463,35 @@ export default {
       <div style="height: 200px"></div>
     </div>
   </div>
+
+  <v-dialog
+      v-model="delDialog"
+      width="auto"
+  >
+    <v-card
+        max-width="400"
+        min-width="200"
+        prepend-icon="mdi-delete-clock"
+        text="你的问题将会被删除，确认嘛？"
+        title="删除问题"
+    >
+      <template v-slot:actions>
+        <v-btn
+            variant="flat"
+            density="compact"
+            text="确认"
+            color="red-darken-1"
+            @click="delQues"
+        ></v-btn>
+
+        <v-btn
+            text="取消"
+            density="compact"
+            @click="delDialog = false"
+        ></v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
@@ -449,7 +505,7 @@ export default {
 </style>
 
 <style>
-.avatar-wrapper{
+.avatar-wrapper {
   position: relative;
   width: 100%;
   height: 0;
