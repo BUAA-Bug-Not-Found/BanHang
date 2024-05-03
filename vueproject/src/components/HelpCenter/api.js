@@ -154,7 +154,7 @@ export function getAnsById(ansId) {
 export function setAnsLikeAPI(ansId, ansType) {
     return axios.request(
         {
-            url: '/setAnsLike',
+            url: '/setLikeAns',
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             data: JSON.stringify({
@@ -162,6 +162,20 @@ export function setAnsLikeAPI(ansId, ansType) {
                     setType: ansType
                 }
             )
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function getInfoByUserIdAPI(userId) {
+    return axios.request(
+        {
+            url: '/getInfoByUserId',
+            params: {
+                userId: userId
+            },
+            method: "get",
         }
     ).then(response => {
         return response.data

@@ -6,15 +6,22 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import RecQuesCard from "@/components/HelpCenter/RecQuesCard.vue";
 import {useDisplay} from "vuetify";
 import AppAnsCard from "@/components/HelpCenter/AppAnsCard.vue";
-import {getTagsApi, setLikeQuesApi, uploadAnsApi} from "@/components/HelpCenter/api";
+import {
+  getQuestionsApi,
+  getQuestionsByTagIdApi,
+  getTagsApi,
+  setLikeQuesApi,
+  uploadAnsApi
+} from "@/components/HelpCenter/api";
 import {getQuesByIdApi} from "@/components/HelpCenter/api";
 import {ElMessage} from "element-plus";
 import router from "@/router";
-import UserStateStore from "@/store";
+import UserStateStore, {userStateStore} from "@/store";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "QuesInfo",
-  components: {AppAnsCard, AnsCard, RecQuesCard, Editor, Toolbar},
+  components: {UserAvatar, AppAnsCard, AnsCard, RecQuesCard, Editor, Toolbar},
   data() {
     return {
       top: false,
@@ -24,6 +31,7 @@ export default {
     window.addEventListener('scroll', this.handleScroll);
   },
   methods: {
+    userStateStore,
     handleScroll() {
       // 假设 right-panel 初始时离顶部有200px的距离
       let scrollDistance = window.pageYOffset || document.documentElement.scrollTop;
@@ -50,64 +58,7 @@ export default {
 
     const tags = ref([])
 
-    const recommendQues = ref([
-      {
-        quesId: 1,
-        userId: 1,
-        userName: "test_user",
-        quesContent: {
-          content: "test_question1"
-        },
-        quesState: 1,
-        quesTime: "2024/4/22 14:03",
-        ifUserLike: 1,
-        ansSum: 20,
-        likeSum: 10,
-        tagIdList: [1, 2]
-      },
-      {
-        quesId: 2,
-        userId: 1,
-        userName: "test_user",
-        quesContent: {
-          content: "test_question2"
-        },
-        quesState: 2,
-        quesTime: "2024/4/22 14:03",
-        ifUserLike: 0,
-        ansSum: 20,
-        likeSum: 10,
-        tagIdList: [3]
-      },
-      {
-        quesId: 3,
-        userId: 1,
-        userName: "test_user",
-        quesContent: {
-          content: "test_question3"
-        },
-        quesState: 3,
-        quesTime: "2024/4/22 14:03",
-        ifUserLike: 0,
-        ansSum: 2,
-        likeSum: 10,
-        tagIdList: [3]
-      },
-      {
-        quesId: 4,
-        userId: 1,
-        userName: "test_user",
-        quesContent: {
-          content: "test_question4"
-        },
-        quesState: 3,
-        quesTime: "2024/4/22 14:03",
-        ifUserLike: 0,
-        ansSum: 2,
-        likeSum: 10,
-        tagIdList: [1]
-      }
-    ])
+    const recommendQues = ref([])
 
     const disTags = ref([])
     const qid = ref(0)
@@ -115,6 +66,29 @@ export default {
     const question = ref(null)
 
     const answers = ref()
+
+    async function fetchAdvise() {
+      for(let i = 0;i < question.value.tagIdList.length;i++) {
+        let response = await getQuestionsByTagIdApi(1, 10, question.value.tagIdList[i])
+        recommendQues.value = recommendQues.value.concat(response.questions);
+        if(recommendQues.value.length > 5) {
+          break
+        }
+      }
+      if(recommendQues.value.length < 5) {
+        let response= await getQuestionsApi(1, 5)
+        recommendQues.value = recommendQues.value.concat(response.questions);
+      }
+      if(recommendQues.value.length > 5) {
+        recommendQues.value.slice(0, 5)
+      }
+      for(let i = 0;i < recommendQues.value.length;i++) {
+        if(recommendQues.value[i].quesId == qid.value) {
+          recommendQues.value.splice(i, 1)
+          break;
+        }
+      }
+    }
 
     const init = () => {
       let router = useRouter()
@@ -124,6 +98,12 @@ export default {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            try{
+              fetchAdvise()
+            } catch (e) {
+              console.log(e)
+            }
+            
             getTagsApi().then(
                 (data) => {
                   tags.value = data.tags
@@ -275,8 +255,8 @@ export default {
       <v-row>
         <v-col cols="8" offset="1">
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
-            <div style="display: flex; align-items: center;">
-              <v-avatar color="surface-variant" style="margin-left: 10px;margin-top: 10px" size="48"/>
+            <div style="display: flex; align-items: center;margin-left: 10px">
+              <UserAvatar :userId="question.userId"></UserAvatar>
               <v-col cols="7">
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
                 <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
@@ -286,7 +266,20 @@ export default {
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
                  v-dompurify-html="question.quesContent.content"/>
-            <div style="margin-left: 10px;margin-bottom: 10px">
+            <v-row>
+              <v-col v-for="(image,index) in question.quesContent.imageList"
+                     :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+              >
+                <div class="avatar-wrapper">
+                  <el-image
+                      class="avatar"
+                      :src="image"
+                      :fit="'cover'"
+                  />
+                </div>
+              </v-col>
+            </v-row>
+            <div style="margin-left: 10px;margin-bottom: 10px;margin-top: 30px">
               <v-chip v-for="tag in disTags" size="small"
                       :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
                       style="margin-left: 3px">
@@ -332,10 +325,10 @@ export default {
         </v-col>
         <v-col cols="3">
           <v-card style="width: 250px;margin-bottom: 20px;margin-top: 10px">
-            <div style="display: flex; align-items: center;">
-              <v-avatar color="surface-variant" style="margin-left: 10px;margin-top: 10px" size="35"/>
+            <div style="display: flex; align-items: center;justify-content: center">
+              <UserAvatar :userId="userStateStore().getUserId"/>
               <v-col cols="7" style="text-align: left">
-                <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
+                <p style="font-size: 20px;margin-top: 10px">{{ userStateStore().getUserName }}</p>
               </v-col>
             </div>
             <div style="width: 75%;margin-top:3px;margin-bottom:10px;transform: translateX(12.5%)">
@@ -346,7 +339,7 @@ export default {
             </div>
           </v-card>
           <v-card :style="top ?
-          'position: fixed; z-index: 888;top: 80px;width:250px;text-align:left' : 'width:250px;text-align:left'">
+          'position: fixed;top: 80px;width:250px;text-align:left' : 'width:250px;text-align:left'">
             <div style="display: flex; align-items: center; transform: translateX(5%); margin-top: 10px">
               <v-icon>mdi-hexagram-outline</v-icon>
               <span style="font-weight: bold; font-size: 15px">推荐问题 </span>
@@ -365,7 +358,9 @@ export default {
         <v-col cols="12">
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="display: flex; align-items: center;">
-              <v-avatar color="surface-variant" style="margin-left: 10px;margin-top: 10px" size="48"/>
+              <v-col cols="1" style="justify-content: end;margin-right: 5px">
+                <UserAvatar :userId="question.userId"/>
+              </v-col>
               <v-col cols="7">
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
                 <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
@@ -375,7 +370,20 @@ export default {
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
                  v-dompurify-html="question.quesContent.content"/>
-            <div style="margin-left: 10px;margin-bottom: 10px">
+            <v-row>
+              <v-col v-for="(image,index) in question.quesContent.imageList"
+                     :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+              >
+                <div class="avatar-wrapper">
+                  <el-image
+                      class="avatar-app"
+                      :src="image"
+                      :fit="'cover'"
+                  />
+                </div>
+              </v-col>
+            </v-row>
+            <div style="margin-left: 10px;margin-bottom: 10px;margin-top: 10px">
               <v-btn :prepend-icon=" !userLike ?
                   'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"
                      color="blue-grey-lighten-2" @click="setLikeQues">
@@ -437,5 +445,34 @@ export default {
   top: 50%;
   left: 2%;
   transform: translateY(-50%);
+}
+</style>
+
+<style>
+.avatar-wrapper{
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding: 0;
+  padding-bottom: 100%;
+  z-index: 1000;
+}
+
+.avatar {
+  position: absolute !important;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.avatar-app {
+  position: absolute !important;
+  top: 5px;
+  right: 0;
+  bottom: 0;
+  left: 5px;
+  overflow: hidden;
 }
 </style>
