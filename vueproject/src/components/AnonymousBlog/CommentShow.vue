@@ -1,7 +1,9 @@
 <template>
   <v-card class="comment-card" v-show="replyToCommentId === null">
-    <div class="user-info">
-      <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
+    <div class="user-info" @click="goToOtherUser(userId)">
+      <div style="display:flex; justify-content: end;align-content: center">
+        <UserAvatar :userId="this.userId"></UserAvatar>
+      </div>
       <div class="user-details">
         <span class="user-name">{{ userName }}</span>
         <span class="time">{{ formatDate(time) }}</span>
@@ -33,18 +35,23 @@
 
 <script>
 import ReplyList from "@/components/AnonymousBlog/ReplyList.vue";
-import {uploadComment} from "@/components/AnonymousBlog/api";
+import {goToOtherUser, uploadComment} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "CommentShow",
-  components: {ReplyList},
+  components: {UserAvatar, ReplyList},
   props: {
     blogId: {
       type: Number,
       required: true
     },
     commentId: {
+      type: Number,
+      required: true
+    },
+    userId: {
       type: Number,
       required: true
     },
@@ -82,6 +89,7 @@ export default {
     };
   },
   methods: {
+    goToOtherUser,
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
@@ -101,16 +109,13 @@ export default {
     sendReply() {
       // 将回复内容和是否匿名发送提交给后端或其他逻辑处理
       if (this.replyContent.trim().length > 0) {
-        // let form = new FormData
-        // form.append('blogId', this.blogId)
-        // form.append('commentContent', this.replyContent)
-        // form.append('ifAnonymous', this.isAnonymous)
-        // form.append('replyToCommentId', this.commentId)
 
-        let json_set = {'blogId': this.blogId,
-                        'commentContent': this.replyContent,
-                        'ifAnonymous': this.isAnonymous,
-                        'replyToCommentId': this.commentId}
+        let json_set = {
+          'blogId': this.blogId,
+          'commentContent': this.replyContent,
+          'ifAnonymous': this.isAnonymous,
+          'replyToCommentId': this.commentId
+        }
         uploadComment(json_set).then(
             (res) => {
               if (res.response == "success") {
@@ -194,9 +199,9 @@ export default {
 }
 
 .reply-input {
-  position: absolute;
-  bottom: -150px; /* 初始时隐藏输入框 */
-  width: 96%;
+  margin-left: 2%;
+  margin-right: 2%;
+  margin-bottom: 10%;
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 5px;

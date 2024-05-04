@@ -1,9 +1,10 @@
 <template>
   <v-card class="blog-view">
     <!-- 用户信息部分 -->
-    <div class="user-info">
-      <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
-      <span class="user-name">{{ userName }}</span>
+    <div class="user-info" @click="goToOtherUser(userId)">
+      <div v-if="this.userId !== ''" style="display:flex; justify-content: end;align-content: center">
+        <UserAvatar :userId="this.userId"></UserAvatar>
+      </div>
     </div>
     <!-- 发帖时间 -->
     <div class="time"> {{ formatDate(time) }}</div>
@@ -51,17 +52,19 @@
 
 <script>
 import CommentList from "@/components/AnonymousBlog/CommentList.vue";
-import {getBlogByBlogId, getCommentsByBlogId, uploadComment} from "@/components/AnonymousBlog/api";
+import {getBlogByBlogId, getCommentsByBlogId, goToOtherUser, uploadComment} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import {useRouter} from "vue-router";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "BlogView",
-  components: {CommentList},
+  components: {UserAvatar, CommentList},
 
   data() {
     return {
       blogId: '',
+      userId: '',
       userName: '',
       userAvatarUrl: '',
       title: '',
@@ -84,6 +87,7 @@ export default {
   },
 
   methods: {
+    goToOtherUser,
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
@@ -105,6 +109,7 @@ export default {
             this.imageList = data.imageList
             this.time = data.time
             this.tagList = data.tagList
+            this.userId = data.userId
           }
       )
     },
@@ -114,6 +119,7 @@ export default {
           (data) => {
             // this.comments = data.comments
             this.comments = data.map(comment => ({
+              userId: comment.userId,
               userName: comment.userName,
               userAvatarURL: comment.userAvatarUrl,
               blogId: this.blogId,
@@ -137,10 +143,12 @@ export default {
         // form.append('ifAnonymous', this.commentAnonymous)
         // form.append('replyToCommentId', replyToId)
 
-        let json_set = {'blogId': this.blogId,
-                        'commentContent': this.newComment,
-                        'ifAnonymous': this.commentAnonymous,
-                        'replyToCommentId': replyToId}
+        let json_set = {
+          'blogId': this.blogId,
+          'commentContent': this.newComment,
+          'ifAnonymous': this.commentAnonymous,
+          'replyToCommentId': replyToId
+        }
         uploadComment(json_set).then(
             (res) => {
               if (res.response == "success") {
