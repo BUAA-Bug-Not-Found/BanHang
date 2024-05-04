@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 from typing import List, Optional
 
@@ -39,6 +39,38 @@ class BlogShow(BaseModel):
     imageList: List[str]
     tagList: List[TagBase]
     commentNum: int
+
+class BlogPage(BaseModel):
+	pageno: int
+	pagesize: int
+	
+	@field_validator('pageno')
+	@classmethod
+	def validate_pageno(cls, value: int) -> int:
+		if value <= 0:
+			raise ValueError("Illegal blog pageno. Must be greater than 0.")
+		return value
+	
+	@field_validator('pagesize')
+	@classmethod
+	def validate_pagesize(cls, value: int):
+		if value <= 0:
+			raise ValueError("Illegal blog pagesize. Must be greater than 0.")
+		return value
+
+class BlogPageTag(BlogPage):
+	nowTag: int
+    
+class BlogPageAdvanced(BlogPage):
+    searchContent: str
+    nowSortMethod: str
+
+    @field_validator('nowSortMethod')
+    @classmethod
+    def validate_nowSortMethod(cls, value: str) -> str:
+        if value not in ['byRelation', 'byTime', 'byPopularity']:
+            raise ValueError("Illegal blog sort method. Must be 'byRelation', 'byTime' or 'byPopularity'.")
+        return value
 
 class BlogCommentBase(BaseModel):
     blogId: int

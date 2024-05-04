@@ -184,6 +184,10 @@ def get_all_blog_tags(db: Session):
     return (db.query(models.BlogTag).all())
 
 
+def get_blog_tag_by_id(db: Session, tag_id: int):
+    return (db.query(models.BlogTag).filter(models.BlogTag.id == tag_id).first())
+
+
 def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
     if asc:
         return db.query(models.Question).order_by(models.Question.create_at.asc()).offset(offset).limit(limit).all()
