@@ -26,7 +26,7 @@ class BlogBase(BaseModel):
     content: str
     ifAnonymous: bool
     imageList: List[str]
-    tagList: List[TagBase]
+    tagList: List[int]
 
 class BlogShow(BaseModel):
     userId: int
@@ -37,7 +37,7 @@ class BlogShow(BaseModel):
     content: str
     time: datetime
     imageList: List[str]
-    tagList: List[int]
+    tagList: List[TagBase]
     commentNum: int
 
 class BlogCommentBase(BaseModel):
