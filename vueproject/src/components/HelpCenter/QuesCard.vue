@@ -10,7 +10,7 @@ export default {
   name: "QuesCard",
   methods: {formatDate},
   components: {UserAvatar},
-  props: ["question", "tags", "index"],
+  props: ["question", "tags", "index", "disTags"],
   emits: ["editQues", 'delQues'],
   setup(props, context) {
     const truncate = (content) => {
@@ -21,22 +21,9 @@ export default {
       return strippedContent;
     };
 
-    const disTags = ref([])
 
     const userLike = ref(props.question.ifUserLike)
     const likeSum = ref(props.question.likeSum)
-
-    const init = () => {
-      for (let i = 0; i < props.question.tagIdList.length; i++) {
-        for (let j = 0; j < props.tags.length; j++) {
-          if (props.tags[j].tagId === props.question.tagIdList[i]) {
-            disTags.value.push(props.tags[j])
-          }
-        }
-      }
-    }
-
-    init()
 
     const menuClick = ref(false);
 
@@ -81,7 +68,7 @@ export default {
     }
 
     const editQues = () => {
-
+      context.emit("editQues", {index: props.index})
     }
 
     const delQues = () => {
@@ -105,7 +92,6 @@ export default {
     return {
       truncate,
       menuClick,
-      disTags,
       goto,
       setLikeQues,
       userLike,
@@ -113,7 +99,7 @@ export default {
       delQues,
       editQues,
       delDialog,
-      isUser
+      isUser,
     };
   },
 };
