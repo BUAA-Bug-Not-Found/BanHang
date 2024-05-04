@@ -1,6 +1,7 @@
 name: auto_deployment
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["backend_pytest"]
     types:
@@ -9,7 +10,7 @@ on:
       - 'dev'
 
 jobs:
-  auto_deployment:
+  auto_deployment_backend:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: self-hosted
     steps:
@@ -17,4 +18,23 @@ jobs:
       - run: schtasks /End /TN BanHang
       - run: if (Test-Path -Path D:\SoftWareEngineer\backend\fastapi){Remove-Item -Path D:\SoftWareEngineer\backend\fastapi -Force -Recurse}
       - run: Copy-Item -Path .\backend\fastapi -Destination D:\SoftWareEngineer\backend -Force -Recurse
-      - run: schtasks /Run /TN BanHang
+      - run: schtasks /Run /TN BanHang\
+
+  auto_deployment_frontend:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - run: if (Test-Path -Path D:\SoftWareEngineer\frontend\vueproject){Remove-Item -Path D:\SoftWareEngineer\frontend\vueproject -Force -Recurse}
+      - run: Copy-Item -Path .\vueproject -Destination D:\SoftWareEngineer\frontend -Force -Recurse
+      - run: npm install
+        working-directory: D:\SoftWareEngineer\frontend\vueproject
+      - run: npm run build
+        working-directory: D:\SoftWareEngineer\frontend\vueproject
+      - run: if (Test-Path -Path F:\tmp\nginx-1.25.1\dist){Remove-Item -Path F:\tmp\nginx-1.25.1\dist -Force -Recurse}
+      - run: Copy-Item -Path .\dist -Destination F:\tmp\nginx-1.25.1 -Force -Recurse
+        working-directory: D:\SoftWareEngineer\frontend\vueproject
+      - run: .\nginx.exe -s quit
+        working-directory: F:\tmp\nginx-1.25.1
+      - run: start .\nginx.exe
+        working-directory: F:\tmp\nginx-1.25.1
