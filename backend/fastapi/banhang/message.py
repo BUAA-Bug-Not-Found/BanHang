@@ -14,6 +14,7 @@ class ConversationShow(BaseModel):
 	userName: str
 	userId: int
 	hasUnreadMessage: bool
+	lastMessage: str
 
 @router.post("/getReletedUser", tags=["Message"], response_model=List[ConversationShow])
 @check_user
@@ -27,6 +28,7 @@ def get_recent_message_conversation(uid: int, db: Session = Depends(get_db)):
 		conversation['userName'] = db_conversation.guest_user.username
 		conversation['userId'] = db_conversation.guest_user.id
 		conversation['hasUnreadMessage'] = db_conversation.is_read
+		conversation['lastMessage'] = db_conversation.messages[-1].message.content if len(db_conversation.messages) > 0 else ""
 		conversations.append(ConversationShow(**conversation))
 	return conversations
 
