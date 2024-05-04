@@ -3,20 +3,14 @@ from sqlalchemy.orm import Session
 from orm.database import get_db
 import orm.schemas as schemas
 import orm.crud as crud
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from tools.check_user import check_user
 from typing import List
 
-
 router = APIRouter()
 
-class BlogPage(BaseModel):
-	pageno: int
-	pagesize: int
-	nowTag: int
-
 @router.post("/blog/getBlogs", tags=["Blog"], response_model=List[schemas.BlogShow])
-def get_blog_by_page(blog_page: BlogPage,
+def get_blog_by_page(blog_page: schemas.BlogPageTag,
 					 db: Session = Depends(get_db)):
 	offset = (blog_page.pageno - 1) * blog_page.pagesize
 	limit = blog_page.pagesize
@@ -89,6 +83,9 @@ def get_blog_by_blog_id(blog_id: BlogId,
 def create_blog(blog: schemas.BlogBase,
 				uid: int,
 				db: Session = Depends(get_db)):
+	for tag_id in blog.tagList:
+		if crud.get_blog_tag_by_id(db, tag_id) == None:
+			return {"response": f"No corresponding tag ID ({tag_id}) exists"}
 	db_blog = crud.create_blog(db,
 					user_id=uid,
 					title=blog.title,
@@ -135,15 +132,9 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
 	else:
 		return {"response":"success"}
 	
-class BlogPageAdvanced(BaseModel):
-	searchContent: str
-	nowSortMethod: str
-	pageno: int
-	pagesize: int
-	
 	
 @router.post("/search/searchBlogAPage", tags=["Blog"], response_model=List[schemas.BlogShow])
-def get_blogs_advanced(blog_page_advanced: BlogPageAdvanced,
+def get_blogs_advanced(blog_page_advanced: schemas.BlogPageAdvanced,
 					 db: Session = Depends(get_db)):
 	offset = (blog_page_advanced.pageno - 1) * blog_page_advanced.pagesize
 	limit = blog_page_advanced.pagesize
