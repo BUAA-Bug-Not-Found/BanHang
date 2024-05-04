@@ -5,6 +5,7 @@
         :key="index"
         :blog-id="comment.blogId"
         :comment-id="comment.commentId"
+        :user-id="comment.userId"
         :user-name="comment.userName"
         :user-avatar-url="comment.userAvatarUrl"
         :content="comment.content"

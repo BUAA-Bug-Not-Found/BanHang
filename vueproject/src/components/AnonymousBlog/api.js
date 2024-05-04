@@ -1,4 +1,5 @@
 import axios from "axios";
+import {getInfoByUserId} from "@/components/AccountManagement/AccountManagementAPI";
 
 export function uploadfile(file) {
     return axios.post('/uploadfile', file,
@@ -102,15 +103,31 @@ export function getALlBlogTags() {
     })
 }
 
-export function getCommentNumByBlogId(blogId) {
-    return axios.request({
-        url: '/blog/getCommentNumByBlogId',
-        method: "post",
-        headers: {'Content-Type': 'application/json'},
-        data: JSON.stringify({
-            blogId: blogId
-        })
-    }).then(response => {
-        return response.data
+export function goToOtherUser(otherUserId) {
+    let otherUserEmail = null
+    getInfoByUserId(otherUserId).then((info) => {
+        if (info == "false") {
+            otherUserEmail = null
+        } else {
+            otherUserEmail = info.email
+            this.$router.push({name: 'othersCenter', params: {"e": otherUserEmail}})
+        }
     })
+}
+
+export async function getTags() {
+    try {
+        const data = await getALlBlogTags();
+        const tags = data.map(tag => ({
+            tagId: tag.tagId,
+            tagName: tag.tagName,
+            tagColor: tag.tagColor,
+            tagIcon: tag.tagIcon
+        }));
+        return tags;
+    } catch (error) {
+        // 处理错误
+        console.error("Failed to get tags:", error);
+        throw error;
+    }
 }

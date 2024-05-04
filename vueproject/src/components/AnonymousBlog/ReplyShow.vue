@@ -1,7 +1,9 @@
 <template>
-  <div class="comment-card" >
-    <div class="user-info">
-      <img :src="userAvatarUrl" :alt="userName" class="user-avatar"/>
+  <div class="comment-card">
+    <div class="user-info" @click="goToOtherUser(userId)">
+      <div style="display:flex; justify-content: end;align-content: center">
+        <UserAvatar :userId="this.userId"></UserAvatar>
+      </div>
       <div class="user-details">
         <span class="user-name">{{ userName }}</span>
         <span class="time">{{ formatDate(time) }}</span>
@@ -14,11 +16,18 @@
 </template>
 
 <script>
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+
 export default {
   name: "ReplyShow",
+  components: {UserAvatar},
 
   props: {
     commentId: {
+      type: Number,
+      required: true
+    },
+    userId: {
       type: Number,
       required: true
     },

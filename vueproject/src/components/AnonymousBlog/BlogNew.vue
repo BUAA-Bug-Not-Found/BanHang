@@ -1,8 +1,8 @@
 <template>
   <v-card class="blog-new">
-    <input v-model="title" placeholder="输入您的标题(不超过50个字符)" class="title-input" maxlength="50">
+    <input v-model="title" placeholder="标题(不超过50个字符)" class="title-input" maxlength="50">
     <!-- 文字编辑区域 -->
-    <textarea v-model="content" placeholder="输入您的帖子内容" class="content-textarea"></textarea>
+    <textarea v-model="content" placeholder="帖子内容(不超过10000个字符)" class="content-textarea" maxlength="10000"></textarea>
 
     <!-- 图片上传区域 -->
     <div class="file-upload-container">
@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import {uploadBlog} from "@/components/AnonymousBlog/api";
+import {getTags, uploadBlog} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import axios from "axios";
 import {showTip} from "@/components/AccountManagement/AccountManagementAPI";
@@ -72,46 +72,28 @@ export default {
       imagePreviews: [], // 图片预览数组，用于回显上传的图片
       ifAnonymous: false,  // 是否匿名
       tagList: [], //标签名列表
-      tagNamesArray: ['学习生活', '日常事务', '情感交流', '灌水吐槽', '寻欢作乐'],
-      tags: [
-        {
-          tagId: 1,
-          tagName: '学习生活',
-          tagIcon: 'mdi-clock',
-          tagColor: 'blue-darken-1'
-        },
-        {
-          tagId: 2,
-          tagName: '日常事务',
-          tagIcon: 'mdi-account',
-          tagColor: 'cyan-darken-1'
-        },
-        {
-          tagId: 3,
-          tagName: '情感交流',
-          tagIcon: 'mdi-heart',
-          tagColor: 'red-darken-1'
-        },
-        {
-          tagId: 4,
-          tagName: '灌水吐槽',
-          tagIcon: 'mdi-comment-alert-outline',
-          tagColor: 'green-darken-1'
-        },
-        {
-          tagId: 5,
-          tagName: '寻欢作乐',
-          tagIcon: 'mdi-emoticon-outline',
-          tagColor: 'purple-darken-1'
-        }
-      ]
+      tagNamesArray: [],
+      tags: []
     };
+  },
+  created() {
+    getTags().then(tags => {
+        console.log("Tags:", tags); // 检查getTags()返回的标签列表
+        this.tags = tags;
+        this.tagNamesArray = tags.map(tag => tag.tagName);
+    }).catch(error => {
+        console.error("Failed to fetch tags:", error);
+    });
   },
   methods: {
     // 处理图片上传
     handleFileUpload(event) {
       const files = event.target.files;
       if (!files) return;
+      if (this.images.length + files.length > 15) {
+        showTip("图片上限为 15 张，请适当减少您的图片数量~", false)
+        return;
+      }
       // 遍历上传的图片文件，生成预览并存入图片预览数组
       for (let i = 0; i < files.length; i++) {
         const fileReader = new FileReader();
@@ -148,7 +130,7 @@ export default {
       this.images.splice(index, 1);
     },
 
-    transNameListToIdList(tagList) {
+    transNameListToTagList(tagList) {
       let tagIds = [];
 
       tagList.forEach(tagName => {
@@ -164,6 +146,11 @@ export default {
     submitBlog() {
       // 弹出确认框，让用户确认是否提交
       // console.log(this.tagList)
+      if(this.title.trim().length===0 || this.content.trim().length===0) {
+        showTip('标题和内容不能为空，请返回修改~')
+        return
+      }
+
       const confirmSubmit = window.confirm("确定要发布该帖吗？👀");
       if (confirmSubmit) {
         // 执行提交操作，比如将内容和图片上传到后端数据库
@@ -178,7 +165,7 @@ export default {
           "content": this.content,
           "imageList": this.images,
           "ifAnonymous": this.ifAnonymous,
-          "tagList": this.transNameListToIdList(this.tagList)
+          "tagList": this.transNameListToTagList(this.tagList)
         }
         uploadBlog(json_set).then(
             (res) => {
@@ -188,6 +175,7 @@ export default {
                   showClose: true,
                   type: 'success',
                 })
+                this.$router.push({path: `/blogList`});
               } else {
                 ElMessage({
                   message: '发帖失败，请修改内容或稍后再试',
@@ -197,8 +185,7 @@ export default {
               }
             }
         )
-        // 提交成功后，返回到帖子列表页面
-        this.$router.push({path: `/blogList`});
+
       }
     },
   },

@@ -40,6 +40,8 @@
             :time="post.time"
             :tag-list="post.tagList"
             :comment-num="post.commentNum"
+            :user-id="post.userId"
+            :tags = "this.tags"
         />
 
         <button @click="loadMore" class="load-more-button">加载更多</button>
@@ -60,7 +62,7 @@
 
 <script>
 import BlogShow from './BlogShow.vue';
-import {getBlogs} from "@/components/AnonymousBlog/api";
+import {getBlogs, getTags} from "@/components/AnonymousBlog/api";
 import {useDisplay} from "vuetify";
 
 export default {
@@ -77,38 +79,7 @@ export default {
       pageno: 1,
       pagesize: 15,
       nowtag: -1,
-      tags: [
-        {
-          tagId: 1,
-          tagName: '学习生活',
-          tagIcon: 'mdi-clock',
-          tagColor: 'blue-darken-1'
-        },
-        {
-          tagId: 2,
-          tagName: '日常事务',
-          tagIcon: 'mdi-account',
-          tagColor: 'cyan-darken-1'
-        },
-        {
-          tagId: 3,
-          tagName: '情感交流',
-          tagIcon: 'mdi-heart',
-          tagColor: 'red-darken-1'
-        },
-        {
-          tagId: 4,
-          tagName: '灌水吐槽',
-          tagIcon: 'mdi-comment-alert-outline',
-          tagColor: 'green-darken-1'
-        },
-        {
-          tagId: 5,
-          tagName: '寻欢作乐',
-          tagIcon: 'mdi-emoticon-outline',
-          tagColor: 'purple-darken-1'
-        },
-      ],
+      tags: [],
 
     };
   },
@@ -116,8 +87,15 @@ export default {
   created() {
     this.nowtag = -1
     this.pageno = 1
-    this.blogs = []   //todo
-    this.fetchBlogListAPage(); //todo
+    this.blogs = []
+    this.fetchBlogListAPage();
+    getTags().then(tags => {
+      console.log("Tags:", tags); // 检查getTags()返回的标签列表
+      this.tags = tags;
+      // localStorage.setItem("blogTags", tags)
+    }).catch(error => {
+      console.error("Failed to fetch tags:", error);
+    });
   },
 
   methods: {
@@ -128,6 +106,7 @@ export default {
           (data) => {
             // this.blogs.concat(data.blogs)
             this.blogs = this.blogs.concat(data.map(blog => ({
+              userId: blog.userId,
               userName: blog.userName,
               userAvatarUrl: blog.userAvatarUrl,
               blogId: blog.blogId,
