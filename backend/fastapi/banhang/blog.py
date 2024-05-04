@@ -37,12 +37,18 @@ def get_blog_by_page(blog_page: BlogPage,
 		blog['title'] = db_blog.title
 		blog['content'] = db_blog.content
 		blog['time'] = db_blog.create_at
+		blog['commentNum'] = len(db_blog.comments)
 		blog['imageList'] = []
 		for db_image in db_images:
 			blog['imageList'].append(db_image.image_url)
 		blog['tagList'] = []
 		for db_tag in db_tags:
-			blog['tagList'].append(db_tag.id)
+			tag = {}
+			tag['tagId'] = db_tag.id
+			tag['tagName'] = db_tag.name
+			tag['tagIcon'] = db_tag.icon
+			tag['tagColor'] = db_tag.color
+			blog['tagList'].append(tag)
 		blogs.append(schemas.BlogShow(**blog))
 	return blogs
 
@@ -64,12 +70,18 @@ def get_blog_by_blog_id(blog_id: BlogId,
 	blog['title'] = db_blog.title
 	blog['content'] = db_blog.content
 	blog['time'] = db_blog.create_at
+	blog['commentNum'] = len(db_blog.comments)
 	blog['imageList'] = []
 	for db_image in db_images:
 		blog['imageList'].append(db_image.image_url)
 	blog['tagList'] = []
 	for db_tag in db_tags:
-		blog['tagList'].append(db_tag.id)
+		tag = {}
+		tag['tagId'] = db_tag.id
+		tag['tagName'] = db_tag.name
+		tag['tagIcon'] = db_tag.icon
+		tag['tagColor'] = db_tag.color
+		blog['tagList'].append(tag)
 	return schemas.BlogShow(**blog)
 
 @router.post("/blog/uploadBlog", tags=["Blog"])
@@ -154,6 +166,7 @@ def get_blogs_advanced(blog_page_advanced: BlogPageAdvanced,
 		blog['title'] = db_blog.title
 		blog['content'] = db_blog.content
 		blog['time'] = db_blog.create_at
+		blog['commentNum'] = len(db_blog.comments)
 		blog['imageList'] = []
 		for db_image in db_images:
 			blog['imageList'].append(db_image.image_url)
@@ -162,3 +175,17 @@ def get_blogs_advanced(blog_page_advanced: BlogPageAdvanced,
 			blog['tagList'].append(db_tag.id)
 		blogs.append(schemas.BlogShow(**blog))
 	return blogs
+
+
+@router.post("/blog/getAllBlogTags", tags=["Blog"], response_model=List[schemas.TagBase])
+def get_all_blog_tags(db: Session = Depends(get_db)):
+	db_tags = crud.get_all_blog_tags(db)
+	tags = []
+	for db_tag in db_tags:
+		tag = {}
+		tag['tagId'] = db_tag.id
+		tag['tagName'] = db_tag.name
+		tag['tagIcon'] = db_tag.icon
+		tag['tagColor'] = db_tag.color
+		tags.append(schemas.TagBase(**tag))
+	return tags

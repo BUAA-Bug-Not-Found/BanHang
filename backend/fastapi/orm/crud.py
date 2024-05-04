@@ -141,7 +141,7 @@ def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
     return (db.query(models.Blog)
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
-    
+
 def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False):
     return (db.query(models.Blog).join(models.BlogTag, models.Blog.tags)
             .filter(models.BlogTag.id == blog_tag_id)
@@ -176,6 +176,10 @@ def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, i
         db_blog_comment = None
         # print("Error during commit: ", e)
     return db_blog_comment
+
+
+def get_all_blog_tags(db: Session):
+    return (db.query(models.BlogTag).all())
 
 
 def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
@@ -263,6 +267,10 @@ def update_question(db: Session, qid: int, questionCreat: schemas.QuestionCreate
     db.refresh(question)
     return question
 
+def set_question_solved(db: Session, qid: int):
+    question = get_question_by_id(db, qid)
+    question.solved = True
+    db.commit()
 
 def get_question_image_by_url(db: Session, url: str) -> models.QuestionImage:
     return db.query(models.QuestionImage).filter(models.QuestionImage.image_url == url).first()

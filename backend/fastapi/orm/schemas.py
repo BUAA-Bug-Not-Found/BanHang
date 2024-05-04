@@ -15,12 +15,18 @@ class EmailCheck(BaseModel):
     email:str
     checkcode:int
 
+class TagBase(BaseModel):
+    tagId: int
+    tagName: str
+    tagIcon: str
+    tagColor: str
+
 class BlogBase(BaseModel):
     title: str
     content: str
     ifAnonymous: bool
     imageList: List[str]
-    tagList: List[int]
+    tagList: List[TagBase]
 
 class BlogShow(BaseModel):
     userId: int
@@ -32,6 +38,7 @@ class BlogShow(BaseModel):
     time: datetime
     imageList: List[str]
     tagList: List[int]
+    commentNum: int
 
 class BlogCommentBase(BaseModel):
     blogId: int

@@ -104,6 +104,8 @@ class BlogTag(Base):
     __tablename__ = 'blog_tags'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True, nullable=False)
+    icon = Column(String, nullable=False, default='tagIcon')
+    color = Column(String, nullable=False, default='blue-darken-1')
     blogs = relationship("Blog", secondary="blog_blog_tags", back_populates="tags")
 
 class BlogBlogTag(Base):
