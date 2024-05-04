@@ -37,6 +37,7 @@ def get_blog_by_page(blog_page: BlogPage,
 		blog['title'] = db_blog.title
 		blog['content'] = db_blog.content
 		blog['time'] = db_blog.create_at
+		blog['commentNum'] = len(db_blog.comments)
 		blog['imageList'] = []
 		for db_image in db_images:
 			blog['imageList'].append(db_image.image_url)
@@ -69,6 +70,7 @@ def get_blog_by_blog_id(blog_id: BlogId,
 	blog['title'] = db_blog.title
 	blog['content'] = db_blog.content
 	blog['time'] = db_blog.create_at
+	blog['commentNum'] = len(db_blog.comments)
 	blog['imageList'] = []
 	for db_image in db_images:
 		blog['imageList'].append(db_image.image_url)
@@ -164,6 +166,7 @@ def get_blogs_advanced(blog_page_advanced: BlogPageAdvanced,
 		blog['title'] = db_blog.title
 		blog['content'] = db_blog.content
 		blog['time'] = db_blog.create_at
+		blog['commentNum'] = len(db_blog.comments)
 		blog['imageList'] = []
 		for db_image in db_images:
 			blog['imageList'].append(db_image.image_url)
