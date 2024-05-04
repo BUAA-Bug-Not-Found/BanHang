@@ -120,7 +120,7 @@ def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymou
             db_image = models.BlogImage(blog_id=db_blog.id, image_url=image_url)
             db.add(db_image)
         for tag_id in tag_ids:
-            db_blog_tag = models.BlogBlogTag(blog_id=db_blog.id, tag_id=tag_id)
+            db_blog_tag = models.BlogBlogTag(blog_id=db_blog.id, blog_tag_id=tag_id)
             db.add(db_blog_tag)
         db.commit()
         db.refresh(db_blog)
