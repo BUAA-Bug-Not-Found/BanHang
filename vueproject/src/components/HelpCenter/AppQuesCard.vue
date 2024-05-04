@@ -10,7 +10,7 @@ export default {
   name: "AppQuesCard",
   methods: {formatDate},
   components: {UserAvatar},
-  props: ["question", "tags"],
+  props: ["question", "disTags"],
   emits: ["editQues", 'delQues'],
   setup(props, context) {
     const truncate = (content) => {
@@ -20,20 +20,6 @@ export default {
       }
       return strippedContent;
     };
-
-    const disTags = ref([])
-
-    const init = () => {
-      for (let i = 0; i < props.question.tagIdList.length; i++) {
-        for (let j = 0; j < props.tags.length; j++) {
-          if (props.tags[j].tagId === props.question.tagIdList[i]) {
-            disTags.value.push(props.tags[j])
-          }
-        }
-      }
-    }
-
-    init()
 
     const menuClick = ref(false);
 
@@ -95,19 +81,23 @@ export default {
 
     const delDialog = ref(false)
 
+    const editQues = () => {
+      context.emit("editQues", {index: props.index})
+    }
+
     const isUser = ref(UserStateStore().getUserId === props.question.userId);
 
     return {
       truncate,
       menuClick,
-      disTags,
       goto,
       userLike,
       likeSum,
       setLikeQues,
       delQues,
       delDialog,
-      isUser
+      isUser,
+      editQues
     };
   },
 };
@@ -161,7 +151,7 @@ export default {
               <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
                 删除
               </v-list-item>
-              <v-list-item density="compact" v-if="isUser">
+              <v-list-item density="compact" v-if="isUser" @click="editQues">
                 修改
               </v-list-item>
               <v-list-item density="compact">

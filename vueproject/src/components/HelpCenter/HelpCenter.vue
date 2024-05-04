@@ -4,7 +4,8 @@ import {
   getQuestionsByTagIdApi,
   getTagsApi,
   uploadFileApi,
-  uploadQuesApi
+  uploadQuesApi,
+  updateQuesApi
 } from "@/components/HelpCenter/api";
 import '@wangeditor/editor/dist/css/style.css'
 import {onBeforeUnmount, ref, shallowRef} from "vue";
@@ -30,6 +31,7 @@ export default {
     const sheet = ref(false)
 
     const toolbarConfig = {}
+
     const editorConfig = {placeholder: '请输入问题内容...'}
 
     const imageList = ref([])
@@ -57,22 +59,31 @@ export default {
       if (lastIndex.value !== 0) {
         getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex.value].tagId).then(
             (data) => {
+              let ori_len = questions.value.length
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
+              for(let i = ori_len;i < questions.value.length; i++) {
+                disTags.value.push([])
+                calTags(i)
+              }
             }
         )
       } else {
         getQuestionsApi(page.value, pageSize.value).then(
             (data) => {
+              let ori_len = questions.value.length
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
+              for(let i = ori_len;i < questions.value.length; i++) {
+                disTags.value.push([])
+                calTags(i)
+              }
             }
         )
       }
     }
 
     const init = () => {
-      getMore()
       getTagsApi().then(
           (data) => {
             tags.value = data.tags
@@ -85,6 +96,7 @@ export default {
             for (let i = 0; i < tags.value.length; i++) {
               tagNamesArray.value.push(tags.value[i].tagName)
             }
+            getMore()
           }
       )
     }
@@ -96,6 +108,7 @@ export default {
         page.value = 0
         lastIndex.value = index
         questions.value = []
+        disTags.value = []
         getMore()
       }
     }
@@ -172,6 +185,105 @@ export default {
       questions.value.splice(id, 1)
     }
 
+    const uploadHtml = ref("")
+    const uploadImageList = ref([])
+    const uploadTags = ref([])
+
+    const editMode = ref(false)
+
+    const editQuesIndex = ref()
+
+    const toEditQues = (data) => {
+      editMode.value = true
+      editQuesIndex.value = data.index
+      valueHtml.value= questions.value[data.index].quesContent.content
+      imageList.value = questions.value[data.index].quesContent.imageList
+      selectTags.value = []
+      for(let i = 0;i < questions.value[data.index].tagIdList.length;i++) {
+        for(let j = 0;j < tags.value.length;j++) {
+          if(questions.value[data.index].tagIdList[i] === tags.value[j].tagId) {
+            selectTags.value.push(tags.value[j].tagName)
+            break
+          }
+        }
+      }
+      sheet.value = !sheet.value
+    }
+
+    const toUploadQues = () => {
+      valueHtml.value= uploadHtml.value
+      imageList.value = uploadImageList.value
+      selectTags.value = uploadTags.value
+      editMode.value = false
+      sheet.value = !sheet.value
+    }
+
+    const editDialog = ref(false)
+
+    const undoEdit = () => {
+      valueHtml.value= ""
+      imageList.value = []
+      selectTags.value = []
+      sheet.value = !sheet.value
+      editDialog.value = false
+    }
+
+    const updateQuestion = () => {
+      if (String(valueHtml.value).replace(/<[^>]*>/g, "") === '') {
+        ElMessage.error('问题内容不得为空');
+      } else {
+        let uploadTags = []
+        for(let i = 0;i < selectTags.value.length;i++) {
+          for(let j =  0;j < tags.value.length; j++) {
+            if(tags.value[j].tagName === selectTags.value[i]) {
+              uploadTags.push(tags.value[j].tagId)
+              break;
+            }
+          }
+        }
+        updateQuesApi(questions.value[editQuesIndex.value].quesId,
+            valueHtml.value, imageList.value, uploadTags).then(
+            (res) => {
+              if (res.isSuccess === true) {
+                ElMessage.success("成功修改问题")
+                questions.value[editQuesIndex.value].quesContent.content = valueHtml.value
+                questions.value[editQuesIndex.value].quesContent.imageList = imageList.value
+                questions.value[editQuesIndex.value].tagIdList = uploadTags
+                valueHtml.value= ""
+                imageList.value = []
+                selectTags.value = []
+                sheet.value = !sheet.value
+                calTags(editQuesIndex.value)
+              } else {
+                ElMessage.error("上传修改失败，请稍后再试")
+              }
+            }
+        )
+      }
+    }
+
+    const disTags = ref([])
+
+    const calTags = (index) => {
+      disTags.value[index] = []
+      for (let i = 0; i < questions.value[index].tagIdList.length; i++) {
+        for (let j = 0; j < tags.value.length; j++) {
+          if (tags.value[j].tagId === questions.value[index].tagIdList[i]) {
+            disTags.value[index].push(tags.value[j])
+            break
+          }
+        }
+      }
+      disTags.value[index] = disTags.value[index].splice(0, 2)
+    }
+
+    const saveUpload = () => {
+      sheet.value = !sheet.value
+      uploadHtml.value = valueHtml.value
+      uploadTags.value = selectTags.value
+      uploadImageList.value = imageList.value
+    }
+
     return {
       editorConfig,
       mode: 'default',
@@ -201,7 +313,18 @@ export default {
       reviseImgList,
       reviseTagList,
       recommendQues,
-      delQuestion
+      delQuestion,
+      toEditQues,
+      toUploadQues,
+      uploadTags,
+      uploadHtml,
+      uploadImageList,
+      editMode,
+      editDialog,
+      undoEdit,
+      saveUpload,
+      updateQuestion,
+      disTags
     }
   }
 }
@@ -212,7 +335,7 @@ export default {
     <v-row justify="center" style="margin-top: 10px">
       <v-col cols="2" style="margin-right: 10px">
         <v-list density="compact">
-          <v-btn @click="sheet = !sheet" color="blue-darken-1" class="w-100" style="margin-bottom: 15px">
+          <v-btn @click="toUploadQues" color="blue-darken-1" class="w-100" style="margin-bottom: 15px">
             发起问题
           </v-btn>
           <v-list-subheader>分区</v-list-subheader>
@@ -235,7 +358,9 @@ export default {
         <QuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
                   :index="index"
                   @delQues="delQuestion"
-                  :question="questions[index]" :tags="tags"/>
+                  @editQues="toEditQues"
+                  :disTags="disTags[index]"
+                  :question="questions[index]"/>
         <!--      <v-pagination-->
         <!--          v-model="page"-->
         <!--          :length="Math.floor(quesSum / pageSize) + 2"-->
@@ -263,28 +388,43 @@ export default {
     <v-col cols="12" style="margin-bottom: 25px">
       <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
                    :index="index"
+                   :disTags="disTags[index]"
                    @delQues="delQuestion"
-                   :question="questions[index]" :tags="tags"/>
+                   :question="questions[index]"
+      />
       <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
         加载更多
       </v-btn>
     </v-col>
   </div>
-  <v-bottom-sheet v-model="sheet" inset>
+  <v-bottom-sheet v-model="sheet" inset :persistent="true">
     <v-card
         class="text-center"
         height="600"
     >
       <v-card-text>
-        <v-row align="center" style="margin-bottom: 5px">
-          <v-col cols="4" offset="4">
+        <v-row v-if="editMode === false" align="center" style="margin-bottom: 5px">
+          <v-col  cols="4" offset="4">
             发布问题
           </v-col>
           <v-col cols="4">
             <v-btn variant="text" @click="uploadQuestion">
               发布
             </v-btn>
-            <v-btn variant="text" @click="sheet = !sheet">
+            <v-btn variant="text" @click="saveUpload">
+              close
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row v-else align="center" style="margin-bottom: 5px">
+          <v-col  cols="4" offset="4">
+            编辑问题
+          </v-col>
+          <v-col cols="4">
+            <v-btn variant="text" @click="updateQuestion">
+              发布
+            </v-btn>
+            <v-btn variant="text" @click="editDialog = !editDialog">
               close
             </v-btn>
           </v-col>
@@ -332,8 +472,8 @@ export default {
               density="default"
           >
             <template v-slot:selection="{item, index}">
-              <v-chip size="x-small" :color="findTagColor(index)">
-                <v-icon>{{ findTagIcon(index) }}</v-icon>
+              <v-chip size="x-small" :color="findTagColor(index + 1)">
+                <v-icon>{{ findTagIcon(index + 1) }}</v-icon>
                 {{ item.title }}
               </v-chip>
             </template>
@@ -358,6 +498,34 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
+
+  <v-dialog
+      v-model="editDialog"
+      width="auto"
+  >
+    <v-card
+        max-width="400"
+        min-width="200"
+        prepend-icon="mdi-delete-clock"
+        text="如若关闭，你的修改将不会被保存，你确认嘛？"
+        title="修改问题"
+    >
+      <template v-slot:actions>
+        <v-btn
+            variant="flat"
+            density="compact"
+            text="确认"
+            color="red-darken-1"
+            @click="undoEdit"
+        ></v-btn>
+        <v-btn
+            text="取消"
+            density="compact"
+            @click="editDialog = false"
+        ></v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 
 </template>
 
