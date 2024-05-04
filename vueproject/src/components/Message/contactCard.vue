@@ -37,7 +37,7 @@ export default {
 }
 
 .box-card {
-    border-radius: 0; /* 去除圆角 */
+    border-radius: 5; /* 去除圆角 */
     height: 70px;
     align-items: center;
     position: flex;
