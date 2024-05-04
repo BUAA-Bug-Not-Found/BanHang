@@ -7,7 +7,7 @@ import RecQuesCard from "@/components/HelpCenter/RecQuesCard.vue";
 import {useDisplay} from "vuetify";
 import AppAnsCard from "@/components/HelpCenter/AppAnsCard.vue";
 import {
-  delQuestionAPI,
+  delQuestionAPI, formatDate,
   getQuestionsApi,
   getQuestionsByTagIdApi,
   getTagsApi,
@@ -32,6 +32,7 @@ export default {
     window.addEventListener('scroll', this.handleScroll);
   },
   methods: {
+    formatDate,
     userStateStore,
     handleScroll() {
       // 假设 right-panel 初始时离顶部有200px的距离
@@ -283,7 +284,7 @@ export default {
               <UserAvatar :userId="question.userId"></UserAvatar>
               <v-col cols="7">
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
-                <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
+                <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
               </v-col>
               <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
                 <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
@@ -390,7 +391,7 @@ export default {
               </v-col>
               <v-col cols="7">
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
-                <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
+                <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
               </v-col>
               <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
                 <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>

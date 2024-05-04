@@ -1,13 +1,14 @@
 <script>
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
-import {delQuestionAPI, setLikeQuesApi} from "@/components/HelpCenter/api";
+import {delQuestionAPI, formatDate, setLikeQuesApi} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "AppQuesCard",
+  methods: {formatDate},
   components: {UserAvatar},
   props: ["question", "tags"],
   emits: ["editQues", 'delQues'],
@@ -130,7 +131,7 @@ export default {
             {{ truncate(question.quesContent.content) }}
           </div>
           <div style="font-size: 12px;color: grey">
-            {{ question.userName }} {{ question.quesTime }}
+            {{ question.userName }} {{ formatDate(question.quesTime) }}
           </div>
         </v-col>
         <v-col cols="4" style="text-align: right;margin-top: 3px">

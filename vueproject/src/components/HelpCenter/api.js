@@ -243,3 +243,14 @@ export function acceptAnswer(ansId) {
         }
     )
 }
+
+export function formatDate(time) {
+    let date = new Date(Date.parse(time))
+    let year = date.getFullYear();
+    let month = ('0' + (date.getMonth() + 1)).slice(-2); // 月份从0开始，需要加1，并且保证两位数
+    let day = ('0' + date.getDate()).slice(-2); // 保证两位数
+    let hours = ('0' + date.getHours()).slice(-2); // 保证两位数
+    let minutes = ('0' + date.getMinutes()).slice(-2); // 保证两位数
+
+    return `${year}.${month}.${day} ${hours}:${minutes}`
+}
