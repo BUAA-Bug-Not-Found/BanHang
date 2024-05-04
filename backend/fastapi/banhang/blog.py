@@ -179,7 +179,7 @@ def get_blogs_advanced(blog_page_advanced: BlogPageAdvanced,
 
 @router.post("/blog/getAllBlogTags", tags=["Blog"], response_model=List[schemas.TagBase])
 def get_all_blog_tags(db: Session = Depends(get_db)):
-	db_tags = crud.get_all_blog_tags()
+	db_tags = crud.get_all_blog_tags(db)
 	tags = []
 	for db_tag in db_tags:
 		tag = {}

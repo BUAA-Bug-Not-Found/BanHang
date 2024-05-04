@@ -16,7 +16,7 @@ class EmailCheck(BaseModel):
     checkcode:int
 
 class TagBase(BaseModel):
-    tagId: str
+    tagId: int
     tagName: str
     tagIcon: str
     tagColor: str
