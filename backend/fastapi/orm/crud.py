@@ -122,6 +122,8 @@ def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymou
         for tag_id in tag_ids:
             db_blog_tag = models.BlogBlogTag(blog_id=db_blog.id, tag_id=tag_id)
             db.add(db_blog_tag)
+        db.commit()
+        db.refresh(db_blog)
     except Exception as e:
         db.rollback()
         db_blog = None
