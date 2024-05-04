@@ -34,7 +34,7 @@ jobs:
       - run: if (Test-Path -Path F:\tmp\nginx-1.25.1\dist){Remove-Item -Path F:\tmp\nginx-1.25.1\dist -Force -Recurse}
       - run: Copy-Item -Path .\dist -Destination F:\tmp\nginx-1.25.1 -Force -Recurse
         working-directory: D:\SoftWareEngineer\frontend\vueproject
-      - run: .\nginx.exe -s quit
+      - run: .\nginx.exe -s quit || exit0
         working-directory: F:\tmp\nginx-1.25.1
       - run: start .\nginx.exe
         working-directory: F:\tmp\nginx-1.25.1
