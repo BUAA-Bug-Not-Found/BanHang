@@ -2,9 +2,6 @@ import axios from "axios";
 
 export function queryStar(_a, _b) {
     // a b email
-    console.log("query参数: ")
-    console.log(_a)
-    console.log(_b)
     return axios.request({
         url: "/queryStar",
         method: "get",
@@ -44,9 +41,6 @@ export function setNickname(_a, _email) {
             "email": _email
         }
     }).then((reply) => {
-        // 
-        console.log("reply")
-        console.log(reply.data)
         return reply.data
     }).catch(() => {
 
@@ -107,9 +101,6 @@ export function getStars(_email) {
             "email": _email
         }
     }).then((reply) => {
-        console.log("stars reply.data => ")
-        console.log(reply.data)
-        console.log("stars over!")
         return reply.data
     }).catch(() => {
         

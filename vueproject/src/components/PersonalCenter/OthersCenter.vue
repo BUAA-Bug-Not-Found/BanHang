@@ -34,7 +34,7 @@
     <v-card>
       <v-tabs
         v-model="tab"
-        color="red darken-4"
+        color="blue"
         fixed-tabs
       >
         <v-tab value="one">Ta的互助贴</v-tab>
@@ -51,7 +51,7 @@
                 <div style="text-align: center; font-size: 0px;">
                   <img :src="firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                 </div> -->
-                <div style="margin-top: 3px" v-dompurify-html="content.blogTitle"></div>
+                <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div>
 
                 <!-- 帖子的发表时间, 评论数量, 点赞数 -->
                 <div style="text-align: right; margin-top: 10px;">
@@ -180,7 +180,6 @@ export default {
     },
     clickHelpItem(_blogId) {
       // router.push({name: 'QuesInfo', params: {qid: _blogId}});
-      console.log("_blogId-other -> " + _blogId)
       router.push('/QuesInfo/' + _blogId);
     }
   },

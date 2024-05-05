@@ -88,7 +88,7 @@
             <v-window-item value="two">
               <v-list>
                 <v-list-item v-for="(content, index) in helpBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
-                  <div style="margin-top: 3px" v-dompurify-html="content.blogTitle"></div>
+                  <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div>
                   <!-- <div style="text-align: center; font-size: 0px;">
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                   </div> -->
@@ -124,7 +124,6 @@
         showTip("请首先登陆", false)
         router.replace({path: "loginPage"})
       }
-      // console.log("user.sign-> " + this.sign)
       if (this.sign === "" || !this.sign) {
         this.sign = "快介绍一下自己吧~"
       }
