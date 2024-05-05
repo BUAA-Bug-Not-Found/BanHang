@@ -117,7 +117,8 @@ class BlogUserAnonyInfo(Base):
     __tablename__ = 'blog_user_anony_info'
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     blog_id = Column(Integer, ForeignKey('blogs.id'), primary_key=True)
-    name = Column(String, nullable=False)
+    anony_name = Column(String, nullable=False)
+    anony_avatar_url = Column(String, nullable=False)
 
 class Question(Base):
     __tablename__ = 'questions'

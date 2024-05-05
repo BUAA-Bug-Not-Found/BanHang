@@ -26,8 +26,9 @@ def get_blog_by_page(blog_page: schemas.BlogPageTag,
 		blog = {}
 		if db_blog.is_anonymous:
 			blog['userId'] = -1
-			blog['userName'] = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user.id, create=True)
-			blog['userAvatarUrl'] = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
+			blog['userName'] = annoy_info.anony_name
+			blog['userAvatarUrl'] = annoy_info.anony_avatar_url
 		else:	
 			db_user = db_blog.user
 			blog['userId'] = db_user.id
@@ -64,8 +65,9 @@ def get_blog_by_blog_id(blog_id: BlogId,
 	blog = {}
 	if db_blog.is_anonymous:
 		blog['userId'] = -1
-		blog['userName'] = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user.id, create=True)
-		blog['userAvatarUrl'] = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+		annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
+		blog['userName'] = annoy_info.anony_name
+		blog['userAvatarUrl'] = annoy_info.anony_avatar_url
 	else:	
 		db_user = db_blog.user
 		blog['userId'] = db_user.id
@@ -118,8 +120,9 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
 		comment = {}
 		if db_comment.is_anonymous:
 			comment['userId'] = -1
-			comment['userName'] = crud.get_user_anony_info_by_comment_id(db, db_comment.blog_id, db_comment.user.id, create=True)
-			comment['userAvatarUrl'] = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+			annoy_info = crud.get_user_anony_info_by_comment_id(db, db_comment.blog_id, db_comment.user.id, create=True)
+			comment['userName'] = annoy_info.anony_name
+			comment['userAvatarUrl'] = annoy_info.anony_avatar_url
 		else:	
 			db_user = db_comment.user
 			comment['userId'] = db_user.id
@@ -167,8 +170,9 @@ def get_blogs_advanced(blog_page_advanced: schemas.BlogPageAdvanced,
 		blog = {}
 		if db_blog.is_anonymous:
 			blog['userId'] = -1
-			blog['userName'] = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user.id, create=True)
-			blog['userAvatarUrl'] = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
+			blog['userName'] = annoy_info.anony_name
+			blog['userAvatarUrl'] = annoy_info.anony_avatar_url
 		else:	
 			db_user = db_blog.user
 			blog['userId'] = db_user.id
