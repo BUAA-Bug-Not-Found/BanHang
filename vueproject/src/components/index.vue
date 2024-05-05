@@ -145,7 +145,7 @@ export default {
     <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="gotoLoginOrPersonalIndex()">
       <v-img :src="this.avatar"/>
     </v-avatar>
-    <v-col>
+    <v-col cols="7">
       <v-text-field
           density="compact"
           class="w-80"
@@ -162,7 +162,7 @@ export default {
         </template>
       </v-text-field>
     </v-col>
-    <v-btn v-if="!isApp" color="primary" @click="downloadApk">Download APK</v-btn>
+<!--    <v-btn v-if="!isApp" color="primary" @click="downloadApk">Download APK</v-btn>-->
     <template v-slot:append>
       <v-btn @click="goto('/message')">
         <v-icon>mdi-email-outline</v-icon>
