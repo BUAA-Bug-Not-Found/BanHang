@@ -185,10 +185,6 @@
         return formattedDateTime;
       },
       clickItem(_blogId) {
-        console.log("blogId是-> ")
-        console.log(_blogId)
-        console.log("blogId是<- ")
-        // router.push({path: })
         router.push({name: 'blogView', params: {id: _blogId}});}
     },
   };

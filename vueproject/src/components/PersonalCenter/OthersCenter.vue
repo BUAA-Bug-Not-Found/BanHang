@@ -125,6 +125,10 @@ export default {
     // 可以添加其他方法
     clickHeart() {
       const s = userStateStore()
+      if (s.email === this.otherEmail) {
+        showTip("不能关注自己!", false)
+        return
+      }
       setStarState(s.email, this.otherEmail, !this.isStar)
             .then((res) => {
               // 收到回复
@@ -145,6 +149,10 @@ export default {
             })
     }, 
     clickChat() {
+      if (userStateStore().email === this.otherEmail) {
+        showTip("不能和自己聊天!", false)
+        return
+      }
       // 跳转到聊天窗口, 传递一个参数
       localStorage.setItem('MessageInterface', JSON.stringify({
         user_id: this.infos.user_id,

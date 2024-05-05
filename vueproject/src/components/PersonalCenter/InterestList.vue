@@ -95,20 +95,8 @@ export default {
             // })));
         })
 
-        // this.stars.concat([
-        //   {
-        //     'headUrl': '../../assets/nr/headImage.jpg',
-        //     'nickname': 'Goths',
-        //     'email': "123"
-        //   },
-        //   {
-        //     'headUrl': '../../assets/nr/headImage.jpg',
-        //     'nickname': 'Goths',
-        //     'email': "123"
-        //   }
-        // ])
         getFans(userStateStore().email).then((res) => {
-            this.fans = res
+            this.fans = res.fans
         })
         // this.fans.concat([
         //   {
@@ -152,20 +140,6 @@ export default {
                 // }
             ],
             fans: [
-                // {
-                //     'headUrl': '',
-                //     'nickname': 'Goths',
-                //     "email": "232323",
-                //   "sign": "签名"
-
-                // },
-                // {
-                //   'headUrl': '../../assets/nr/headImage.jpg',
-                //   'nickname': 'Goths',
-                //   'email': "123",
-                //   "sign": "签名"
-
-                // }
             ]
         }
     },

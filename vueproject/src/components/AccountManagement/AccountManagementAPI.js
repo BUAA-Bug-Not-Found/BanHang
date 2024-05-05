@@ -5,7 +5,7 @@ import userStateStore from "@/store";
 import router from "@/router";
 
 export const NICKNAME_FORMAT_TIP = "昵称必须由1-15个字符组成, 只可包含汉字,字母,数字,下划线,连字符";
-export const PASSWORD_FORMAT_TIP = "密码必须至少含8个字符, 且需有至少一个字母和一个数字";
+export const PASSWORD_FORMAT_TIP = "密码必须至少含8个字符, 最多32个字符, 且不可仅包含数字或仅包含大写字母或仅包含小写字母";
 export const SIGN_FORMAT_TIP = "个性签名最多包含30个字符"
 export const hashTool = require("bcryptjs")
 
@@ -153,9 +153,13 @@ export function isNicknameFormatOk(nickname) {
 
 export function isPasswordFormatOk(password) {
     // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    const regex1 = /[0-9]/
-    const regex2 = /[a-zA-Z]/
-    return regex1.test(password) && regex2.test(password)
+    const regex1 = /^[0-9]+$/
+    const regex2 = /^[a-z]+$/
+    const regex3 = /^[A-Z]+$/
+    const len = password.length
+    return !regex1.test(password) && !regex2.test(password) && !regex3.test(password) && len <= 32 && len >= 8
+    // const regex2 = /[a-zA-Z]/
+    // return regex1.test(password) && regex2.test(password) && len <= 32 && len >= 8
 }
 
 export function isSignFormatOk(sign) {
