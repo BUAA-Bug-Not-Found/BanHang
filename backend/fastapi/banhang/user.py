@@ -214,7 +214,7 @@ class GetHelpBlogResponse(BaseModel):
     blogId: int
 @router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetHelpBlogResponse],
             responses={400: {"model": excResponse}})
-def get_helpBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
+def get_helpBlogs_by_email(email:str,#current_user: Optional[dict] = Depends(authorize),
                             db:Session = Depends(get_db)):
     # if not current_user:
     #     pass
@@ -225,7 +225,7 @@ def get_helpBlogs_by_email(email:str,current_user: Optional[dict] = Depends(auth
     #     pass
     #     # raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
     questions = crud.get_questions_by_email(db, email)
-    return [GetAnonyBlogResponse(blogTitle = question.content,
+    return [GetHelpBlogResponse(blogTitle = question.content,
                                  firstPhotoUrl = question.images[0].image_url if len(question.images) > 0 else "",
                                  time = question.create_at,
                                  blogId = question.id)
