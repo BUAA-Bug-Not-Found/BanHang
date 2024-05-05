@@ -51,7 +51,7 @@
         v-bind="props"
     >
       <v-row>
-        <v-col cols="1" >
+        <v-col cols="2" >
           <div style="display:flex; justify-content: end;align-content: center">
             <UserAvatar :userId="this.userId"></UserAvatar>
           </div>
