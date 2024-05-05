@@ -130,6 +130,24 @@ def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymou
     return db_blog
 
 
+def get_user_anony_info_by_blog_id(db: Session, blog_id: int, user_id: int, create: bool = False):
+    name = (db.query(models.BlogUserAnonyInfo.anony_name)
+            .filter(models.BlogUserAnonyInfo.blog_id == blog_id, models.BlogUserAnonyInfo.user_id == user_id)
+            .first())
+    def random_hex(length):
+        import random
+        return random.randint(0,16**length)
+    if create and name == None:
+        name = f"匿名用户 #{random_hex(6):06X}"
+        try:
+            db.add(models.BlogUserAnonyInfo(blog_id=blog_id, user_id=user_id, anony_name=name))
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            name = None
+    return name
+
+
 def get_blog_by_blog_id(db: Session, blog_id: int):
     return db.query(models.Blog).filter(models.Blog.id == blog_id).first()
 
