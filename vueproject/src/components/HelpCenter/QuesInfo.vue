@@ -493,7 +493,7 @@ export default {
                  style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
               <span style="font-weight: bold;font-size: 20px">评论 </span>
               <span>
-                <v-btn prepend-icon="mdi-reply" color="primary" @click="uploadAnswer">
+                <v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadAnswer">
                   发送回复
                 </v-btn>
               </span>
@@ -593,7 +593,7 @@ export default {
                      color="blue-grey-lighten-2" @click="setLikeQues">
                 {{ likeSum }}
               </v-btn>
-              <v-btn variant="text" prepend-icon="mdi-reply" size="small" color="blue-grey-lighten-2">
+              <v-btn variant="text" prepend-icon="mdi-message-reply-text" size="small" color="blue-grey-lighten-2">
                 {{ question.ansSum }}
               </v-btn>
               <v-chip v-for="tag in disTags" size="small"
