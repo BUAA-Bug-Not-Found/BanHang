@@ -83,14 +83,6 @@
                 </v-list-item>
               </v-list>
             </v-window-item>
-            
-
-            <!-- <QuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
-                  :index="index"
-                  @delQues="delQuestion"
-                  @editQues="toEditQues"
-                  :disTags="disTags[index]"
-                  :question="questions[index]"/> -->
             <!-- 该window展示互助贴的内容 -->
             <v-window-item value="two">
               <v-list>
@@ -120,26 +112,29 @@
   
   export default {
     created() {
-      // 为什么不会立即回显???? TODO
-      this.headUrl = userStateStore().headImage;
-      this.nickname = userStateStore().nickname;
-      this.email = userStateStore().email;
-      this.sign = userStateStore().sign;
-      if (!this.email) {
-        showTip("请首先登陆", false)
-        router.replace({path: "loginPage"})
-      }
-      if (this.sign === "" || !this.sign) {
-        this.sign = "快介绍一下自己吧~"
-      }
-      // 加载一下匿名贴和互助贴
-      getHelpBlogs(userStateStore().email).then((res) => {
-        this.helpBlogs = res
-      })
-      getWaterBlogs(userStateStore().email).then((res) => {
-        this.waterBlogs = res
-      })
-      // this.helpBlogs = get
+      setTimeout(() => {
+        // 这里放置需要延迟执行的代码
+        this.headUrl = userStateStore().headImage;
+        this.nickname = userStateStore().nickname;
+        this.email = userStateStore().email;
+        this.sign = userStateStore().sign;
+        if (!this.email) {
+          showTip("请首先登陆", false)
+          router.replace({path: "loginPage"})
+        }
+        if (this.sign === "" || !this.sign) {
+          this.sign = "快介绍一下自己吧~"
+        }
+        // 加载一下匿名贴和互助贴
+        getHelpBlogs(userStateStore().email).then((res) => {
+          this.helpBlogs = res
+        })
+        getWaterBlogs(userStateStore().email).then((res) => {
+          this.waterBlogs = res
+        })
+      }, 100);
+      
+      
     },
     data() {
       return {
