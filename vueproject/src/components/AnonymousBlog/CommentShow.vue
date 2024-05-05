@@ -1,12 +1,12 @@
 <template>
   <v-card class="comment-card" v-show="replyToCommentId === null">
-    <div class="user-info" @click="goToOtherUser(userId)">
-      <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
-        <UserAvatar :userId="this.userId"></UserAvatar>
+    <div class="user-info">
+      <div v-if="userId !== -1" style="display:flex; justify-content: end;align-content: center">
+        <UserAvatar :userId="userId"></UserAvatar>
       </div>
-      <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
+      <div v-if="userId === -1" style="display:flex; justify-content: end;align-content: center">
         <v-avatar style="margin-top:8px">
-          <v-img :src="this.userAvatarUrl"></v-img>
+          <v-img :src="userAvatarUrl"></v-img>
         </v-avatar>
       </div>
       <div class="user-details">
@@ -44,6 +44,7 @@ import {goToOtherUser, uploadComment} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import UserStateStore from "@/store";
+import router from "@/router";
 
 export default {
   name: "CommentShow",
@@ -135,6 +136,7 @@ export default {
                   showClose: true,
                   type: 'success',
                 })
+                router.go(0)
               } else {
                 ElMessage({
                   message: '评论失败，请修改内容或稍后再试',
