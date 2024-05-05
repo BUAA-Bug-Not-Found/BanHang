@@ -22,7 +22,23 @@
     <div class="content">
       <p>{{ content }}</p>
       <div class="image-list">
-        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>
+<!--        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>-->
+
+        <v-row>
+          <v-col v-for="(image,index) in imageList"
+                 :key="'image' + index" :cols="useDisplay().smAndDown.value? 4 : 3"
+          >
+            <div class="avatar-wrapper">
+              <el-image
+                  class="avatar"
+                  :src="image"
+                  :fit="'cover'"
+                  @click="showPic(imageList)"
+              />
+            </div>
+          </v-col>
+        </v-row>
+
       </div>
     </div>
 
@@ -61,10 +77,22 @@ import {getBlogByBlogId, getCommentsByBlogId, goToOtherUser, uploadComment} from
 import {ElMessage} from "element-plus";
 import {useRouter} from "vue-router";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+import {api as viewerApi} from "v-viewer";
+import {useDisplay} from "vuetify";
 
 export default {
   name: "BlogView",
   components: {UserAvatar, CommentList},
+
+  setup() {
+    const showPic = (imgList) => {
+      viewerApi({images: imgList})
+    }
+
+    return {
+      showPic
+    }
+  },
 
   data() {
     return {
@@ -92,6 +120,7 @@ export default {
   },
 
   methods: {
+    useDisplay,
     goToOtherUser,
     formatDate(time) {
       let date = new Date(Date.parse(time))
