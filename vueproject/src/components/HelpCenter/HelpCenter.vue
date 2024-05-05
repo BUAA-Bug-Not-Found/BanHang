@@ -17,6 +17,7 @@ import {ElMessage} from "element-plus";
 import {Plus} from "@element-plus/icons-vue";
 import userStateStore from "../../store";
 import router from "@/router";
+import {api as viewerApi} from 'v-viewer'
 
 export default {
   name: "HelpCenter",
@@ -62,7 +63,7 @@ export default {
               let ori_len = questions.value.length
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
-              for(let i = ori_len;i < questions.value.length; i++) {
+              for (let i = ori_len; i < questions.value.length; i++) {
                 disTags.value.push([])
                 calTags(i)
               }
@@ -74,7 +75,7 @@ export default {
               let ori_len = questions.value.length
               quesSum.value = data.quesSum
               questions.value = questions.value.concat(data.questions)
-              for(let i = ori_len;i < questions.value.length; i++) {
+              for (let i = ori_len; i < questions.value.length; i++) {
                 disTags.value.push([])
                 calTags(i)
               }
@@ -148,9 +149,9 @@ export default {
         ElMessage.error('问题内容不得为空');
       } else {
         let uploadTags = []
-        for(let i = 0;i < selectTags.value.length;i++) {
-          for(let j =  0;j < tags.value.length; j++) {
-            if(tags.value[j].tagName === selectTags.value[i]) {
+        for (let i = 0; i < selectTags.value.length; i++) {
+          for (let j = 0; j < tags.value.length; j++) {
+            if (tags.value[j].tagName === selectTags.value[i]) {
               uploadTags.push(tags.value[j].tagId)
               break;
             }
@@ -196,12 +197,12 @@ export default {
     const toEditQues = (data) => {
       editMode.value = true
       editQuesIndex.value = data.index
-      valueHtml.value= questions.value[data.index].quesContent.content
+      valueHtml.value = questions.value[data.index].quesContent.content
       imageList.value = questions.value[data.index].quesContent.imageList
       selectTags.value = []
-      for(let i = 0;i < questions.value[data.index].tagIdList.length;i++) {
-        for(let j = 0;j < tags.value.length;j++) {
-          if(questions.value[data.index].tagIdList[i] === tags.value[j].tagId) {
+      for (let i = 0; i < questions.value[data.index].tagIdList.length; i++) {
+        for (let j = 0; j < tags.value.length; j++) {
+          if (questions.value[data.index].tagIdList[i] === tags.value[j].tagId) {
             selectTags.value.push(tags.value[j].tagName)
             break
           }
@@ -211,7 +212,7 @@ export default {
     }
 
     const toUploadQues = () => {
-      valueHtml.value= uploadHtml.value
+      valueHtml.value = uploadHtml.value
       imageList.value = uploadImageList.value
       selectTags.value = uploadTags.value
       editMode.value = false
@@ -221,7 +222,7 @@ export default {
     const editDialog = ref(false)
 
     const undoEdit = () => {
-      valueHtml.value= ""
+      valueHtml.value = ""
       imageList.value = []
       selectTags.value = []
       sheet.value = !sheet.value
@@ -233,9 +234,9 @@ export default {
         ElMessage.error('问题内容不得为空');
       } else {
         let uploadTags = []
-        for(let i = 0;i < selectTags.value.length;i++) {
-          for(let j =  0;j < tags.value.length; j++) {
-            if(tags.value[j].tagName === selectTags.value[i]) {
+        for (let i = 0; i < selectTags.value.length; i++) {
+          for (let j = 0; j < tags.value.length; j++) {
+            if (tags.value[j].tagName === selectTags.value[i]) {
               uploadTags.push(tags.value[j].tagId)
               break;
             }
@@ -249,7 +250,7 @@ export default {
                 questions.value[editQuesIndex.value].quesContent.content = valueHtml.value
                 questions.value[editQuesIndex.value].quesContent.imageList = imageList.value
                 questions.value[editQuesIndex.value].tagIdList = uploadTags
-                valueHtml.value= ""
+                valueHtml.value = ""
                 imageList.value = []
                 selectTags.value = []
                 sheet.value = !sheet.value
@@ -282,6 +283,10 @@ export default {
       uploadHtml.value = valueHtml.value
       uploadTags.value = selectTags.value
       uploadImageList.value = imageList.value
+    }
+
+    const showPic = (imgList) => {
+      viewerApi({images: imgList})
     }
 
     return {
@@ -324,7 +329,8 @@ export default {
       undoEdit,
       saveUpload,
       updateQuestion,
-      disTags
+      disTags,
+      showPic
     }
   }
 }
@@ -404,7 +410,7 @@ export default {
     >
       <v-card-text>
         <v-row v-if="editMode === false" align="center" style="margin-bottom: 5px">
-          <v-col  cols="4" offset="4">
+          <v-col cols="4" offset="4">
             发布问题
           </v-col>
           <v-col cols="4">
@@ -417,7 +423,7 @@ export default {
           </v-col>
         </v-row>
         <v-row v-else align="center" style="margin-bottom: 5px">
-          <v-col  cols="4" offset="4">
+          <v-col cols="4" offset="4">
             编辑问题
           </v-col>
           <v-col cols="4">
@@ -430,18 +436,13 @@ export default {
           </v-col>
         </v-row>
         <v-row>
-          <v-col v-for="(image,index) in imageList" :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
-                >
+          <v-col v-for="image in imageList" :key="image" :cols="display.smAndDown.value? 4 : 3">
             <div class="avatar-wrapper">
               <el-image
                   class="avatar"
                   :src="image"
-                  :zoom-rate="1.2"
-                  :max-scale="7"
-                  :min-scale="0.2"
-                  :preview-src-list="imageList"
-                  :initial-index="4"
                   :fit="'cover'"
+                  @click="showPic(imageList)"
               />
             </div>
           </v-col>
@@ -558,7 +559,7 @@ export default {
   border-color: var(--el-color-primary);
 }
 
-.avatar-wrapper{
+.avatar-wrapper {
   position: relative;
   width: 100%;
   height: 0;
@@ -572,6 +573,7 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
+  cursor: pointer;
 
   overflow: hidden;
 }
