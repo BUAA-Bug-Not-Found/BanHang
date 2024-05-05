@@ -79,15 +79,16 @@ import { checkLogin } from '../AccountManagement/AccountManagementAPI';
 export default {
     components: {UserShow},
     created() {
+      setTimeout(() => {
         checkLogin();
         // 拿到stars和fans列表
         getStars(userStateStore().email).then((res) => {
             this.stars = res.stars
         })
-
         getFans(userStateStore().email).then((res) => {
             this.fans = res.fans
         })
+      }, 100);
     },
     data() {
         return {

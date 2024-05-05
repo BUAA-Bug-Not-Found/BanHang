@@ -81,15 +81,17 @@ import { isNicknameFormatOk, isSignFormatOk, NICKNAME_FORMAT_TIP, showTip, SIGN_
 export default {
     name: "EditPersonalInfo",
     created() {
-        // 加载数据
-        this.nickname = userStateStore().nickname
-        this.sign = userStateStore().sign
-        this.headImage1 = userStateStore().headImage
-        if (!userStateStore().email) {
-            showTip("请首先登陆", false)
-            router.replace({path: "loginPage"})
-        }
-        this.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setTimeout(() => {
+            // 加载数据
+            this.nickname = userStateStore().nickname
+            this.sign = userStateStore().sign
+            this.headImage1 = userStateStore().headImage
+            if (!userStateStore().email) {
+                showTip("请首先登陆", false)
+                router.replace({path: "loginPage"})
+            }
+            this.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }, 100);
     },
     data() {
         return {
