@@ -1,6 +1,6 @@
 <template>
   <div class="comment-card">
-    <div class="user-info" @click="goToOtherUser(userId)">
+    <div class="user-info" >
       <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
         <UserAvatar :userId="this.userId"></UserAvatar>
       </div>

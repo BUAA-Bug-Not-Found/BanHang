@@ -79,6 +79,7 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import UserStateStore from "@/store";
 import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
+import router from "@/router";
 
 export default {
   name: "BlogView",
@@ -156,7 +157,7 @@ export default {
             this.comments = data.map(comment => ({
               userId: comment.userId,
               userName: comment.userName,
-              userAvatarURL: comment.userAvatarUrl,
+              userAvatarUrl: comment.userAvatarUrl,
               blogId: this.blogId,
               commentId: comment.commentId,
               content: comment.commentContent,
@@ -202,7 +203,7 @@ export default {
                   showClose: true,
                   type: 'success',
                 })
-                this.fetchCommentInfo();
+                router.go(0)
               } else {
                 ElMessage({
                   message: '评论失败，请修改内容或稍后再试',
