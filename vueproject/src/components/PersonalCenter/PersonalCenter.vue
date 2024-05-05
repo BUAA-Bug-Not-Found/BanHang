@@ -64,7 +64,7 @@
             <!-- 该window展示匿名贴的内容 -->
             <v-window-item value="one">
               <v-list>
-                <v-list-item v-for="(content, index) in waterBlogs.slice().reverse()" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
+                <v-list-item v-for="(content, index) in waterBlogs.slice().reverse()" :key="index" @click="clickWaterItem(content.blogId)" style="cursor: pointer;">
                   <div style="text-align: left;">
                     <v-text style="vertical-align: middle; font-size: 18px; font-weight: bold;">{{ content.blogTitle }}</v-text>
                   </div>
@@ -87,11 +87,11 @@
             <!-- 该window展示互助贴的内容 -->
             <v-window-item value="two">
               <v-list>
-                <v-list-item v-for="(content, index) in helpBlogs" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
+                <v-list-item v-for="(content, index) in helpBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
                   <div style="margin-top: 3px" v-dompurify-html="content.blogTitle"></div>
-                  <div style="text-align: center; font-size: 0px;">
+                  <!-- <div style="text-align: center; font-size: 0px;">
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
-                  </div>
+                  </div> -->
                   <div style="text-align: right; margin-top: 10px;">
                     <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>
@@ -190,8 +190,13 @@
         
         return formattedDateTime;
       },
-      clickItem(_blogId) {
-        router.push({name: 'blogView', params: {id: _blogId}});}
+      clickWaterItem(_blogId) {
+        router.push({name: 'blogView', params: {id: _blogId}});
+        // router.push('/blogView/' + _blogId);
+      },
+      clickHelpItem(_blogId) {
+        router.push('/QuesInfo/' + _blogId);
+      }
     },
   };
   </script>

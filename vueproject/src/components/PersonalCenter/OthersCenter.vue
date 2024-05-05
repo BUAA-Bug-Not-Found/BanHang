@@ -45,12 +45,13 @@
           <!-- 该window展示匿名贴的内容 -->
           <v-window-item value="one">
             <v-list>
-              <v-list-item v-for="(content, index) in otherBlogs" :key="index" @click="clickItem" style="cursor: pointer;">
+              <v-list-item v-for="(content, index) in otherBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
                 
-                <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</span>
+                <!-- <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</span>
                 <div style="text-align: center; font-size: 0px;">
                   <img :src="firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
-                </div>
+                </div> -->
+                <div style="margin-top: 3px" v-dompurify-html="content.blogTitle"></div>
 
                 <!-- 帖子的发表时间, 评论数量, 点赞数 -->
                 <div style="text-align: right; margin-top: 10px;">
@@ -118,7 +119,6 @@ export default {
         'https://via.placeholder.com/150',
         // 添加更多图片链接...
       ],
-      // headUrl: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg"
     };
   },
   methods: {
@@ -177,6 +177,11 @@ export default {
       const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
       
       return formattedDateTime;
+    },
+    clickHelpItem(_blogId) {
+      // router.push({name: 'QuesInfo', params: {qid: _blogId}});
+      console.log("_blogId-other -> " + _blogId)
+      router.push('/QuesInfo/' + _blogId);
     }
   },
 };
