@@ -421,7 +421,7 @@ export default {
   <v-bottom-sheet v-model="sheet" inset :persistent="true">
     <v-card
         class="text-center"
-        height="600"
+        height="800"
     >
       <v-card-text>
         <v-row v-if="editMode === false" align="center" style="margin-bottom: 5px">
