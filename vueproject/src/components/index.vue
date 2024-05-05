@@ -154,7 +154,7 @@ export default {
           hide-details
           single-line
           v-model="searchContent"
-          @keyup.enter="search"
+          @keyup.enter="navigateToSearchList"
           style="margin-left: 10px; margin-right: 10px"
       >
         <template v-slot:append-inner>
