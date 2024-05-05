@@ -64,7 +64,7 @@
             <!-- 该window展示匿名贴的内容 -->
             <v-window-item value="one">
               <v-list>
-                <v-list-item v-for="(content, index) in waterBlogs.slice().reverse()" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
+                <v-list-item v-for="(content, index) in waterBlogs.slice().reverse()" :key="index" @click="clickWaterItem(content.blogId)" style="cursor: pointer;">
                   <div style="text-align: left;">
                     <v-text style="vertical-align: middle; font-size: 18px; font-weight: bold;">{{ content.blogTitle }}</v-text>
                   </div>
@@ -84,18 +84,23 @@
               </v-list>
             </v-window-item>
             
+
+            <!-- <QuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
+                  :index="index"
+                  @delQues="delQuestion"
+                  @editQues="toEditQues"
+                  :disTags="disTags[index]"
+                  :question="questions[index]"/> -->
             <!-- 该window展示互助贴的内容 -->
             <v-window-item value="two">
               <v-list>
-                <v-list-item v-for="(content, index) in helpBlogs" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
-                  <div style="margin-top: 3px" v-dompurify-html="content.blogTitle"></div>
-                  <div style="text-align: center; font-size: 0px;">
-                    <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
-                  </div>
+                <v-list-item v-for="(content, index) in helpBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
+                  <!-- <span>span-> {{ truncate(content.blogTitle) }}</span> -->
+                  <div style="text-align: left;">{{ truncate(content.blogTitle) }}</div>
+                  <!-- <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div> -->
                   <div style="text-align: right; margin-top: 10px;">
                     <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>
-                  <!-- 分隔线 -->
                   <v-divider style="margin-top: 0px;"></v-divider>
                 </v-list-item>
               </v-list>
@@ -124,7 +129,6 @@
         showTip("请首先登陆", false)
         router.replace({path: "loginPage"})
       }
-      // console.log("user.sign-> " + this.sign)
       if (this.sign === "" || !this.sign) {
         this.sign = "快介绍一下自己吧~"
       }
@@ -173,6 +177,13 @@
         userStateStore().resetUserInfo()
         router.replace({path: "/loginPage"})
       },
+      truncate(content) {
+        const strippedContent = String(content).replace(/<[^>]*>/g, "")
+        if (strippedContent.length > 20) {
+          return `${strippedContent.slice(0, 20)}...`;
+        }
+        return strippedContent;
+      },
       formatDateTime(dateTimeStr) {
         // 创建 Date 对象
         const dateTime = new Date(dateTimeStr);
@@ -190,8 +201,13 @@
         
         return formattedDateTime;
       },
-      clickItem(_blogId) {
-        router.push({name: 'blogView', params: {id: _blogId}});}
+      clickWaterItem(_blogId) {
+        router.push({name: 'blogView', params: {id: _blogId}});
+        // router.push('/blogView/' + _blogId);
+      },
+      clickHelpItem(_blogId) {
+        router.push('/QuesInfo/' + _blogId);
+      }
     },
   };
   </script>

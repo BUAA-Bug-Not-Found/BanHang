@@ -12,7 +12,6 @@ export const hashTool = require("bcryptjs")
 
 export function tryLogin(_email, _password) {
     // TODO 完善request中的数据
-    console.log("登录密码-> " + _password)
     return axios.request({
         url: "/login",
         method: "put",
@@ -43,7 +42,6 @@ export function getPasswordByEmail(_email) {
 }
 
 export function tryResetPassword(_email, _password, _checkCode) {
-    console.log("重置密码-> " + _password)
     return axios.request({
         url: "/resetPassword",
         method: "post",

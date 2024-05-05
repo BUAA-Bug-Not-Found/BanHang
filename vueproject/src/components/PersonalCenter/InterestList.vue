@@ -4,7 +4,7 @@
       <v-card>
         <v-tabs
           v-model="tab"
-          color="red darken-4"
+          color="blue"
           fixed-tabs
         >
           <v-tab value="one">我的关注</v-tab>
@@ -80,64 +80,19 @@ export default {
     components: {UserShow},
     created() {
         checkLogin();
-
         // 拿到stars和fans列表
         getStars(userStateStore().email).then((res) => {
-            // this.stars.concat(res.stars)
             this.stars = res.stars
-            console.log("res.stars -> ")
-            console.log(res.stars)
-            // this.stars = this.stars.concat(res.map(star => ({
-            //   headUrl: star.headUrl,
-            //   nickname: star.nickname,
-            //   email: star.email,
-            //   sign: "这是写死的签名, 等待后端返回"
-            // })));
         })
 
         getFans(userStateStore().email).then((res) => {
             this.fans = res.fans
         })
-        // this.fans.concat([
-        //   {
-        //     'headUrl': '../../assets/nr/headImage.jpg',
-        //     'nickname': 'Goths',
-        //     'email': "123"
-        //   },
-        //   {
-        //     'headUrl': '../../assets/nr/headImage.jpg',
-        //     'nickname': 'Goths',
-        //     'email': "123"
-        //   },
-        //   {
-        //     'headUrl': '../../assets/nr/headImage.jpg',
-        //     'nickname': 'Goths',
-        //     'email': "123"
-        //   }
-        // ])
     },
     data() {
         return {
             tab: 'one',
             stars: [
-                // {
-                //     'headUrl': '../../assets/nr/headImage.jpg',
-                //     'nickname': 'Goths',
-                //     'email': "123"
-                // }
-
-                // {
-                //     'headUrl': '',
-                //     'nickname': 'Goths',
-                //     "email": "232323",
-                //     "sign": "签名"
-                // },
-                // {
-                //   'headUrl': '../../assets/nr/headImage.jpg',
-                //   'nickname': 'Goths',
-                //   'email': "123",
-                //   "sign": "签名"
-                // }
             ],
             fans: [
             ]
@@ -146,7 +101,6 @@ export default {
     methods: {
         clickOtherUser(_email) {
             // 展示_email对应的用户的首页
-            // console.log("跳转-> ")
             // 传名的话, 就只有名, 而不要表示路径分隔的斜杠了
             router.push({name: "othersCenter", params: {"e": _email}})
         }
@@ -155,7 +109,6 @@ export default {
 </script>
 
 <style scoped>
-
 
 
 </style>
