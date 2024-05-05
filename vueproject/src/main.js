@@ -13,6 +13,15 @@ import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 
+router.beforeEach((to, from, next) => {
+  // 如果当前路由为'/'，则跳转到'/blogList'路由
+  if (to.path === '/') {
+    next('/blogList');
+  } else {
+    next();
+  }
+});
+
 // let isLocal = false
 axios.defaults.timeout = 10000;
 //TODO:设置后端远程端口和本地端口
