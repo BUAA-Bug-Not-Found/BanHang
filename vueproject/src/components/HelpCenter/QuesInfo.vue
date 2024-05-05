@@ -139,11 +139,16 @@ export default {
     const toolbarConfig1 = {
       excludeKeys: ['undo', 'redo', 'todo', 'fontSize', 'fontFamily',
         'lineHeight', 'group-justify', 'group-video',
-        'group-indent', 'bgColor', 'bulletedList', 'italic', 'group-image'
+        'group-indent', 'bgColor', 'bulletedList', 'italic', 'group-image',
+          'fullScreen'
       ],
     }
 
-    const toolbarConfig2 = {}
+    const toolbarConfig2 = {
+      excludeKeys: [
+        'fullScreen'
+      ],
+    }
 
     const editorConfig = {placeholder: '请输入内容...'}
 
@@ -503,7 +508,7 @@ export default {
               <v-divider></v-divider>
             </div>
             <div style="margin-bottom: 10px">
-              statistic info
+              {{userStateStore().sign}}
             </div>
           </v-card>
           <v-card :style="top ?
