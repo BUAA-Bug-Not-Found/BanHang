@@ -55,32 +55,38 @@ export default {
 
     const reviseTagList = ref([])
 
+    const lockMore = ref(false)
+
     const getMore = () => {
-      page.value = page.value + 1
-      if (lastIndex.value !== 0) {
-        getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex.value].tagId).then(
-            (data) => {
-              let ori_len = questions.value.length
-              quesSum.value = data.quesSum
-              questions.value = questions.value.concat(data.questions)
-              for (let i = ori_len; i < questions.value.length; i++) {
-                disTags.value.push([])
-                calTags(i)
+      if(lockMore.value === false) {
+        lockMore.value = true
+        page.value = page.value + 1
+        if (lastIndex.value !== 0) {
+          getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex.value].tagId).then(
+              (data) => {
+                let ori_len = questions.value.length
+                quesSum.value = data.quesSum
+                questions.value = questions.value.concat(data.questions)
+                for (let i = ori_len; i < questions.value.length; i++) {
+                  disTags.value.push([])
+                  calTags(i)
+                }
               }
-            }
-        )
-      } else {
-        getQuestionsApi(page.value, pageSize.value).then(
-            (data) => {
-              let ori_len = questions.value.length
-              quesSum.value = data.quesSum
-              questions.value = questions.value.concat(data.questions)
-              for (let i = ori_len; i < questions.value.length; i++) {
-                disTags.value.push([])
-                calTags(i)
+          )
+        } else {
+          getQuestionsApi(page.value, pageSize.value).then(
+              (data) => {
+                let ori_len = questions.value.length
+                quesSum.value = data.quesSum
+                questions.value = questions.value.concat(data.questions)
+                for (let i = ori_len; i < questions.value.length; i++) {
+                  disTags.value.push([])
+                  calTags(i)
+                }
               }
-            }
-        )
+          )
+        }
+        lockMore.value = false
       }
     }
 
