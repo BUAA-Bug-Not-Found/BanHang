@@ -80,7 +80,7 @@ export default {
       pagesize: 15,
       nowtag: -1,
       tags: [],
-
+      isFetching: false // 是否正在请求数据的标志位
     };
   },
 
@@ -101,6 +101,12 @@ export default {
   methods: {
     useDisplay,
     fetchBlogListAPage() {
+      // 如果正在请求数据，则直接返回，避免多次请求
+      if (this.isFetching) {
+        return;
+      }
+      // 设置标志位为 true，表示正在请求数据
+      this.isFetching = true;
       // 发起后端数据请求，获取一页的博客简要信息
       getBlogs(this.pageno, this.pagesize, this.nowtag).then(
           (data) => {
@@ -116,6 +122,7 @@ export default {
               tagList: blog.tagList,
               commentNum: blog.commentNum
             })));
+            this.isFetching = false;
           }
       )
     },

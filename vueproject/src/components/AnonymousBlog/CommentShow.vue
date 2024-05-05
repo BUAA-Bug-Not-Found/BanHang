@@ -19,7 +19,7 @@
       <ReplyList :comments="replies"/>
     </div>
     <div v-show="isInputVisible" class="reply-input">
-      <v-text-field v-model="replyContent" placeholder="请输入回复内容"></v-text-field>
+      <v-textarea v-model="replyContent" placeholder="请输入回复内容"></v-textarea>
       <label>
         <input type="checkbox" v-model="isAnonymous"/>匿名发送
       </label>
