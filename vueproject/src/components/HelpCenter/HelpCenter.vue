@@ -391,7 +391,6 @@ export default {
       </div>
       <!-- 评论 -->
     </div>
-    <v-col cols="12" style="margin-bottom: 25px">
       <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
                    :index="index"
                    :disTags="disTags[index]"
@@ -401,7 +400,7 @@ export default {
       <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
         加载更多
       </v-btn>
-    </v-col>
+      <div style="height: 25px;"></div>
   </div>
   <v-bottom-sheet v-model="sheet" inset :persistent="true">
     <v-card
