@@ -37,6 +37,13 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
 
+import 'viewerjs/dist/viewer.css'
+import VueViewer from 'v-viewer'
+
+app.use(VueViewer, {defaultOptions: {
+    zIndex: 1000000
+}})
+
 app.use(vuetify).use(VueDOMPurifyHTML).use(ElementPlus)
 
 app.mount('#app')

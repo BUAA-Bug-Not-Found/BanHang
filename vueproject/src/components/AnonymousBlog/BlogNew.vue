@@ -57,6 +57,7 @@
 </template>
 
 <script>
+
 import {getTags, uploadBlog} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import axios from "axios";
