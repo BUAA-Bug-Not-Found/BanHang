@@ -134,8 +134,11 @@ def get_user_anony_info_by_blog_id(db: Session, blog_id: int, user_id: int, crea
     name = (db.query(models.BlogUserAnonyInfo.anony_name)
             .filter(models.BlogUserAnonyInfo.blog_id == blog_id, models.BlogUserAnonyInfo.user_id == user_id)
             .first())
+    def random_hex(length):
+        import random
+        return random.randint(0,16**length)
     if create and name == None:
-        name = f"匿名用户{user_id}"
+        name = f"匿名用户 #{random_hex(6):06X}"
         try:
             db.add(models.BlogUserAnonyInfo(blog_id=blog_id, user_id=user_id, anony_name=name))
             db.commit()
