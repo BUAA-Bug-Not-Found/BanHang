@@ -7,17 +7,17 @@
 
 <script>
 
-import router from './router';
+// import router from './router';
 
 export default {
   name: 'App',
-  created() {
-    const curPath = this.$route.path
-    console.log("cur->[" + curPath + "]")
-    if (curPath === '/') {
-      router.push({path: "/blogList"})
-    }
-  }
+  // created() {
+  //   const curPath = this.$route.path
+  //   console.log("cur->[" + curPath + "]")
+  //   if (curPath === '/') {
+  //     router.push({path: "/blogList"})
+  //   }
+  // }
 }
 </script>
 
