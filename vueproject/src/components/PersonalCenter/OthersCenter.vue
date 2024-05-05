@@ -46,12 +46,9 @@
           <v-window-item value="one">
             <v-list>
               <v-list-item v-for="(content, index) in otherBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
+                <div style="text-align: left;">{{ truncate(content.blogTitle) }}</div>
                 
-                <!-- <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</span>
-                <div style="text-align: center; font-size: 0px;">
-                  <img :src="firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
-                </div> -->
-                <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div>
+                <!-- <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div> -->
 
                 <!-- 帖子的发表时间, 评论数量, 点赞数 -->
                 <div style="text-align: right; margin-top: 10px;">
@@ -181,7 +178,14 @@ export default {
     clickHelpItem(_blogId) {
       // router.push({name: 'QuesInfo', params: {qid: _blogId}});
       router.push('/QuesInfo/' + _blogId);
-    }
+    },
+    truncate(content) {
+      const strippedContent = String(content).replace(/<[^>]*>/g, "")
+      if (strippedContent.length > 20) {
+        return `${strippedContent.slice(0, 20)}...`;
+      }
+      return strippedContent;
+    },
   },
 };
 </script>

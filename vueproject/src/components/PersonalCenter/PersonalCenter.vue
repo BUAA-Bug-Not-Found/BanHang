@@ -84,18 +84,23 @@
               </v-list>
             </v-window-item>
             
+
+            <!-- <QuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
+                  :index="index"
+                  @delQues="delQuestion"
+                  @editQues="toEditQues"
+                  :disTags="disTags[index]"
+                  :question="questions[index]"/> -->
             <!-- 该window展示互助贴的内容 -->
             <v-window-item value="two">
               <v-list>
                 <v-list-item v-for="(content, index) in helpBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
-                  <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div>
-                  <!-- <div style="text-align: center; font-size: 0px;">
-                    <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
-                  </div> -->
+                  <!-- <span>span-> {{ truncate(content.blogTitle) }}</span> -->
+                  <div style="text-align: left;">{{ truncate(content.blogTitle) }}</div>
+                  <!-- <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div> -->
                   <div style="text-align: right; margin-top: 10px;">
                     <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>
-                  <!-- 分隔线 -->
                   <v-divider style="margin-top: 0px;"></v-divider>
                 </v-list-item>
               </v-list>
@@ -171,6 +176,13 @@
         // 注销登录信息
         userStateStore().resetUserInfo()
         router.replace({path: "/loginPage"})
+      },
+      truncate(content) {
+        const strippedContent = String(content).replace(/<[^>]*>/g, "")
+        if (strippedContent.length > 20) {
+          return `${strippedContent.slice(0, 20)}...`;
+        }
+        return strippedContent;
       },
       formatDateTime(dateTimeStr) {
         // 创建 Date 对象
