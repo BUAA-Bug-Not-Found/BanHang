@@ -173,21 +173,27 @@ export default {
     const imageList = ref([])
 
     const uploadAnswer = () => {
-      if (String(replyHtml.value).replace(/<[^>]*>/g, "") === '') {
-        ElMessage.error("不能上传空白答案")
+      if(!userStateStore().isAuthentic) {
+        ElMessage.error("请先登录")
+        router.push('/loginPage')
+      } else {
+        if (String(replyHtml.value).replace(/<[^>]*>/g, "") === '') {
+          ElMessage.error("不能上传空白答案")
+        } else {
+          uploadAnsApi(qid.value, replyHtml.value, imageList.value).then(
+              (res) => {
+                if (res.isSuccess === true) {
+                  ElMessage.success("回答已上传")
+                  replyHtml.value = ''
+                  imageList.value = []
+                  router.go(0)
+                } else {
+                  ElMessage.error("回答失败，请稍后再试")
+                }
+              }
+          )
+        }
       }
-      uploadAnsApi(qid.value, replyHtml.value, imageList.value).then(
-          (res) => {
-            if (res.isSuccess === true) {
-              ElMessage.success("回答已上传")
-              replyHtml.value = ''
-              imageList.value = []
-              router.go(0)
-            } else {
-              ElMessage.error("回答失败，请稍后再试")
-            }
-          }
-      )
     }
 
     const setLikeQues = () => {
