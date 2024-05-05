@@ -76,29 +76,32 @@ import { getUserInfos, showTip } from '../AccountManagement/AccountManagementAPI
 import { getHelpBlogs } from './PersonalCenterAPI';
 export default {
   created() {
-    if (!userStateStore().email) {
-      showTip("请首先登陆", false)
-      router.replace({path: "/loginPage"})
-    }
-    this.otherEmail = router.currentRoute.value.params.e
-    // 拉取该用户的信息
-    getUserInfos(this.otherEmail).then((_infos) => {
-      if (_infos === false) {
-        showTip("应用出错!", false)
-      } else {
-        this.infos = _infos
+    setTimeout(() => {
+      if (!userStateStore().email) {
+        showTip("请首先登陆", false)
+        router.replace({path: "/loginPage"})
       }
-    })
-    // 拉取该用户的互助贴
-    getHelpBlogs(this.otherEmail).then((_helpBlogs) => {
-      this.otherBlogs = _helpBlogs;
-    })
-    // 当用户没有登陆的时候，这时候是无法正常queryStar的
-    queryStar(userStateStore().email, this.otherEmail).then((res) => {
-      this.isStar = res.isStar
-    }).catch(() => {
-      showTip("应用出错!!", false)
-    })
+      this.otherEmail = router.currentRoute.value.params.e
+      // 拉取该用户的信息
+      getUserInfos(this.otherEmail).then((_infos) => {
+        if (_infos === false) {
+          showTip("应用出错!", false)
+        } else {
+          this.infos = _infos
+        }
+      })
+      // 拉取该用户的互助贴
+      getHelpBlogs(this.otherEmail).then((_helpBlogs) => {
+        this.otherBlogs = _helpBlogs;
+      })
+      // 当用户没有登陆的时候，这时候是无法正常queryStar的
+      queryStar(userStateStore().email, this.otherEmail).then((res) => {
+        this.isStar = res.isStar
+      }).catch(() => {
+        showTip("应用出错!!", false)
+      })
+    }, 100);
+    
   },
   data() {
     return {
