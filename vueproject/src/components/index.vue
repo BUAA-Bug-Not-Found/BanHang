@@ -165,7 +165,7 @@ export default {
 
 <!--    <v-btn v-if="!isApp" color="primary" @click="downloadApk">Download APK</v-btn>-->
     <template v-slot:append>
-      <v-tooltip text="下载安卓端apk应用">
+      <v-tooltip v-if="!isApp" text="下载安卓端apk应用">
         <template v-slot:activator="{ props }">
           <v-btn @click="downloadApk" icon="mdi-arrow-down-circle-outline" v-bind="props"></v-btn>
         </template>
