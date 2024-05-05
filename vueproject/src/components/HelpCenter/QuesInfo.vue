@@ -20,6 +20,7 @@ import {ElMessage} from "element-plus";
 import router from "@/router";
 import UserStateStore, {userStateStore} from "@/store";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+import {api as viewerApi} from "v-viewer";
 
 export default {
   name: "QuesInfo",
@@ -326,6 +327,10 @@ export default {
       return tags.value[index].tagIcon
     }
 
+    const showPic = (imgList) => {
+      viewerApi({images: imgList})
+    }
+
 
     return {
       truncate,
@@ -363,7 +368,8 @@ export default {
       findTagColor,
       findTagIcon,
       handleChange,
-      tagNamesArray
+      tagNamesArray,
+      showPic
     };
   },
 };
@@ -426,6 +432,7 @@ export default {
                       class="avatar"
                       :src="image"
                       :fit="'cover'"
+                      @click="showPic(question.quesContent.imageList)"
                   />
                 </div>
               </v-col>
@@ -533,6 +540,7 @@ export default {
                       class="avatar-app"
                       :src="image"
                       :fit="'cover'"
+                      @click="showPic(question.quesContent.imageList)"
                   />
                 </div>
               </v-col>
@@ -617,12 +625,8 @@ export default {
               <el-image
                   class="avatar"
                   :src="image"
-                  :zoom-rate="1.2"
-                  :max-scale="7"
-                  :min-scale="0.2"
-                  :preview-src-list="editImgList"
-                  :initial-index="4"
                   :fit="'cover'"
+                  @click="showPic(question.quesContent.imageList)"
               />
             </div>
           </v-col>
@@ -735,6 +739,8 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
+  cursor: pointer;
+
   overflow: hidden;
 }
 
