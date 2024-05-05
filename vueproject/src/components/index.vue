@@ -5,10 +5,12 @@ import {ref} from "vue";
 import userStateStore from '@/store';
 import { $bus } from '@/store';
 import { isApp } from '@/store';
+import axios from 'axios';
 
 export default {
   name: 'HomeIndex',
   setup() {
+    console.log('indexSetUp')
     const store = userStateStore()
     const display = useDisplay()
     const isLogin = ref(store.isAuthentic);
@@ -41,6 +43,15 @@ export default {
       link.click();
       document.body.removeChild(link);
     }
+    axios.get('/getCurrentUserInfo', {}).then(response => {
+          const storage = userStateStore()
+          storage.login_store_info(response.data, response.data.email)
+          this.user_name.value = response.data.user_name
+          this.isLogin.value = true
+          this.avatar.value = response.data.url
+      }).catch(error=>{
+          console.log(error)
+      })
     return {display, search, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp}
   },
   unmounted() {
@@ -56,12 +67,14 @@ export default {
       }
     },
     gotoLoginOrPersonalIndex() {
-      if (userStateStore().user_id != 1) {
+      const store = userStateStore()
+      if (store.isAuthentic) {
         this.goto('/personalCenter')
       } else {
         this.goto('/loginPage')
       }
-    }
+    },
+    
   }
 }
 </script>

@@ -122,8 +122,12 @@ export const userStateStore = defineStore("user", {
             this.sign = ""
             this.user_id = 1
             localStorage.clear()
+            $bus.emit("updateIndexData", {
+                isLogin: false,
+                user_name: '未登录',
+                avatar: "src/assets/images/default-avatar.png",
+            })
         }
     }
 })
-
 export default userStateStore
