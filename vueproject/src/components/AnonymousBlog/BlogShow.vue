@@ -52,7 +52,7 @@
         v-bind="props"
     >
       <v-row>
-        <v-col :cols="useDisplay().smAndDown.value ? 2 : 1">
+        <v-col :cols="useDisplay().smAndDown.value ? 3 : 1">
           <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
             <UserAvatar :userId="this.userId"></UserAvatar>
           </div>
@@ -62,7 +62,7 @@
             </v-avatar>
           </div>
         </v-col>
-        <v-col cols="7" style="text-align: left;" :class="`cursor-pointer`" @click="goToBlogCardView">
+        <v-col cols="6" style="text-align: left;" :class="`cursor-pointer`" @click="goToBlogCardView">
           <div style="margin-top: 10px;">
             {{ truncatedContent }}
           </div>
@@ -70,7 +70,7 @@
             {{ userName }} 发表于 {{ formatDate(time) }}
           </div>
         </v-col>
-        <v-col cols="3" style="text-align: right; justify-content: end; margin-top: 3px">
+        <v-col cols="2" style="text-align: right; justify-content: end; margin-top: 3px">
           <!--          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"-->
           <!--                 color="blue-grey-lighten-2">-->
           <!--            {{ 1 }}-->
@@ -93,6 +93,8 @@
               outlined
           >
             {{ tag.tagName }}
+          </v-chip>
+          <v-chip v-if="this.tagList.length === 0" color="transparent" size="x-small">
           </v-chip>
           </span>
       </div>
