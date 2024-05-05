@@ -43,6 +43,7 @@ import ReplyList from "@/components/AnonymousBlog/ReplyList.vue";
 import {goToOtherUser, uploadComment} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+import UserStateStore from "@/store";
 
 export default {
   name: "CommentShow",
@@ -109,6 +110,11 @@ export default {
       this.isOpen = !this.isOpen;
     },
     showInput() {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
       this.isInputVisible = true;
     },
     sendReply() {

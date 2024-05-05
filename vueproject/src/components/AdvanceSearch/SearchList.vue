@@ -145,7 +145,7 @@ export default {
     this.isFetchingBlog = false
     this.isFetchingQues = false
     this.isFetchingUser = false
-    this.searchQues()
+    this.loadMore()
     // console.log("this.searchUserList")
     // console.log(this.searchUserList)
   },
@@ -179,7 +179,7 @@ export default {
         return
       }
       this.isFetchingQues = true
-      searchQuesAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
+      searchQuesAPage(this.searchContent, this.quesPageNo, this.quesPageSize, this.nowSortMethod).then(
           (data) => {
             this.searchQuesList = this.searchQuesList.concat(data.questions)
             this.isFetchingQues = false
@@ -210,7 +210,7 @@ export default {
         return
       }
       this.isFetchingUser = true
-      searchUserAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
+      searchUserAPage(this.searchContent, this.userPageNo, this.userPageSize, this.nowSortMethod).then(
           (data) => {
             this.searchUserList = this.searchUserList.concat(data.users)
             this.isFetchingUser = false
@@ -229,6 +229,9 @@ export default {
         this.searchQues()
         this.quesPageNo += 1
       }
+      // console.log(this.userPageNo)
+      // console.log(this.blogPageNo)
+      // console.log(this.quesPageNo)
     },
 
     reloadBySortMethod(sortMethod) {
