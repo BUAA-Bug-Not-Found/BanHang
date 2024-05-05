@@ -24,9 +24,16 @@ def get_blog_by_page(blog_page: schemas.BlogPageTag,
 		db_user = db_blog.user
 		db_tags = db_blog.tags
 		blog = {}
-		blog['userId'] = db_user.id
-		blog['userName'] = db_user.username
-		blog['userAvatarUrl'] = db_user.userAvatarURL
+		if db_blog.is_anonymous:
+			blog['userId'] = -1
+			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
+			blog['userName'] = annoy_info.anony_name
+			blog['userAvatarUrl'] = annoy_info.anony_avatar_url
+		else:	
+			db_user = db_blog.user
+			blog['userId'] = db_user.id
+			blog['userName'] = db_user.username
+			blog['userAvatarUrl'] = db_user.userAvatarURL
 		blog['blogId'] = db_blog.id
 		blog['title'] = db_blog.title
 		blog['content'] = db_blog.content
@@ -54,12 +61,18 @@ def get_blog_by_blog_id(blog_id: BlogId,
 						db: Session = Depends(get_db)):
 	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
 	db_images = db_blog.images
-	db_user = db_blog.user
 	db_tags = db_blog.tags
 	blog = {}
-	blog['userId'] = db_user.id
-	blog['userName'] = db_user.username
-	blog['userAvatarUrl'] = db_user.userAvatarURL
+	if db_blog.is_anonymous:
+		blog['userId'] = -1
+		annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
+		blog['userName'] = annoy_info.anony_name
+		blog['userAvatarUrl'] = annoy_info.anony_avatar_url
+	else:	
+		db_user = db_blog.user
+		blog['userId'] = db_user.id
+		blog['userName'] = db_user.username
+		blog['userAvatarUrl'] = db_user.userAvatarURL
 	blog['blogId'] = db_blog.id
 	blog['title'] = db_blog.title
 	blog['content'] = db_blog.content
@@ -104,11 +117,17 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
 	db_comments = crud.get_blog_comments_by_blog_id(db, blog_id.blogId)
 	comments = []
 	for db_comment in db_comments:
-		db_user = crud.get_user_by_id(db, db_comment.user_id)
 		comment = {}
-		comment['userId'] = db_user.id
-		comment['userName'] = db_user.username
-		comment['userAvatarUrl'] = db_user.userAvatarURL
+		if db_comment.is_anonymous:
+			comment['userId'] = -1
+			annoy_info = crud.get_user_anony_info_by_comment_id(db, db_comment.blog_id, db_comment.user.id, create=True)
+			comment['userName'] = annoy_info.anony_name
+			comment['userAvatarUrl'] = annoy_info.anony_avatar_url
+		else:	
+			db_user = db_comment.user
+			comment['userId'] = db_user.id
+			comment['userName'] = db_user.username
+			comment['userAvatarUrl'] = db_user.userAvatarURL
 		comment['commentId'] = db_comment.id
 		comment['commentContent'] = db_comment.content
 		comment['time'] = db_comment.create_at
@@ -147,12 +166,18 @@ def get_blogs_advanced(blog_page_advanced: schemas.BlogPageAdvanced,
 	blogs = []
 	for db_blog in db_blogs:
 		db_images = db_blog.images
-		db_user = db_blog.user
 		db_tags = db_blog.tags
 		blog = {}
-		blog['userId'] = db_user.id
-		blog['userName'] = db_user.username
-		blog['userAvatarUrl'] = db_user.userAvatarURL
+		if db_blog.is_anonymous:
+			blog['userId'] = -1
+			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
+			blog['userName'] = annoy_info.anony_name
+			blog['userAvatarUrl'] = annoy_info.anony_avatar_url
+		else:	
+			db_user = db_blog.user
+			blog['userId'] = db_user.id
+			blog['userName'] = db_user.username
+			blog['userAvatarUrl'] = db_user.userAvatarURL
 		blog['blogId'] = db_blog.id
 		blog['title'] = db_blog.title
 		blog['content'] = db_blog.content

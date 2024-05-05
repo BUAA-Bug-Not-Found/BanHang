@@ -61,7 +61,7 @@ def mock_blog_data():
     return {
         "title": "blogTitle",
         "content": "blogContent",
-        "ifAnonymous": True,
+        "ifAnonymous": False,
         "imageList": [
             "string"
         ],

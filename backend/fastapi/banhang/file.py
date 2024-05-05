@@ -64,15 +64,19 @@ async def upload_avatar(file: UploadFile):
     bucket = oss2.Bucket(auth, oss_config.ENDPOINT, oss_config.BUCKET_NAME)
     file_content = await file.read()
     root, extension = os.path.splitext(file.filename)
-    oss_name = uuid.uuid4().hex + extension
-    with open(oss_name, "wb") as f:
+    local_name = uuid.uuid4().hex + extension
+    resize_name = uuid.uuid4().hex + extension
+    oss_name = resize_name
+    with open(local_name, "wb") as f:
         f.write(file_content)
     try:
-        resize_image(oss_name, oss_name)
-    except:
-        return {"response": "error"}
-    result = bucket.put_object_from_file(oss_name, oss_name)
-    os.remove(oss_name)
+        resize_image(local_name, resize_name)
+        os.remove(local_name)
+    except Exception as e:
+        os.remove(local_name)
+        return {"response": "error", "description": str(e)}
+    result = bucket.put_object_from_file(key=oss_name, filename=resize_name)
+    os.remove(resize_name)
     if result.status == 200:
         return {"response": "success",
                 "fileUrl": "https://" + oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT + "/" + oss_name}
@@ -80,9 +84,6 @@ async def upload_avatar(file: UploadFile):
         return {"response": "error"}
     
 def resize_image(image_path, output_path, size=(500, 500)):
-    try:
-        with Image.open(image_path) as img:
-            img_resized = img.resize(size, Image.ANTIALIAS)
-            img_resized.save(output_path)
-    except IOError:
-        raise UniException("Resize image error")
+    with Image.open(image_path) as img:
+        img_resized = img.resize(size, Image.LANCZOS)
+        img_resized.save(output_path)
