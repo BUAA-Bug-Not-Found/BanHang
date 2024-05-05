@@ -20,7 +20,6 @@
     </v-container>
 </template>
 
-
 <script>
 import router from '@/router';
 

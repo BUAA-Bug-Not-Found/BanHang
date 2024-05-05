@@ -28,7 +28,13 @@ app.include_router(message.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://lyhtool.tpddns.cn:8000", "http://127.0.0.1:8080", "http://127.0.0.1:8080","http://localhost:8080", "http://localhost", "https://localhost"],
+    allow_origins=["http://lyhtool.tpddns.cn:8000",
+                   "http://127.0.0.1:8080",
+                   "http://127.0.0.1:8080",
+                   "http://localhost:8080",
+                   "http://localhost",
+                   "https://localhost",
+                   "https://banhang.lyhtool.com:8001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

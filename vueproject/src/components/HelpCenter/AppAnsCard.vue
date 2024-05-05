@@ -1,12 +1,13 @@
 <script>
 import {ref} from "vue";
-import {delAnswerAPI, getAnsById, setAnsLikeAPI} from "@/components/HelpCenter/api";
+import {delAnswerAPI, formatDate, getAnsById, setAnsLikeAPI} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "AppAnsCard",
+  methods: {formatDate},
   components: {UserAvatar},
   props: ["ansId", "index"],
   emits: ["delAns", "editAns"],
@@ -105,7 +106,7 @@ export default {
         <v-col cols="10">
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
             <span style="font-size: 15px">{{ ans.userName }}</span>
-            <span style="font-size: 12px;color: gray">回答于{{ ans.ansTime }}</span>
+            <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>
           </div>
           <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
           <div style="margin-bottom: 5px">
@@ -117,10 +118,10 @@ export default {
             >
               {{ likeSum }}
             </v-btn>
-            <v-btn
-                :prepend-icon="'mdi-reply'" variant="text" size="small"
-                color="blue-grey-lighten-2">
-            </v-btn>
+<!--            <v-btn-->
+<!--                :prepend-icon="'mdi-reply'" variant="text" size="small"-->
+<!--                color="blue-grey-lighten-2">-->
+<!--            </v-btn>-->
             <v-btn v-if="isUser"
                 :icon="'mdi-delete-circle'" variant="text" size="small"
                 color="blue-grey-lighten-2"

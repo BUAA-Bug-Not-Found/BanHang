@@ -6,6 +6,7 @@ import os
 from fastapi.responses import StreamingResponse
 from mimetypes import guess_type
 from banhang.BanHangException import UniException
+from PIL import Image
 
 
 class OSS_config:
@@ -57,17 +58,31 @@ async def upload_file(file: UploadFile):
     else:
         return {"response": "error"}
 
-@router.get("/downloadfile/", tags=['file'])
-def download_file(filename:str):
+@router.post("/uploadAvatar/", tags=['file'])
+async def upload_avatar(file: UploadFile):
     auth = oss2.Auth(oss_config.ACCESS_KEY_ID, oss_config.ACCESS_KEY_SECRET)
     bucket = oss2.Bucket(auth, oss_config.ENDPOINT, oss_config.BUCKET_NAME)
-    if not os.path.exists("./download"):
-        os.mkdir("./download")
-    if os.path.exists("./download/" + filename):
-        os.remove("./download/" + filename)
+    file_content = await file.read()
+    root, extension = os.path.splitext(file.filename)
+    oss_name = uuid.uuid4().hex + extension
+    with open(oss_name, "wb") as f:
+        f.write(file_content)
     try:
-        res = bucket.get_object(filename)
-        return StreamingResponse(res, media_type=guess_type(filename)[0] or "text/plain")
+        resize_image(oss_name, oss_name)
     except:
-        raise UniException(key="desceiption", value = "文件名错误")
-
+        return {"response": "error"}
+    result = bucket.put_object_from_file(oss_name, oss_name)
+    os.remove(oss_name)
+    if result.status == 200:
+        return {"response": "success",
+                "fileUrl": "https://" + oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT + "/" + oss_name}
+    else:
+        return {"response": "error"}
+    
+def resize_image(image_path, output_path, size=(500, 500)):
+    try:
+        with Image.open(image_path) as img:
+            img_resized = img.resize(size, Image.ANTIALIAS)
+            img_resized.save(output_path)
+    except IOError:
+        raise UniException("Resize image error")

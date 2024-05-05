@@ -4,6 +4,9 @@
     <div>
         <v-card> 
         <v-toolbar density="compact" style="background-color:aliceblue;">
+            <v-btn icon @click="clickGoBack">
+                <v-icon color="grey">mdi-arrow-left</v-icon>
+            </v-btn>
             <v-spacer></v-spacer>
         </v-toolbar>
         <div style="margin-top: 10px;">
@@ -44,7 +47,7 @@ import axios from "axios";
 import userStateStore from '../../store';
 import {setSign, setNickname, setHeadImage} from "@/components/PersonalCenter/PersonalCenterAPI";
 import router from "@/router";
-import { showTip } from "../AccountManagement/AccountManagementAPI";
+import { isNicknameFormatOk, isSignFormatOk, NICKNAME_FORMAT_TIP, showTip, SIGN_FORMAT_TIP } from "../AccountManagement/AccountManagementAPI";
 
 export default {
     name: "EditPersonalInfo",
@@ -96,30 +99,38 @@ export default {
             }
         },
         save() {
-            console.log(this.nickname);
-            console.log(this.sign);
-            setSign(this.sign, userStateStore().email)
+            if (!this.nickname || !this.sign) {
+                showTip("昵称或个性签名不可为空!", false)
+            } else if (!isSignFormatOk(this.sign)) {
+                showTip(SIGN_FORMAT_TIP, false)
+            } else if (!isNicknameFormatOk(this.nickname)) {
+                showTip(NICKNAME_FORMAT_TIP, false)
+            } else {
+                setSign(this.sign, userStateStore().email)
                 .then((res) => {
                     if (res.isSuccess) {
                         userStateStore().sign = this.sign
                     }
                 })
-            setNickname(this.nickname, userStateStore().email)
-                .then((res) => {
-                    if (res.isSuccess) {
-                        userStateStore().nickname = this.nickname;
-                    }
-                })
-            // 保存头像
-            setHeadImage(userStateStore().email, this.headImage1)
-                .then((res) => {
-                    if (res.isSuccess) {
-                        userStateStore().headImage = this.headImage1;
-                        router.push({path: "/personalCenter"});
-                    }
-                })
-            // if (f1 && f2) {
-            // }
+                setNickname(this.nickname, userStateStore().email)
+                    .then((res) => {
+                        if (res.isSuccess) {
+                            userStateStore().nickname = this.nickname;
+                        }
+                    })
+                // 保存头像
+                setHeadImage(userStateStore().email, this.headImage1)
+                    .then((res) => {
+                        if (res.isSuccess) {
+                            userStateStore().headImage = this.headImage1;
+                            router.push({path: "/personalCenter"});
+                        }
+                    })
+            }
+        },
+        clickGoBack() {
+            // console.log("尝试返回")
+            router.push({path: "/personalCenter"});
         }
     },
 };

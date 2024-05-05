@@ -76,6 +76,24 @@ export function uploadQuesApi(content, imageList, quesTags) {
     })
 }
 
+export function updateQuesApi(quesId, content, imageList, quesTags) {
+    return axios.request({
+        url: 'updateQues',
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        data: JSON.stringify({
+            quesId: quesId,
+            quesContent: {
+                content: content,
+                imageList: imageList,
+            },
+            quesTags: quesTags
+        })
+    }).then(response => {
+        return response.data
+    })
+}
+
 export function getQuestionsByTagIdApi(pageNo, pageSize, tagId) {
     return axios.request({
         url: '/getQuestionsByTagId',
@@ -104,21 +122,26 @@ export function setLikeQuesApi(quesId, setType) {
     })
 }
 
-export function setLikeAnsApi(ansId, setType) {
-    return axios.request({
-        url: '/setLikeAns',
-        method: 'post',
-        headers: {'Content-Type': 'application/json'},
-        data: JSON.stringify({
-            ansId: ansId,
-            setType: setType
-        })
-    }).then(response => {
+export function uploadAnsApi(quesId, content, imageList) {
+    return axios.request(
+        {
+            url: '/answerQues',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                quesId: quesId,
+                ansContent: {
+                    content: content,
+                    imageList: imageList
+                },
+            })
+        }
+    ).then(response => {
         return response.data
     })
 }
 
-export function uploadAnsApi(quesId, content, imageList) {
+export function updateAnsApi(quesId, content, imageList) {
     return axios.request(
         {
             url: '/answerQues',
@@ -242,4 +265,15 @@ export function acceptAnswer(ansId) {
             )
         }
     )
+}
+
+export function formatDate(time) {
+    let date = new Date(Date.parse(time))
+    let year = date.getFullYear();
+    let month = ('0' + (date.getMonth() + 1)).slice(-2); // 月份从0开始，需要加1，并且保证两位数
+    let day = ('0' + date.getDate()).slice(-2); // 保证两位数
+    let hours = ('0' + date.getHours()).slice(-2); // 保证两位数
+    let minutes = ('0' + date.getMinutes()).slice(-2); // 保证两位数
+
+    return `${year}.${month}.${day} ${hours}:${minutes}`
 }

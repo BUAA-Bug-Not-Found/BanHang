@@ -1,15 +1,16 @@
 <script>
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
-import {delQuestionAPI, setLikeQuesApi} from "@/components/HelpCenter/api";
+import {delQuestionAPI, formatDate, setLikeQuesApi} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "AppQuesCard",
+  methods: {formatDate},
   components: {UserAvatar},
-  props: ["question", "tags"],
+  props: ["question", "disTags"],
   emits: ["editQues", 'delQues'],
   setup(props, context) {
     const truncate = (content) => {
@@ -19,20 +20,6 @@ export default {
       }
       return strippedContent;
     };
-
-    const disTags = ref([])
-
-    const init = () => {
-      for (let i = 0; i < props.question.tagIdList.length; i++) {
-        for (let j = 0; j < props.tags.length; j++) {
-          if (props.tags[j].tagId === props.question.tagIdList[i]) {
-            disTags.value.push(props.tags[j])
-          }
-        }
-      }
-    }
-
-    init()
 
     const menuClick = ref(false);
 
@@ -94,19 +81,23 @@ export default {
 
     const delDialog = ref(false)
 
+    const editQues = () => {
+      context.emit("editQues", {index: props.index})
+    }
+
     const isUser = ref(UserStateStore().getUserId === props.question.userId);
 
     return {
       truncate,
       menuClick,
-      disTags,
       goto,
       userLike,
       likeSum,
       setLikeQues,
       delQues,
       delDialog,
-      isUser
+      isUser,
+      editQues
     };
   },
 };
@@ -130,7 +121,7 @@ export default {
             {{ truncate(question.quesContent.content) }}
           </div>
           <div style="font-size: 12px;color: grey">
-            {{ question.userName }} {{ question.quesTime }}
+            {{ question.userName }} {{ formatDate(question.quesTime) }}
           </div>
         </v-col>
         <v-col cols="4" style="text-align: right;margin-top: 3px">
@@ -160,7 +151,7 @@ export default {
               <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
                 删除
               </v-list-item>
-              <v-list-item density="compact" v-if="isUser">
+              <v-list-item density="compact" v-if="isUser" @click="editQues">
                 修改
               </v-list-item>
               <v-list-item density="compact">

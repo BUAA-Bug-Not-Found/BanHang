@@ -8,11 +8,12 @@ import {useDisplay} from "vuetify";
 import AppAnsCard from "@/components/HelpCenter/AppAnsCard.vue";
 import {
   delQuestionAPI,
+  formatDate,
   getQuestionsApi,
   getQuestionsByTagIdApi,
   getTagsApi,
-  setLikeQuesApi,
-  uploadAnsApi
+  setLikeQuesApi, updateQuesApi,
+  uploadAnsApi, uploadFileApi
 } from "@/components/HelpCenter/api";
 import {getQuesByIdApi} from "@/components/HelpCenter/api";
 import {ElMessage} from "element-plus";
@@ -32,6 +33,7 @@ export default {
     window.addEventListener('scroll', this.handleScroll);
   },
   methods: {
+    formatDate,
     userStateStore,
     handleScroll() {
       // 假设 right-panel 初始时离顶部有200px的距离
@@ -54,8 +56,6 @@ export default {
       }
       return strippedContent;
     };
-
-    const selectTags = ref([])
 
     const tags = ref([])
 
@@ -89,6 +89,8 @@ export default {
       }
     }
 
+    const tagNamesArray = ref([])
+
     const init = () => {
       let router = useRouter()
       qid.value = router.currentRoute.value.params.qid
@@ -113,6 +115,9 @@ export default {
                       }
                     }
                   }
+                  for (let i = 0; i < tags.value.length; i++) {
+                    tagNamesArray.value.push(tags.value[i].tagName)
+                  }
                 }
             )
           }
@@ -126,24 +131,37 @@ export default {
       anchor.scrollIntoView();
     }
 
-    const editorRef = shallowRef()
+    const editorRef1 = shallowRef()
 
-    const toolbarConfig = {
+    const editorRef2 = shallowRef()
+
+    const toolbarConfig1 = {
       excludeKeys: ['undo', 'redo', 'todo', 'fontSize', 'fontFamily',
         'lineHeight', 'group-justify', 'group-video',
         'group-indent', 'bgColor', 'bulletedList', 'italic', 'group-image'
       ],
     }
+
+    const toolbarConfig2 = {}
+
     const editorConfig = {placeholder: '请输入内容...'}
 
     onBeforeUnmount(() => {
-      const editor = editorRef.value
-      if (editor == null) return
-      editor.destroy()
+      const editor1 = editorRef1.value
+      if (editor1 == null) return
+      editor1.destroy()
+
+      const editor2 = editorRef2.value
+      if (editor2 == null) return
+      editor1.destroy()
     })
 
-    const handleCreated = (editor) => {
-      editorRef.value = editor // 记录 editor 实例，重要！
+    const handleCreated1 = (editor) => {
+      editorRef1.value = editor // 记录 editor 实例，重要！
+    }
+
+    const handleCreated2 = (editor) => {
+      editorRef2.value = editor // 记录 editor 实例，重要！
     }
 
     const userLike = ref(false)
@@ -214,19 +232,107 @@ export default {
       question.value.ansIdList.splice(index,1)
     }
 
+    const editHtml = ref("")
+
+    const editImgList = ref([])
+
+    const editTagList = ref([])
+
+    const sheet = ref(false)
+
+    const toEdit = () => {
+      sheet.value = !sheet.value
+      editHtml.value = question.value.quesContent.content
+      editImgList.value = question.value.quesContent.imageList
+      editTagList.value = []
+      for(let i = 0;i < question.value.tagIdList.length;i++) {
+        for(let j = 0;j < tags.value.length;j++) {
+          if(question.value.tagIdList[i] === tags.value[j].tagId) {
+            editTagList.value.push(tags.value[j].tagName)
+            break
+          }
+        }
+      }
+    }
+
+    const updateQues = () => {
+      if (String(editHtml.value).replace(/<[^>]*>/g, "") === '') {
+        ElMessage.error('问题内容不得为空');
+      } else {
+        let uploadTags = []
+        for(let i = 0;i < editTagList.value.length;i++) {
+          for(let j =  0;j < tags.value.length; j++) {
+            if(tags.value[j].tagName === editTagList.value[i]) {
+              uploadTags.push(tags.value[j].tagId)
+              break;
+            }
+          }
+        }
+        updateQuesApi(qid.value,
+            editHtml.value, editImgList.value, uploadTags).then(
+            (res) => {
+              if (res.isSuccess === true) {
+                ElMessage.success("成功修改问题")
+                question.value.quesContent.content = editHtml.value
+                question.value.quesContent.imageList = editImgList.value
+                question.value.tagIdList = uploadTags
+                disTags.value = []
+                for (let i = 0; i < question.value.tagIdList.length; i++) {
+                  for (let j = 0; j < tags.value.length; j++) {
+                    if (tags.value[j].tagId === question.value.tagIdList[i]) {
+                      disTags.value.push(tags.value[j])
+                    }
+                  }
+                }
+                editHtml.value= ""
+                editImgList.value = []
+                editTagList.value = []
+                sheet.value = !sheet.value
+              } else {
+                ElMessage.error("上传修改失败，请稍后再试")
+              }
+            }
+        )
+      }
+    }
+
+    const handleChange = (file) => {
+      if (file.raw.type !== "image/jpeg" && file.raw.type !== "image/png") {
+        ElMessage.error('Avatar picture must be JPG format!');
+        return false;
+      }
+      uploadFileApi(file.raw).then((res) => {
+        if (res.response === 'success') {
+          ElMessage.success("Avatar picture upload succeeded!")
+          imageList.value.push(res.fileUrl)
+        } else {
+          ElMessage.error('Avatar picture upload failed!');
+        }
+      })
+      return true;
+    }
+
+    const findTagColor = (index) => {
+      return tags.value[index].tagColor
+    }
+
+    const findTagIcon = (index) => {
+      return tags.value[index].tagIcon
+    }
+
+
     return {
       truncate,
       disTags,
       qid,
       question,
-      selectTags,
       tags,
       goAnchor,
       mode: 'default',
       replyHtml,
-      handleCreated,
-      toolbarConfig,
-      editorRef,
+      handleCreated1,
+      toolbarConfig1,
+      editorRef1,
       editorConfig,
       recommendQues,
       display,
@@ -238,7 +344,20 @@ export default {
       delQues,
       delDialog,
       isUser,
-      delAns
+      delAns,
+      handleCreated2,
+      toolbarConfig2,
+      editorRef2,
+      editHtml,
+      editImgList,
+      editTagList,
+      sheet,
+      toEdit,
+      updateQues,
+      findTagColor,
+      findTagIcon,
+      handleChange,
+      tagNamesArray
     };
   },
 };
@@ -283,11 +402,11 @@ export default {
               <UserAvatar :userId="question.userId"></UserAvatar>
               <v-col cols="7">
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
-                <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
+                <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
               </v-col>
               <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
                 <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
-                <v-btn variant="text" icon="mdi-book-edit" size="large"></v-btn>
+                <v-btn variant="text" icon="mdi-book-edit" size="large" @click="toEdit"></v-btn>
               </v-col>
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
@@ -328,8 +447,8 @@ export default {
             <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
               <Toolbar
                   style="border-bottom: 1px solid #ccc"
-                  :editor="editorRef"
-                  :defaultConfig="toolbarConfig"
+                  :editor="editorRef1"
+                  :defaultConfig="toolbarConfig1"
                   :mode="mode"
               />
               <Editor
@@ -337,7 +456,7 @@ export default {
                   v-model="replyHtml"
                   :defaultConfig="editorConfig"
                   :mode="mode"
-                  @onCreated="handleCreated"
+                  @onCreated="handleCreated1"
               />
             </div>
             <div style="transform: translateX(3%);margin-top: 10px">
@@ -390,11 +509,11 @@ export default {
               </v-col>
               <v-col cols="7">
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
-                <p style="font-size: 15px;color: gray">{{ question.quesTime }}</p>
+                <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
               </v-col>
               <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
                 <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
-                <v-btn variant="text" icon="mdi-book-edit" size="large"></v-btn>
+                <v-btn variant="text" icon="mdi-book-edit" size="large" @click="toEdit"></v-btn>
               </v-col>
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
@@ -439,8 +558,8 @@ export default {
             <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
               <Toolbar
                   style="border-bottom: 1px solid #ccc"
-                  :editor="editorRef"
-                  :defaultConfig="toolbarConfig"
+                  :editor="editorRef1"
+                  :defaultConfig="toolbarConfig1"
                   :mode="mode"
               />
               <Editor
@@ -448,7 +567,7 @@ export default {
                   v-model="replyHtml"
                   :defaultConfig="editorConfig"
                   :mode="mode"
-                  @onCreated="handleCreated"
+                  @onCreated="handleCreated1"
               />
             </div>
             <div style="transform: translateX(3%);margin-top: 10px">
@@ -465,6 +584,95 @@ export default {
     </div>
   </div>
 
+  <v-bottom-sheet v-model="sheet" inset :persistent="true">
+    <v-card
+        class="text-center"
+        height="600"
+    >
+      <v-card-text>
+        <v-row align="center" style="margin-bottom: 5px">
+          <v-col  cols="4" offset="4">
+            编辑问题
+          </v-col>
+          <v-col cols="4">
+            <v-btn variant="text" @click="updateQues">
+              发布
+            </v-btn>
+            <v-btn variant="text" @click="sheet = !sheet">
+              close
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col v-for="(image,index) in editImgList"
+                 :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+          >
+            <div class="avatar-wrapper">
+              <el-image
+                  class="avatar"
+                  :src="image"
+                  :zoom-rate="1.2"
+                  :max-scale="7"
+                  :min-scale="0.2"
+                  :preview-src-list="editImgList"
+                  :initial-index="4"
+                  :fit="'cover'"
+              />
+            </div>
+          </v-col>
+          <v-col :cols="display.smAndDown.value? 4 : 3">
+            <el-form style="width: 100%">
+              <el-upload
+                  class="avatar-uploader"
+                  action="#"
+                  :show-file-list="false"
+                  :auto-upload="false"
+                  :on-change="handleChange"
+                  accept=".jpg,.png"
+              >
+                <el-icon class="avatar-uploader-icon">
+                  <Plus/>
+                </el-icon>
+              </el-upload>
+            </el-form>
+          </v-col>
+        </v-row>
+
+        <div>
+          <v-select
+              v-model="editTagList"
+              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray"
+              multiple
+              label="添加标签"
+              density="default"
+          >
+            <template v-slot:selection="{item, index}">
+              <v-chip size="x-small" :color="findTagColor(index)">
+                <v-icon>{{ findTagIcon(index) }}</v-icon>
+                {{ item.title }}
+              </v-chip>
+            </template>
+          </v-select>
+        </div>
+
+        <div style="border: 1px solid #ccc">
+          <Editor
+              style="height: 350px; overflow-y: hidden;"
+              v-model="editHtml"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="handleCreated2"
+          />
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef2"
+              :defaultConfig="toolbarConfig2"
+              :mode="mode"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-bottom-sheet>
   <v-dialog
       v-model="delDialog"
       width="auto"

@@ -1,15 +1,16 @@
 <script>
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
-import {delQuestionAPI, setLikeQuesApi} from "@/components/HelpCenter/api";
+import {delQuestionAPI, formatDate, setLikeQuesApi} from "@/components/HelpCenter/api";
 import UserStateStore from "@/store"
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "QuesCard",
+  methods: {formatDate},
   components: {UserAvatar},
-  props: ["question", "tags", "index"],
+  props: ["question", "tags", "index", "disTags"],
   emits: ["editQues", 'delQues'],
   setup(props, context) {
     const truncate = (content) => {
@@ -20,22 +21,9 @@ export default {
       return strippedContent;
     };
 
-    const disTags = ref([])
 
     const userLike = ref(props.question.ifUserLike)
     const likeSum = ref(props.question.likeSum)
-
-    const init = () => {
-      for (let i = 0; i < props.question.tagIdList.length; i++) {
-        for (let j = 0; j < props.tags.length; j++) {
-          if (props.tags[j].tagId === props.question.tagIdList[i]) {
-            disTags.value.push(props.tags[j])
-          }
-        }
-      }
-    }
-
-    init()
 
     const menuClick = ref(false);
 
@@ -80,7 +68,7 @@ export default {
     }
 
     const editQues = () => {
-
+      context.emit("editQues", {index: props.index})
     }
 
     const delQues = () => {
@@ -104,7 +92,6 @@ export default {
     return {
       truncate,
       menuClick,
-      disTags,
       goto,
       setLikeQues,
       userLike,
@@ -112,7 +99,7 @@ export default {
       delQues,
       editQues,
       delDialog,
-      isUser
+      isUser,
     };
   },
 };
@@ -137,7 +124,7 @@ export default {
             {{ truncate(question.quesContent.content) }}
           </div>
           <div style="font-size: 12px;color: grey;margin-bottom: 5px">
-            {{ question.userName }}发表于{{ question.quesTime }}
+            {{ question.userName }}发表于{{ formatDate(question.quesTime) }}
           </div>
         </v-col>
         <v-col cols="3" style="text-align: left;margin-top: 3px">
