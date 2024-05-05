@@ -9,7 +9,7 @@
                     <v-text style="margin-left: 12px;">从本地选择头像</v-text>
                 </v-card>
 
-                <v-card v-if="this.isMobileDevice" style="padding-top:10px; padding-bottom:10px; margin-left: 10px; margin-right: 10px; margin-top: 10px;" @click="clickCameraHeadImage">
+                <v-card v-if="false" style="padding-top:10px; padding-bottom:10px; margin-left: 10px; margin-right: 10px; margin-top: 10px;" @click="clickCameraHeadImage">
                     <v-text style="margin-left: 12px;">拍照上传头像</v-text>
                 </v-card>
 
@@ -81,17 +81,18 @@ import { isNicknameFormatOk, isSignFormatOk, NICKNAME_FORMAT_TIP, showTip, SIGN_
 export default {
     name: "EditPersonalInfo",
     created() {
-        setTimeout(() => {
-            // 加载数据
-            this.nickname = userStateStore().nickname
-            this.sign = userStateStore().sign
-            this.headImage1 = userStateStore().headImage
-            if (!userStateStore().email) {
-                showTip("请首先登陆", false)
-                router.replace({path: "loginPage"})
-            }
-            this.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }, 100);
+        // 加载数据
+        this.nickname = userStateStore().nickname
+        this.sign = userStateStore().sign
+        this.headImage1 = userStateStore().headImage
+        if (!userStateStore().email) {
+            showTip("请首先登陆", false)
+            router.replace({path: "loginPage"})
+        }
+        this.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // setTimeout(() => {
+            
+        // }, 100);
     },
     data() {
         return {

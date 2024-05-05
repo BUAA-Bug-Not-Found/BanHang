@@ -76,10 +76,10 @@ import { getUserInfos, showTip } from '../AccountManagement/AccountManagementAPI
 import { getHelpBlogs } from './PersonalCenterAPI';
 export default {
   created() {
-    setTimeout(() => {
-      if (!userStateStore().email) {
+    if (!userStateStore().email) {
         showTip("请首先登陆", false)
         router.replace({path: "/loginPage"})
+        return
       }
       this.otherEmail = router.currentRoute.value.params.e
       // 拉取该用户的信息
@@ -100,8 +100,6 @@ export default {
       }).catch(() => {
         showTip("应用出错!!", false)
       })
-    }, 100);
-    
   },
   data() {
     return {

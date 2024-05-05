@@ -12,6 +12,7 @@ import VueDOMPurifyHTML from 'vue-dompurify-html'
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 router.beforeEach((to, from, next) => {
   // 如果当前路由为'/'，则跳转到'/blogList'路由
@@ -32,9 +33,11 @@ const app = createApp(App)
 
 //使用pinia进行状态管理
 const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 app.use(pinia)
 
 app.use(router)
+
 
 //引用vuetify3 组件库
 const vuetify = createVuetify({
@@ -56,3 +59,6 @@ app.use(VueViewer, {defaultOptions: {
 app.use(vuetify).use(VueDOMPurifyHTML).use(ElementPlus)
 
 app.mount('#app')
+
+
+
