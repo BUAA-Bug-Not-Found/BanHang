@@ -18,9 +18,6 @@ export default {
     const avatar = ref(store.headImage);
 
     const searchContent = ref("")
-    const search = () => {
-      console.log("search")
-    }
 
     const router = useRouter()
 
@@ -53,7 +50,7 @@ export default {
       }).catch(error=>{
           console.log(error)
       })
-    return {display, search, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp}
+    return {display, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp}
   },
   unmounted() {
     $bus.off('updateIndexData', this.updateData)
@@ -96,7 +93,7 @@ export default {
           hide-details
           single-line
           v-model="searchContent"
-          @keyup.enter="search"
+          @keyup.enter="navigateToSearchList"
           style="margin-left: 10px; margin-right: 10px"
       >
         <template v-slot:append-inner>

@@ -44,7 +44,7 @@
         </div>
       </div>
       <div class="input">
-        <v-text-field v-model="inputMessage" style="flex: 1;height: 32x;padding: 0;" hide-details=true></v-text-field>
+        <v-text-field @keyup.enter="submitMessage" v-model="inputMessage" style="flex: 1;height: 32x;padding: 0;" hide-details=true></v-text-field>
         <v-btn @click="submitMessage" color="primary" style="height: 54px;">发送</v-btn>
       </div>
     </div>
