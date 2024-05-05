@@ -53,11 +53,12 @@
         v-bind="props"
     >
       <v-row>
-        <v-col cols="1" style="min-width: 50px">
-          <v-avatar color="surface-variant" style="margin-top: 15px;margin-left: 10px" size="33" :image="userAvatarUrl">
-          </v-avatar>
+        <v-col cols="2" >
+          <div style="display:flex; justify-content: end;align-content: center">
+            <UserAvatar :userId="this.userId"></UserAvatar>
+          </div>
         </v-col>
-        <v-col cols="5" style="text-align: left;" @click="goToBlogCardView">
+        <v-col cols="8" style="text-align: left;" @click="goToBlogCardView">
           <div style="margin-top: 10px;">
             {{ truncatedContent }}
           </div>
@@ -65,12 +66,13 @@
             {{ userName }} 发表于 {{ formatDate(time) }}
           </div>
         </v-col>
-        <v-col cols="4" style="text-align: right;margin-top: 3px">
-          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"
-                 color="blue-grey-lighten-2">
-            {{ 1 }}
-          </v-btn>
-          <v-btn variant="text" prepend-icon="mdi-message-text" size="small" color="blue-grey-lighten-2">
+        <v-col cols="1" style="text-align: right;margin-top: 3px">
+<!--          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"-->
+<!--                 color="blue-grey-lighten-2">-->
+<!--            {{ 1 }}-->
+<!--          </v-btn>-->
+          <v-btn variant="text" prepend-icon="mdi-message-text" size="small" color="blue-grey-lighten-2"
+                  @click="goToBlogCardView">
             {{ this.commentNum }}
           </v-btn>
         </v-col>
@@ -78,7 +80,7 @@
       <div style="margin-left: 10px;margin-bottom: 10px">
         <span style="margin-bottom: 10px">
           <v-chip
-              v-for="(tag, index) in this.tags.filter(tag => this.tagList.includes(tag.tagId))"
+              v-for="(tag, index) in this.tagList"
               size="x-small"
               :key="index"
               :color="tag.tagColor"
@@ -95,11 +97,19 @@
 </template>
 
 <script>
+import {goToOtherUser} from "@/components/AnonymousBlog/api";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+
 export default {
   name: "BlogShow",
+  components: {UserAvatar},
 
   props: {
     blogId: {
+      type: Number,
+      required: true
+    },
+    userId: {
       type: Number,
       required: true
     },
@@ -130,45 +140,13 @@ export default {
     commentNum: {
       type: Number,
       required: true
+    },
+    tags: {
+      type: Array,
+      required: true
     }
   },
 
-  data() {
-    return {
-      tags: [
-        {
-          tagId: 1,
-          tagName: '学习生活',
-          tagIcon: 'mdi-clock',
-          tagColor: 'blue-darken-1'
-        },
-        {
-          tagId: 2,
-          tagName: '日常事务',
-          tagIcon: 'mdi-account',
-          tagColor: 'cyan-darken-1'
-        },
-        {
-          tagId: 3,
-          tagName: '情感交流',
-          tagIcon: 'mdi-heart',
-          tagColor: 'red-darken-1'
-        },
-        {
-          tagId: 4,
-          tagName: '灌水吐槽',
-          tagIcon: 'mdi-comment-alert-outline',
-          tagColor: 'green-darken-1'
-        },
-        {
-          tagId: 5,
-          tagName: '寻欢作乐',
-          tagIcon: 'mdi-emoticon-outline',
-          tagColor: 'purple-darken-1'
-        },
-      ]
-    };
-  },
 
   computed: {
     truncatedContent() {
@@ -181,6 +159,7 @@ export default {
   },
 
   methods: {
+    goToOtherUser,
     goToBlogCardView() {
       const blogId = this.$props.blogId;
       this.$router.push({name: 'blogView', params: {id: blogId}});

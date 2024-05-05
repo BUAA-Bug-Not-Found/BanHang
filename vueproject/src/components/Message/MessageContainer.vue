@@ -8,7 +8,7 @@
         您还没有联系人
       </div>
       <contactCard v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
-        :avatar="item.userAvatarUrl" @open-message="handleContactClicked" />
+        :avatar="item.userAvatarUrl" :last_message="item.lastMessage" @open-message="handleContactClicked" />
     </div>
 
     <div v-else style="height: 100%; display: flex; flex-direction: column;;">
@@ -263,5 +263,6 @@ export default {
   width: 100%;
   height: 100%;
   max-height: 100%;
+  background-color: rgb(238, 238, 238);
 }
 </style>

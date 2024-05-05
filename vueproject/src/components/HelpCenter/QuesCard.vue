@@ -1,14 +1,19 @@
 <script>
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
-import {setLikeQuesApi} from "@/components/HelpCenter/api";
+import {delQuestionAPI, formatDate, setLikeQuesApi} from "@/components/HelpCenter/api";
+import UserStateStore from "@/store"
+import {ElMessage} from "element-plus";
+import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
   name: "QuesCard",
-  props: ["question", "tags"],
-  setup(props) {
+  methods: {formatDate},
+  components: {UserAvatar},
+  props: ["question", "tags", "index", "disTags"],
+  emits: ["editQues", 'delQues'],
+  setup(props, context) {
     const truncate = (content) => {
-      console.log(content)
       const strippedContent = String(content).replace(/<[^>]*>/g, "")
       if (strippedContent.length > 20) {
         return `${strippedContent.slice(0, 20)}...`;
@@ -16,23 +21,9 @@ export default {
       return strippedContent;
     };
 
-    const disTags = ref([])
 
     const userLike = ref(props.question.ifUserLike)
     const likeSum = ref(props.question.likeSum)
-
-    const init = () => {
-      for (let i = 0; i < props.question.tagIdList.length; i++) {
-        for (let j = 0; j < props.tags.length; j++) {
-          if (props.tags[j].tagId === props.question.tagIdList[i]) {
-            disTags.value.push(props.tags[j])
-          }
-        }
-      }
-      console.log(userLike.value)
-    }
-
-    init()
 
     const menuClick = ref(false);
 
@@ -55,28 +46,60 @@ export default {
     }
 
     const setLikeQues = () => {
-      setLikeQuesApi(props.question.quesId, userLike.value ? 0 : 1).then(
-          (res) => {
-            if (res.isSuccess === true) {
-              if (userLike.value) {
-                likeSum.value--
+      const state = UserStateStore()
+      if(!state.email) {
+        ElMessage.error("请先登录")
+      } else {
+        setLikeQuesApi(props.question.quesId, userLike.value ? 0 : 1).then(
+            (res) => {
+              if (res.isSuccess === true) {
+                if (userLike.value) {
+                  likeSum.value--
+                } else {
+                  likeSum.value++
+                }
+                userLike.value = !userLike.value;
               } else {
-                likeSum.value++
+                ElMessage.error("点赞失败，请稍后再试")
               }
-              userLike.value = !userLike.value;
+            }
+        )
+      }
+    }
+
+    const editQues = () => {
+      context.emit("editQues", {index: props.index})
+    }
+
+    const delQues = () => {
+      delQuestionAPI(props.question.quesId).then(
+          (res) => {
+            if(res.isSuccess === true) {
+              ElMessage.success('问题已删除')
+              context.emit("delQues", {index: props.index})
+              delDialog.value = false
+            } else {
+              ElMessage.error('删除失败，请稍后再试')
             }
           }
       )
     }
 
+    const delDialog = ref(false)
+
+    const isUser = ref(UserStateStore().getUserId === props.question.userId);
+
     return {
       truncate,
       menuClick,
-      disTags,
       goto,
       setLikeQues,
       userLike,
-      likeSum
+      likeSum,
+      delQues,
+      editQues,
+      delDialog,
+      isUser,
     };
   },
 };
@@ -86,20 +109,22 @@ export default {
   <v-hover v-slot="{ isHovering, props }">
     <v-card
         class="mx-auto"
-        width="w-75"
+        style="width: 90%"
         :color="isHovering ? 'cyan-lighten-5' : undefined"
         v-bind="props"
     >
       <v-row>
-        <v-col cols="1">
-          <v-avatar color="surface-variant" style="margin: 10px" size="40"></v-avatar>
+        <v-col cols="2">
+          <div style="display:flex; justify-content: end;align-content: center">
+            <UserAvatar :userId="question.userId"></UserAvatar>
+          </div>
         </v-col>
         <v-col cols="7" style="text-align: left;" :class="`cursor-pointer`" @click="goto()">
           <div style="margin-top: 10px;">
             {{ truncate(question.quesContent.content) }}
           </div>
-          <div style="font-size: 12px;color: grey">
-            {{ question.userName }}发表于{{ question.quesTime }}
+          <div style="font-size: 12px;color: grey;margin-bottom: 5px">
+            {{ question.userName }}发表于{{ formatDate(question.quesTime) }}
           </div>
         </v-col>
         <v-col cols="3" style="text-align: left;margin-top: 3px">
@@ -127,13 +152,13 @@ export default {
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item density="compact">
+                <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
                   删除
                 </v-list-item>
-                <v-list-item>
+                <v-list-item density="compact" v-if="isUser" @click="editQues">
                   修改
                 </v-list-item>
-                <v-list-item>
+                <v-list-item density="compact">
                   举报
                 </v-list-item>
               </v-list>
@@ -150,6 +175,35 @@ export default {
       </v-row>
     </v-card>
   </v-hover>
+
+  <v-dialog
+      v-model="delDialog"
+      width="auto"
+  >
+    <v-card
+        max-width="400"
+        min-width="200"
+        prepend-icon="mdi-delete-clock"
+        text="你的问题将会被删除，确认嘛？"
+        title="删除问题"
+    >
+      <template v-slot:actions>
+        <v-btn
+            variant="flat"
+            density="compact"
+            text="确认"
+            color="red-darken-1"
+            @click="delQues"
+        ></v-btn>
+
+        <v-btn
+            text="取消"
+            density="compact"
+            @click="delDialog = false"
+        ></v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

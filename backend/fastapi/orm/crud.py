@@ -120,8 +120,10 @@ def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymou
             db_image = models.BlogImage(blog_id=db_blog.id, image_url=image_url)
             db.add(db_image)
         for tag_id in tag_ids:
-            db_blog_tag = models.BlogBlogTag(blog_id=db_blog.id, tag_id=tag_id)
+            db_blog_tag = models.BlogBlogTag(blog_id=db_blog.id, blog_tag_id=tag_id)
             db.add(db_blog_tag)
+        db.commit()
+        db.refresh(db_blog)
     except Exception as e:
         db.rollback()
         db_blog = None
@@ -141,7 +143,7 @@ def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
     return (db.query(models.Blog)
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
-    
+
 def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False):
     return (db.query(models.Blog).join(models.BlogTag, models.Blog.tags)
             .filter(models.BlogTag.id == blog_tag_id)
@@ -176,6 +178,14 @@ def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, i
         db_blog_comment = None
         # print("Error during commit: ", e)
     return db_blog_comment
+
+
+def get_all_blog_tags(db: Session):
+    return (db.query(models.BlogTag).all())
+
+
+def get_blog_tag_by_id(db: Session, tag_id: int):
+    return (db.query(models.BlogTag).filter(models.BlogTag.id == tag_id).first())
 
 
 def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
@@ -246,6 +256,11 @@ def create_question(db: Session, questionCreat: schemas.QuestionCreate) -> model
 def get_question_by_id(db: Session, id: int) -> models.Question:
     return db.query(models.Question).filter(models.Question.id == id).first()
 
+def delete_question_by_id(db: Session,id: int):
+    question = get_question_by_id(db, id)
+    db.delete(question)
+    db.commit()
+
 
 def update_question(db: Session, qid: int, questionCreat: schemas.QuestionCreate):
     question = get_question_by_id(db, qid)
@@ -258,6 +273,10 @@ def update_question(db: Session, qid: int, questionCreat: schemas.QuestionCreate
     db.refresh(question)
     return question
 
+def set_question_solved(db: Session, qid: int):
+    question = get_question_by_id(db, qid)
+    question.solved = True
+    db.commit()
 
 def get_question_image_by_url(db: Session, url: str) -> models.QuestionImage:
     return db.query(models.QuestionImage).filter(models.QuestionImage.image_url == url).first()
@@ -292,6 +311,11 @@ def create_question_comment_image(db: Session, image: schemas.QuestionCommentIma
     db.commit()
     db.refresh(question_image)
     return question_image
+
+def delete_question_comment_by_id(db: Session,id: int):
+    comment = get_question_comment_by_id(db, id)
+    db.delete(comment)
+    db.commit()
 
 
 def search_question_by_word_list(db: Session, word_list: List[str], offset: int, limit: int, asc: int):

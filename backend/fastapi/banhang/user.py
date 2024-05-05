@@ -127,6 +127,7 @@ class UserInfoResponse(BaseModel):
     sign: str
     url: str
     user_id: int
+    email: str
 @router.get("/getInfoByEmail", tags=['用户中心'],response_model=UserInfoResponse,
             responses={400: {"model": excResponse}})
 def get_info_by_email(email:str, db:Session = Depends(get_db)):
@@ -134,7 +135,7 @@ def get_info_by_email(email:str, db:Session = Depends(get_db)):
     if not user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
     return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
-            'user_id':user.id}
+            'user_id':user.id, 'email': user.email}
 
 class SetSignRequest(BaseModel):
     email:str
@@ -175,6 +176,8 @@ class GetAnonyBlogResponse(BaseModel):
     blogTitle:str
     firstPhotoUrl:str
     time: datetime
+    blogId: int
+    blogText: str
 @router.get("/getAnonyBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse],
             responses={400: {"model": excResponse}})
 def get_anonyBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
@@ -188,10 +191,17 @@ def get_anonyBlogs_by_email(email:str,current_user: Optional[dict] = Depends(aut
     blogs = crud.get_blog_by_email(db, email)
     return [GetAnonyBlogResponse(blogTitle = blog.title,
                                  firstPhotoUrl = blog.images[0].image_url if len(blog.images) > 0 else "",
-                                 time = blog.create_at)
+                                 time = blog.create_at,
+                                 blogId = blog.id,
+                                 blogText = blog.content)
             for blog in blogs]
 
-@router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse],
+class GetHelpBlogResponse(BaseModel):
+    blogTitle:str
+    firstPhotoUrl:str
+    time: datetime
+    blogId: int
+@router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetHelpBlogResponse],
             responses={400: {"model": excResponse}})
 def get_helpBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
                             db:Session = Depends(get_db)):
@@ -204,7 +214,8 @@ def get_helpBlogs_by_email(email:str,current_user: Optional[dict] = Depends(auth
     questions = crud.get_questions_by_email(db, email)
     return [GetAnonyBlogResponse(blogTitle = question.content,
                                  firstPhotoUrl = question.images[0].image_url if len(question.images) > 0 else "",
-                                 time = question.create_at)
+                                 time = question.create_at,
+                                 blogId = question.id)
             for question in questions]
 
 class QueryStarResponse(BaseModel):
@@ -241,17 +252,18 @@ class UserResponse(BaseModel):
     nickname:str
     sign:str
     url:str
+    email: str
 class UserSearchResponse(BaseModel):
     users: List[UserResponse]
     userSum: int
 
-class SearchQuestionsRequest(BaseModel):
+class SearchUsersRequest(BaseModel):
     searchContent:str
     pageno:int
     pagesize:int
     nowSortMethod:str
 @router.post("/searchUserAPage", tags=["用户中心"], response_model=UserSearchResponse)
-def search_questions_by_content(req:SearchQuestionsRequest,db: Session = Depends(get_db),
+def search_questions_by_content(req:SearchUsersRequest,db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     # try:
     #     sort_mode = {'byRelation':1, 'byTime':2, 'byPopularity':3}[search_questions_request.nowSortMethod]
@@ -267,7 +279,8 @@ def search_questions_by_content(req:SearchQuestionsRequest,db: Session = Depends
     offset = (pageNo - 1) * pageSize
     limit = pageSize
     db_users= crud.search_user_by_word(db, req.searchContent, offset=offset, limit=limit)
-    users = [{'nickname':user.username, 'sign':user.sign, 'url':user.userAvatarURL if user.userAvatarURL else ""}
+    users = [{'nickname':user.username, 'sign':user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
+              'email': user.email}
              for user in db_users]
     return {"users": users,
             "userSum": crud.get_search_user_sum_by_word(db, req.searchContent, offset=offset, limit=limit)}
@@ -285,7 +298,7 @@ def get_fans_by_email(email:str,db: Session = Depends(get_db),
     user = crud.get_user_by_email(db, email)
     if user is None:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username}
+    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username, 'sign':fan.sign}
             for fan in user.followers]
     return {'fans':fans}
 
@@ -298,9 +311,9 @@ def get_stars_by_email(email:str, db: Session = Depends(get_db),
     user = crud.get_user_by_email(db, email)
     if user is None:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username}
-            for fan in user.followed]
-    return {'stars':fans}
+    stars = [{'email':star.email, 'headUrl':star.userAvatarURL, 'nickname':star.username, 'sign': star.sign}
+            for star in user.followed]
+    return {'stars':stars}
 
 class SetUserHeadUrlRequest(emailRequest):
     url:str
@@ -324,4 +337,4 @@ def get_info_by_id(userId:int, db:Session = Depends(get_db)):
     if not user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
     return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
-            'user_id':user.id}
+            'user_id':user.id, 'email': user.email}

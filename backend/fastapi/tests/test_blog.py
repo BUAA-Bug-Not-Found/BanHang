@@ -25,4 +25,5 @@ def test_upload(mock_blog_data, mock_user_data, new_database):
     assert blogs[0]["title"] == mock_blog_data["title"]
     assert blogs[0]["content"] == mock_blog_data["content"]
     assert blogs[0]["userId"] == user_info["uid"]
-
+    assert len(blogs[0]["imageList"]) == 1
+    assert blogs[0]["imageList"][0] == "string"

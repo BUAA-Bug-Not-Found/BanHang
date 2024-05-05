@@ -1,7 +1,10 @@
 <template>
     <v-card class="box-card"  @click="sendUserToParent">
         <img :src="avatar" class="profile-photo" />
-        <p class="name">{{ user_name }}</p>
+        <div style="flex:1;max-width: calc(100% - 50px);text-align: left;">
+            <b class="name">{{ user_name }}</b>
+            <div class="last-message">{{ last_message }}</div>
+        </div>
     </v-card>
 </template>
   
@@ -13,7 +16,8 @@ export default {
     props: {
         user_name: String,
         user_id: Number,
-        avatar: String
+        avatar: String,
+        last_message:String,
     },
     components: {
         ElCard
@@ -37,12 +41,14 @@ export default {
 }
 
 .box-card {
-    border-radius: 0; /* 去除圆角 */
+    border-radius: 5; /* 去除圆角 */
     height: 70px;
     align-items: center;
     position: flex;
     display: flex;
     align-items: center;
+    padding: 10px;
+    width: 100%;
 }
 
 .box-card:hover {
@@ -56,5 +62,15 @@ export default {
   margin-bottom: 0;
   line-height: 1.3;
   text-align: left;
+}
+
+.last-message {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 1.2em;
+    padding-left: 10px;
+    color: #999;
+    font-size:12px;
 }
 </style>
