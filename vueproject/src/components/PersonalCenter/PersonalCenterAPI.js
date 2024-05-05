@@ -107,6 +107,9 @@ export function getStars(_email) {
             "email": _email
         }
     }).then((reply) => {
+        console.log("stars reply.data => ")
+        console.log(reply.data)
+        console.log("stars over!")
         return reply.data
     }).catch(() => {
         

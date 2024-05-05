@@ -180,6 +180,7 @@ export default {
     },
 
     searchUsers() {
+
       if (this.isFetchingUser) {
         return
       }
