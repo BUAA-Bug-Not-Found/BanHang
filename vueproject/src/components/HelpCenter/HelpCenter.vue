@@ -31,7 +31,11 @@ export default {
     const editorRef = shallowRef()
     const sheet = ref(false)
 
-    const toolbarConfig = {}
+    const toolbarConfig = {
+      excludeKeys: [
+        'fullScreen'
+      ],
+    }
 
     const editorConfig = {placeholder: '请输入问题内容...'}
 
@@ -128,6 +132,7 @@ export default {
 
     const handleCreated = (editor) => {
       editorRef.value = editor // 记录 editor 实例，重要！
+      console.log(editor.getAllMenuKeys())
     }
 
     const handleChange = (file) => {

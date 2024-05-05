@@ -120,7 +120,7 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
 		comment = {}
 		if db_comment.is_anonymous:
 			comment['userId'] = -1
-			annoy_info = crud.get_user_anony_info_by_comment_id(db, db_comment.blog_id, db_comment.user.id, create=True)
+			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_comment.blog_id, db_comment.user.id, create=True)
 			comment['userName'] = annoy_info.anony_name
 			comment['userAvatarUrl'] = annoy_info.anony_avatar_url
 		else:	

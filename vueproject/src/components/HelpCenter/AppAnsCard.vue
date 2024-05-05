@@ -127,10 +127,10 @@ export default {
                 color="blue-grey-lighten-2"
                 @click="delDialog = !delDialog">
             </v-btn>
-            <v-btn v-if="isUser"
-                :icon="'mdi-file-edit'" variant="text" size="small"
-                color="blue-grey-lighten-2">
-            </v-btn>
+<!--            <v-btn v-if="isUser"-->
+<!--                :icon="'mdi-file-edit'" variant="text" size="small"-->
+<!--                color="blue-grey-lighten-2">-->
+<!--            </v-btn>-->
           </div>
         </v-col>
       </v-row>
