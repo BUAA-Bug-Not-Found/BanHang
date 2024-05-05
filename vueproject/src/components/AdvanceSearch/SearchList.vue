@@ -107,6 +107,7 @@ export default {
       isFetchingQues: false,
       isFetchingBlog: false,
       isFetchingUser: false,
+      tags: [],
     }
   },
   watch: {
@@ -125,7 +126,6 @@ export default {
       this.isFetchingQues = false
       this.isFetchingUser = false
       this.searchQues()
-      tags: [],
     }
   },
   created() {
