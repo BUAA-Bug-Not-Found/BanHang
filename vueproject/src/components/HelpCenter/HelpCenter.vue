@@ -289,6 +289,10 @@ export default {
       viewerApi({images: imgList})
     }
 
+    const delPic = (index) => {
+      imageList.value.splice(index, 1)
+    }
+
     return {
       editorConfig,
       mode: 'default',
@@ -330,7 +334,8 @@ export default {
       saveUpload,
       updateQuestion,
       disTags,
-      showPic
+      showPic,
+      delPic
     }
   }
 }
@@ -436,8 +441,11 @@ export default {
           </v-col>
         </v-row>
         <v-row>
-          <v-col v-for="image in imageList" :key="image" :cols="display.smAndDown.value? 4 : 3">
+          <v-col v-for="(image, index) in imageList" :key="image" :cols="display.smAndDown.value? 4 : 3">
             <div class="avatar-wrapper">
+              <div class="right-top">
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1" icon="mdi-close"></v-btn>
+              </div>
               <el-image
                   class="avatar"
                   :src="image"
@@ -567,11 +575,16 @@ export default {
   padding-bottom: 100%;
 }
 
+.right-top {
+  position: absolute; /* 使用绝对定位 */
+  top: -5%;
+  right: -5%;
+  z-index: 88888;
+}
+
 .avatar {
   position: absolute !important;
   top: 0;
-  right: 0;
-  bottom: 0;
   left: 0;
   cursor: pointer;
 
