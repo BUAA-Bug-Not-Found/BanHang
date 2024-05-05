@@ -56,12 +56,12 @@
             <!-- 该window展示匿名贴的内容 -->
             <v-window-item value="one">
               <v-list>
-                <v-list-item v-for="(content, index) in waterBlogs" :key="index" @click="clickItem" style="cursor: pointer;">
+                <v-list-item v-for="(content, index) in waterBlogs" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
                   <div style="text-align: left;">
                     <v-text style="vertical-align: middle; font-size: 18px; font-weight: bold;">{{ content.blogTitle }}</v-text>
                   </div>
                   <div style="text-align: left; margin-top: 10px;">
-                    <v-text style="vertical-align: middle; font-size: 12px; color: grey;">快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~</v-text>
+                    <v-text style="vertical-align: middle; font-size: 12px; color: grey;">{{ content.blogText }}</v-text>
                   </div>
                   <v-divider style="width:10px;"></v-divider>
                   <div style="text-align: center; font-size: 0px;">
@@ -79,7 +79,7 @@
             <!-- 该window展示互助贴的内容 -->
             <v-window-item value="two">
               <v-list>
-                <v-list-item v-for="(content, index) in helpBlogs" :key="index" @click="clickItem" style="cursor: pointer;">
+                <v-list-item v-for="(content, index) in helpBlogs" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
                   <!-- <div style="text-align:left;">
                     <v-text style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</v-text>
                   </div> -->
@@ -141,10 +141,6 @@
         sign: "",
         posts: [
           { content: "这是第一条动态" },
-          { content: "这是第二条动态" },
-          { content: "这是第三条动态" },
-          { content: "这是第三条动态" },
-          { content: "这是第三条动态" },
         ],
         helpBlogs: [
           // 
@@ -153,10 +149,6 @@
           // 
         ],
         images: [
-          'https://via.placeholder.com/150',
-          'https://via.placeholder.com/150',
-          'https://via.placeholder.com/150',
-          'https://via.placeholder.com/150',
           'https://via.placeholder.com/150',
           // 添加更多图片链接...
         ]
@@ -191,7 +183,13 @@
         const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
         
         return formattedDateTime;
-      }
+      },
+      clickItem(_blogId) {
+        console.log("blogId是-> ")
+        console.log(_blogId)
+        console.log("blogId是<- ")
+        // router.push({path: })
+        router.push({name: 'blogView', params: {id: _blogId}});}
     },
   };
   </script>

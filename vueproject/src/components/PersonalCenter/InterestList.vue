@@ -67,24 +67,34 @@
 
 
 <script>
-// import userStateStore from '../../store';
+import userStateStore from '../../store';
 
 import router from '@/router';
 
-// import { getStars, getFans } from './PersonalCenterAPI';
+import { getStars, getFans } from './PersonalCenterAPI';
 
 import UserShow from "@/components/PersonalCenter/UserShow.vue";
-// import { checkLogin } from '../AccountManagement/AccountManagementAPI';
+import { checkLogin } from '../AccountManagement/AccountManagementAPI';
 
 export default {
     components: {UserShow},
     created() {
-        // checkLogin();
+        checkLogin();
 
         // 拿到stars和fans列表
-        // getStars(userStateStore().email).then((res) => {
-        //     this.stars = res
-        // })
+        getStars(userStateStore().email).then((res) => {
+            // this.stars.concat(res.stars)
+            this.stars = res.stars
+            console.log("res.stars -> ")
+            console.log(res.stars)
+            // this.stars = this.stars.concat(res.map(star => ({
+            //   headUrl: star.headUrl,
+            //   nickname: star.nickname,
+            //   email: star.email,
+            //   sign: "这是写死的签名, 等待后端返回"
+            // })));
+        })
+
         // this.stars.concat([
         //   {
         //     'headUrl': '../../assets/nr/headImage.jpg',
@@ -97,9 +107,9 @@ export default {
         //     'email': "123"
         //   }
         // ])
-        // getFans(userStateStore().email).then((res) => {
-        //     this.fans = res
-        // })
+        getFans(userStateStore().email).then((res) => {
+            this.fans = res
+        })
         // this.fans.concat([
         //   {
         //     'headUrl': '../../assets/nr/headImage.jpg',
@@ -128,34 +138,34 @@ export default {
                 //     'email': "123"
                 // }
 
-                {
-                    'headUrl': '',
-                    'nickname': 'Goths',
-                    "email": "232323",
-                    "sign": "签名"
-                },
-                {
-                  'headUrl': '../../assets/nr/headImage.jpg',
-                  'nickname': 'Goths',
-                  'email': "123",
-                  "sign": "签名"
-                }
+                // {
+                //     'headUrl': '',
+                //     'nickname': 'Goths',
+                //     "email": "232323",
+                //     "sign": "签名"
+                // },
+                // {
+                //   'headUrl': '../../assets/nr/headImage.jpg',
+                //   'nickname': 'Goths',
+                //   'email': "123",
+                //   "sign": "签名"
+                // }
             ],
             fans: [
-                {
-                    'headUrl': '',
-                    'nickname': 'Goths',
-                    "email": "232323",
-                  "sign": "签名"
+                // {
+                //     'headUrl': '',
+                //     'nickname': 'Goths',
+                //     "email": "232323",
+                //   "sign": "签名"
 
-                },
-                {
-                  'headUrl': '../../assets/nr/headImage.jpg',
-                  'nickname': 'Goths',
-                  'email': "123",
-                  "sign": "签名"
+                // },
+                // {
+                //   'headUrl': '../../assets/nr/headImage.jpg',
+                //   'nickname': 'Goths',
+                //   'email': "123",
+                //   "sign": "签名"
 
-                }
+                // }
             ]
         }
     },

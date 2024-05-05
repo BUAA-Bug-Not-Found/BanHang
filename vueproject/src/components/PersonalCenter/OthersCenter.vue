@@ -10,7 +10,7 @@
                 <v-icon color="blue">mdi-chat</v-icon>
               </v-btn>
               <v-btn icon @click="clickHeart">
-                <v-icon :class="{'redHeart': isStar, 'greyHeart': !isStar}" color="red">mdi-heart</v-icon>
+                <v-icon :class="{'redHeart': isStar, 'greyHeart': !isStar}">mdi-heart</v-icon>
               </v-btn>
             </v-toolbar>
           </div>
@@ -19,7 +19,7 @@
             <v-avatar color="surface-variant"
              style="margin-top: 15px;margin-left: 10px"
               size="80"
-              :image="infos.headUrl">
+              :image="infos.url">
             </v-avatar>
           </div>
           <div style="margin-top: 10px;">
@@ -108,16 +108,13 @@ export default {
       infos: {
         "headUrl": "",
         "nickname": "",
-        "sign": ""
+        "sign": "",
+        "user_id": 8
       },
       otherBlogs: [],
       otherEmail: '', // TODO 这里要填充
       isStar: false,
       images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
         'https://via.placeholder.com/150',
         // 添加更多图片链接...
       ],
@@ -149,6 +146,12 @@ export default {
     }, 
     clickChat() {
       // 跳转到聊天窗口, 传递一个参数
+      localStorage.setItem('MessageInterface', JSON.stringify({
+        user_id: this.infos.user_id,
+        user_name: this.infos.nickname,
+        avatar: this.infos.headUrl
+      }))
+      router.push('/message')
     },
     formatDateTime(dateTimeStr) {
       // 创建 Date 对象
