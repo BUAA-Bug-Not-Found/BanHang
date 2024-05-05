@@ -145,7 +145,7 @@ export default {
     this.isFetchingBlog = false
     this.isFetchingQues = false
     this.isFetchingUser = false
-    this.searchQues()
+    this.loadMore()
     // console.log("this.searchUserList")
     // console.log(this.searchUserList)
   },

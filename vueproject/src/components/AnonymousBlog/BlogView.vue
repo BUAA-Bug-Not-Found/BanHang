@@ -79,7 +79,6 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import UserStateStore from "@/store";
 import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
-import UserStateStore from "@/store";
 
 export default {
   name: "BlogView",
