@@ -57,6 +57,7 @@
 </template>
 
 <script>
+
 import {getTags, uploadBlog} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import axios from "axios";
@@ -121,6 +122,7 @@ export default {
         }).catch(() => {
           showTip("图片上传失败, 请重新尝试!", false)
         })
+
       }
     },
     // 移除已上传的图片
@@ -167,7 +169,6 @@ export default {
           "tagList": this.transNameListToTagList(this.tagList)
         }
         uploadBlog(json_set).then(
-
             (res) => {
               if (res.response == "success") {
                 ElMessage({

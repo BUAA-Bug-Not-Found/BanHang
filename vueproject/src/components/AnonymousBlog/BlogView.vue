@@ -133,7 +133,6 @@ export default {
               time: comment.time,
               replyToCommentId: comment.replyToCommentId,
             }))
-
           }
       )
     },

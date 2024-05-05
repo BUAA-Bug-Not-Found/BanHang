@@ -64,6 +64,9 @@
 import BlogShow from './BlogShow.vue';
 import {getBlogs, getTags} from "@/components/AnonymousBlog/api";
 import {useDisplay} from "vuetify";
+import UserStateStore from "@/store";
+import {ElMessage} from "element-plus";
+
 
 export default {
   name: 'BlogList',
@@ -140,6 +143,11 @@ export default {
     },
 
     goToNewBlog() {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
       this.$router.push({path: `/blogNew`});
     },
   }

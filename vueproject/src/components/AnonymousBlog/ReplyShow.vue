@@ -1,8 +1,13 @@
 <template>
   <div class="comment-card">
     <div class="user-info" @click="goToOtherUser(userId)">
-      <div style="display:flex; justify-content: end;align-content: center">
+      <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
         <UserAvatar :userId="this.userId"></UserAvatar>
+      </div>
+      <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
+        <v-avatar style="margin-top:8px">
+          <v-img :src="this.userAvatarUrl"></v-img>
+        </v-avatar>
       </div>
       <div class="user-details">
         <span class="user-name">{{ userName }}</span>

@@ -1,4 +1,5 @@
 <template>
+
   <!--  <div class="blog-card" @click="goToBlogCardView">-->
   <!--    <div class="user-info">-->
   <!--      <v-col cols="7" style="text-align: left;">-->
@@ -97,6 +98,7 @@
       </div>
     </v-card>
   </v-hover>
+
 </template>
 
 <script>

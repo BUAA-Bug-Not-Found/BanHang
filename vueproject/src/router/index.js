@@ -109,7 +109,8 @@ const routes = [
                 path: '/message',
                 name: "message",
                 component: MessageContainer
-            }, {
+            },
+            {
                 path: '/searchList/:keywords',
                 name: "searchList",
                 component: SearchList
