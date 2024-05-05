@@ -197,6 +197,10 @@ export default {
       }
     }
 
+    const delPic = (index) => {
+      editImgList.value.splice(index, 1)
+    }
+
     const setLikeQues = () => {
       const state = UserStateStore()
       if (!state.email) {
@@ -250,7 +254,10 @@ export default {
     const toEdit = () => {
       sheet.value = !sheet.value
       editHtml.value = question.value.quesContent.content
-      editImgList.value = question.value.quesContent.imageList
+      editImgList.value = []
+      for(let i = 0;i < question.value.quesContent.imageList.length;i++) {
+        editImgList.value.push(question.value.quesContent.imageList[i])
+      }
       editTagList.value = []
       for(let i = 0;i < question.value.tagIdList.length;i++) {
         for(let j = 0;j < tags.value.length;j++) {
@@ -281,7 +288,10 @@ export default {
               if (res.isSuccess === true) {
                 ElMessage.success("成功修改问题")
                 question.value.quesContent.content = editHtml.value
-                question.value.quesContent.imageList = editImgList.value
+                question.value.quesContent.imageList = []
+                for(let i = 0;i < editImgList.value.length;i++) {
+                  question.value.quesContent.imageList.push(editImgList.value[i])
+                }
                 question.value.tagIdList = uploadTags
                 disTags.value = []
                 for (let i = 0; i < question.value.tagIdList.length; i++) {
@@ -331,7 +341,6 @@ export default {
       viewerApi({images: imgList})
     }
 
-
     return {
       truncate,
       disTags,
@@ -369,7 +378,8 @@ export default {
       findTagIcon,
       handleChange,
       tagNamesArray,
-      showPic
+      showPic,
+      delPic
     };
   },
 };
@@ -622,11 +632,14 @@ export default {
                  :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
           >
             <div class="avatar-wrapper">
+              <div class="right-top">
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1" icon="mdi-close"></v-btn>
+              </div>
               <el-image
                   class="avatar"
                   :src="image"
                   :fit="'cover'"
-                  @click="showPic(question.quesContent.imageList)"
+                  @click="showPic(editImgList)"
               />
             </div>
           </v-col>

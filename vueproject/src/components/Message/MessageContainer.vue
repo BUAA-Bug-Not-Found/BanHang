@@ -25,7 +25,7 @@
         <div v-for="message in messages" :key="message.id">
           <div v-if="message.senderId == myId" class="message-right">
             <div style="display: flex;flex-direction: column;   align-items: flex-end; justify-content: flex-end;">
-              <div class="time">{{ message.time }}</div>
+              <div class="time">{{ this.formatDateTime(message.time) }}</div>
               <div class="content">
                 {{ message.content }}
               </div>
@@ -35,7 +35,7 @@
           <div v-else class="message-left">
             <img :src="curAvatar" class="profile-photo" />
             <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
-              <div class="time">{{ message.time }}</div>
+              <div class="time">{{ this.formatDateTime(message.time) }}</div>
               <div class="content">
                 {{ message.content }}
               </div>
@@ -159,7 +159,24 @@ export default {
             container.scrollTop = container.scrollHeight;
           });
         }
-    }
+    },
+    formatDateTime(dateTimeStr) {
+        // 创建 Date 对象
+        const dateTime = new Date(dateTimeStr);
+        
+        // 提取年月日时分秒
+        const year = dateTime.getFullYear();
+        const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+        const date = String(dateTime.getDate()).padStart(2, '0');
+        const hours = String(dateTime.getHours()).padStart(2, '0');
+        const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+        const seconds = String(dateTime.getSeconds()).padStart(2, '0');
+        
+        // 拼接成目标格式的字符串
+        const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
+        
+        return formattedDateTime;
+      },
   }
 }
 </script>
