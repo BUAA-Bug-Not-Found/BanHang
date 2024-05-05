@@ -105,21 +105,14 @@ export default {
               console.log(e)
             }
             isUser.value = UserStateStore().getUserId === question.value.userId
-            getTagsApi().then(
-                (data) => {
-                  tags.value = data.tags
-                  for (let i = 0; i < question.value.tagIdList.length; i++) {
-                    for (let j = 0; j < tags.value.length; j++) {
-                      if (tags.value[j].tagId === question.value.tagIdList[i]) {
-                        disTags.value.push(tags.value[j])
-                      }
-                    }
-                  }
-                  for (let i = 0; i < tags.value.length; i++) {
-                    tagNamesArray.value.push(tags.value[i].tagName)
-                  }
+            disTags.value = []
+            for (let i = 0; i < question.value.tagIdList.length; i++) {
+              for (let j = 0; j < tags.value.length; j++) {
+                if (tags.value[j].tagId === question.value.tagIdList[i]) {
+                  disTags.value.push(tags.value[j])
                 }
-            )
+              }
+            }
           }
       )
     }
