@@ -13,7 +13,7 @@ from banhang import blog
 from orm import crud,schemas
 from orm.database import get_db
 
-from tools.check_user import generate_jwt_token,authorize
+from tools.check_user import generate_jwt_token,authorize, check_user
 from tools.mail import MailSender,is_valid_email
 import banhang.BanHangException as EXC
 import random
@@ -137,12 +137,23 @@ def get_info_by_email(email:str, db:Session = Depends(get_db)):
     return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
             'user_id':user.id, 'email': user.email}
 
+@router.get("/getCurrentUserInfo", tags=['用户中心'],response_model=UserInfoResponse,
+            responses={400: {"model": excResponse}})
+def get_current_user_info(current_user: Optional[dict] = Depends(authorize), db:Session = Depends(get_db)):
+    if not current_user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
+    user = crud.get_user_by_id(db, current_user['uid'])
+    if not user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
+    return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
+            'user_id':user.id, 'email': user.email}
+
 class SetSignRequest(BaseModel):
     email:str
     sign:str
 @router.post("/setSignByEmail", tags=['用户中心'], response_model=successResponse,
              responses={400: {"model": excResponse}})
-def set_sign_by_email(req:SetSignRequest,current_user: Optional[dict] = Depends(authorize),
+def set_sign_by_email(req:SetSignRequest, current_user: Optional[dict] = Depends(authorize),
                       db:Session = Depends(get_db)):
     if not current_user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
