@@ -112,9 +112,8 @@
   
   export default {
     created() {
-      setTimeout(() => {
-        // 这里放置需要延迟执行的代码
-        this.headUrl = userStateStore().headImage;
+      // 这里放置需要延迟执行的代码
+      this.headUrl = userStateStore().headImage;
         this.nickname = userStateStore().nickname;
         this.email = userStateStore().email;
         this.sign = userStateStore().sign;
@@ -132,9 +131,6 @@
         getWaterBlogs(userStateStore().email).then((res) => {
           this.waterBlogs = res
         })
-      }, 100);
-      
-      
     },
     data() {
       return {

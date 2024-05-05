@@ -5,7 +5,7 @@ import {ref} from "vue";
 import userStateStore from '@/store';
 import { $bus } from '@/store';
 import { isApp } from '@/store';
-import axios from 'axios';
+// import axios from 'axios';
 
 export default {
   name: 'HomeIndex',
@@ -41,15 +41,15 @@ export default {
       link.click();
       document.body.removeChild(link);
     }
-    axios.get('/getCurrentUserInfo', {}).then(response => {
-          const storage = userStateStore()
-          storage.login_store_info(response.data, response.data.email)
-          this.user_name.value = response.data.user_name
-          this.isLogin.value = true
-          this.avatar.value = response.data.url
-      }).catch(error=>{
-          console.log(error)
-      })
+    // axios.get('/getCurrentUserInfo', {}).then(response => {
+    //       const storage = userStateStore()
+    //       storage.login_store_info(response.data, response.data.email)
+    //       this.user_name.value = response.data.user_name
+    //       this.isLogin.value = true
+    //       this.avatar.value = response.data.url
+    //   }).catch(error=>{
+    //       console.log(error)
+    //   })
     return {display, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp}
   },
   unmounted() {
