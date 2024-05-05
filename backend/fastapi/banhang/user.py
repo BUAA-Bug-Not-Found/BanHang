@@ -300,6 +300,7 @@ class FansResponse(BaseModel):
     email: str
     headUrl: str
     nickname: str
+    sign: str
 class getFansResponse(BaseModel):
     fans: List[FansResponse]
 
