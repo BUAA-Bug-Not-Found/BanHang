@@ -1,33 +1,33 @@
 <template>
-  <v-btn-toggle mandatory shaped>
-    <v-btn @click="reloadBySearchObj('ques')">
+  <v-btn-toggle v-model="nowSearchObj" mandatory shaped>
+    <v-btn value="ques" @click="reloadBySearchObj('ques')">
       <v-icon>mdi-help-box</v-icon>
       互助帖
     </v-btn>
 
-    <v-btn @click="reloadBySearchObj('blog')">
+    <v-btn value="blog" @click="reloadBySearchObj('blog')">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名帖
     </v-btn>
 
-    <v-btn @click="reloadBySearchObj('user')">
+    <v-btn value="user" @click="reloadBySearchObj('user')">
       <v-icon>mdi-account</v-icon>
       用户
     </v-btn>
   </v-btn-toggle>
 
-  <v-btn-toggle mandatory shaped>
-    <v-btn @click="reloadBySortMethod('byRelation')">
+  <v-btn-toggle v-model="nowSortMethod" mandatory shaped>
+    <v-btn value="byRelation" @click="reloadBySortMethod('byRelation')">
       <v-icon color="blue">mdi-link</v-icon>
       相关度
     </v-btn>
 
-    <v-btn @click="reloadBySortMethod('byPopularity')">
+    <v-btn value="byPopularity" @click="reloadBySortMethod('byPopularity')">
       <v-icon color="red">mdi-fire</v-icon>
       热度
     </v-btn>
 
-    <v-btn @click="reloadBySortMethod('byTime')">
+    <v-btn value="byTime" @click="reloadBySortMethod('byTime')">
       <v-icon color="green">mdi-clock</v-icon>
       时间
     </v-btn>
@@ -35,7 +35,7 @@
 
   <v-divider></v-divider>
   <div v-if="this.nowSearchObj==='ques'">
-<!--    todo 显示问题列表 -->
+    <!--    todo 显示问题列表 -->
 
   </div>
   <div v-if="this.nowSearchObj==='blog'">
@@ -55,19 +55,19 @@
     </div>
   </div>
   <div v-if="this.nowSearchObj==='user'">
-<!--    todo 显示用户列表 -->
+    <!--    todo 显示用户列表 -->
     <div>
       <UserShow
-        v-for="(post, index) in searchUserList"
-        :key="index"
-        :nickname="post.nickname"
-        :sign="post.sign"
-        :email="post.email"
-        :headImage="post.url"
+          v-for="(post, index) in searchUserList"
+          :key="index"
+          :nickname="post.nickname"
+          :sign="post.sign"
+          :email="post.email"
+          :headImage="post.url"
       >
-      <!-- <v-divider style="margin-top: 0px;"></v-divider> -->
+        <!-- <v-divider style="margin-top: 0px;"></v-divider> -->
 
-    </UserShow>
+      </UserShow>
     </div>
   </div>
 
@@ -98,6 +98,27 @@ export default {
       quesPageNo: 1,
       blogPageNo: 1,
       userPageNo: 1,
+      isFetchingQues: false,
+      isFetchingBlog: false,
+      isFetchingUser: false,
+    }
+  },
+  watch: {
+    '$route'(to) {
+      // Update searchContent when route changes
+      this.searchContent = to.params.keywords || '';
+      this.nowSearchObj = "ques"
+      this.nowSortMethod = "byRelation"
+      this.searchQuesList = []
+      this.searchBlogList = []
+      this.searchUserList = []
+      this.quesPageNo = 1
+      this.blogPageNo = 1
+      this.userPageNo = 1
+      this.isFetchingBlog = false
+      this.isFetchingQues = false
+      this.isFetchingUser = false
+      this.searchQues()
     }
   },
   created() {
@@ -113,12 +134,20 @@ export default {
     this.quesPageNo = 1
     this.blogPageNo = 1
     this.userPageNo = 1
-    this.searchQues()   //todo
-    console.log("this.searchUserList")
-    console.log(this.searchUserList)
+    this.isFetchingBlog = false
+    this.isFetchingQues = false
+    this.isFetchingUser = false
+    this.searchQues()
+    // console.log("this.searchUserList")
+    // console.log(this.searchUserList)
   },
   methods: {
     searchBlogs() {
+      if (this.isFetchingBlog) {
+        return
+      }
+      this.isFetchingBlog = true
+
       searchBlogAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
             // this.searchBlogList = this.searchBlogList.concat(data.blogs)
@@ -132,62 +161,34 @@ export default {
               tagList: blog.tagList,
               userId: blog.userId
             })));
-            console.log(this.searchBlogList)
+            this.isFetchingBlog = false
           }
       )
     },
 
     searchQues() {
+      if (this.isFetchingQues) {
+        return
+      }
+      this.isFetchingQues = true
       searchQuesAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
-             this.searchQuesList = this.searchQuesList.concat(data.questions)
-            // this.searchQuesList = this.searchQuesList.concat(data.map(ques => ({
-            //   quesId: ques.quesId,
-            //   userId: ques.userId,
-            //   userName: ques.userName,
-            //   quesContent: ques.quesContent,
-            //   quesState: ques.quesState,
-            //   quesTime: ques.quesTime,
-            //   ifUserLike: ques.ifUserLike,
-            //   ansSum: ques.ansSum,
-            //   likeSum: ques.likeSum,
-            //   tagIdList: ques.tagIdList
-            // })));
+            this.searchQuesList = this.searchQuesList.concat(data.questions)
+            this.isFetchingQues = false
           }
       )
     },
 
     searchUsers() {
-      this.searchUserList = [{
-        nickname: "nr",
-        email: "1052683403@qq.com",
-        url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
-        sign: "还没有签名"
-      },
-      {
-        nickname: "nr",
-        email: "21371455@buaa.edu.cn",
-        url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
-        sign: "还没有签名"
-      },
-      {
-        nickname: "nr",
-        email: "21371455@buaa.edu.cn",
-        url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
-        sign: "还没有签名"
-      }]
+
+      if (this.isFetchingUser) {
+        return
+      }
+      this.isFetchingUser = true
       searchUserAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
-            console.log("--->")
-            console.log(data.users)
-            console.log("<---")
-            // data.users是一个列表
             this.searchUserList = this.searchUserList.concat(data.users)
-            // this.searchUserList = this.searchUserList.concat(data.map(user =>({
-            //   nickname: user.nickname,
-            //   sign: user.sign,
-            //   url: user.url
-            // })));
+            this.isFetchingUser = false
           }
       )
     },
