@@ -55,32 +55,38 @@ export default {
 
     const reviseTagList = ref([])
 
+    const lockMore = ref(false)
+
     const getMore = () => {
-      page.value = page.value + 1
-      if (lastIndex.value !== 0) {
-        getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex.value].tagId).then(
-            (data) => {
-              let ori_len = questions.value.length
-              quesSum.value = data.quesSum
-              questions.value = questions.value.concat(data.questions)
-              for (let i = ori_len; i < questions.value.length; i++) {
-                disTags.value.push([])
-                calTags(i)
+      if(lockMore.value === false) {
+        lockMore.value = true
+        page.value = page.value + 1
+        if (lastIndex.value !== 0) {
+          getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex.value].tagId).then(
+              (data) => {
+                let ori_len = questions.value.length
+                quesSum.value = data.quesSum
+                questions.value = questions.value.concat(data.questions)
+                for (let i = ori_len; i < questions.value.length; i++) {
+                  disTags.value.push([])
+                  calTags(i)
+                }
               }
-            }
-        )
-      } else {
-        getQuestionsApi(page.value, pageSize.value).then(
-            (data) => {
-              let ori_len = questions.value.length
-              quesSum.value = data.quesSum
-              questions.value = questions.value.concat(data.questions)
-              for (let i = ori_len; i < questions.value.length; i++) {
-                disTags.value.push([])
-                calTags(i)
+          )
+        } else {
+          getQuestionsApi(page.value, pageSize.value).then(
+              (data) => {
+                let ori_len = questions.value.length
+                quesSum.value = data.quesSum
+                questions.value = questions.value.concat(data.questions)
+                for (let i = ori_len; i < questions.value.length; i++) {
+                  disTags.value.push([])
+                  calTags(i)
+                }
               }
-            }
-        )
+          )
+        }
+        lockMore.value = false
       }
     }
 
@@ -289,6 +295,10 @@ export default {
       viewerApi({images: imgList})
     }
 
+    const delPic = (index) => {
+      imageList.value.splice(index, 1)
+    }
+
     return {
       editorConfig,
       mode: 'default',
@@ -330,7 +340,8 @@ export default {
       saveUpload,
       updateQuestion,
       disTags,
-      showPic
+      showPic,
+      delPic
     }
   }
 }
@@ -391,7 +402,6 @@ export default {
       </div>
       <!-- 评论 -->
     </div>
-    <v-col cols="12" style="margin-bottom: 25px">
       <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
                    :index="index"
                    :disTags="disTags[index]"
@@ -401,7 +411,7 @@ export default {
       <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
         加载更多
       </v-btn>
-    </v-col>
+      <div style="height: 25px;"></div>
   </div>
   <v-bottom-sheet v-model="sheet" inset :persistent="true">
     <v-card
@@ -436,8 +446,11 @@ export default {
           </v-col>
         </v-row>
         <v-row>
-          <v-col v-for="image in imageList" :key="image" :cols="display.smAndDown.value? 4 : 3">
+          <v-col v-for="(image, index) in imageList" :key="image" :cols="display.smAndDown.value? 4 : 3">
             <div class="avatar-wrapper">
+              <div class="right-top">
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1" icon="mdi-close"></v-btn>
+              </div>
               <el-image
                   class="avatar"
                   :src="image"
@@ -567,11 +580,16 @@ export default {
   padding-bottom: 100%;
 }
 
+.right-top {
+  position: absolute; /* 使用绝对定位 */
+  top: -5%;
+  right: -5%;
+  z-index: 88888;
+}
+
 .avatar {
   position: absolute !important;
   top: 0;
-  right: 0;
-  bottom: 0;
   left: 0;
   cursor: pointer;
 

@@ -1,10 +1,10 @@
 <script>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import {ref, onMounted, onBeforeUnmount} from "vue";
 import router from "@/router";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 
 export default {
-  name: "RecQuesCard",
+  name: "PlainQuesCard",
   components: {UserAvatar},
   props: ["question", "tags"],
   setup(props) {
@@ -19,8 +19,8 @@ export default {
     const disTags = ref([])
 
     const init = () => {
-      for(let i = 0;i < props.question.tagIdList.length;i++) {
-        for(let j = 0; j < props.tags.length;j++) {
+      for (let i = 0; i < props.question.tagIdList.length; i++) {
+        for (let j = 0; j < props.tags.length; j++) {
           if (props.tags[j].tagId === props.question.tagIdList[i]) {
             disTags.value.push(props.tags[j])
           }
@@ -48,13 +48,24 @@ export default {
 
     const goto = () => {
       router.push("/QuesInfo/" + props.question.quesId).then(
-          ()=>{
+          () => {
             router.go(0)
           }
       )
     }
 
-    return { truncate, menuClick, disTags, goto};
+    const formatDate = (time) => {
+      let date = new Date(Date.parse(time))
+      let year = date.getFullYear();
+      let month = ('0' + (date.getMonth() + 1)).slice(-2); // 月份从0开始，需要加1，并且保证两位数
+      let day = ('0' + date.getDate()).slice(-2); // 保证两位数
+      let hours = ('0' + date.getHours()).slice(-2); // 保证两位数
+      let minutes = ('0' + date.getMinutes()).slice(-2); // 保证两位数
+
+      return `${year}.${month}.${day}-${hours}:${minutes}`
+    }
+
+    return {truncate, menuClick, disTags, goto, formatDate};
   },
 };
 </script>
@@ -63,38 +74,35 @@ export default {
   <v-hover v-slot="{ isHovering, props }">
     <v-card
         class="mx-auto"
-        width="w-75"
+        width="96%"
         :class="`cursor-pointer`"
         :color="isHovering ? 'cyan-lighten-5' : undefined"
         v-bind="props"
         @click="goto()"
     >
       <v-row>
-        <v-col cols="3" style="display: flex;justify-content: end;margin-top: 8px">
+        <v-col cols="1" style="min-width: 50px">
           <UserAvatar :userId="question.userId" style="padding-left: 8px"></UserAvatar>
         </v-col>
-        <v-col cols="9" style="text-align: left;" @click="goto">
-          <div style="margin-top: 10px;font-size: 13px">
+        <v-col cols="5" style="text-align: left;" @click="goto">
+          <div style="margin-top: 10px;">
             {{ truncate(question.quesContent.content) }}
           </div>
-          <div>
-            <v-btn :prepend-icon="question.ifUserLike === 1 ?
-                  'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"
-                   color="blue-grey-lighten-2">
-              {{ question.likeSum }}
-            </v-btn>
-            <v-btn variant="text" prepend-icon="mdi-reply" size="small" color="blue-grey-lighten-2">
-              {{ question.ansSum }}
-            </v-btn>
+          <div style="font-size: 12px;color: grey">
+            {{ question.userName }} 发表于 {{ formatDate(question.quesTime) }}
           </div>
         </v-col>
+        <v-col cols="4" style="text-align: right;margin-top: 3px">
+          <v-btn :prepend-icon="question.ifUserLike === 1 ?
+                  'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"
+                 color="blue-grey-lighten-2">
+            {{ question.likeSum }}
+          </v-btn>
+          <v-btn variant="text" prepend-icon="mdi-message-text" size="small" color="blue-grey-lighten-2">
+            {{ question.ansSum }}
+          </v-btn>
+        </v-col>
       </v-row>
-      <div style="margin-bottom: 10px;transform: translateX(5%)">
-        <v-chip v-for="tag in disTags" size="x-small" :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor">
-          <v-icon>{{tag.tagIcon}}</v-icon>
-          {{tag.tagName}}
-        </v-chip>
-      </div>
     </v-card>
   </v-hover>
 </template>

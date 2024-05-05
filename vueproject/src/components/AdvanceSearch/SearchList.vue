@@ -35,7 +35,11 @@
 
   <v-divider></v-divider>
   <div v-if="this.nowSearchObj==='ques'">
-    <!--    todo 显示问题列表 -->
+    <div class="blog-list">
+      <PlainQuesCard style="margin-bottom: 5px" v-for="ques in searchQuesList" :key="ques.quesId"
+                     :tags="tags"
+                     :question="ques"/>
+    </div>
 
   </div>
   <div v-if="this.nowSearchObj==='blog'">
@@ -79,10 +83,12 @@ import {searchBlogAPage, searchQuesAPage, searchUserAPage} from "@/components/Ad
 import BlogShow from "@/components/AnonymousBlog/BlogShow.vue";
 import UserShow from "@/components/PersonalCenter/UserShow.vue";
 import {useRouter} from "vue-router";
+import {getTagsApi} from "@/components/HelpCenter/api";
+import PlainQuesCard from "@/components/HelpCenter/PlainQuesCard.vue";
 
 export default {
   name: "searchList",
-  components: {BlogShow, UserShow},
+  components: {PlainQuesCard, BlogShow, UserShow},
 
   data() {
     return {
@@ -101,6 +107,7 @@ export default {
       isFetchingQues: false,
       isFetchingBlog: false,
       isFetchingUser: false,
+      tags: [],
     }
   },
   watch: {
@@ -131,6 +138,7 @@ export default {
     this.searchQuesList = []
     this.searchBlogList = []
     this.searchUserList = []
+    this.tags = []
     this.quesPageNo = 1
     this.blogPageNo = 1
     this.userPageNo = 1
@@ -175,6 +183,23 @@ export default {
           (data) => {
             this.searchQuesList = this.searchQuesList.concat(data.questions)
             this.isFetchingQues = false
+            getTagsApi().then(
+                (data) => {
+                  this.tags = data.tags
+                }
+            )
+            // this.searchQuesList = this.searchQuesList.concat(data.map(ques => ({
+            //   quesId: ques.quesId,
+            //   userId: ques.userId,
+            //   userName: ques.userName,
+            //   quesContent: ques.quesContent,
+            //   quesState: ques.quesState,
+            //   quesTime: ques.quesTime,
+            //   ifUserLike: ques.ifUserLike,
+            //   ansSum: ques.ansSum,
+            //   likeSum: ques.likeSum,
+            //   tagIdList: ques.tagIdList
+            // })));
           }
       )
     },
@@ -230,7 +255,6 @@ export default {
       this.userPageNo = 1
       this.loadMore()
     }
-
   }
 }
 </script>

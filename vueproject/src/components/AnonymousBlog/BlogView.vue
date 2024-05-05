@@ -38,7 +38,6 @@
             </div>
           </v-col>
         </v-row>
-
       </div>
     </div>
 
@@ -77,6 +76,7 @@ import {getBlogByBlogId, getCommentsByBlogId, goToOtherUser, uploadComment} from
 import {ElMessage} from "element-plus";
 import {useRouter} from "vue-router";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+import UserStateStore from "@/store";
 import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
 import UserStateStore from "@/store";
@@ -119,6 +119,7 @@ export default {
     this.fetchBlogInfo(); //todo
     this.fetchCommentInfo();  //todo
   },
+
 
   methods: {
     useDisplay,
@@ -175,6 +176,11 @@ export default {
       this.showCommentInput = !this.showCommentInput;
     },
     addComment(replyToId) {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
       // todo 提交评论的逻辑，读取评论和用户信息，存入数据库，同步加入 comments 列表
       if (this.newComment.trim().length !== 0) {
         // let form = new FormData
