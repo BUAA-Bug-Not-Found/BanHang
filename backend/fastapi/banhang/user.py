@@ -216,14 +216,14 @@ class GetHelpBlogResponse(BaseModel):
             responses={400: {"model": excResponse}})
 def get_helpBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
                             db:Session = Depends(get_db)):
-    if not current_user:
-        pass
-        # raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
-    user = crud.get_user_by_email(db, email)
-    current_user_instance = crud.get_user_by_id(db, current_user['uid'])
-    if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
-        pass
-        # raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
+    # if not current_user:
+    #     pass
+    #     # raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
+    # user = crud.get_user_by_email(db, email)
+    # current_user_instance = crud.get_user_by_id(db, current_user['uid'])
+    # if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
+    #     pass
+    #     # raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
     questions = crud.get_questions_by_email(db, email)
     return [GetAnonyBlogResponse(blogTitle = question.content,
                                  firstPhotoUrl = question.images[0].image_url if len(question.images) > 0 else "",
