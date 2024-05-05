@@ -1,16 +1,24 @@
 <template>
     <v-container>
+      <v-dialog v-model="showDialog" max-width="300px">
+        <v-card>
+          <v-card-title class="headline">确认操作</v-card-title>
+          <v-card-text>
+            确定要退出登录吗？
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="error" @click="clickQuitLogin">确认</v-btn>
+            <v-btn color="blue darken-1" @click="showDialog = false">取消</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
       <div>
         <v-card style="margin-bottom: 20px; height: auto;">
             <!-- div好像是行内的 -->
             <div style="text-align: center;">
               <v-toolbar density="compact" style="background-color:aliceblue;">
                 <v-spacer></v-spacer>
-
-                <!-- <v-btn prepend-icon="mdi-delete" variant="text" size="small"
-                   color="blue-grey-lighten-2" @click="setLikeQues">
-                  {{ likeSum }}
-                </v-btn> -->
                 <v-btn icon @click="clickMyInterest">
                   <v-icon color="red">mdi-heart</v-icon>
                 </v-btn>
@@ -19,7 +27,7 @@
                   <v-icon color="blue">mdi-pencil</v-icon>
                 </v-btn>
 
-                <v-btn icon @click="clickQuitLogin">
+                <v-btn icon @click="showDialog = true">
                   <v-icon color="grey">mdi-logout</v-icon>
                 </v-btn>
               </v-toolbar>
@@ -44,7 +52,7 @@
       <v-card>
         <v-tabs
           v-model="tab"
-          color="red darken-4"
+          color="blue"
           fixed-tabs
         >
           <v-tab value="one">匿名贴</v-tab>
@@ -56,17 +64,17 @@
             <!-- 该window展示匿名贴的内容 -->
             <v-window-item value="one">
               <v-list>
-                <v-list-item v-for="(content, index) in waterBlogs" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
+                <v-list-item v-for="(content, index) in waterBlogs.slice().reverse()" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
                   <div style="text-align: left;">
                     <v-text style="vertical-align: middle; font-size: 18px; font-weight: bold;">{{ content.blogTitle }}</v-text>
                   </div>
                   <div style="text-align: left; margin-top: 10px;">
                     <v-text style="vertical-align: middle; font-size: 12px; color: grey;">{{ content.blogText }}</v-text>
                   </div>
-                  <v-divider style="width:10px;"></v-divider>
-                  <div style="text-align: center; font-size: 0px;">
+                  <!-- <v-divider style="width:10px;"></v-divider> -->
+                  <!-- <div style="text-align: center; font-size: 0px;">
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
-                  </div>
+                  </div> -->
                   <div style="text-align: right; margin-top: 10px;">
                     <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>
@@ -80,9 +88,6 @@
             <v-window-item value="two">
               <v-list>
                 <v-list-item v-for="(content, index) in helpBlogs" :key="index" @click="clickItem(content.blogId)" style="cursor: pointer;">
-                  <!-- <div style="text-align:left;">
-                    <v-text style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</v-text>
-                  </div> -->
                   <div style="margin-top: 3px" v-dompurify-html="content.blogTitle"></div>
                   <div style="text-align: center; font-size: 0px;">
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
@@ -139,6 +144,7 @@
         nickname: "",
         email: "",
         sign: "",
+        showDialog: false,
         posts: [
           { content: "这是第一条动态" },
         ],
