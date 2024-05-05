@@ -166,7 +166,6 @@ def get_blogs_advanced(blog_page_advanced: schemas.BlogPageAdvanced,
 	blogs = []
 	for db_blog in db_blogs:
 		db_images = db_blog.images
-		db_user = db_blog.user
 		db_tags = db_blog.tags
 		blog = {}
 		if db_blog.is_anonymous:
