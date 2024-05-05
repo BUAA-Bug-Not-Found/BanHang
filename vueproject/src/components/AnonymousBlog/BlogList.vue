@@ -12,6 +12,16 @@
           </v-btn>
         </v-list-item>
 
+        <v-list-item>
+          <v-btn @click="swithConcernedTag(-1)" class="w-100">全部
+            <v-icon
+                icon="mdi-home-circle"
+                color="indigo-lighten-4"
+                end
+            ></v-icon>
+          </v-btn>
+        </v-list-item>
+        <v-list-subheader>分区：</v-list-subheader>
         <v-list-item v-for="tag in tags" :key="tag.tagId">
           <v-list-item-content>
             <v-btn @click="swithConcernedTag(tag.tagId)" class="w-100">{{ tag.tagName }}
@@ -41,7 +51,7 @@
             :tag-list="post.tagList"
             :comment-num="post.commentNum"
             :user-id="post.userId"
-            :tags = "this.tags"
+            :tags="this.tags"
         />
 
         <button @click="loadMore" class="load-more-button">加载更多</button>
