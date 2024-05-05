@@ -214,7 +214,7 @@ export default {
 .reply-input {
   margin-left: 2%;
   margin-right: 2%;
-  margin-bottom: 10%;
+  margin-bottom: 2%;
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 5px;
