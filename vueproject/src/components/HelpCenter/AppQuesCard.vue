@@ -168,6 +168,9 @@ export default {
               <v-icon>{{ tag.tagIcon }}</v-icon>
               {{ tag.tagName }}
             </v-chip>
+          <v-chip v-if="disTags.length === 0" size="x-small" color="blue-grey-darken-1">
+            其他
+          </v-chip>
           </span>
       </div>
     </v-card>

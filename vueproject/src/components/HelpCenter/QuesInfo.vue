@@ -555,14 +555,14 @@ export default {
       </div>
     </div>
     <div v-else>
-      <v-row>
+      <v-row style="margin-left: 12px;margin-right: 12px">
         <v-col cols="12">
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="display: flex; align-items: center;">
-              <v-col cols="1" style="justify-content: end;margin-right: 5px">
+              <v-col cols="2" style="justify-content: end;margin-right: 5px">
                 <UserAvatar :userId="question.userId"/>
               </v-col>
-              <v-col cols="7">
+              <v-col cols="6">
                 <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
                 <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
               </v-col>
