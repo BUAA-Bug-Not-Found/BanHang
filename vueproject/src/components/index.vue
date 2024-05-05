@@ -58,7 +58,13 @@ export default {
   unmounted() {
     $bus.off('updateIndexData', this.updateData)
   },
-
+  mounted() {
+    // $refs.NiMing2.click()
+    this.$nextTick(() => {
+      const defaultBtn = document.querySelector('.default');
+      defaultBtn.click(); // 触发默认按钮的点击事件
+    });
+  },
   methods: {
     navigateToSearchList() {
       if (this.searchContent.trim() !== '') {
@@ -81,6 +87,7 @@ export default {
 </script>
 
 <template>
+  <!-- <div> -->
   <img v-if="!display.smAndDown.value" src='@/assets/images/background.png' style="position: fixed;width: 100%;height: 100%;">
   <v-app-bar :elevation="1"
              v-if="!display.smAndDown.value">
@@ -109,7 +116,7 @@ export default {
       互助中心
     </v-btn>
 
-    <v-btn @click="goto('/blogList')">
+    <v-btn @click="goto('/blogList')" class="default">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名空间
     </v-btn>
@@ -185,7 +192,7 @@ export default {
       互助中心
     </v-btn>
 
-    <v-btn @click="goto('/blogList')">
+    <v-btn @click="goto('/blogList')" id="NiMing2">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名空间
     </v-btn>
@@ -199,6 +206,7 @@ export default {
       用户中心
     </v-btn>
   </v-bottom-navigation>
+<!-- </div> -->
 </template>
 
 <style scoped>

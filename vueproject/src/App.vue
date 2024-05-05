@@ -7,8 +7,13 @@
 
 <script>
 
+// import router from './router';
+
 export default {
   name: 'App',
+  // created() {
+  //   router.push({path: "/blogList"})
+  // }
 }
 </script>
 

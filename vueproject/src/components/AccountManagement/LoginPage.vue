@@ -73,8 +73,7 @@ export default {
                             // 存储用户信息
                             st.login_store_info(ret, this.email);
                             showTip("登录成功 !", true)
-                            router.push({path: "/HelpCenter"});
-                            
+                            router.push({path: "/blogList"});
                         })
                     } else { // 验证失败
                         showTip("信息验证失败, 请重新输入!!", false)
