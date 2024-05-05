@@ -1,4 +1,5 @@
 <template>
+
   <!--  <div class="blog-card" @click="goToBlogCardView">-->
   <!--    <div class="user-info">-->
   <!--      <v-col cols="7" style="text-align: left;">-->
@@ -51,9 +52,14 @@
         v-bind="props"
     >
       <v-row>
-        <v-col cols="1" >
-          <div style="display:flex; justify-content: end;align-content: center">
+        <v-col :cols="useDisplay().smAndDown.value ? 2 : 1">
+          <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
             <UserAvatar :userId="this.userId"></UserAvatar>
+          </div>
+          <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
+            <v-avatar v-bind="props" style="margin-top:8px">
+              <v-img :src="this.userAvatarUrl"></v-img>
+            </v-avatar>
           </div>
         </v-col>
         <v-col cols="7" style="text-align: left;" :class="`cursor-pointer`" @click="goToBlogCardView">
@@ -65,12 +71,12 @@
           </div>
         </v-col>
         <v-col cols="3" style="text-align: right; justify-content: end; margin-top: 3px">
-<!--          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"-->
-<!--                 color="blue-grey-lighten-2">-->
-<!--            {{ 1 }}-->
-<!--          </v-btn>-->
+          <!--          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"-->
+          <!--                 color="blue-grey-lighten-2">-->
+          <!--            {{ 1 }}-->
+          <!--          </v-btn>-->
           <v-btn variant="text" prepend-icon="mdi-message-text" size="small" color="blue-grey-lighten-2"
-                  @click="goToBlogCardView">
+                 @click="goToBlogCardView">
             {{ this.commentNum }}
           </v-btn>
         </v-col>
@@ -92,11 +98,13 @@
       </div>
     </v-card>
   </v-hover>
+
 </template>
 
 <script>
 import {goToOtherUser} from "@/components/AnonymousBlog/api";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+import {useDisplay} from "vuetify";
 
 export default {
   name: "BlogShow",
@@ -157,6 +165,7 @@ export default {
   },
 
   methods: {
+    useDisplay,
     goToOtherUser,
     goToBlogCardView() {
       const blogId = this.$props.blogId;

@@ -76,7 +76,6 @@ export default {
         this.goto('/loginPage')
       }
     },
-
   }
 }
 </script>
