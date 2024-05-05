@@ -6,6 +6,11 @@
             <div style="text-align: center;">
               <v-toolbar density="compact" style="background-color:aliceblue;">
                 <v-spacer></v-spacer>
+
+                <!-- <v-btn prepend-icon="mdi-delete" variant="text" size="small"
+                   color="blue-grey-lighten-2" @click="setLikeQues">
+                  {{ likeSum }}
+                </v-btn> -->
                 <v-btn icon @click="clickMyInterest">
                   <v-icon color="red">mdi-heart</v-icon>
                 </v-btn>
@@ -52,7 +57,13 @@
             <v-window-item value="one">
               <v-list>
                 <v-list-item v-for="(content, index) in waterBlogs" :key="index" @click="clickItem" style="cursor: pointer;">
-                  <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</span>
+                  <div style="text-align: left;">
+                    <v-text style="vertical-align: middle; font-size: 18px; font-weight: bold;">{{ content.blogTitle }}</v-text>
+                  </div>
+                  <div style="text-align: left; margin-top: 10px;">
+                    <v-text style="vertical-align: middle; font-size: 12px; color: grey;">快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~快介绍一下自己吧~</v-text>
+                  </div>
+                  <v-divider style="width:10px;"></v-divider>
                   <div style="text-align: center; font-size: 0px;">
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                   </div>
@@ -69,7 +80,10 @@
             <v-window-item value="two">
               <v-list>
                 <v-list-item v-for="(content, index) in helpBlogs" :key="index" @click="clickItem" style="cursor: pointer;">
-                  <span style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</span>
+                  <!-- <div style="text-align:left;">
+                    <v-text style="vertical-align: middle; font-size: 15px; font-weight: bold;">{{ content.blogTitle }}</v-text>
+                  </div> -->
+                  <div style="margin-top: 3px" v-dompurify-html="content.blogTitle"></div>
                   <div style="text-align: center; font-size: 0px;">
                     <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
                   </div>
@@ -177,7 +191,7 @@
         const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
         
         return formattedDateTime;
-    }
+      }
     },
   };
   </script>

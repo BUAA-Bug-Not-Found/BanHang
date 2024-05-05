@@ -21,35 +21,16 @@
 </template>
 
 <script>
-import router from '@/router';
 
 //   该文件是用户列表中的一个表项视图
 export default {
     name: "UserShow",
     props: {
-        nickname: {
-            type: String,
-            required: true
-        },
-        email: {
-            type: String,
-            required: true
-        },
-        headImage: {
-            type: String,
-            required: true
-        },
-        sign: {
-            type: String,
-            required: true
-        }
+        time: "",
+        title: "",
+        content: ""
     },
-
     methods: {
-        clickHeadImage() {
-            // 跳转到otherCenter
-            router.push({name: "othersCenter", params: {"e": this.email}})
-        }
     }
 };
 </script>

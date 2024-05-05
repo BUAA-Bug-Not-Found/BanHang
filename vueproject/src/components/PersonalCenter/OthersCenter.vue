@@ -16,15 +16,17 @@
           </div>
           <div style="text-align: center;">
             <!-- 头像 -->
-            <v-avatar size="80" style="margin-top: 10px;">
-              <img src="../../assets/nr/headImage.jpg" alt="Avatar">
+            <v-avatar color="surface-variant"
+             style="margin-top: 15px;margin-left: 10px"
+              size="80"
+              :image="infos.headUrl">
             </v-avatar>
           </div>
           <div style="margin-top: 10px;">
-            <span class="nickname">Goths</span>
+            <span class="nickname">{{ infos.nickname }}</span>
           </div>
           <div style="margin-bottom: 10px; font-size: 10px; text-align: center;">
-            <span class="signature">上网不涉密, 涉密不上网</span>
+            <span class="signature">{{ infos.sign }}</span>
           </div>
       </v-card>
     </div>
@@ -52,7 +54,7 @@
 
                 <!-- 帖子的发表时间, 评论数量, 点赞数 -->
                 <div style="text-align: right; margin-top: 10px;">
-                  <v-text class="time" style=" margin-right: 5px;">{{ content.time }}</v-text>
+                  <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                 </div>
                 <!-- 分隔线 -->
                 <v-divider style="margin-top: 0px;"></v-divider>
@@ -78,7 +80,7 @@ export default {
   created() {
     if (!userStateStore().email) {
       showTip("请首先登陆", false)
-      router.replace({path: "loginPage"})
+      router.replace({path: "/loginPage"})
     }
     this.otherEmail = router.currentRoute.value.params.e
     // 拉取该用户的信息
@@ -97,7 +99,7 @@ export default {
     queryStar(userStateStore().email, this.otherEmail).then((res) => {
       this.isStar = res.isStar
     }).catch(() => {
-      showTip("queryStar异常了！", false)
+      showTip("应用出错!!", false)
     })
   },
   data() {
@@ -118,7 +120,8 @@ export default {
         'https://via.placeholder.com/150',
         'https://via.placeholder.com/150',
         // 添加更多图片链接...
-      ]
+      ],
+      // headUrl: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg"
     };
   },
   methods: {
@@ -146,6 +149,23 @@ export default {
     }, 
     clickChat() {
       // 跳转到聊天窗口, 传递一个参数
+    },
+    formatDateTime(dateTimeStr) {
+      // 创建 Date 对象
+      const dateTime = new Date(dateTimeStr);
+      
+      // 提取年月日时分秒
+      const year = dateTime.getFullYear();
+      const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+      const date = String(dateTime.getDate()).padStart(2, '0');
+      const hours = String(dateTime.getHours()).padStart(2, '0');
+      const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+      const seconds = String(dateTime.getSeconds()).padStart(2, '0');
+      
+      // 拼接成目标格式的字符串
+      const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
+      
+      return formattedDateTime;
     }
   },
 };
@@ -154,18 +174,18 @@ export default {
 <style scoped>
 
 .nickname {
-font-size: 20px;
-font-weight: bold;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .signature {
-font-size: 12px;
-color: gray;
+  font-size: 12px;
+  color: gray;
 }
 
 .time {
-font-size: 10px;
-color: gray;
+  font-size: 10px;
+  color: gray;
 }
 
 .redHeart {

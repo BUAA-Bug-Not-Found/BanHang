@@ -156,24 +156,24 @@ export default {
     },
 
     searchUsers() {
-      // this.searchUserList = [{
-      //   nickname: "nr",
-      //   email: "1052683403@qq.com",
-      //   url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
-      //   sign: "还没有签名"
-      // },
-      // {
-      //   nickname: "nr",
-      //   url: "21371455@buaa.edu.cn",
-      //   headImage: "",
-      //   sign: "还没有签名"
-      // },
-      // {
-      //   nickname: "nr",
-      //   url: "21371455@buaa.edu.cn",
-      //   headImage: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
-      //   sign: "还没有签名"
-      // }]
+      this.searchUserList = [{
+        nickname: "nr",
+        email: "1052683403@qq.com",
+        url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
+        sign: "还没有签名"
+      },
+      {
+        nickname: "nr",
+        email: "21371455@buaa.edu.cn",
+        url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
+        sign: "还没有签名"
+      },
+      {
+        nickname: "nr",
+        email: "21371455@buaa.edu.cn",
+        url: "https://banhang.oss-cn-beijing.aliyuncs.com/da897ef40ab440b5b7bd09e32bb0ceea.jpg",
+        sign: "还没有签名"
+      }]
       searchUserAPage(this.searchContent, this.blogPageNo, this.blogPageSize, this.nowSortMethod).then(
           (data) => {
             console.log("--->")

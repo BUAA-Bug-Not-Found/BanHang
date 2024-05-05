@@ -1,10 +1,14 @@
 import axios from "axios";
 import {ElMessage} from "element-plus";
 import CryptoJS from "crypto-js";
+import userStateStore from "@/store";
+import router from "@/router";
 
 export const NICKNAME_FORMAT_TIP = "昵称必须由1-15个字符组成, 只可包含汉字,字母,数字,下划线,连字符";
-export const PASSWORD_FORMAT_TIP = "密码必须至少含8个字符, 且需有至少一个大写字母, 一个小写字母和一个数字";
+export const PASSWORD_FORMAT_TIP = "密码必须至少含8个字符, 且需有至少一个字母和一个数字";
+export const SIGN_FORMAT_TIP = "个性签名最多包含30个字符"
 export const hashTool = require("bcryptjs")
+
 
 export function tryLogin(_email, _password) {
     // TODO 完善request中的数据
@@ -148,6 +152,20 @@ export function isNicknameFormatOk(nickname) {
 }
 
 export function isPasswordFormatOk(password) {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    return regex.test(password)
+    // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    const regex1 = /[0-9]/
+    const regex2 = /[a-zA-Z]/
+    return regex1.test(password) && regex2.test(password)
 }
+
+export function isSignFormatOk(sign) {
+    return sign.length <= 30 && sign.length >= 1
+}
+
+export function checkLogin() {
+    if (!userStateStore().email) {
+          showTip("请首先登陆", false)
+          router.replace({path: "/loginPage"})
+    }
+}
+
