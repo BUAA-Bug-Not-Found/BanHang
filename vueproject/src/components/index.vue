@@ -34,6 +34,7 @@ export default {
     }
     $bus.on('updateIndexData', updateData);
 
+
     const downloadApk = () => {
       const url = '/path/to/your/app.apk'; // 替换为实际的 APK 文件路径
       const link = document.createElement('a');
@@ -57,6 +58,7 @@ export default {
   unmounted() {
     $bus.off('updateIndexData', this.updateData)
   },
+
   methods: {
     navigateToSearchList() {
       if (this.searchContent.trim() !== '') {
@@ -74,7 +76,7 @@ export default {
         this.goto('/loginPage')
       }
     },
-    
+
   }
 }
 </script>
