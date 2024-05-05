@@ -79,6 +79,7 @@ import {useRouter} from "vue-router";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
+import UserStateStore from "@/store";
 
 export default {
   name: "BlogView",
@@ -166,6 +167,11 @@ export default {
       )
     },
     toggleCommentInput() {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
       this.showCommentInput = !this.showCommentInput;
     },
     addComment(replyToId) {
