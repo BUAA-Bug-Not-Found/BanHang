@@ -47,18 +47,16 @@
     <v-card
         class="mx-auto"
         width="96%"
-        style="text-align: left"
-        :class="`cursor-pointer`"
         :color="isHovering ? 'cyan-lighten-5' : undefined"
         v-bind="props"
     >
       <v-row>
-        <v-col cols="2" >
+        <v-col cols="1" >
           <div style="display:flex; justify-content: end;align-content: center">
             <UserAvatar :userId="this.userId"></UserAvatar>
           </div>
         </v-col>
-        <v-col cols="8" style="text-align: left;" @click="goToBlogCardView">
+        <v-col cols="7" style="text-align: left;" :class="`cursor-pointer`" @click="goToBlogCardView">
           <div style="margin-top: 10px;">
             {{ truncatedContent }}
           </div>
@@ -66,7 +64,7 @@
             {{ userName }} 发表于 {{ formatDate(time) }}
           </div>
         </v-col>
-        <v-col cols="1" style="text-align: right;margin-top: 3px">
+        <v-col cols="3" style="text-align: right; justify-content: end; margin-top: 3px">
 <!--          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"-->
 <!--                 color="blue-grey-lighten-2">-->
 <!--            {{ 1 }}-->
