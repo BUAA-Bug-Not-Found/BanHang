@@ -7,7 +7,8 @@ export default {
   name: "RecQuesCard",
   components: {UserAvatar},
   props: ["question", "tags"],
-  setup(props) {
+  emits: ["refresh"],
+  setup(props, context) {
     const truncate = (content) => {
       const strippedContent = content.replace(/<[^>]*>/g, "");
       if (strippedContent.length > 10) {
@@ -48,9 +49,7 @@ export default {
 
     const goto = () => {
       router.push("/QuesInfo/" + props.question.quesId).then(
-          ()=>{
-            router.go(0)
-          }
+          context.emit("refresh", props.question.quesId)
       )
     }
 
