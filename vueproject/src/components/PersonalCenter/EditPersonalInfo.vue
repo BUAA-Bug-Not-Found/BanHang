@@ -120,6 +120,7 @@ export default {
                 }).then((res) => {
                     const data = res.data
                     if (data.response == 'success') {
+                        showTip("图片上传成功!", true)
                         this.headImage1 = data.fileUrl; // 回显
                     } else {
                         // 图片上传失败给一个弹窗
