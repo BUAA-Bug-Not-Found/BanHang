@@ -2,8 +2,13 @@
   <v-card class="blog-view">
     <!-- 用户信息部分 -->
     <div class="user-info" @click="goToOtherUser(userId)">
-      <div v-if="this.userId !== ''" style="display:flex; justify-content: end;align-content: center">
+      <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
         <UserAvatar :userId="this.userId"></UserAvatar>
+      </div>
+      <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
+        <v-avatar style="margin-top:8px">
+          <v-img :src="this.userAvatarUrl"></v-img>
+        </v-avatar>
       </div>
     </div>
     <!-- 发帖时间 -->
@@ -32,7 +37,7 @@
     </div>
     <!-- 评论输入框 -->
     <div v-if="showCommentInput" class="comment-input">
-      <v-text-field v-model="newComment" placeholder="输入您的评论"></v-text-field>
+      <v-textarea v-model="newComment" placeholder="输入您的评论"></v-textarea>
       <div class="anonymous-and-addbutton">
         <v-checkbox v-model="commentAnonymous" label="匿名发布" class="anonymous-checkbox"></v-checkbox>
         <v-btn @click="addComment(null)" class="ma-2" color="green">提交评论
@@ -64,7 +69,7 @@ export default {
   data() {
     return {
       blogId: '',
-      userId: '',
+      userId: -1,
       userName: '',
       userAvatarUrl: '',
       title: '',
