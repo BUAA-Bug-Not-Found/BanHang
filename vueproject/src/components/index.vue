@@ -145,7 +145,7 @@ export default {
     <v-avatar color="surface-variant" style="margin-left: 15px" size="32" @click="gotoLoginOrPersonalIndex()">
       <v-img :src="this.avatar"/>
     </v-avatar>
-    <v-col>
+    <v-col cols="7">
       <v-text-field
           density="compact"
           class="w-80"
@@ -162,8 +162,14 @@ export default {
         </template>
       </v-text-field>
     </v-col>
-    <v-btn v-if="!isApp" color="primary" @click="downloadApk">Download APK</v-btn>
+
+<!--    <v-btn v-if="!isApp" color="primary" @click="downloadApk">Download APK</v-btn>-->
     <template v-slot:append>
+      <v-tooltip text="下载安卓端apk应用">
+        <template v-slot:activator="{ props }">
+          <v-btn @click="downloadApk" icon="mdi-arrow-down-circle-outline" v-bind="props"></v-btn>
+        </template>
+      </v-tooltip>
       <v-btn @click="goto('/message')">
         <v-icon>mdi-email-outline</v-icon>
       </v-btn>
