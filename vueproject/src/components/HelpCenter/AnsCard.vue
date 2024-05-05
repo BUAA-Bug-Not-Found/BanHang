@@ -119,7 +119,7 @@ export default {
               {{ likeSum }}
             </v-btn>
 <!--            <v-btn-->
-<!--                :prepend-icon="'mdi-reply'" variant="text" size="small"-->
+<!--                :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"-->
 <!--                color="blue-grey-lighten-2">-->
 <!--            </v-btn>-->
             <v-btn v-if="isUser"
