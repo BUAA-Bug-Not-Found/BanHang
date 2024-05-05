@@ -92,6 +92,31 @@ export default {
 
     const tagNamesArray = ref([])
 
+    const refresh = (index) => {
+      qid.value = index
+      getQuesByIdApi(qid.value).then(
+          (res) => {
+            question.value = res.question
+            userLike.value = res.question.ifUserLike
+            likeSum.value = res.question.likeSum
+            try {
+              fetchAdvise()
+            } catch (e) {
+              console.log(e)
+            }
+            isUser.value = UserStateStore().getUserId === question.value.userId
+            disTags.value = []
+            for (let i = 0; i < question.value.tagIdList.length; i++) {
+              for (let j = 0; j < tags.value.length; j++) {
+                if (tags.value[j].tagId === question.value.tagIdList[i]) {
+                  disTags.value.push(tags.value[j])
+                }
+              }
+            }
+          }
+      )
+    }
+
     const init = () => {
       let router = useRouter()
       qid.value = router.currentRoute.value.params.qid
@@ -384,7 +409,8 @@ export default {
       handleChange,
       tagNamesArray,
       showPic,
-      delPic
+      delPic,
+      refresh
     };
   },
 };
@@ -438,7 +464,7 @@ export default {
             </div>
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
                  v-dompurify-html="question.quesContent.content"/>
-            <v-row>
+            <v-row style="margin: 10px">
               <v-col v-for="(image,index) in question.quesContent.imageList"
                      :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
               >
@@ -519,7 +545,8 @@ export default {
             </div>
             <v-divider></v-divider>
             <RecQuesCard v-for="ques in recommendQues" :key="'rec-' + ques.quesId" :tags="tags"
-                         @init="init" :question="ques"/>
+                         @refresh="refresh"
+                         :question="ques"/>
           </v-card>
         </v-col>
       </v-row>
@@ -582,7 +609,7 @@ export default {
             <div id="comment"
                  style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
               <span style="font-weight: bold;font-size: 20px">评论 </span>
-              <span><v-btn prepend-icon="mdi-reply" color="primary" @click="uploadAnswer">发送回复</v-btn></span>
+              <span><v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadAnswer">发送回复</v-btn></span>
             </div>
             <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
               <Toolbar
