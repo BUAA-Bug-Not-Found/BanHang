@@ -43,6 +43,16 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert blog["userName"] == mock_user_data['username']
     assert blog['quesContent']['content'] == mock_question_data["quesContent"]['content']
     assert blog["quesContent"]['imageList'] == mock_question_data["quesContent"]["imageList"]
+    mock_user_2 = mock_user_data.copy()
+    mock_user_2['email'] = "test2@buaa.edu.cn"
+
+    # 检查用户权限
+    register_login_user(client, mock_user_2)
+    mock_question_data["quesContent"]["content"] = "changed content2"
+    res = client.post("/updateQues", json = mock_question_data)
+    assert res.status_code != 200
+
+    register_login_user(client, mock_user_data)
 
     mock_question_comment_data['quesId'] = blogs['questions'][0]['quesId']
     # 尝试comment

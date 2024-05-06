@@ -11,3 +11,4 @@ oss2
 python-multipart
 alembic
 yagmail
+pillow
