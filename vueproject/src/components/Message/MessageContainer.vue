@@ -109,7 +109,7 @@ export default {
   },
   methods: {
     updateData() {
-      if (this.myId != 1) {
+      if (this.isLogin) {
         if (this.curUserId != 0) {
           axios.post('/getHistoryMessage', { targetUserId: this.curUserId })
             .then(response => {
