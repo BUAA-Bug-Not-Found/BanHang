@@ -183,12 +183,20 @@ export default {
 
     const display = useDisplay()
 
-    const findTagColor = (index) => {
-      return tags.value[index + 1].tagColor
+    const findTagColor = (tagName) => {
+      for(let i = 0;i < tags.value.length;i++) {
+        if(tags.value[i].tagName === tagName) {
+          return tags.value[i].tagColor
+        }
+      }
     }
 
-    const findTagIcon = (index) => {
-      return tags.value[index + 1].tagIcon
+    const findTagIcon = (tagName) => {
+      for(let i = 0;i < tags.value.length;i++) {
+        if(tags.value[i].tagName === tagName) {
+          return tags.value[i].tagIcon
+        }
+      }
     }
 
     const recommendQues = ref([])
@@ -490,9 +498,9 @@ export default {
               label="添加标签"
               density="default"
           >
-            <template v-slot:selection="{item, index}">
-              <v-chip size="x-small" :color="findTagColor(index + 1)">
-                <v-icon>{{ findTagIcon(index + 1) }}</v-icon>
+            <template v-slot:selection="{item}">
+              <v-chip size="x-small" :color="findTagColor(item.title)">
+                <v-icon>{{ findTagIcon(item.title) }}</v-icon>
                 {{ item.title }}
               </v-chip>
             </template>
