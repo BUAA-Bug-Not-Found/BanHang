@@ -54,7 +54,7 @@
             :tags="this.tags"
         />
 
-        <button @click="loadMore" class="load-more-button">加载更多</button>
+        <button v-if="notEnd" @click="loadMore" class="load-more-button">加载更多</button>
       </div>
 
       <div v-if="useDisplay().smAndDown.value" class="left-buttons">
@@ -93,7 +93,8 @@ export default {
       pagesize: 15,
       nowtag: -1,
       tags: [],
-      isFetching: false // 是否正在请求数据的标志位
+      isFetching: false, // 是否正在请求数据的标志位
+      notEnd: true
     };
   },
 
@@ -101,6 +102,7 @@ export default {
     this.nowtag = -1
     this.pageno = 1
     this.blogs = []
+    this.notEnd = true
     this.fetchBlogListAPage();
     getTags().then(tags => {
       console.log("Tags:", tags); // 检查getTags()返回的标签列表
@@ -136,6 +138,10 @@ export default {
               commentNum: blog.commentNum
             })));
             this.isFetching = false;
+
+            if(data.length < this.pagesize){
+              this.notEnd = false
+            }
           }
       )
     },

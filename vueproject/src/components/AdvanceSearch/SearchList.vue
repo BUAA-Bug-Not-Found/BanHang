@@ -16,7 +16,7 @@
     </v-btn>
   </v-btn-toggle>
 
-  <v-btn-toggle v-model="nowSortMethod" mandatory shaped>
+  <v-btn-toggle v-if="false" v-model="nowSortMethod" mandatory shaped>
     <v-btn value="byRelation" @click="reloadBySortMethod('byRelation')">
       <v-icon color="blue">mdi-link</v-icon>
       相关度
@@ -93,8 +93,8 @@ export default {
   data() {
     return {
       searchContent: "",
-      nowSearchObj: "",
-      nowSortMethod: "",
+      nowSearchObj: "ques",
+      nowSortMethod: "byTime",
       searchBlogList: [],
       searchQuesList: [],
       searchUserList: [],
@@ -115,7 +115,7 @@ export default {
       // Update searchContent when route changes
       this.searchContent = to.params.keywords || '';
       this.nowSearchObj = "ques"
-      this.nowSortMethod = "byRelation"
+      this.nowSortMethod = "byTime"
       this.searchQuesList = []
       this.searchBlogList = []
       this.searchUserList = []
@@ -134,7 +134,7 @@ export default {
     // this.searchContent = this.$props.keywords
     // console.log(this.searchContent)
     this.nowSearchObj = "ques"
-    this.nowSortMethod = "byRelation"
+    this.nowSortMethod = "byTime"
     this.searchQuesList = []
     this.searchBlogList = []
     this.searchUserList = []

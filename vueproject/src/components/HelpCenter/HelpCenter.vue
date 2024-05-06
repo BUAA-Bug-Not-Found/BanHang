@@ -416,12 +416,12 @@ export default {
       <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
         加载更多
       </v-btn>
-      <div style="height: 25px;"></div>
+      <div style="height: 200px;"></div>
   </div>
   <v-bottom-sheet v-model="sheet" inset :persistent="true">
     <v-card
         class="text-center"
-        height="600"
+        height="800"
     >
       <v-card-text>
         <v-row v-if="editMode === false" align="center" style="margin-bottom: 5px">
