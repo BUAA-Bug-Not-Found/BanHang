@@ -211,9 +211,9 @@ def update_question(question: UpdateQuestion, db: Session = Depends(get_db),
     ques = crud.get_question_by_id(db, question.quesId)
     user = crud.get_user_by_id(db, current_user["uid"])
     if not ques:
-        return UniException(key="isSuccess", value=False, others={"description": "不存在该id的问题"})
+        raise UniException(key="isSuccess", value=False, others={"description": "不存在该id的问题"})
     if user.privilege == 0 and current_user['uid'] != ques.user_id:
-        return UniException(key="isSuccess", value=False, others={"description": "用户无权更新该问题"})
+        raise UniException(key="isSuccess", value=False, others={"description": "用户无权更新该问题"})
 
     check_question_tag_to_id(question.quesTags, db)
     check_question_image_to_id(question.quesContent.imageList, db, question.quesId)
@@ -260,9 +260,9 @@ class UpdateAnswer(BaseModel):
 def answer_question(ans: AnsQuestion, db: Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
-        return UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
+        raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
     if not crud.get_question_by_id(db, ans.quesId):
-        return UniException(key="isSuccess", value=False, others={"description": "问题id不存在"})
+        raise UniException(key="isSuccess", value=False, others={"description": "问题id不存在"})
     comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(
         content=ans.ansContent.content,
         userId=current_user['uid'],
@@ -284,12 +284,12 @@ def answer_question(ans: AnsQuestion, db: Session = Depends(get_db),
 def update_answer(update_ans: UpdateAnswer, db: Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
-        return UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
+        raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
     if not crud.get_question_comment_by_id(db, update_ans.ansId):
-        return UniException(key="isSuccess", value=False, others={"description": "回答id不存在"})
+        raise UniException(key="isSuccess", value=False, others={"description": "回答id不存在"})
     if crud.get_question_comment_by_id(db, update_ans.ansId).user_id != current_user['uid'] and \
             crud.get_user_by_id(db, current_user['uid']).privilege == 0:
-        return UniException(key="isSuccess", value=False, others={"description": "该用户无权限更改该回答"})
+        raise UniException(key="isSuccess", value=False, others={"description": "该用户无权限更改该回答"})
     check_question_comment_image_to_id(update_ans.ansContent.imageList, db, update_ans.ansId)
     comment = crud.update_question_comment(db, update_ans.ansId, schemas.QuestionCommentCreat(
         content=update_ans.ansContent.content,
