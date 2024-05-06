@@ -2,7 +2,7 @@
   <v-card class="blog-new">
     <input v-model="title" placeholder="标题(不超过50个字符)" class="title-input" maxlength="50">
     <!-- 文字编辑区域 -->
-    <textarea v-model="content" placeholder="帖子内容(不超过10000个字符)" class="content-textarea" maxlength="10000"></textarea>
+    <el-input v-model="content" rows="15" type="textarea" placeholder="帖子内容(不超过10000个字符)" style="margin-bottom: 5px" maxlength="10000"></el-input>
 
     <!-- 图片上传区域 -->
     <div class="file-upload-container">

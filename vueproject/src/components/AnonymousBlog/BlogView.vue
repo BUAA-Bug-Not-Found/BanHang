@@ -20,7 +20,7 @@
     </div>
 
     <div class="content">
-      <p>{{ content }}</p>
+      <span style="white-space: pre-line" v-html="content"></span>
       <div class="image-list">
 <!--        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>-->
 
