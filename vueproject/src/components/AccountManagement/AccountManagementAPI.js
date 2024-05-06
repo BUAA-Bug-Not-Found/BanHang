@@ -119,7 +119,7 @@ export function tryRegister(_username, _email, _password, _checkCode) {
     })
 }
 
-export function showTip(content, isSuccess) {
+export function showTip(content, isSuccess, time=2000) {
     let t = 'error'
     if (isSuccess == true) {
         t = 'success'
@@ -127,7 +127,8 @@ export function showTip(content, isSuccess) {
     ElMessage({
         message: content,
         showClose: true,
-        type: t
+        type: t,
+        duration: time
     })
 }
 

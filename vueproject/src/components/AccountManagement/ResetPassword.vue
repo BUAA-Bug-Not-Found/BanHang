@@ -52,7 +52,7 @@ export default {
             } else if (this.password1 !== this.password2) {
                 showTip("两次输入的密码不一致, 请重新输入", false)
             } else if (!isPasswordFormatOk(this.password1)) {
-                showTip(PASSWORD_FORMAT_TIP, false)
+                showTip(PASSWORD_FORMAT_TIP, false, 5000)
             } else if (!this.checkCode) {
                 showTip("请输入验证码", false)
             } else {
