@@ -7,60 +7,9 @@ from pydantic import BaseModel, field_validator
 from tools.check_user import check_user
 from typing import List
 
-router = APIRouter()
-
-@router.post("/blog/getBlogs", tags=["Blog"], response_model=List[schemas.BlogShow])
-def get_blog_by_page(blog_page: schemas.BlogPageTag,
-					 db: Session = Depends(get_db)):
-	offset = (blog_page.pageno - 1) * blog_page.pagesize
-	limit = blog_page.pagesize
-	if blog_page.nowTag == -1:
-		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
-	else:
-		db_blogs = crud.get_blogs_by_tag_id(db, blog_page.nowTag, offset, limit)
-	blogs = []
-	for db_blog in db_blogs:
-		db_images = db_blog.images
-		db_user = db_blog.user
-		db_tags = db_blog.tags
-		blog = {}
-		if db_blog.is_anonymous:
-			blog['userId'] = -1
-			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
-			blog['userName'] = annoy_info.anony_name
-			blog['userAvatarUrl'] = annoy_info.anony_avatar_url
-		else:	
-			db_user = db_blog.user
-			blog['userId'] = db_user.id
-			blog['userName'] = db_user.username
-			blog['userAvatarUrl'] = db_user.userAvatarURL
-		blog['blogId'] = db_blog.id
-		blog['title'] = db_blog.title
-		blog['content'] = db_blog.content
-		blog['time'] = db_blog.create_at
-		blog['commentNum'] = len(db_blog.comments)
-		blog['imageList'] = []
-		for db_image in db_images:
-			blog['imageList'].append(db_image.image_url)
-		blog['tagList'] = []
-		for db_tag in db_tags:
-			tag = {}
-			tag['tagId'] = db_tag.id
-			tag['tagName'] = db_tag.name
-			tag['tagIcon'] = db_tag.icon
-			tag['tagColor'] = db_tag.color
-			blog['tagList'].append(tag)
-		blogs.append(schemas.BlogShow(**blog))
-	return blogs
-
-class BlogId(BaseModel):
-	blogId: int
-
-@router.post("/blog/getBlogByBlogId", response_model=schemas.BlogShow, tags=["Blog"])
-def get_blog_by_blog_id(blog_id: BlogId,
-						db: Session = Depends(get_db)):
-	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
+def get_blog_from_db_blog(db, db_blog):
 	db_images = db_blog.images
+	db_user = db_blog.user
 	db_tags = db_blog.tags
 	blog = {}
 	if db_blog.is_anonymous:
@@ -89,6 +38,33 @@ def get_blog_by_blog_id(blog_id: BlogId,
 		tag['tagIcon'] = db_tag.icon
 		tag['tagColor'] = db_tag.color
 		blog['tagList'].append(tag)
+	return blog
+
+router = APIRouter()
+
+@router.post("/blog/getBlogs", tags=["Blog"], response_model=List[schemas.BlogShow])
+def get_blog_by_page(blog_page: schemas.BlogPageTag,
+					 db: Session = Depends(get_db)):
+	offset = (blog_page.pageno - 1) * blog_page.pagesize
+	limit = blog_page.pagesize
+	if blog_page.nowTag == -1:
+		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+	else:
+		db_blogs = crud.get_blogs_by_tag_id(db, blog_page.nowTag, offset, limit)
+	blogs = []
+	for db_blog in db_blogs:
+		blog = get_blog_from_db_blog(db, db_blog)
+		blogs.append(schemas.BlogShow(**blog))
+	return blogs
+
+class BlogId(BaseModel):
+	blogId: int
+
+@router.post("/blog/getBlogByBlogId", response_model=schemas.BlogShow, tags=["Blog"])
+def get_blog_by_blog_id(blog_id: BlogId,
+						db: Session = Depends(get_db)):
+	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
+	blog = get_blog_from_db_blog(db, db_blog)
 	return schemas.BlogShow(**blog)
 
 @router.post("/blog/uploadBlog", tags=["Blog"])
@@ -165,30 +141,7 @@ def get_blogs_advanced(blog_page_advanced: schemas.BlogPageAdvanced,
 		db_blogs = []
 	blogs = []
 	for db_blog in db_blogs:
-		db_images = db_blog.images
-		db_tags = db_blog.tags
-		blog = {}
-		if db_blog.is_anonymous:
-			blog['userId'] = -1
-			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
-			blog['userName'] = annoy_info.anony_name
-			blog['userAvatarUrl'] = annoy_info.anony_avatar_url
-		else:	
-			db_user = db_blog.user
-			blog['userId'] = db_user.id
-			blog['userName'] = db_user.username
-			blog['userAvatarUrl'] = db_user.userAvatarURL
-		blog['blogId'] = db_blog.id
-		blog['title'] = db_blog.title
-		blog['content'] = db_blog.content
-		blog['time'] = db_blog.create_at
-		blog['commentNum'] = len(db_blog.comments)
-		blog['imageList'] = []
-		for db_image in db_images:
-			blog['imageList'].append(db_image.image_url)
-		blog['tagList'] = []
-		for db_tag in db_tags:
-			blog['tagList'].append(db_tag.id)
+		blog = get_blog_from_db_blog(db, db_blog)
 		blogs.append(schemas.BlogShow(**blog))
 	return blogs
 
