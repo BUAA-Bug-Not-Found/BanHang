@@ -99,6 +99,7 @@ export default {
 .user-details {
   display: flex;
   flex-direction: column;
+  margin-left: 3px;
 }
 
 .user-name {

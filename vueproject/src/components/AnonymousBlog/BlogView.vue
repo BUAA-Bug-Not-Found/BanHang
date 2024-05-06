@@ -2,13 +2,15 @@
   <v-card class="blog-view">
     <!-- 用户信息部分 -->
     <div class="user-info" @click="goToOtherUser(userId)">
-      <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
-        <UserAvatar :userId="this.userId"></UserAvatar>
+      <div v-if="userId !== -1" class="avatar-with-username">
+        <UserAvatar :userId="userId"></UserAvatar>
+        <span class="username">{{ userName }}</span>
       </div>
-      <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
-        <v-avatar style="margin-top:8px">
-          <v-img :src="this.userAvatarUrl"></v-img>
+      <div v-else class="avatar-with-username">
+        <v-avatar>
+          <v-img :src="userAvatarUrl"></v-img>
         </v-avatar>
+        <span class="username">{{ userName }}</span>
       </div>
     </div>
     <!-- 发帖时间 -->
@@ -22,7 +24,7 @@
     <div class="content">
       <span style="white-space: pre-line" v-html="content"></span>
       <div class="image-list">
-<!--        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>-->
+        <!--        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>-->
 
         <v-row>
           <v-col v-for="(image,index) in imageList"
@@ -222,6 +224,19 @@ export default {
 </script>
 
 <style scoped>
+.avatar-with-username {
+  display: flex;
+  align-items: center;
+}
+
+.username {
+  margin-left: 8px; /* 调整用户名与头像之间的间距 */
+  font-weight: bold; /* 设置字体加粗 */
+  display: inline-block; /* 使得用户名与头像处于同一行 */
+  line-height: 1; /* 设置行高为1，以便垂直居中 */
+  font-size: 20px;
+}
+
 .blog-view {
   margin-top: 20px;
   margin-left: 2%;

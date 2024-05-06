@@ -64,13 +64,13 @@
         </v-col>
         <v-col cols="6" style="text-align: left;" :class="`cursor-pointer`" @click="goToBlogCardView">
           <div style="margin-top: 10px;">
-            {{ truncatedContent }}
+            {{ title }}
           </div>
-          <div style="font-size: 12px;color: grey">
+          <div style="font-size: 12px;color: darkgray">
             {{ userName }} 发表于 {{ formatDate(time) }}
           </div>
         </v-col>
-        <v-col cols="2" style="text-align: right; justify-content: end; margin-top: 3px">
+        <v-col cols="3" style="text-align: right; justify-content: end; margin-top: 3px">
           <!--          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"-->
           <!--                 color="blue-grey-lighten-2">-->
           <!--            {{ 1 }}-->
@@ -81,7 +81,12 @@
           </v-btn>
         </v-col>
       </v-row>
-      <div style="margin-left: 10px;margin-bottom: 10px">
+
+      <div style="margin-left: 2%; margin-bottom: 3px; font-size: 12px; color: gray">
+        {{truncatedContent}}
+      </div>
+
+      <div style="margin-left: 2%; margin-bottom: 5px">
         <span style="margin-bottom: 10px">
           <v-chip
               v-for="(tag, index) in this.tagList"
@@ -159,7 +164,7 @@ export default {
   computed: {
     truncatedContent() {
       if (this.content.length > 200) {
-        return this.content.substring(0, 200) + "...";
+        return this.content.substring(0, 150) + "...";
       } else {
         return this.content;
       }
