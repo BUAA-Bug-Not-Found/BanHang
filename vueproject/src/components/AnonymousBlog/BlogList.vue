@@ -155,6 +155,7 @@ export default {
       this.pageno = 1
       this.nowtag = changToTag
       this.blogs = []
+      this.notEnd =true
       this.fetchBlogListAPage()
     },
 
