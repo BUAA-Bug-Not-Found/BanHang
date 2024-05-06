@@ -18,7 +18,7 @@
       <span style="white-space: pre-line" v-html="content"></span>
     </div>
     <div v-show="replyToCommentId === null && replies.length > 0" class="expand-button">
-      <button @click="toggleReplies">{{ isOpen ? '收起回复' : '展开回复' }}</button>
+      <button @click="toggleReplies" style="font-size: 12px; color: darkgray">{{ isOpen ? '收起回复' : '展开回复' }}</button>
     </div>
     <div v-show="isOpen && replies.length > 0">
       <ReplyList :comments="replies"/>
@@ -185,6 +185,7 @@ export default {
 .user-details {
   display: flex;
   flex-direction: column;
+  margin-left: 3px;
 }
 
 .user-name {
@@ -208,7 +209,7 @@ export default {
   position: absolute;
   bottom: 0;
   right: 0;
-  margin: 10px;
+  margin: 3px;
 }
 
 .reply-input {
