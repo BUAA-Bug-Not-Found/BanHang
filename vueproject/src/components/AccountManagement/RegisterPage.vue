@@ -70,9 +70,9 @@ export default {
             } else if (infos.pass1 !== infos.pass2) {
                 showTip("两次输入的密码不相等, 请重新输入", false)
             } else if (!isNicknameFormatOk(infos.name)) {
-                showTip(NICKNAME_FORMAT_TIP, false)
+                showTip(NICKNAME_FORMAT_TIP, false, 5000)
             } else if (!isPasswordFormatOk(infos.pass1)) {
-                showTip(PASSWORD_FORMAT_TIP, false)
+                showTip(PASSWORD_FORMAT_TIP, false, 5000)
             } else {
                 // 注册账户
                 tryRegister(infos.name, infos.toEmail, hashPassword(infos.pass1), infos.inputCheckCode)

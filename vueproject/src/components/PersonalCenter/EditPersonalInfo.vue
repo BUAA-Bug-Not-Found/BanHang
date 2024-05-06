@@ -138,9 +138,9 @@ export default {
             if (!this.nickname || !this.sign) {
                 showTip("昵称或个性签名不可为空!", false)
             } else if (!isSignFormatOk(this.sign)) {
-                showTip(SIGN_FORMAT_TIP, false)
+                showTip(SIGN_FORMAT_TIP, false, 5000)
             } else if (!isNicknameFormatOk(this.nickname)) {
-                showTip(NICKNAME_FORMAT_TIP, false)
+                showTip(NICKNAME_FORMAT_TIP, false, 5000)
             } else {
                 setSign(this.sign, userStateStore().email)
                 .then((res) => {
