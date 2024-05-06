@@ -22,7 +22,8 @@
     </div>
 
     <div class="content">
-      <span style="white-space: pre-line" v-html="content"></span>
+<!--      <span style="white-space: pre-line" v-html="content"></span>-->
+      <div style="white-space: pre-line" v-dompurify-html="content"/>
       <div class="image-list">
         <!--        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>-->
 
@@ -82,6 +83,7 @@ import UserStateStore from "@/store";
 import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
 import router from "@/router";
+
 
 export default {
   name: "BlogView",
