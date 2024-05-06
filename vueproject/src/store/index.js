@@ -23,7 +23,7 @@ export const userStateStore = defineStore("user", {
             }
         }
         return {
-            user_id: 1,
+            user_id: 0,
             user_name: "未登录",
             profile_photo: "src/assets/images/default-avatar.png",
             register_date: "default",
