@@ -71,10 +71,6 @@
                   <div style="text-align: left; margin-top: 10px;">
                     <v-text style="vertical-align: middle; font-size: 12px; color: grey;">{{ content.blogText }}</v-text>
                   </div>
-                  <!-- <v-divider style="width:10px;"></v-divider> -->
-                  <!-- <div style="text-align: center; font-size: 0px;">
-                    <img :src="content.firstPhotoUrl" style=" margin-left: 10px; margin-top: 10px;"/>
-                  </div> -->
                   <div style="text-align: right; margin-top: 10px;">
                     <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>

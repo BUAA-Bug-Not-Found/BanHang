@@ -3,12 +3,44 @@
             <v-card>
                 <v-card-title class="headline">找回密码</v-card-title>
                     <v-card-text>
-                        <v-text-field v-model="password1" label="新密码" type="password"  style="width: 100%"></v-text-field>
+                        <!-- <v-text-field v-model="password1" label="新密码" type="password"  style="width: 100%"></v-text-field>
                         <v-text-field v-model="password2" label="确认密码" type="password" style="width: 100%"></v-text-field>
                         <v-text-field v-model="email" label="邮箱" style="width: 100%"></v-text-field>
                         <v-text-field v-model="checkCode" label="验证码" style="width: 100%"></v-text-field>
                         <v-btn color="primary" block type="submit" @click.prevent="sendCheckCode" v-bind="props">发送验证码</v-btn> <br/>
+                        <v-btn color="#42a300" block type="submit" @click.prevent="resetPassword1" v-bind="props">重置密码</v-btn> -->
+
+
+                        <v-text-field v-model="password1" label="新密码" type="password" style="width: 100%"></v-text-field>
+                        <v-text-field v-model="password2" label="确认密码" type="password" style="width: 100%"></v-text-field>
+                        <v-text-field v-model="email" label="邮箱" style="width: 100%"></v-text-field>
+                        <div style="display: flex;">
+                            <v-text-field v-model="checkCode" label="验证码" style="width: 60%; margin-right: 16px;"></v-text-field>
+                            <v-btn color="primary" type="submit" @click.prevent="sendCheckCode" style="height: 56px;">发送验证码</v-btn>
+                        </div>
                         <v-btn color="#42a300" block type="submit" @click.prevent="resetPassword1" v-bind="props">重置密码</v-btn>
+
+
+                        <!-- <v-row>
+                            <v-col cols="12">
+                                <v-text-field v-model="password1" label="新密码" type="password" style="width: 100%"></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field v-model="password2" label="确认密码" type="password" style="width: 100%"></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field v-model="email" label="邮箱" style="width: 100%; padding-bottom: 0px;"></v-text-field>
+                            </v-col>
+                            <v-col cols="9">
+                                <v-text-field v-model="checkCode" label="验证码" style="width: 100%; margin-bottom: 0px;"></v-text-field>
+                            </v-col>
+                            <v-col cols="3">
+                                <v-btn color="primary" block type="submit" @click.prevent="sendCheckCode" v-bind="props" class="mt-0">发送验证码</v-btn>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-btn color="#42a300" block type="submit" @click.prevent="resetPassword1" v-bind="props">重置密码</v-btn>
+                            </v-col>
+                        </v-row> -->
                     </v-card-text>
             </v-card>
     </v-container>
@@ -79,4 +111,10 @@ export default {
 .v-text-field {
     width: 400px;
 }
+
+.v-input__details {
+    /* height: 0px; */
+    display: none;
+}
+
 </style>

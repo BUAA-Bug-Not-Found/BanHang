@@ -7,8 +7,10 @@
                         <v-text-field v-model="password1" label="密码" type="password" style="width: 100%"></v-text-field>
                         <v-text-field v-model="password2" label="确认密码" type="password" style="width: 100%"></v-text-field>
                         <v-text-field v-model="email" label="邮箱" style="width: 100%"></v-text-field>
-                        <v-text-field v-model="checkCode" label="验证码" style="width: 100%"></v-text-field>
-                        <v-btn color="primary" block type="submit" @click.prevent="sendCheckCode" v-bind="props">发送验证码</v-btn> <br/>
+                        <div style="display: flex;">
+                            <v-text-field v-model="checkCode" label="验证码" style="width: 60%; margin-right: 16px;"></v-text-field>
+                            <v-btn color="primary" @click.prevent="sendCheckCode" v-bind="props" style="height: 56px;">发送验证码</v-btn> <br/>
+                        </div>
                         <v-btn color="#42a300" block type="submit" @click.prevent="register" v-bind="props">注册</v-btn>
                 </v-card-text>
         </v-card>
