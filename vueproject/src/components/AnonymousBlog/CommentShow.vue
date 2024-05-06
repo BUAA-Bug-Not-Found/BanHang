@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="content" @click="showInput">
-      {{ content }}
+      <span style="white-space: pre-line" v-html="content"></span>
     </div>
     <div v-show="replyToCommentId === null && replies.length > 0" class="expand-button">
       <button @click="toggleReplies">{{ isOpen ? '收起回复' : '展开回复' }}</button>
