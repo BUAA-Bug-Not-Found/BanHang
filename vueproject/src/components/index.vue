@@ -33,10 +33,10 @@ export default {
 
 
     const downloadApk = () => {
-      const url = '/path/to/your/app.apk'; // 替换为实际的 APK 文件路径
+      const url = 'https://banhang.oss.chlience.com/app-debug.apk'; // 替换为实际的 APK 文件路径
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'app.apk';
+      link.download = 'banhang.apk';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

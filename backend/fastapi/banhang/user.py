@@ -104,7 +104,7 @@ def send_check_code(req: emailRequest, db:Session = Depends(get_db)):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"invalid email"})
     try:
         if os.environ.get("CHECKCODE") is None:
-            MailSender.send(req.email, checkcode)
+            MailSender.send_by_buaa_mail(req.email, checkcode)
             pass
         crud.create_checkcode_record(db, schemas.EmailCheck(email = req.email, checkcode = checkcode))
         return {"isSuccess":True}

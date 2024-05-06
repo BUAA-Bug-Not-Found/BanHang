@@ -1,13 +1,13 @@
 <template>
   <v-card :class="{ 'pc-container': !display.smAndDown.valueOf(), 'pe-container': display.smAndDown.valueOf() }">
-    <div v-if="this.myId == 1">
+    <div v-if="!isLogin">
       <div>您还没有登陆</div>
     </div>
     <div v-else-if="this.curUserId == 0">
-      <div v-if="this.contactList.lenth == 0">
+      <div v-if="this.contactList.length == 0">
         您还没有联系人
       </div>
-      <contactCard v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
+      <contactCard v-else v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
         :avatar="item.userAvatarUrl" :last_message="item.lastMessage" @open-message="handleContactClicked" />
     </div>
 
@@ -78,6 +78,7 @@ export default {
       myId: store.user_id,
       display: useDisplay(),
       init: false,
+      isLogin: store.isAuthentic,
     };
   },
   mounted() {
