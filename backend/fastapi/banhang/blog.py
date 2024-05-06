@@ -136,7 +136,7 @@ def get_blogs_advanced(blog_page_advanced: schemas.BlogPageAdvanced,
 	if  blog_page_advanced.nowSortMethod == "byRelation":
 		db_blogs = crud.get_blogs_by_search_content(db, blog_page_advanced.searchContent, offset, limit, asc=False)
 	elif blog_page_advanced.nowSortMethod == "byTime":
-		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+		db_blogs = crud.get_blogs_by_search_content(db, blog_page_advanced.searchContent, offset, limit, asc=False)
 	elif blog_page_advanced.nowSortMethod == "byPopularity":
 		db_blogs = []
 	blogs = []

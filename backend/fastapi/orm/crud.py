@@ -173,7 +173,7 @@ def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: i
 def get_blogs_by_search_content(db: Session, search_content: str, offset: int, limit: int, asc: int):
     word_list = [x.strip() for x in search_content.split(" ") if x != ""]
     return (db.query(models.Blog)
-            .filter(or_(*[models.Blog.content.like(f"%{word}%") for word in word_list]))
+            .filter(or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
 
