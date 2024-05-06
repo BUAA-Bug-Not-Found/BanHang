@@ -81,9 +81,9 @@ export default {
   <img v-if="!display.smAndDown.value" src='@/assets/images/background.png' style="position: fixed;width: 100%;height: 100%;">
   <v-app-bar :elevation="1"
              v-if="!display.smAndDown.value">
-    <template v-slot:prepend>
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
-    </template>
+<!--    <template v-slot:prepend>-->
+<!--      <v-app-bar-nav-icon></v-app-bar-nav-icon>-->
+<!--    </template>-->
     <v-app-bar-title>伴航</v-app-bar-title>
     <v-col col="4">
       <v-text-field
