@@ -5,6 +5,8 @@ import sys
 
 from typing import List
 
+import yagmail
+
 from alibabacloud_dm20151123.client import Client as Dm20151123Client
 from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_dm20151123 import models as dm_20151123_models
@@ -68,6 +70,10 @@ class MailSender:
             # 诊断地址
             print(error.data.get("Recommend"))
             UtilClient.assert_as_string(error.message)
+    @staticmethod
+    def send_by_buaa_mail(addr:str,checkcode:int):
+        yag_server = yagmail.SMTP(user='20375061@buaa.edu.cn', password=os.environ['BUAA_MAIL_SEC'], host='smtp.buaa.edu.cn')
+        yag_server.send(to=addr, subject='伴航平台验证码', contents='欢迎使用伴航，您的验证码是：{}'.format(checkcode))
 
     @staticmethod
     async def send_async(
