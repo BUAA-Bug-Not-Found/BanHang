@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 import inspect
 from fastapi import Request
@@ -8,7 +9,8 @@ import inspect
 
 from fastapi import Cookie
 
-KEY = "ORANGE IS THE BEST PRODUCT MANAGER IN THE WORLD!!!!!!!!!"
+KEY = "ORANGE IS THE BEST PRODUCT MANAGER IN THE WORLD!!!!!!!!!" if 'Banhang_Token' not in os.environ \
+    else os.environ['Banhang_Token']
 AGING = 8640000
 def generate_jwt_token(uid:int, username:str):
     expiration_time = time.time() + AGING
