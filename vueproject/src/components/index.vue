@@ -54,7 +54,7 @@ export default {
     //       console.log(error)
     //   })
     axios.post('getAppLastVersion', {}).then(response => {
-      showDialog.value = (response.data.version[0] != version[0] || response.data.version[1] != version[1]) && isApp
+      showDialog.value = response.data.version[0] != version[0] && isApp
       downloadUrl.value = response.data.fileUrl
     }).catch(error=>{
       console.log(error)
