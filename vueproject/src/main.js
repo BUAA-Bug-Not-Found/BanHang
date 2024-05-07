@@ -75,7 +75,7 @@ app.use(vuetify).use(VueDOMPurifyHTML, {
             if (!iframeWhitelist.includes(hostname)) {
               currentNode.parentNode.removeChild(currentNode);
             }
-          } catch(error) {
+          } catch {
             currentNode.parentNode.removeChild(currentNode);
           }
           return
