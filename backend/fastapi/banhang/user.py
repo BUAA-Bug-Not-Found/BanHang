@@ -116,6 +116,8 @@ def send_check_code(req: emailRequest, db:Session = Depends(get_db)):
 def reset_password(req:resetPasswordRequest, db:Session = Depends(get_db)):
     if not crud.is_valid_checkCode(db, req.checkCode, req.email):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid check"})
+    if not req.email.endswith("buaa.edu.cn"):
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"邮箱不是北航邮箱，目前仅北航使用"})
     user = crud.get_user_by_email(db, req.email)
     if not user:
         raise EXC.UniException(key="isSuccess", value=False, others={"description":"用户不存在"})
