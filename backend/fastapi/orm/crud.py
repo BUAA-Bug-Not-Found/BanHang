@@ -320,8 +320,8 @@ def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: boo
                                                 (models.UserQuestionLike.question_id == models.Question.id)))
            .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
            .filter(models.Question.user_id == models.User.id)
-           .filter(db.query(exists().where((models.QuestionQuestionTag.question_id == models.Question.id) &
-                                           (models.QuestionQuestionTag.question_tag_id == tag.id))))
+           .filter(exists().where((models.QuestionQuestionTag.question_id == models.Question.id) &
+                                           (models.QuestionQuestionTag.question_tag_id == tag.id)))
            .group_by(models.Question.id, models.Question.delated, models.Question.archived)
            ).all()
     if asc:
