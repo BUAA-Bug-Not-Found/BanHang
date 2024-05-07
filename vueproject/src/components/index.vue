@@ -4,7 +4,8 @@ import {useRouter} from 'vue-router'
 import {ref} from "vue";
 import userStateStore from '@/store';
 import { $bus } from '@/store';
-import { isApp } from '@/store';
+import { isApp, version } from '@/store';
+import axios from 'axios';
 // import axios from 'axios';
 
 export default {
@@ -16,6 +17,7 @@ export default {
     const isLogin = ref(store.isAuthentic);
     const user_name = ref(store.user_name);
     const avatar = ref(store.headImage);
+    const showDialog = ref(false)
 
     const searchContent = ref("")
 
@@ -31,9 +33,10 @@ export default {
     }
     $bus.on('updateIndexData', updateData);
 
+    const downloadUrl = ref("https://banhang.oss.chlience.com/releases/banhang-v0.0.1-alpha.apk")
 
     const downloadApk = () => {
-      const url = 'https://banhang.oss.chlience.com/app-debug.apk'; // 替换为实际的 APK 文件路径
+      const url = downloadUrl.value; // 替换为实际的 APK 文件路径
       const link = document.createElement('a');
       link.href = url;
       link.download = 'banhang.apk';
@@ -50,7 +53,13 @@ export default {
     //   }).catch(error=>{
     //       console.log(error)
     //   })
-    return {display, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp}
+    axios.post('getAppLastVersion', {}).then(response => {
+      showDialog.value = (response.data.version[0] != version[0] || response.data.version[1] != version[1]) && isApp
+      downloadUrl.value = response.data.fileUrl
+    }).catch(error=>{
+      console.log(error)
+    })
+    return {display, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp, showDialog, downloadUrl}
   },
   unmounted() {
     $bus.off('updateIndexData', this.updateData)
@@ -79,6 +88,18 @@ export default {
 <template>
   <!-- <div> -->
   <img v-if="!display.smAndDown.value" src='@/assets/images/background.png' style="position: fixed;width: 100%;height: 100%;">
+  <v-dialog v-model="showDialog" max-width="80%">
+      <v-card>
+        <v-card-title>更新提示</v-card-title>
+        <v-card-text>
+          新版本App已发布！
+          <a :href="downloadUrl" target="_blank">点击下载</a>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="showDialog = false">关闭</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   <v-app-bar :elevation="1"
              v-if="!display.smAndDown.value">
 <!--    <template v-slot:prepend>-->
