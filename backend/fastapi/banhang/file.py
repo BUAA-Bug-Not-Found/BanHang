@@ -1,12 +1,10 @@
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, UploadFile
 import oss2
 import uuid
 import os
 
-from fastapi.responses import StreamingResponse
-from mimetypes import guess_type
-from banhang.BanHangException import UniException
 from PIL import Image
+from tools.check_user import check_user
 
 
 class OSS_config:
@@ -47,7 +45,10 @@ oss_config = OSS_config()
 router = APIRouter()
 
 @router.post("/uploadfile/", tags=['File'])
-async def upload_file(file: UploadFile):
+@check_user
+async def upload_file(uid: int, file: UploadFile):
+    if uid == None:
+        return {"response": "error"}
     auth = oss2.Auth(oss_config.ACCESS_KEY_ID, oss_config.ACCESS_KEY_SECRET)
     if oss_config.CNAME:
         bucket = oss2.Bucket(auth, oss_config.CNAME, oss_config.BUCKET_NAME, is_cname=True)
@@ -67,7 +68,10 @@ async def upload_file(file: UploadFile):
         return {"response": "error"}
 
 @router.post("/uploadAvatar/", tags=['File'])
-async def upload_avatar(file: UploadFile):
+@check_user
+async def upload_avatar(uid: int, file: UploadFile):
+    if uid == None:
+        return {"response": "error"}
     auth = oss2.Auth(oss_config.ACCESS_KEY_ID, oss_config.ACCESS_KEY_SECRET)
     if oss_config.CNAME:
         bucket = oss2.Bucket(auth, oss_config.CNAME, oss_config.BUCKET_NAME, is_cname=True)
