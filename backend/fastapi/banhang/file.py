@@ -4,7 +4,9 @@ import uuid
 import os
 
 from PIL import Image
-from tools.check_user import check_user
+from tools.check_user import check_user, authorize
+from fastapi import APIRouter, Depends
+from typing import Optional
 
 
 class OSS_config:
@@ -45,9 +47,8 @@ oss_config = OSS_config()
 router = APIRouter()
 
 @router.post("/uploadfile/", tags=['File'])
-@check_user
-async def upload_file(uid: int, file: UploadFile):
-    if uid == None:
+async def upload_file(file: UploadFile, current_user: Optional[dict] = Depends(authorize)):
+    if current_user == None:
         return {"response": "error"}
     auth = oss2.Auth(oss_config.ACCESS_KEY_ID, oss_config.ACCESS_KEY_SECRET)
     if oss_config.CNAME:
@@ -56,21 +57,21 @@ async def upload_file(uid: int, file: UploadFile):
         bucket = oss2.Bucket(auth, oss_config.ENDPOINT, oss_config.BUCKET_NAME)
     file_content = await file.read()
     root, extension = os.path.splitext(file.filename)
-    oss_name = uuid.uuid4().hex + extension
-    with open(oss_name, "wb") as f:
+    local_file_path = uuid.uuid4().hex + extension
+    oss_file_path = str(current_user['uid']) + "/file/" + uuid.uuid4().hex + extension
+    with open(local_file_path, "wb") as f:
         f.write(file_content)
-    result = bucket.put_object_from_file(oss_name, oss_name)
-    os.remove(oss_name)
+    result = bucket.put_object_from_file(oss_file_path, local_file_path)
+    os.remove(local_file_path)
     if result.status == 200:
         return {"response": "success",
-                "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT))  + "/" + oss_name}
+                "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT))  + "/" + oss_file_path}
     else:
         return {"response": "error"}
 
 @router.post("/uploadAvatar/", tags=['File'])
-@check_user
-async def upload_avatar(uid: int, file: UploadFile):
-    if uid == None:
+async def upload_avatar(file: UploadFile, current_user: Optional[dict] = Depends(authorize)):
+    if current_user == None:
         return {"response": "error"}
     auth = oss2.Auth(oss_config.ACCESS_KEY_ID, oss_config.ACCESS_KEY_SECRET)
     if oss_config.CNAME:
@@ -79,22 +80,22 @@ async def upload_avatar(uid: int, file: UploadFile):
         bucket = oss2.Bucket(auth, oss_config.ENDPOINT, oss_config.BUCKET_NAME)
     file_content = await file.read()
     root, extension = os.path.splitext(file.filename)
-    local_name = uuid.uuid4().hex + extension
-    resize_name = uuid.uuid4().hex + extension
-    oss_name = resize_name
-    with open(local_name, "wb") as f:
+    local_file_path = uuid.uuid4().hex + extension
+    local_resized_file_path = uuid.uuid4().hex + extension
+    oss_file_path = str(current_user['uid']) + "/avatar/" + uuid.uuid4().hex + extension
+    with open(local_file_path, "wb") as f:
         f.write(file_content)
     try:
-        resize_image(local_name, resize_name)
-        os.remove(local_name)
+        resize_image(local_file_path, local_resized_file_path)
+        os.remove(local_file_path)
     except Exception as e:
-        os.remove(local_name)
+        os.remove(local_file_path)
         return {"response": "error", "description": str(e)}
-    result = bucket.put_object_from_file(key=oss_name, filename=resize_name)
-    os.remove(resize_name)
+    result = bucket.put_object_from_file(key=oss_file_path, filename=local_resized_file_path)
+    os.remove(local_resized_file_path)
     if result.status == 200:
         return {"response": "success",
-                "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT))  + "/" + oss_name}
+                "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT))  + "/" + oss_file_path}
     else:
         return {"response": "error"}
     
