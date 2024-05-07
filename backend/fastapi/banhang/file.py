@@ -109,7 +109,7 @@ def get_app_last_version():
     realeases = bucket.list_objects_v2(prefix="releases/", delimiter="/").object_list
     last_release = sorted(realeases, key=lambda x: x.last_modified)[-1]
     file_path = last_release.key
-    version = file_path.split("-")[1]
+    version = ".".join(file_path.split(".")[:-1]).split("-")[1:]
     return {"response": "success",
             "version": version,
             "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT))  + "/" + file_path}
