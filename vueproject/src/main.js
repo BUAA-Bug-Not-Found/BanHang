@@ -58,9 +58,29 @@ app.use(VueViewer, {
     }
 })
 
+const iframeWhitelist = ['player.bilibili.com']
 app.use(vuetify).use(VueDOMPurifyHTML, {
     default: {
         ADD_TAGS: ['iframe'],
+    },
+    hooks: {
+      uponSanitizeElement: (currentNode) => {
+        if (currentNode.nodeName == 'IFRAME') {
+          let src = currentNode.getAttribute('src');
+          if (!src.startsWith('https:')) {
+            src = 'https:' + src
+          }
+          try {
+            const hostname = new URL(src).hostname
+            if (!iframeWhitelist.includes(hostname)) {
+              currentNode.parentNode.removeChild(currentNode);
+            }
+          } catch {
+            currentNode.parentNode.removeChild(currentNode);
+          }
+          return
+        }
+      },
     }}).use(ElementPlus)
 
 app.mount('#app')

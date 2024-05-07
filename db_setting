@@ -1,6 +1,0 @@
-host = "chlience.cn"
-port = "5432"
-database = "banhang"  # 数据库名称
-username = "banhang"
-password = "banhang666"
-"postgresql://banhang:banhang666@chlience.cn:5432/banhang"
