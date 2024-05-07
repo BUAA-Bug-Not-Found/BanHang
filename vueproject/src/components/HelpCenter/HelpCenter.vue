@@ -33,7 +33,7 @@ export default {
 
     const toolbarConfig = {
       excludeKeys: [
-        'fullScreen'
+        'fullScreen', 'group-image', 'group-video'
       ],
     }
 
@@ -508,6 +508,12 @@ export default {
         </div>
 
         <div style="border: 1px solid #ccc">
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef"
+              :defaultConfig="toolbarConfig"
+              :mode="mode"
+          />
           <Editor
               style="height: 350px; overflow-y: hidden;"
               v-model="valueHtml"
@@ -515,13 +521,8 @@ export default {
               :mode="mode"
               @onCreated="handleCreated"
           />
-          <Toolbar
-              style="border-bottom: 1px solid #ccc"
-              :editor="editorRef"
-              :defaultConfig="toolbarConfig"
-              :mode="mode"
-          />
         </div>
+        <div style="height: 50px"></div>
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
