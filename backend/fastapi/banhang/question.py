@@ -55,31 +55,31 @@ def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 
                            others={"description": "pageNo或pageSize小于等于零，不符合要求。"})
     offset = (pageNo - 1) * pageSize
     limit = pageSize
-    db_questions = crud.get_questions(db, offset=offset, limit=limit, asc=False)
+    db_questions = list(crud.get_questions(db, offset=offset, limit=limit, asc=False))
+    qids = [q.question_id for q in db_questions]
+    questions_tags = crud.get_questions_tags(db, qids)
+    questions_images = crud.get_questions_images_urls(db, qids)
     questions = []
     for question in db_questions:
         # quesId,userId,userName,
         # quesContent,quesState,quesTime,
         # ifUserLike, ansSum, likeSum,
         # tagIdList
-        user = question.user
         retquestion = {}
-        retquestion['quesId'] = question.id
-        retquestion['userId'] = user.id
-        retquestion['userName'] = user.username
-        retquestion['quesContent'] = {'content': question.content,
-                                      'imageList': [image.image_url for image in question.images]}
-        retquestion['quesState'] = 0 if question.delated else \
-            1 if question.archived else \
-                2 if not question.solved else \
+        retquestion['quesId'] = question.question_id
+        retquestion['userId'] = question.user_id
+        retquestion['userName'] = question.user_name
+        retquestion['quesContent'] = {'content': question.question_content,
+                                      'imageList': questions_images[question.question_id]}
+        retquestion['quesState'] = 0 if question.question_delated else \
+            1 if question.question_archived else \
+                2 if not question.question_solved else \
                     3
-        retquestion['quesTime'] = question.create_at
-        retquestion['ifUserLike'] = (
-            crud.get_user_by_id(db, current_user["uid"]) in question.liked_users if current_user else
-            False)
-        retquestion['ansSum'] = len(question.comments)
-        retquestion['likeSum'] = len(question.liked_users)
-        retquestion['tagIdList'] = [tag.id for tag in question.tags]
+        retquestion['quesTime'] = question.question_create_at
+        retquestion['ifUserLike'] = question.if_user_like
+        retquestion['ansSum'] = question.ans_sum
+        retquestion['likeSum'] = question.like_sum
+        retquestion['tagIdList'] = questions_tags[question.question_id]
         questions.append(retquestion)
     return {"questions": questions, "quesSum": crud.get_question_num(db)}
 
