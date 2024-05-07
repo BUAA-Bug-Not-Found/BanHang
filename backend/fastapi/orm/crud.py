@@ -3,7 +3,7 @@ from typing import List, Type, Dict
 
 from sqlalchemy.orm import Session, aliased
 from orm import models, schemas
-from sqlalchemy import or_, and_, desc, func, case, distinct
+from sqlalchemy import or_, and_, desc, func, case, distinct, exists
 from orm.models import Message, Conversation, ConversationMessage, User
 
 
@@ -180,7 +180,8 @@ def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: i
 def get_blogs_by_search_content(db: Session, search_content: str, offset: int, limit: int, asc: int):
     word_list = [x.strip() for x in search_content.split(" ") if x != ""]
     return (db.query(models.Blog)
-            .filter(or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
+            .filter(
+        or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
 
@@ -226,6 +227,8 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
                          func.max(models.Question.content).label("question_content"),
                          models.Question.delated.label('question_delated'),
                          models.Question.archived.label('question_archived'),
+                         models.Question.solved.label('question_solved'),
+                         models.Question.create_at.label('question_create_at'),
                          case((func.count(models.UserQuestionLike.user_id) > 0, True), else_=False).label(
                              'if_user_like'),
                          func.count(distinct(models.QuestionComment.id)).label('ans_sum'),
@@ -264,20 +267,24 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
                           models.Question.solved,
                           models.Question.create_at)
                 ).order_by(models.Question.create_at.desc()).offset(offset).limit(limit)
-def get_questions_tags(db:Session, question_ids: List[int]) ->Dict[int, List[int]]:
+
+
+def get_questions_tags(db: Session, question_ids: List[int]) -> Dict[int, List[int]]:
     """
     return {questionid: [tags]}
     """
     res = {}
     for qid in question_ids:
         res[qid] = []
-    ret:List[models.QuestionQuestionTag] = (
-        db.query(models.QuestionQuestionTag).filter(or_(*[(models.QuestionQuestionTag.question_id == qid) for qid in question_ids])).all())
+    ret: List[models.QuestionQuestionTag] = (
+        db.query(models.QuestionQuestionTag).filter(
+            or_(*[(models.QuestionQuestionTag.question_id == qid) for qid in question_ids])).all())
     for qtag in ret:
         res[qtag.question_id].append(qtag.question_tag_id)
     return res
 
-def get_questions_images_urls(db:Session, question_ids: List[int]) ->Dict[int, List[str]]:
+
+def get_questions_images_urls(db: Session, question_ids: List[int]) -> Dict[int, List[str]]:
     """
     return {questionid: [image_urls]}
     """
@@ -292,19 +299,39 @@ def get_questions_images_urls(db:Session, question_ids: List[int]) ->Dict[int, L
     return res
 
 
-
-
-def get_questions_by_tag_id(db: Session, offset: int = 0, limit: int = 10, asc: bool = False, tag_id: int = 1):
-    tag = get_question_tag_by_id(db, tag_id)
-    questions = [q for q in tag.questions]
+def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: bool = False,
+                         tag=None, input_user_id: int = 1):
+    uqlike = aliased(models.UserQuestionLike)
+    questions = (db.query(func.max(models.Question.id).label("question_id"),
+                         func.max(models.User.id).label("user_id"),
+                         func.max(models.User.username).label("user_name"),
+                         func.max(models.Question.content).label("question_content"),
+                         models.Question.delated.label('question_delated'),
+                         models.Question.archived.label('question_archived'),
+                         models.Question.solved.label('question_solved'),
+                         models.Question.create_at.label('question_create_at'),
+                         case((func.count(models.UserQuestionLike.user_id) > 0, True), else_=False).label(
+                             'if_user_like'),
+                         func.count(distinct(models.QuestionComment.id)).label('ans_sum'),
+                         func.count(distinct(uqlike.user_id)).label('like_sum'),
+                         )
+           .outerjoin(models.QuestionComment, (models.Question.id == models.QuestionComment.question_id))
+           .outerjoin(models.UserQuestionLike, ((models.UserQuestionLike.user_id == input_user_id) &
+                                                (models.UserQuestionLike.question_id == models.Question.id)))
+           .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
+           .filter(models.Question.user_id == models.User.id)
+           .filter(exists().where((models.QuestionQuestionTag.question_id == models.Question.id) &
+                                           (models.QuestionQuestionTag.question_tag_id == tag.id)))
+           .group_by(models.Question.id, models.Question.delated, models.Question.archived)
+           ).all()
     if asc:
-        return sorted(questions, key=lambda q: q.create_at)[offset:offset + limit]
+        return sorted(questions, key=lambda q: q.question_create_at)[offset:offset + limit]
     else:
-        return sorted(questions, key=lambda q: q.create_at)[offset:offset + limit]
+        return sorted(questions, key=lambda q: q.question_create_at)[offset:offset + limit]
 
 
-def get_question_sum_by_tag_id(db: Session, tag_id):
-    return len(get_question_tag_by_id(db, tag_id).questions)
+def get_question_sum_by_tag_id(db: Session, tagId):
+    return len(db.query(models.QuestionTag).filter(models.QuestionTag.id == tagId).all())
 
 
 def get_question_num(db: Session):
