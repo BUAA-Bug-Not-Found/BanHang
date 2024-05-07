@@ -12,6 +12,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
+      - run: if (Test-Path -Path D:\SoftWareEngineer\backend_test\requirements.txt){Remove-Item -Path D:\SoftWareEngineer\backend_test\requirements.txt -Force -Recurse}
+      - run: Copy-Item -Path .\requirements.txt -Destination D:\SoftWareEngineer\backend_test\requirements.txt -Force
       - run: if (Test-Path -Path D:\SoftWareEngineer\backend_test\fastapi){Remove-Item -Path D:\SoftWareEngineer\backend_test\fastapi -Force -Recurse}
       - run: Copy-Item -Path .\backend\fastapi -Destination D:\SoftWareEngineer\backend_test -Force -Recurse
       - run: .\runBackend.bat

@@ -1,4 +1,5 @@
 import uvicorn
+from debug_toolbar.middleware import DebugToolbarMiddleware
 from fastapi import FastAPI
 
 from banhang import user, blog, question, file, message
@@ -11,7 +12,7 @@ from banhang.BanHangException import UniException
 from fastapi.middleware.cors import CORSMiddleware
 
 
-app = FastAPI()
+app = FastAPI() #如果需要开启开发者工具栏，请在其中传入debug=True。 注意提交到dev前一定要改回False或删去debug参数
 @app.exception_handler(UniException)
 async def unicorn_exception_handler(request: Request, exc: UniException):
     exc.others[exc.key] = exc.value
@@ -43,6 +44,11 @@ app.add_middleware(
 
 DEBUG = True
 def main():
+    app.add_middleware(
+        DebugToolbarMiddleware,
+        panels=["debug_toolbar.panels.sqlalchemy.SQLAlchemyPanel"],
+    )
+    ## 在app实例化时传入debug=True来开启debugTool
     recreate_db.upgrade_db()
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
