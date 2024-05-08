@@ -167,7 +167,7 @@ export default {
       <v-divider style="height:20px" vertical></v-divider>
     </div>
     <template v-slot:append>
-      <v-btn @click="goto('/message')" v-if="isLogin">
+      <v-btn @click="goto('/message')" v-if="isLogin  && unreadMessageNum != 0">
         <v-badge :content="unreadMessageNum"  color="rgb(200, 25, 25)">
           <v-icon>mdi-email-outline</v-icon>
         </v-badge>
@@ -217,7 +217,7 @@ export default {
           <v-btn @click="downloadApk" icon="mdi-arrow-down-circle-outline" v-bind="props"></v-btn>
         </template>
       </v-tooltip>
-      <v-btn @click="goto('/message')" v-if="isLogin">
+      <v-btn @click="goto('/message')" v-if="isLogin && unreadMessageNum != 0">
         <v-badge :content="unreadMessageNum"  color="rgb(200, 25, 25)">
           <v-icon>mdi-email-outline</v-icon>
         </v-badge>
