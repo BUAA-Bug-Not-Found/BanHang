@@ -217,6 +217,7 @@ class Conversation(Base):
     host_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     guest_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     is_read = Column(Boolean, nullable=False, default=True)
+    unread_message_num = Column(Integer, nullable=False, default=0)
     update_at = Column(DateTime, nullable=False, server_default=func.now())
 
     host_user = relationship("User", foreign_keys=[host_user_id])
