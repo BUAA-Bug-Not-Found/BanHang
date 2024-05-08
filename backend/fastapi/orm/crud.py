@@ -586,6 +586,7 @@ def send_message(db: Session, host_user_id: int, guest_user_id: int, content: st
                                             conversation_id=db_host_conversation.id)
         db.add(db_assoiation)
         db_guest_conversation.update_at = db_message.create_at
+        db_guest_conversation.unread_message_num = db_guest_conversation.unread_message_num + 1
         db_guest_conversation.is_read = False
         db.add(db_guest_conversation)
         db_assoiation = ConversationMessage(is_read=False, message_id=db_message.id,
