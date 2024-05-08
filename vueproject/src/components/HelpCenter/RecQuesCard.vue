@@ -69,10 +69,10 @@ export default {
         @click="goto()"
     >
       <v-row>
-        <v-col cols="3" style="display: flex;justify-content: end;margin-top: 8px">
-          <UserAvatar :userId="question.userId" style="padding-left: 8px"></UserAvatar>
+        <v-col cols="4" style="display: flex;justify-content: end;margin-top: 8px;">
+          <UserAvatar :userId="question.userId" style="padding-left: 8px;"></UserAvatar>
         </v-col>
-        <v-col cols="9" style="text-align: left;" @click="goto">
+        <v-col cols="8" style="text-align: left;" @click="goto">
           <div style="margin-top: 10px;font-size: 13px">
             {{ truncate(question.quesContent.content) }}
           </div>
