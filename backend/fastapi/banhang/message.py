@@ -73,3 +73,9 @@ def send_message(uid: int, message_create: MessageCreate, db: Session = Depends(
 		return {"status": "success"}
 	else:
 		return {"status": "error"}
+
+@router.post("/getUnreadMessageNum", tags=["Message"])
+@check_user
+def get_unread_message_num(uid: int, db: Session = Depends(get_db)):
+	num = crud.get_unread_message_num(db, uid)
+	return {"status": "success", "num": num}

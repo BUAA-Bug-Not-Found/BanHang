@@ -545,6 +545,10 @@ def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
 
 
+def get_unread_message_num(db: Session, user_id: int):
+    return db.query(func.sum(Conversation.unread_message_num)).filter(Conversation.host_user_id == user_id).scalar()
+
+
 def create_conversation(db: Session, host_user_id: int, guest_user_id: int):
     db_conversation = Conversation(host_user_id=host_user_id, guest_user_id=guest_user_id)
     db.add(db_conversation)
