@@ -93,6 +93,19 @@ export function uploadComment(commentData) {
     })
 }
 
+export function deleteBlogByBlogId(blogId) {
+    return axios.request({
+        url: '/blog/deleteBlogByBlogId',
+        method: "post",
+        headers: {'Content-Type': 'application/json'},
+        data: JSON.stringify({
+            blogId: blogId
+        })
+    }).then(response => {
+        return response.data
+    })
+}
+
 export function getALlBlogTags() {
     return axios.request({
         url: '/blog/getAllBlogTags',
