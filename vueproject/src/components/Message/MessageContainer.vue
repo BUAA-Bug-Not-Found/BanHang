@@ -57,6 +57,7 @@ import contactCard from './contactCard.vue';
 import axios from 'axios';
 import userStateStore from '@/store';
 import { useDisplay } from 'vuetify'
+import { $bus } from '@/store';
 
 export default {
   name: "MessageContainer",
@@ -76,6 +77,7 @@ export default {
       timer: null,
       myAvatar: store.profile_photo,
       myId: store.user_id,
+      myName: store.user_name,
       display: useDisplay(),
       init: false,
       isLogin: store.isAuthentic,
@@ -143,15 +145,29 @@ export default {
       this.curAvatar = avatar
       this.init = false
       this.updateData()
+      setTimeout(() => {
+        $bus.emit('updateUnreadData')
+      }, 2000);
     },
     submitMessage() {
-      axios.post('/sendMessage', { targetUserId: this.curUserId, content: this.inputMessage })
-        .then(response => {
-          this.inputMessage = ""
-        })
-        .catch(error => {
-          console.error(error);
-        })
+      if (this.inputMessage !== '') {
+        axios.post('/sendMessage', { targetUserId: this.curUserId, content: this.inputMessage })
+          .then(response => {
+            this.inputMessage = ""
+          })
+          .catch(error => {
+            console.error(error);
+          })
+        this.messages.push({
+          senderName: this.myName,
+          senderId: this.myId,
+          receiverName: this.curUserName,
+          receiverId: this.curUserId,
+          content: this.inputMessage,
+          time: this.formatDateTime(new Date().toString()),
+          read: false
+      })
+      }
     },
     scrollToBottom() {
         var container = this.$refs.container;

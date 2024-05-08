@@ -20,18 +20,37 @@ export default {
     const showDialog = ref(false)
 
     const searchContent = ref("")
+    const unreadMessageNum = ref('...')
 
     const router = useRouter()
 
     const goto = (route) => {
       router.push(route)
     }
-    const updateData = (data) => {
+
+    const getUnreadMessageNum = () => {
+      if (isLogin.value) {
+        console.log('updateUnreadData')
+        axios.post('/getUnreadMessageNum', {}).then(response => {
+          unreadMessageNum.value = response.data.num
+        }).catch(error => {
+          console.log(error)
+        })
+      }
+    };
+    getUnreadMessageNum();
+    const updateUserData = (data) => {
       isLogin.value = data.isLogin
       user_name.value = data.user_name
       avatar.value = data.avatar
+      getUnreadMessageNum();
     }
-    $bus.on('updateIndexData', updateData);
+    $bus.on('updateIndexData', updateUserData);
+    $bus.on('updateUnreadData', getUnreadMessageNum);
+
+    const timer = setInterval(() => {
+      getUnreadMessageNum();
+    }, 20000);
 
     const downloadUrl = ref("https://banhang.oss.chlience.com/releases/banhang-v0.0.1-alpha.apk")
 
@@ -59,10 +78,12 @@ export default {
     }).catch(error=>{
       console.log(error)
     })
-    return {display, user_name, isLogin, avatar, goto, searchContent, updateData, downloadApk, isApp, showDialog, downloadUrl}
+    return {display, user_name, isLogin, avatar, goto, searchContent, updateUserData, downloadApk, isApp, showDialog, downloadUrl, unreadMessageNum, timer, getUnreadMessageNum}
   },
   unmounted() {
-    $bus.off('updateIndexData', this.updateData)
+    $bus.off('updateIndexData', this.updateUserData);
+    $bus.off('updateUnreadData', this.getUnreadMessageNum);
+    clearInterval(this.timer)
   },
   methods: {
     navigateToSearchList() {
@@ -146,8 +167,13 @@ export default {
       <v-divider style="height:20px" vertical></v-divider>
     </div>
     <template v-slot:append>
-      <v-btn @click="goto('/message')">
+      <v-btn @click="goto('/message')" v-if="isLogin">
+        <v-badge :content="unreadMessageNum"  color="rgb(200, 25, 25)">
           <v-icon>mdi-email-outline</v-icon>
+        </v-badge>
+      </v-btn>
+      <v-btn @click="goto('/message')" v-else>
+        <v-icon>mdi-email-outline</v-icon>
       </v-btn>
       <v-col v-if="isLogin">
         <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()">
@@ -191,7 +217,12 @@ export default {
           <v-btn @click="downloadApk" icon="mdi-arrow-down-circle-outline" v-bind="props"></v-btn>
         </template>
       </v-tooltip>
-      <v-btn @click="goto('/message')">
+      <v-btn @click="goto('/message')" v-if="isLogin">
+        <v-badge :content="unreadMessageNum"  color="rgb(200, 25, 25)">
+          <v-icon>mdi-email-outline</v-icon>
+        </v-badge>
+      </v-btn>
+      <v-btn @click="goto('/message')" v-else>
         <v-icon>mdi-email-outline</v-icon>
       </v-btn>
     </template>
