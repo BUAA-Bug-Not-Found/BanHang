@@ -370,7 +370,7 @@ export default {
         <v-list density="compact"
                 :style="'position: fixed;top: 80px;width:200px;text-align:left'"
           >
-          <v-btn @click="toUploadQues" color="blue-darken-1" class="w-100" style="margin-bottom: 15px">
+          <v-btn @click="toUploadQues" color="blue-darken-1" class="w-100" :style="'margin-bottom: 15px'">
             发起问题
           </v-btn>
           <v-list-subheader>分区</v-list-subheader>
@@ -379,7 +379,7 @@ export default {
               :key="i"
               :value="item"
               color="primary"
-              style="text-align: left;"
+              :style="'text-align: left;'"
               @click="shiftIndex(i)"
           >
             <v-icon :icon="item.tagIcon" size="20" :color="item.tagColor"></v-icon>
@@ -389,14 +389,14 @@ export default {
           </v-list-item>
         </v-list>
       </v-col>
-      <v-col cols="8" style="margin-bottom: 25px">
-        <QuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
+      <v-col cols="8" :style="'margin-bottom: 25px'">
+        <QuesCard :style="'margin-bottom: 5px'" v-for="(ques, index) in questions" :key="ques.quesId"
                   :index="index"
                   @delQues="delQuestion"
                   @editQues="toEditQues"
                   :disTags="disTags[index]"
                   :question="questions[index]"/>
-        <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
+        <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" :style="'margin-top: 5px'" @click="getMore">
           加载更多
         </v-btn>
       </v-col>
@@ -414,13 +414,13 @@ export default {
       </div>
       <!-- 评论 -->
     </div>
-      <AppQuesCard style="margin-bottom: 5px" v-for="(ques, index) in questions" :key="ques.quesId"
+      <AppQuesCard :style="'margin-bottom: 5px'" v-for="(ques, index) in questions" :key="ques.quesId"
                    :index="index"
                    :disTags="disTags[index]"
                    @delQues="delQuestion"
                    :question="questions[index]"
       />
-      <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" style="margin-top: 5px" @click="getMore">
+      <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" :style="'margin-top: 5px'" @click="getMore">
         加载更多
       </v-btn>
       <div style="height: 200px;"></div>
@@ -431,7 +431,7 @@ export default {
         height="800"
     >
       <v-card-text>
-        <v-row v-if="editMode === false" align="center" style="margin-bottom: 5px">
+        <v-row v-if="editMode === false" align="center" :style="'margin-bottom: 5px'">
           <v-col cols="4" offset="4">
             发布问题
           </v-col>
@@ -444,7 +444,7 @@ export default {
             </v-btn>
           </v-col>
         </v-row>
-        <v-row v-else align="center" style="margin-bottom: 5px">
+        <v-row v-else align="center" :style="'margin-bottom: 5px'">
           <v-col cols="4" offset="4">
             编辑问题
           </v-col>
@@ -472,7 +472,7 @@ export default {
             </div>
           </v-col>
           <v-col :cols="display.smAndDown.value? 4 : 3">
-            <el-form style="width: 100%">
+            <el-form :style="'width: 100%'">
               <el-upload
                   class="avatar-uploader"
                   action="#"
@@ -508,13 +508,13 @@ export default {
 
         <div style="border: 1px solid #ccc">
           <Toolbar
-              style="border-bottom: 1px solid #ccc"
+              :style="'border-bottom: 1px solid #ccc'"
               :editor="editorRef"
               :defaultConfig="toolbarConfig"
               :mode="mode"
           />
           <Editor
-              style="height: 350px; overflow-y: hidden;"
+              :style="'height: 350px; overflow-y: hidden;'"
               v-model="valueHtml"
               :defaultConfig="editorConfig"
               :mode="mode"

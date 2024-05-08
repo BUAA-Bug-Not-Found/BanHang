@@ -545,17 +545,22 @@ export default {
               {{userStateStore().sign}}
             </div>
           </v-card>
-          <v-card :style="top ?
-          'position: fixed;top: 80px;width:250px;text-align:left' : 'width:250px;text-align:left'">
-            <div style="display: flex; align-items: center; transform: translateX(5%); margin-top: 10px">
-              <v-icon>mdi-hexagram-outline</v-icon>
-              <span style="font-weight: bold; font-size: 15px">推荐问题 </span>
-            </div>
-            <v-divider></v-divider>
-            <RecQuesCard v-for="ques in recommendQues" :key="'rec-' + ques.quesId" :tags="tags"
-                         @refresh="refresh"
-                         :question="ques"/>
-          </v-card>
+          <div class="height-restrict">
+            <v-card
+                :style="top ? 'position: fixed;top: 80px;width:250px;text-align:left'
+                      : 'width:250px;text-align:left'"
+            >
+              <div style="display: flex; align-items: center; transform: translateX(5%); margin-top: 10px">
+                <v-icon>mdi-hexagram-outline</v-icon>
+                <span style="font-weight: bold; font-size: 15px">推荐问题 </span>
+              </div>
+              <v-divider></v-divider>
+              <RecQuesCard v-for="ques in recommendQues" :key="'rec-' + ques.quesId" :tags="tags"
+                           @refresh="refresh"
+                           :question="ques"/>
+            </v-card>
+          </div>
+
         </v-col>
       </v-row>
       <div style="height: 200px">
@@ -805,5 +810,10 @@ export default {
   bottom: 0;
   left: 5px;
   overflow: hidden;
+}
+
+.height-restrict {
+  max-height: 550px;
+  overflow: scroll;
 }
 </style>
