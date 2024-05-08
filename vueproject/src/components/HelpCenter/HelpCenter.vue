@@ -365,9 +365,11 @@ export default {
 
 <template>
   <div v-if="!display.smAndDown.value">
-    <v-row justify="center" :style="'margin-top: 10px'">
-      <v-col cols="2" :style="'margin-right: 10px'">
-        <v-list density="compact">
+    <v-row justify="center" style="margin-top: 10px">
+      <v-col cols="2" style="margin-right: 10px">
+        <v-list density="compact"
+                :style="'position: fixed;top: 80px;width:200px;text-align:left'"
+          >
           <v-btn @click="toUploadQues" color="blue-darken-1" class="w-100" :style="'margin-bottom: 15px'">
             发起问题
           </v-btn>
@@ -394,12 +396,6 @@ export default {
                   @editQues="toEditQues"
                   :disTags="disTags[index]"
                   :question="questions[index]"/>
-        <!--      <v-pagination-->
-        <!--          v-model="page"-->
-        <!--          :length="Math.floor(quesSum / pageSize) + 2"-->
-        <!--          class="my-4"-->
-        <!--          @update:modelValue="updatePage"-->
-        <!--      ></v-pagination>-->
         <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" :style="'margin-top: 5px'" @click="getMore">
           加载更多
         </v-btn>
