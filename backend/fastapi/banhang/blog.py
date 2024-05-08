@@ -48,9 +48,9 @@ def get_blog_by_page(blog_page: schemas.BlogPageTag,
 	offset = (blog_page.pageno - 1) * blog_page.pagesize
 	limit = blog_page.pagesize
 	if blog_page.nowTag == -1:
-		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False)
+		db_blogs = crud.get_blogs(db, offset=offset, limit=limit, asc=False, not_deleted=True)
 	else:
-		db_blogs = crud.get_blogs_by_tag_id(db, blog_page.nowTag, offset, limit)
+		db_blogs = crud.get_blogs_by_tag_id(db, blog_page.nowTag, offset, limit, not_deleted=True)
 	blogs = []
 	for db_blog in db_blogs:
 		blog = get_blog_from_db_blog(db, db_blog)
@@ -64,6 +64,10 @@ class BlogId(BaseModel):
 def get_blog_by_blog_id(blog_id: BlogId,
 						db: Session = Depends(get_db)):
 	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
+	if db_blog == None:
+		return {"response":"error", "description":"No corresponding blog ID exists"}
+	if db_blog.status == "deleted":
+		return {"response":"error", "description":"Blog has been deleted"}
 	blog = get_blog_from_db_blog(db, db_blog)
 	return schemas.BlogShow(**blog)
 
@@ -86,17 +90,41 @@ def create_blog(blog: schemas.BlogBase,
 		return {"response":"error"}
 	else:
 		return {"response":"success"}
+	
+
+@router.post("/blog/deleteBlogByBlogId", tags=["Blog"])
+@check_user
+def delete_blog_by_blog_id(blog_id: BlogId,
+				uid: int,
+				db: Session = Depends(get_db)):
+	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
+	if db_blog == None:
+		return {"response":"error", "description":"No corresponding blog ID exists"}
+	if db_blog.user_id != uid:
+		return {"response":"error", "description":"Permission denied"}
+	if db_blog.status == "deleted":
+		return {"response":"error", "description":"Blog has been deleted"}
+	db_blog.status = "deleted"
+	db.add(db_blog)
+	db.commit()
+	return {"response":"success"}
+	
 
 @router.post("/blog/getCommentsByBlogId", response_model=List[schemas.BlogCommentShow], tags=["Blog"])
 def get_blog_comments_by_blog_id(blog_id: BlogId,
 								 db: Session = Depends(get_db)):
-	db_comments = crud.get_blog_comments_by_blog_id(db, blog_id.blogId)
+	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
+	if db_blog == None:
+		return {"response":"error", "description":"No corresponding blog ID exists"}
+	if db_blog.status == "deleted":
+		return {"response":"error", "description":"Blog has been deleted"}
+	db_comments = db_blog.comments
 	comments = []
 	for db_comment in db_comments:
 		comment = {}
 		if db_comment.is_anonymous:
 			comment['userId'] = -1
-			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_comment.blog_id, db_comment.user.id, create=True)
+			annoy_info = crud.get_user_anony_info_by_blog_id(db, db_comment.blog_id, db_comment.user_id, create=True)
 			comment['userName'] = annoy_info.anony_name
 			comment['userAvatarUrl'] = annoy_info.anony_avatar_url
 		else:	
@@ -116,6 +144,11 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
 def create_blog_comment(blog_comment: schemas.BlogCommentBase,
 						uid: int,
 						db: Session = Depends(get_db)):
+	db_blog = crud.get_blog_by_blog_id(db, blog_comment.blogId)
+	if db_blog == None:
+		return {"response":"error", "description":"No corresponding blog ID exists"}
+	if db_blog.status == "deleted":
+		return {"response":"error", "description":"Blog has been deleted"}
 	db_blog_comment = crud.create_blog_comment(db,
 					user_id=uid,
 					blog_id=blog_comment.blogId,
@@ -134,9 +167,9 @@ def get_blogs_advanced(blog_page_advanced: schemas.BlogPageAdvanced,
 	offset = (blog_page_advanced.pageno - 1) * blog_page_advanced.pagesize
 	limit = blog_page_advanced.pagesize
 	if  blog_page_advanced.nowSortMethod == "byRelation":
-		db_blogs = crud.get_blogs_by_search_content(db, blog_page_advanced.searchContent, offset, limit, asc=False)
+		db_blogs = crud.get_blogs_by_search_content(db, blog_page_advanced.searchContent, offset, limit, asc=False, not_deleted=True)
 	elif blog_page_advanced.nowSortMethod == "byTime":
-		db_blogs = crud.get_blogs_by_search_content(db, blog_page_advanced.searchContent, offset, limit, asc=False)
+		db_blogs = crud.get_blogs_by_search_content(db, blog_page_advanced.searchContent, offset, limit, asc=False, not_deleted=True)
 	elif blog_page_advanced.nowSortMethod == "byPopularity":
 		db_blogs = []
 	blogs = []

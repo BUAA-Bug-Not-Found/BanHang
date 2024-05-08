@@ -156,32 +156,37 @@ def get_user_anony_info_by_blog_id(db: Session, blog_id: int, user_id: int, crea
 
 
 def get_blog_by_blog_id(db: Session, blog_id: int):
-    return db.query(models.Blog).filter(models.Blog.id == blog_id).first()
+    return (db.query(models.Blog)
+            .filter(models.Blog.id == blog_id).first())
 
-
+# 未更新 deleted 相关内容，被鹿哥调用
 def get_blog_by_email(db: Session, email: str):
     user = get_user_by_email(db, email)
     return db.query(models.Blog).filter(models.Blog.user_id == user.id).all()
 
 
-def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False):
+def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False, not_deleted: bool = False):
     return (db.query(models.Blog)
+            .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
 
 
-def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False):
-    return (db.query(models.Blog).join(models.BlogTag, models.Blog.tags)
+def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False, not_deleted: bool = False):
+    return (db.query(models.Blog)
+            .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
+            .join(models.BlogTag, models.Blog.tags)
             .filter(models.BlogTag.id == blog_tag_id)
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
 
 
-def get_blogs_by_search_content(db: Session, search_content: str, offset: int, limit: int, asc: int):
+def get_blogs_by_search_content(db: Session, search_content: str, offset: int, limit: int, asc: int, not_deleted: bool = False):
     word_list = [x.strip() for x in search_content.split(" ") if x != ""]
     return (db.query(models.Blog)
+            .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
             .filter(
-        or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
+            or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
 
