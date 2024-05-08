@@ -122,7 +122,7 @@ export default {
         </template>
       </v-text-field>
     </v-col>
-    <v-btn @click="goto('/HelpCenter')">
+    <v-btn @click="goto('/HelpCenter/0')">
       <v-icon>mdi-help-box</v-icon>
       互助中心
     </v-btn>
@@ -204,7 +204,7 @@ export default {
       active
       v-if="display.smAndDown.value"
   >
-    <v-btn @click="goto('/HelpCenter')">
+    <v-btn @click="goto('/HelpCenter/0')">
       <v-icon>mdi-help-box</v-icon>
       互助中心
     </v-btn>

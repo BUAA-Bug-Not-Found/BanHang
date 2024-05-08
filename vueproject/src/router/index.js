@@ -36,7 +36,7 @@ const routes = [
         component: HomeIndex,
         children: [
             {
-                path: '/Helpcenter',
+                path: '/Helpcenter/:tagId',
                 name: "Helpcenter",
                 component: HelpCenter
             },

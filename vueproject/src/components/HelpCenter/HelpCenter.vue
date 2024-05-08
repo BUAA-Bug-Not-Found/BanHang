@@ -18,6 +18,7 @@ import {Plus} from "@element-plus/icons-vue";
 import userStateStore from "../../store";
 import router from "@/router";
 import {api as viewerApi} from 'v-viewer'
+import {useRouter} from "vue-router";
 
 export default {
   name: "HelpCenter",
@@ -65,7 +66,7 @@ export default {
       if(lockMore.value === false) {
         lockMore.value = true
         page.value = page.value + 1
-        if (lastIndex.value !== 0) {
+        if (lastIndex.value != 0) {
           getQuestionsByTagIdApi(page.value, pageSize.value, tags.value[lastIndex.value].tagId).then(
               (data) => {
                 let ori_len = questions.value.length
@@ -95,6 +96,8 @@ export default {
     }
 
     const init = () => {
+      let router = useRouter()
+      lastIndex.value = router.currentRoute.value.params.tagId
       getTagsApi().then(
           (data) => {
             tags.value = data.tags
