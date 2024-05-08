@@ -22,7 +22,7 @@
     </div>
 
     <div class="content">
-<!--      <span style="white-space: pre-line" v-html="content"></span>-->
+      <!--      <span style="white-space: pre-line" v-html="content"></span>-->
       <div style="white-space: pre-line" v-dompurify-html="content"/>
       <div class="image-list">
         <!--        <img v-for="(image, index) in imageList" :key="index" :src="image" class="blog-image"/>-->
@@ -43,6 +43,18 @@
         </v-row>
       </div>
     </div>
+
+    <div style="margin-left: 5px;margin-bottom: 10px;margin-top: 30px; display: flex; justify-content: flex-start;">
+      <v-chip v-for="tag in tagList" size="small"
+              :key="tag.tagId" :color="tag.tagColor"
+              @click="gotoBlogList(tag.tagId)"
+              :class="`cursor-pointer`"
+              style="margin-left: 1%">
+        <v-icon>{{ tag.tagIcon }}</v-icon>
+        {{ tag.tagName }}
+      </v-chip>
+    </div>
+
 
     <!-- 评论按钮 -->
     <div v-if="!showCommentInput" class="comment-input">
@@ -221,6 +233,9 @@ export default {
       this.newComment = '';
       this.showCommentInput = false;
     },
+    gotoBlogList(tagId) {
+      this.$router.push({name: 'blogList', params: {tagId: tagId}})
+    }
   }
 };
 </script>

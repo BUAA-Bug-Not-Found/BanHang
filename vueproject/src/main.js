@@ -17,7 +17,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 router.beforeEach((to, from, next) => {
     // 如果当前路由为'/'，则跳转到'/blogList'路由
     if (to.path === '/') {
-        next('/blogList');
+        next('/blogList/-1');
     } else {
         next();
     }

@@ -127,7 +127,7 @@ export default {
       互助中心
     </v-btn>
 
-    <v-btn @click="goto('/blogList')">
+    <v-btn @click="goto('/blogList/-1')">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名空间
     </v-btn>
@@ -209,7 +209,7 @@ export default {
       互助中心
     </v-btn>
 
-    <v-btn @click="goto('/blogList')">
+    <v-btn @click="goto('/blogList/-1')">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名空间
     </v-btn>

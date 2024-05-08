@@ -76,6 +76,7 @@ import {getBlogs, getTags} from "@/components/AnonymousBlog/api";
 import {useDisplay} from "vuetify";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
+import {useRouter} from "vue-router";
 
 
 export default {
@@ -99,7 +100,8 @@ export default {
   },
 
   created() {
-    this.nowtag = -1
+    let router = useRouter()
+    this.nowtag = router.currentRoute.value.params.tagId
     this.pageno = 1
     this.blogs = []
     this.notEnd = true
@@ -111,6 +113,17 @@ export default {
     }).catch(error => {
       console.error("Failed to fetch tags:", error);
     });
+  },
+
+  beforeRouteUpdate(to, from, next) {
+    // This will be called whenever the route parameters change
+    // You can fetch data or perform any necessary actions here
+    this.nowtag = to.params.tagId;
+    this.pageno = 1;
+    this.blogs = [];
+    this.notEnd = true;
+    this.fetchBlogListAPage();
+    next();
   },
 
   methods: {
