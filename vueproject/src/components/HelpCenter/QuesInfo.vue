@@ -165,10 +165,10 @@ export default {
     const editorRef2 = shallowRef()
 
     const toolbarConfig1 = {
-      excludeKeys: ['undo', 'redo', 'todo', 'fontSize', 'fontFamily',
+      excludeKeys: ['undo', 'redo', 'fontSize', 'fontFamily',
         'lineHeight', 'group-justify', 'group-video',
         'group-indent', 'bgColor', 'bulletedList', 'italic', 'group-image',
-          'fullScreen'
+        'fullScreen'
       ],
     }
 
@@ -207,7 +207,7 @@ export default {
     const imageList = ref([])
 
     const uploadAnswer = () => {
-      if(!userStateStore().isAuthentic) {
+      if (!userStateStore().isAuthentic) {
         ElMessage.error("请先登录")
         router.push('/loginPage')
       } else {
@@ -220,6 +220,7 @@ export default {
                   ElMessage.success("回答已上传")
                   replyHtml.value = ''
                   imageList.value = []
+                  sheet2.value=false
                   router.go(0)
                 } else {
                   ElMessage.error("回答失败，请稍后再试")
@@ -257,7 +258,7 @@ export default {
     const delQues = () => {
       delQuestionAPI(qid.value).then(
           (res) => {
-            if(res.isSuccess === true) {
+            if (res.isSuccess === true) {
               ElMessage.success('问题已删除')
               router.push('/HelpCenter')
               delDialog.value = false
@@ -273,7 +274,7 @@ export default {
     const isUser = ref(false);
 
     const delAns = (index) => {
-      question.value.ansIdList.splice(index,1)
+      question.value.ansIdList.splice(index, 1)
     }
 
     const editHtml = ref("")
@@ -282,19 +283,21 @@ export default {
 
     const editTagList = ref([])
 
-    const sheet = ref(false)
+    const sheet1 = ref(false)
+
+    const sheet2 = ref(false)
 
     const toEdit = () => {
-      sheet.value = !sheet.value
+      sheet1.value = !sheet1.value
       editHtml.value = question.value.quesContent.content
       editImgList.value = []
-      for(let i = 0;i < question.value.quesContent.imageList.length;i++) {
+      for (let i = 0; i < question.value.quesContent.imageList.length; i++) {
         editImgList.value.push(question.value.quesContent.imageList[i])
       }
       editTagList.value = []
-      for(let i = 0;i < question.value.tagIdList.length;i++) {
-        for(let j = 0;j < tags.value.length;j++) {
-          if(question.value.tagIdList[i] === tags.value[j].tagId) {
+      for (let i = 0; i < question.value.tagIdList.length; i++) {
+        for (let j = 0; j < tags.value.length; j++) {
+          if (question.value.tagIdList[i] === tags.value[j].tagId) {
             editTagList.value.push(tags.value[j].tagName)
             break
           }
@@ -307,9 +310,9 @@ export default {
         ElMessage.error('问题内容不得为空');
       } else {
         let uploadTags = []
-        for(let i = 0;i < editTagList.value.length;i++) {
-          for(let j =  0;j < tags.value.length; j++) {
-            if(tags.value[j].tagName === editTagList.value[i]) {
+        for (let i = 0; i < editTagList.value.length; i++) {
+          for (let j = 0; j < tags.value.length; j++) {
+            if (tags.value[j].tagName === editTagList.value[i]) {
               uploadTags.push(tags.value[j].tagId)
               break;
             }
@@ -322,7 +325,7 @@ export default {
                 ElMessage.success("成功修改问题")
                 question.value.quesContent.content = editHtml.value
                 question.value.quesContent.imageList = []
-                for(let i = 0;i < editImgList.value.length;i++) {
+                for (let i = 0; i < editImgList.value.length; i++) {
                   question.value.quesContent.imageList.push(editImgList.value[i])
                 }
                 question.value.tagIdList = uploadTags
@@ -334,10 +337,10 @@ export default {
                     }
                   }
                 }
-                editHtml.value= ""
+                editHtml.value = ""
                 editImgList.value = []
                 editTagList.value = []
-                sheet.value = !sheet.value
+                sheet1.value = !sheet1.value
               } else {
                 ElMessage.error("上传修改失败，请稍后再试")
               }
@@ -378,6 +381,8 @@ export default {
       router.push("/HelpCenter/" + index)
     }
 
+    const dialShow = ref(false)
+
     return {
       tagClick,
       truncate,
@@ -409,7 +414,7 @@ export default {
       editHtml,
       editImgList,
       editTagList,
-      sheet,
+      sheet1,
       toEdit,
       updateQues,
       findTagColor,
@@ -418,7 +423,9 @@ export default {
       tagNamesArray,
       showPic,
       delPic,
-      refresh
+      refresh,
+      dialShow,
+      sheet2
     };
   },
 };
@@ -544,7 +551,7 @@ export default {
               <v-divider></v-divider>
             </div>
             <div style="margin-bottom: 10px">
-              {{userStateStore().sign}}
+              {{ userStateStore().sign }}
             </div>
           </v-card>
           <div>
@@ -570,6 +577,46 @@ export default {
       </div>
     </div>
     <div v-else>
+
+      <div class="dials" v-if="dialShow">
+        <!-- 点赞 -->
+        <div style="margin-bottom: 10px">
+          <v-btn :icon="'mdi-minus'"
+                 color="grey-lighten-5"
+                 @click="dialShow = !dialShow"
+          />
+        </div>
+        <div style="margin-bottom: 10px">
+          <v-btn :icon="!userLike ?
+              'mdi-thumb-up-outline' : 'mdi-thumb-up'"
+                 color="grey-lighten-5"
+                 size="small" @click="setLikeQues"
+                 v-if="likeSum === 0"
+          />
+          <v-badge v-else :content="likeSum" color="red-lighten-1" offset-x="5" offset-y="5">
+            <v-btn :icon="!userLike ?
+              'mdi-thumb-up-outline' : 'mdi-thumb-up'"
+                   color="grey-lighten-5"
+                   size="small" @click="setLikeQues"
+            />
+          </v-badge>
+        </div>
+        <div style="margin-bottom: 10px">
+          <v-btn :icon="'mdi-message-reply-text'"
+                 color="grey-lighten-5"
+                 size="small"
+                 @click="sheet2 = !sheet2"
+          />
+        </div>
+      </div>
+      <div class="dials" v-else>
+        <div>
+          <v-btn :icon="'mdi-plus'"
+                 color="grey-lighten-5"
+                 @click="dialShow = !dialShow"
+          />
+        </div>
+      </div>
       <v-row style="margin-left: 12px;margin-right: 12px">
         <v-col cols="12">
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
@@ -622,26 +669,6 @@ export default {
           </v-card>
 
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
-            <div id="comment"
-                 style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
-              <span style="font-weight: bold;font-size: 20px">评论 </span>
-              <span><v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadAnswer">发送回复</v-btn></span>
-            </div>
-            <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
-              <Toolbar
-                  style="border-bottom: 1px solid #ccc"
-                  :editor="editorRef1"
-                  :defaultConfig="toolbarConfig1"
-                  :mode="mode"
-              />
-              <Editor
-                  style="height: 250px; overflow-y: hidden;"
-                  v-model="replyHtml"
-                  :defaultConfig="editorConfig"
-                  :mode="mode"
-                  @onCreated="handleCreated1"
-              />
-            </div>
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部评论 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
@@ -656,21 +683,21 @@ export default {
     </div>
   </div>
 
-  <v-bottom-sheet v-model="sheet" inset :persistent="true">
+  <v-bottom-sheet v-model="sheet1" inset :persistent="true">
     <v-card
         class="text-center"
         height="800"
     >
       <v-card-text>
         <v-row align="center" style="margin-bottom: 5px">
-          <v-col  cols="4" offset="4">
+          <v-col cols="4" offset="4">
             编辑问题
           </v-col>
           <v-col cols="4">
             <v-btn variant="text" @click="updateQues">
               发布
             </v-btn>
-            <v-btn variant="text" @click="sheet = !sheet">
+            <v-btn variant="text" @click="sheet1 = !sheet1">
               close
             </v-btn>
           </v-col>
@@ -681,7 +708,8 @@ export default {
           >
             <div class="avatar-wrapper">
               <div class="right-top">
-                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1" icon="mdi-close"></v-btn>
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1"
+                       icon="mdi-close"></v-btn>
               </div>
               <el-image
                   class="avatar"
@@ -744,6 +772,41 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
+  <v-bottom-sheet v-model="sheet2" inset>
+    <v-card
+        class="text-center"
+        height="500"
+    >
+      <v-card-text>
+        <v-row align="center" style="margin-bottom: 5px">
+          <v-col cols="4" offset="4">
+            发布评论
+          </v-col>
+          <v-col cols="4">
+            <v-btn prepend-icon="mdi-message-reply-text"
+                   color="primary" @click="uploadAnswer">
+              回复
+            </v-btn>
+          </v-col>
+        </v-row>
+        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0px">
+          <Toolbar
+              style="border-bottom: 1px solid #ccc;"
+              :editor="editorRef1"
+              :defaultConfig="toolbarConfig1"
+              :mode="mode"
+          />
+          <Editor
+              style="height: 300px;"
+              v-model="replyHtml"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="handleCreated1"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-bottom-sheet>
   <v-dialog
       v-model="delDialog"
       width="auto"
@@ -781,6 +844,14 @@ export default {
   top: 50%;
   left: 2%;
   transform: translateY(-50%);
+}
+
+.dials {
+  position: fixed;
+  z-index: 888;
+  top: 85%;
+  right: 2%;
+  transform: translateY(-85%);
 }
 </style>
 
