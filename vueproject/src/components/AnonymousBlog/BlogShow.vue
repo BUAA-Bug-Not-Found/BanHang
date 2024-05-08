@@ -96,6 +96,7 @@
               text-color="white"
               label
               outlined
+              @click="gotoBlogList(tag.tagId)"
           >
             {{ tag.tagName }}
           </v-chip>
@@ -188,6 +189,10 @@ export default {
       let minutes = ('0' + date.getMinutes()).slice(-2); // 保证两位数
 
       return `${year}.${month}.${day}-${hours}:${minutes}`
+    },
+
+    gotoBlogList(tagId) {
+      this.$router.push({name: 'blogList', params: {tagId: tagId}})
     }
   }
 };

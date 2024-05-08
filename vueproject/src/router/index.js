@@ -86,7 +86,7 @@ const routes = [
                 component: ToolBox
             },
             {
-                path: '/blogList',
+                path: '/blogList/:tagId',
                 name: "blogList",
                 component: BlogList
             },

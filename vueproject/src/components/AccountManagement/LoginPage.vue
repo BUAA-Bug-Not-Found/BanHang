@@ -73,7 +73,7 @@ export default {
                             // 存储用户信息
                             st.login_store_info(ret, this.email);
                             showTip("登录成功 !", true)
-                            router.push({path: "/blogList"});
+                            router.push({path: "/blogList", params: {tagId: -1}});
                         })
                     } else { // 验证失败
                         showTip("信息验证失败, 请重新输入!!", false)
