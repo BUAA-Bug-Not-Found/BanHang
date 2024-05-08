@@ -1,9 +1,13 @@
 import datetime
+import os
 from typing import List, Type, Dict
 
+from fastapi import  BackgroundTasks
 from sqlalchemy.orm import Session, aliased
 from orm import models, schemas
 from sqlalchemy import or_, and_, desc, func, case, distinct, exists
+
+from orm.database import SessionLocal
 from orm.models import Message, Conversation, ConversationMessage, User
 
 
@@ -279,6 +283,8 @@ def get_questions_tags(db: Session, question_ids: List[int]) -> Dict[int, List[i
     return {questionid: [tags]}
     """
     res = {}
+    if len(question_ids) == 0:
+        return res
     for qid in question_ids:
         res[qid] = []
     ret: List[models.QuestionQuestionTag] = (
@@ -294,6 +300,8 @@ def get_questions_images_urls(db: Session, question_ids: List[int]) -> Dict[int,
     return {questionid: [image_urls]}
     """
     res = {}
+    if len(question_ids) == 0:
+        return res
     for qid in question_ids:
         res[qid] = []
     ret = (db.query(models.Question.id.label('qid'), models.QuestionImage.image_url.label("image_url"))
@@ -308,27 +316,27 @@ def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: boo
                          tag=None, input_user_id: int = 1):
     uqlike = aliased(models.UserQuestionLike)
     questions = (db.query(func.max(models.Question.id).label("question_id"),
-                         func.max(models.User.id).label("user_id"),
-                         func.max(models.User.username).label("user_name"),
-                         func.max(models.Question.content).label("question_content"),
-                         models.Question.delated.label('question_delated'),
-                         models.Question.archived.label('question_archived'),
-                         models.Question.solved.label('question_solved'),
-                         models.Question.create_at.label('question_create_at'),
-                         case((func.count(models.UserQuestionLike.user_id) > 0, True), else_=False).label(
-                             'if_user_like'),
-                         func.count(distinct(models.QuestionComment.id)).label('ans_sum'),
-                         func.count(distinct(uqlike.user_id)).label('like_sum'),
-                         )
-           .outerjoin(models.QuestionComment, (models.Question.id == models.QuestionComment.question_id))
-           .outerjoin(models.UserQuestionLike, ((models.UserQuestionLike.user_id == input_user_id) &
-                                                (models.UserQuestionLike.question_id == models.Question.id)))
-           .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
-           .filter(models.Question.user_id == models.User.id)
-           .filter(exists().where((models.QuestionQuestionTag.question_id == models.Question.id) &
-                                           (models.QuestionQuestionTag.question_tag_id == tag.id)))
-           .group_by(models.Question.id, models.Question.delated, models.Question.archived)
-           ).all()
+                          func.max(models.User.id).label("user_id"),
+                          func.max(models.User.username).label("user_name"),
+                          func.max(models.Question.content).label("question_content"),
+                          models.Question.delated.label('question_delated'),
+                          models.Question.archived.label('question_archived'),
+                          models.Question.solved.label('question_solved'),
+                          models.Question.create_at.label('question_create_at'),
+                          case((func.count(models.UserQuestionLike.user_id) > 0, True), else_=False).label(
+                              'if_user_like'),
+                          func.count(distinct(models.QuestionComment.id)).label('ans_sum'),
+                          func.count(distinct(uqlike.user_id)).label('like_sum'),
+                          )
+                 .outerjoin(models.QuestionComment, (models.Question.id == models.QuestionComment.question_id))
+                 .outerjoin(models.UserQuestionLike, ((models.UserQuestionLike.user_id == input_user_id) &
+                                                      (models.UserQuestionLike.question_id == models.Question.id)))
+                 .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
+                 .filter(models.Question.user_id == models.User.id)
+                 .filter(exists().where((models.QuestionQuestionTag.question_id == models.Question.id) &
+                                        (models.QuestionQuestionTag.question_tag_id == tag.id)))
+                 .group_by(models.Question.id, models.Question.delated, models.Question.archived)
+                 ).all()
     if asc:
         return sorted(questions, key=lambda q: q.question_create_at)[offset:offset + limit]
     else:
@@ -336,7 +344,7 @@ def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: boo
 
 
 def get_question_sum_by_tag_id(db: Session, tagId):
-    return len(db.query(models.QuestionTag).filter(models.QuestionTag.id == tagId).all())
+    return len(db.query(models.QuestionTag).filter(models.QuestionTag.id == tagId).first().questions)
 
 
 def get_question_num(db: Session):
@@ -481,7 +489,8 @@ def get_questions_by_email(db: Session, email: str) -> List[models.Question]:
     return db.query(models.Question).filter(models.Question.user_id == user.id).all()
 
 
-def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionCommentCreat) -> models.QuestionComment:
+def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionCommentCreat,
+                            background_tasks: BackgroundTasks) -> models.QuestionComment:
     comment = models.QuestionComment(user_id=questionCommentCreat.userId,
                                      question=get_question_by_id(db, questionCommentCreat.questionId),
                                      content=questionCommentCreat.content,
@@ -490,6 +499,8 @@ def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionC
     db.add(comment)
     db.commit()
     db.refresh(comment)
+    if os.getenv("BANHANG_TEST") is None:
+        background_tasks.add_task(send_message_for_question_answer, comment.id)
     return comment
 
 
@@ -519,26 +530,32 @@ def set_ans_accept(db: Session, is_accepted: bool, question_comment_id: int):
     return comment
 
 
-def set_like_question(db: Session, user_id: int, question_id: int, is_like: bool):
+def set_like_question(db: Session, user_id: int, question_id: int, is_like: bool,
+                            background_tasks: BackgroundTasks):
     question = get_question_by_id(db, question_id)
     user = get_user_by_id(db, user_id)
     if is_like:
         if user not in question.liked_users:
             question.liked_users.append(user)
             db.commit()
+            if os.getenv("BANHANG_TEST") is None:
+                background_tasks.add_task(send_message_for_like_question, question_id, user_id)
     else:
         if user in question.liked_users:
             question.liked_users.remove(user)
             db.commit()
 
 
-def set_like_question_comment(db: Session, user_id: int, question_comment_id: int, is_like: bool):
+def set_like_question_comment(db: Session, user_id: int, question_comment_id: int, is_like: bool,
+                            background_tasks: BackgroundTasks):
     comment = get_question_comment_by_id(db, question_comment_id)
     user = get_user_by_id(db, user_id)
     if is_like:
         if user not in comment.liked_users:
             comment.liked_users.append(user)
             db.commit()
+            if os.getenv("BANHANG_TEST") is None:
+                background_tasks.add_task(send_message_for_like_question_comment, question_comment_id, user_id)
     else:
         if user in comment.liked_users:
             comment.liked_users.remove(user)
@@ -548,6 +565,42 @@ def set_like_question_comment(db: Session, user_id: int, question_comment_id: in
 def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
     return db.query(Conversation).filter(
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
+
+def send_message_for_question_answer(comment_id: int):
+    print("back_send_message_for_answer: {}".format(comment_id))
+    db = SessionLocal()
+    try:
+        comment = get_question_comment_by_id(db, comment_id)
+        target_user_id = comment.question.user_id
+        send_message(db, 34, target_user_id,
+                     "自动提示：【{}】 回答了您提出的“{}”问题： {}".format(comment.user.username,
+                                                                       comment.question.content,
+                                                                       comment.content))
+    finally:
+        db.close()
+
+def send_message_for_like_question_comment(comment_id: int, like_user:int):
+    print("back_send_message_for {} like_answer {}".format(like_user, comment_id))
+    db = SessionLocal()
+    try:
+        comment = get_question_comment_by_id(db, comment_id)
+        user = get_user_by_id(db, like_user)
+        send_message(db, 34, comment.user_id,
+                     "自动提示：【{}】 点赞了您在 “{}” 问题下的回答：“{}”".format(
+                         user.username, comment.question.content, comment.content))
+    finally:
+        db.close()
+
+def send_message_for_like_question(question_id: int, like_user:int):
+    print("back_send_message_for {} like_question {}".format(like_user, question_id))
+    db = SessionLocal()
+    try:
+        question = get_question_by_id(db, question_id)
+        user = get_user_by_id(db, like_user)
+        send_message(db, 34, question.user_id,
+                     "自动提示：【{}】 点赞了您提出问题：“{}”".format(user.username, question.content))
+    finally:
+        db.close()
 
 
 def get_unread_message_num(db: Session, user_id: int):
