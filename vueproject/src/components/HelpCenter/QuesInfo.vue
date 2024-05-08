@@ -372,7 +372,12 @@ export default {
       viewerApi({images: imgList})
     }
 
+    const tagClick = (index) => {
+      router.push("/HelpCenter/" + index)
+    }
+
     return {
+      tagClick,
       truncate,
       disTags,
       qid,
@@ -482,6 +487,8 @@ export default {
             <div style="margin-left: 10px;margin-bottom: 10px;margin-top: 30px">
               <v-chip v-for="tag in disTags" size="small"
                       :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
+                      @click="tagClick(tag.tagId)"
+                      :class="`cursor-pointer`"
                       style="margin-left: 3px">
                 <v-icon>{{ tag.tagIcon }}</v-icon>
                 {{ tag.tagName }}
@@ -599,7 +606,8 @@ export default {
               </v-btn>
               <v-chip v-for="tag in disTags" size="small"
                       :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
-                      style="margin-left: 3px">
+                      @click="tagClick(tag.tagId)"
+                      style="margin-left: 3px;cursor: pointer">
                 <v-icon>{{ tag.tagIcon }}</v-icon>
                 {{ tag.tagName }}
               </v-chip>

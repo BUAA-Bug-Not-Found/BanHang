@@ -73,6 +73,8 @@ export default {
       )
     }
 
+
+
     return {
       ans,
       ansIdRef,
@@ -81,7 +83,7 @@ export default {
       likeSum,
       delDialog,
       isUser,
-      delAnswer
+      delAnswer,
     };
   },
 };
