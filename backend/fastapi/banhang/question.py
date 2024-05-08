@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Header, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from orm.database import get_db
 import orm.schemas as schemas
@@ -264,7 +264,7 @@ class UpdateAnswer(BaseModel):
 
 @router.post("/answerQues", tags=["Question"], response_model=successResponse,
              responses={400: {"model": excResponse}})
-def answer_question(ans: AnsQuestion, db: Session = Depends(get_db),
+def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
@@ -275,7 +275,7 @@ def answer_question(ans: AnsQuestion, db: Session = Depends(get_db),
         userId=current_user['uid'],
         questionCommentImageids=[],
         questionId=ans.quesId
-    ))
+    ), background_tasks)
     check_question_comment_image_to_id(ans.ansContent.imageList, db, comment.id)
     comment = crud.update_question_comment(db, comment.id, schemas.QuestionCommentCreat(
         content=ans.ansContent.content,
@@ -340,7 +340,7 @@ class setLikeAnswer(BaseModel):
 
 @router.post("/setLikeQues", tags=["Question"], response_model=successResponse,
              responses={400: {"model": excResponse}})
-def set_question_like(set_like_ques: setLikeQuestion, db: Session = Depends(get_db),
+def set_question_like(set_like_ques: setLikeQuestion, background_tasks: BackgroundTasks, db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     like = set_like_ques.setType == 1
     quesId = set_like_ques.quesId
@@ -348,13 +348,13 @@ def set_question_like(set_like_ques: setLikeQuestion, db: Session = Depends(get_
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
     if not crud.get_question_by_id(db, quesId):
         raise UniException(key="isSuccess", value=False, others={"description": "问题不存在"})
-    crud.set_like_question(db, current_user['uid'], quesId, like)
+    crud.set_like_question(db, current_user['uid'], quesId, like, background_tasks)
     return {"isSuccess": True}
 
 
 @router.post("/setLikeAns", tags=["Question"], response_model=successResponse,
              responses={400: {"model": excResponse}})
-def set_answer_like(set_like_answer: setLikeAnswer, db: Session = Depends(get_db),
+def set_answer_like(set_like_answer: setLikeAnswer, background_tasks: BackgroundTasks, db: Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
     like = set_like_answer.setType == 1
     ansId = set_like_answer.ansId
@@ -362,7 +362,7 @@ def set_answer_like(set_like_answer: setLikeAnswer, db: Session = Depends(get_db
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
     if not crud.get_question_comment_by_id(db, ansId):
         raise UniException(key="isSuccess", value=False, others={"description": "回答不存在"})
-    crud.set_like_question_comment(db, current_user['uid'], ansId, like)
+    crud.set_like_question_comment(db, current_user['uid'], ansId, like, background_tasks)
     return {"isSuccess": True}
 
 
