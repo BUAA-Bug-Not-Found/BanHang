@@ -15,8 +15,8 @@ export default {
   setup(props, context) {
     const truncate = (content) => {
       const strippedContent = String(content).replace(/<[^>]*>/g, "");
-      if (strippedContent.length > 15) {
-        return `${strippedContent.slice(0, 15)}...`;
+      if (strippedContent.length > 12) {
+        return `${strippedContent.slice(0, 12)}...`;
       }
       return strippedContent;
     };
@@ -113,7 +113,7 @@ export default {
         v-bind="props"
     >
       <v-row>
-        <v-col cols="1" style="min-width: 50px">
+        <v-col offset="1" cols="2" style="min-width: 50px">
           <UserAvatar :userId="question.userId"></UserAvatar>
         </v-col>
         <v-col cols="5" style="text-align: left;" :class="`cursor-pointer`" @click="goto()">
@@ -161,7 +161,7 @@ export default {
           </v-menu>
         </v-col>
       </v-row>
-      <div style="margin-left: 10px;margin-bottom: 10px">
+      <div style="margin-left: 30px;margin-bottom: 10px">
         <span style="margin-bottom: 10px">
             <v-chip v-for="tag in disTags" size="x-small" :key="question.quesId + '-' + tag.tagId"
                     :color="tag.tagColor">
@@ -169,7 +169,7 @@ export default {
               {{ tag.tagName }}
             </v-chip>
           <v-chip v-if="disTags.length === 0" size="x-small" color="blue-grey-darken-1">
-            其他
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其他&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           </v-chip>
           </span>
       </div>
