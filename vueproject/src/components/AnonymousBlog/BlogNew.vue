@@ -176,7 +176,7 @@ export default {
                   showClose: true,
                   type: 'success',
                 })
-                this.$router.push({path: `/blogList`, params: {tagId: -1}});
+                this.$router.push({name: 'blogList', params: {tagId: -1}})
               } else {
                 ElMessage({
                   message: '发帖失败，请修改内容或稍后再试',
