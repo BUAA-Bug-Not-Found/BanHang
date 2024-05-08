@@ -71,19 +71,42 @@
           </div>
         </v-col>
         <v-col cols="3" style="text-align: right; justify-content: end; margin-top: 3px">
-          <!--          <v-btn :prepend-icon="'mdi-thumb-up'" variant="text" size="small"-->
-          <!--                 color="blue-grey-lighten-2">-->
-          <!--            {{ 1 }}-->
-          <!--          </v-btn>-->
           <v-btn variant="text" prepend-icon="mdi-message-text" size="small" color="blue-grey-lighten-2"
                  @click="goToBlogCardView">
             {{ this.commentNum }}
           </v-btn>
+          <v-menu v-show="isHovering || this.menuCLick" :location="'bottom'">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                  size="28px"
+                  v-bind="props"
+                  variant="text"
+                  @click="this.menuCLick = !this.menuCLick"
+                  class="rounded-circle"
+              >
+                <template v-slot:prepend>
+                  <v-icon size="15">mdi-dots-vertical</v-icon>
+                </template>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item density="compact" v-if="this.isCurUser">
+                <div style="color: darkgray; font-size: 16px" @click="delDialog = !delDialog">
+                  删除
+                </div>
+              </v-list-item>
+              <v-list-item density="compact">
+                <div style="color: darkgray; font-size: 16px" @click="sendReportMes">
+                  举报
+                </div>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-col>
       </v-row>
 
       <div style="margin-left: 2%; margin-bottom: 3px; font-size: 12px; color: gray" @click="goToBlogCardView">
-        {{truncatedContent}}
+        {{ truncatedContent }}
       </div>
 
       <div style="margin-left: 2%; margin-bottom: 5px">
@@ -107,12 +130,46 @@
     </v-card>
   </v-hover>
 
+  <v-dialog
+      v-model="delDialog"
+      width="auto"
+  >
+    <v-card
+        max-width="400"
+        min-width="200"
+        prepend-icon="mdi-delete-clock"
+        text="您的帖子将会被删除，确认嘛？"
+        title="删除帖子"
+    >
+      <template v-slot:actions>
+        <div style="display: flex; justify-content: center;">
+          <v-btn
+              variant="flat"
+              density="compact"
+              text="确认"
+              color="red-darken-1"
+              @click="delBlog"
+          ></v-btn>
+
+          <v-btn
+              text="取消"
+              density="compact"
+              @click="delDialog = false"
+          ></v-btn>
+        </div>
+      </template>
+    </v-card>
+
+  </v-dialog>
+
 </template>
 
 <script>
-import {goToOtherUser} from "@/components/AnonymousBlog/api";
+import {deleteBlogByBlogId, goToOtherUser} from "@/components/AnonymousBlog/api";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
+import UserStateStore from "@/store"
+import {ElMessage} from "element-plus";
 
 export default {
   name: "BlogShow",
@@ -161,6 +218,17 @@ export default {
     }
   },
 
+  data() {
+    return {
+      menuCLick: false,
+      delDialog: false,
+      isCurUser: false,
+    }
+  },
+
+  created() {
+    this.isCurUser = UserStateStore().getUserId === this.userId
+  },
 
   computed: {
     truncatedContent() {
@@ -193,6 +261,39 @@ export default {
 
     gotoBlogList(tagId) {
       this.$router.push({name: 'blogList', params: {tagId: tagId}})
+    },
+
+    delBlog() {
+      deleteBlogByBlogId(this.blogId).then(
+          (res) => {
+            if (res.response == "success") {
+              ElMessage({
+                message: '删除成功',
+                showClose: true,
+                type: 'success',
+              })
+              // this.$router.push({name: 'blogList', params: {tagId: -1}})
+              location.reload()
+            } else {
+              ElMessage({
+                message: '删除失败，请先登录或稍后再试',
+                showClose: true,
+                type: 'error',
+              })
+            }
+          }
+      )
+    },
+
+    sendReportMes() {
+      ElMessage({
+        message: '感谢您对平台风气的关心和维护，举报自动处理功能尚在开发中...',
+        showClose: true
+      })
+      ElMessage({
+        message: '当前您可以直接联系开发人员进行举报和删帖，再次感谢！',
+        showClose: true
+      })
     }
   }
 };
