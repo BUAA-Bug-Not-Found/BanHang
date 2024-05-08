@@ -1,8 +1,17 @@
 <template>
     <v-card class="box-card"  @click="sendUserToParent">
-        <img :src="avatar" class="profile-photo" />
+        
+        <div class="avatar-container">
+            <img :src="avatar" class="profile-photo" />
+            <div class="red-dot" v-if="unreadMessageNum != 0">
+                <span class="dot-number">
+                    {{ unreadMessageNum }}
+                </span>
+            </div>
+        </div>
         <div style="flex:1;max-width: calc(100% - 50px);text-align: left;">
-            <b class="name">{{ user_name }}</b>
+            <b class="name">{{ user_name }}    
+            </b>         
             <div class="last-message">{{ last_message }}</div>
         </div>
     </v-card>
@@ -18,6 +27,7 @@ export default {
         user_id: Number,
         avatar: String,
         last_message:String,
+        unreadMessageNum:Number,
     },
     components: {
         ElCard
@@ -60,8 +70,10 @@ export default {
   margin-left: 10px; /* 可根据需要调整头像和名字之间的间距 */
   margin-top: 0;
   margin-bottom: 0;
+  margin-right: 10px;
   line-height: 1.3;
   text-align: left;
+  width: 100%;
 }
 
 .last-message {
@@ -72,5 +84,28 @@ export default {
     padding-left: 10px;
     color: #999;
     font-size:12px;
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+.red-dot {
+  position: absolute;
+  top: -5px; /* 调整红点相对头像的位置 */
+  right: 0px; /* 调整红点相对头像的位置 */
+  width: 15px;
+  height: 15px;
+  background-color: rgb(200, 25, 25);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot-number {
+  font-size: 11px; /* 调整数字的字体大小 */
+  color: white;
+  margin: 1px; /* 调整数字与红点边缘的间距 */
 }
 </style>
