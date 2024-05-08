@@ -94,6 +94,7 @@ export default {
 
     const refresh = (index) => {
       qid.value = index
+      question.value.ansIdList = []
       getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
