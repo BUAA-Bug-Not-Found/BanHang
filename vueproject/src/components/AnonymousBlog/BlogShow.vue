@@ -272,7 +272,8 @@ export default {
                 showClose: true,
                 type: 'success',
               })
-              this.$router.push({name: 'blogList', params: {tagId: -1}})
+              // this.$router.push({name: 'blogList', params: {tagId: -1}})
+              location.reload()
             } else {
               ElMessage({
                 message: '删除失败，请先登录或稍后再试',
