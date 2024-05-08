@@ -100,6 +100,7 @@ export default {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            recommendQues.value = []
             try {
               fetchAdvise()
             } catch (e) {
@@ -126,6 +127,7 @@ export default {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            recommendQues.value = []
             try {
               fetchAdvise()
             } catch (e) {
@@ -545,10 +547,10 @@ export default {
               {{userStateStore().sign}}
             </div>
           </v-card>
-          <div class="height-restrict">
+          <div>
             <v-card
-                :style="top ? 'position: fixed;top: 80px;width:250px;text-align:left'
-                      : 'width:250px;text-align:left'"
+                :style="top ? 'position: fixed;top: 80px;width:250px;text-align:left;max-height:550px;overflow-y:scroll'
+                      : 'width:250px;text-align:left;max-height:550px;overflow-y:scroll'"
             >
               <div style="display: flex; align-items: center; transform: translateX(5%); margin-top: 10px">
                 <v-icon>mdi-hexagram-outline</v-icon>
