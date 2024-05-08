@@ -60,6 +60,8 @@ class MessageCreate(BaseModel):
 @router.post("/sendMessage", tags=["Message"])
 @check_user
 def send_message(uid: int, message_create: MessageCreate, db: Session = Depends(get_db)):
+	if len(message_create.content) == 0:
+		return {"status": "error", "description": "Empty message"}
 	res = crud.send_message(db, uid, message_create.targetUserId, message_create.content)
 	if res:
 		return {"status": "success"}
