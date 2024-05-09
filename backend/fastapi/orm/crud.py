@@ -200,9 +200,11 @@ def get_blog_by_email(db: Session, email: str): # todo deprecated
     user = get_user_by_email(db, email)
     return db.query(models.Blog).filter(models.Blog.user_id == user.id).all()
 
-def get_blog_by_user_id(db: Session, id: int):
+def get_blogs_by_user_id(db: Session, id: int, not_deleted: bool = False):
     user = get_user_by_id(db, id)
-    return db.query(models.Blog).filter(models.Blog.user_id == user.id).all()
+    return (db.query(models.Blog)
+            .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
+            .filter(models.Blog.user_id == user.id).all())
 
 
 def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False, not_deleted: bool = False):
