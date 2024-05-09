@@ -30,7 +30,7 @@ router.afterEach( () => {
             //每次执行前，先移除上次插入的代码
             document.getElementById('baidu_sdk') && document.getElementById('baidu_sdk').remove();
             var hm = document.createElement("script");
-            hm.src = "'https://hm.baidu.com/hm.js?68c71c552e46ad5e9749315567f36a65'";
+            hm.src = "https://hm.baidu.com/hm.js?68c71c552e46ad5e9749315567f36a65";
             hm.id = "baidu_sdk"
             var s = document.getElementsByTagName("script")[0];
             s.parentNode.insertBefore(hm, s);
