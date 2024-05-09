@@ -13,7 +13,6 @@ import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
-import baiduAnalytics from "vue-baidu-analytics";
 
 router.beforeEach((to, from, next) => {
     // 如果当前路由为'/'，则跳转到'/blogList'路由
@@ -53,13 +52,6 @@ pinia.use(piniaPluginPersistedstate);
 app.use(pinia)
 
 app.use(router)
-
-app.use(baiduAnalytics, {
-    router: router,
-    siteIdList: ['https://hm.baidu.com/hm.js?68c71c552e46ad5e9749315567f36a65'], //在上面生成的script中hm.src后面的字符串
-    isDebug: false,
-});
-
 
 //引用vuetify3 组件库
 const vuetify = createVuetify({
