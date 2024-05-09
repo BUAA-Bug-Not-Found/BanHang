@@ -420,7 +420,7 @@ class FansResponseNew(BaseModel):
 class getFansResponseNew(BaseModel):
     fans: List[FansResponseNew]
 
-@router.get("/getFansByEmail", tags=['用户中心'], response_model=getFansResponse)
+@router.get("/getFansByEmail", tags=['用户中心'], response_model=getFansResponse, deprecated=True) # todo deprecated
 def get_fans_by_email(email:str,db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_email(db, email)
