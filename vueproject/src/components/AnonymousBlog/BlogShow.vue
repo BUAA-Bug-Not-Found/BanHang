@@ -91,12 +91,12 @@
             </template>
             <v-list>
               <v-list-item density="compact" v-if="this.isCurUser">
-                <div style="color: darkgray; font-size: 16px" @click="delDialog = !delDialog">
+                <div style="color: red; font-size: 16px" @click="delDialog = !delDialog">
                   删除
                 </div>
               </v-list-item>
               <v-list-item density="compact">
-                <div style="color: darkgray; font-size: 16px" @click="sendReportMes">
+                <div style="color: black; font-size: 16px" @click="sendReportMes">
                   举报
                 </div>
               </v-list-item>
