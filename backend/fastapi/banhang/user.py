@@ -258,7 +258,7 @@ def get_anonyBlogs_by_id(id: int,current_user: Optional[dict] = Depends(authoriz
     current_user_instance = crud.get_user_by_id(db, current_user['uid'])
     if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
-    blogs = crud.get_blog_by_user_id(db, id)
+    blogs = crud.get_blogs_by_user_id(db, id, not_deleted=True)
     return [GetAnonyBlogResponse(blogTitle = blog.title,
                                  firstPhotoUrl = blog.images[0].image_url if len(blog.images) > 0 else "",
                                  time = blog.create_at,
