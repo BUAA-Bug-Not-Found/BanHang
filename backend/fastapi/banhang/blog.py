@@ -166,11 +166,12 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
 	else:
 		host_user_id = 50
 		if blog_comment.replyToCommentId == None:
+			
 			guest_user_id = db_blog.user_id
-			content = f"你的帖子有了新回复：{blog_comment.commentContent}"
+			content = f"您的帖子「{db_blog.title}」有了新回复：{blog_comment.commentContent}"
 		else:
 			guest_user_id = db_blog_comment.reply_to_comment.user_id
-			content = f"你的评论有了新回复：{blog_comment.commentContent}"
+			content = f"您在帖子「{db_blog.title}」的评论有了新回复：{blog_comment.commentContent}"
 		crud.send_message(db, host_user_id, guest_user_id, content)
 		return {"response":"success"}
 	
