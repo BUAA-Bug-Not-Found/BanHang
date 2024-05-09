@@ -1,7 +1,7 @@
 <template>
   <v-card class="blog-view">
     <!-- 用户信息部分 -->
-    <div class="user-info" @click="goToOtherUser(userId)">
+    <div class="user-info">
       <div v-if="userId !== -1" class="avatar-with-username">
         <UserAvatar :userId="userId"></UserAvatar>
         <span class="username">{{ userName }}</span>
