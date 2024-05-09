@@ -17,7 +17,7 @@
       <div style="text-align: left;">
         <p class="has-line-data" data-line-start="0" data-line-end="3">
         <strong>本工具用于自动捕获spoc课程平台上的作业信息并进行统一展示，未来还预计提供作业提醒等服务，只能在App上使用</strong><br>
-        <strong>本服务需要获取使用您登陆的cookie信息，该信息只会存在您自己的手机上，不会上传至我们的服务器。</strong><br>
+        <strong>本服务需要获取使用您登录的cookie信息，该信息只会存在您自己的手机上，不会上传至我们的服务器。</strong><br>
         <strong>以下是获取cookie的方式，需要在电脑上进行。一般来说，设置一次cookie（约2min）可以使用很久。以下内容使用Edge浏览器演示，其余浏览器操作基本一致。</strong></p>
         <ol>
         <li>1. 登录spoc平台，进入作业页面点击右键，并选择检查，弹出右侧的窗口</li>

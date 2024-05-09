@@ -425,7 +425,7 @@ export default {
       </v-btn>
       <div style="height: 200px;"></div>
   </div>
-  <v-bottom-sheet v-model="sheet" inset :persistent="true">
+  <v-bottom-sheet v-model="sheet" inset>
     <v-card
         class="text-center"
         height="800"
@@ -436,9 +436,6 @@ export default {
             发布问题
           </v-col>
           <v-col cols="4">
-            <v-btn variant="text" @click="uploadQuestion">
-              发布
-            </v-btn>
             <v-btn variant="text" @click="saveUpload">
               close
             </v-btn>
@@ -449,14 +446,43 @@ export default {
             编辑问题
           </v-col>
           <v-col cols="4">
-            <v-btn variant="text" @click="updateQuestion">
-              发布
-            </v-btn>
             <v-btn variant="text" @click="editDialog = !editDialog">
               close
             </v-btn>
           </v-col>
         </v-row>
+
+        <div style="border: 1px solid #ccc">
+          <Toolbar
+              :style="'border-bottom: 1px solid #ccc'"
+              :editor="editorRef"
+              :defaultConfig="toolbarConfig"
+              :mode="mode"
+          />
+          <Editor
+              :style="'height: 350px; overflow-y: hidden;'"
+              v-model="valueHtml"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="handleCreated"
+          />
+        </div>
+        <div style="margin-top: 15px">
+          <v-select
+              v-model="selectTags"
+              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray.slice(1, tagNamesArray.length)"
+              multiple
+              label="添加标签"
+              density="default"
+          >
+            <template v-slot:selection="{item}">
+              <v-chip size="x-small" :color="findTagColor(item.title)">
+                <v-icon>{{ findTagIcon(item.title) }}</v-icon>
+                {{ item.title }}
+              </v-chip>
+            </template>
+          </v-select>
+        </div>
         <v-row>
           <v-col v-for="(image, index) in imageList" :key="image" :cols="display.smAndDown.value? 4 : 3">
             <div class="avatar-wrapper">
@@ -488,39 +514,12 @@ export default {
             </el-form>
           </v-col>
         </v-row>
-
-        <div>
-          <v-select
-              v-model="selectTags"
-              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray.slice(1, tagNamesArray.length)"
-              multiple
-              label="添加标签"
-              density="default"
-          >
-            <template v-slot:selection="{item}">
-              <v-chip size="x-small" :color="findTagColor(item.title)">
-                <v-icon>{{ findTagIcon(item.title) }}</v-icon>
-                {{ item.title }}
-              </v-chip>
-            </template>
-          </v-select>
+        <div style="text-align: right;margin-top: 5px">
+          <v-btn color="primary" @click="uploadQuestion">
+            发布问题
+          </v-btn>
         </div>
 
-        <div style="border: 1px solid #ccc">
-          <Toolbar
-              :style="'border-bottom: 1px solid #ccc'"
-              :editor="editorRef"
-              :defaultConfig="toolbarConfig"
-              :mode="mode"
-          />
-          <Editor
-              :style="'height: 350px; overflow-y: hidden;'"
-              v-model="valueHtml"
-              :defaultConfig="editorConfig"
-              :mode="mode"
-              @onCreated="handleCreated"
-          />
-        </div>
         <div style="height: 50px"></div>
       </v-card-text>
     </v-card>

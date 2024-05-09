@@ -21,10 +21,11 @@ import router from "@/router";
 import UserStateStore, {userStateStore} from "@/store";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {api as viewerApi} from "v-viewer";
+import {Plus} from "@element-plus/icons-vue";
 
 export default {
   name: "QuesInfo",
-  components: {UserAvatar, AppAnsCard, AnsCard, RecQuesCard, Editor, Toolbar},
+  components: {Plus, UserAvatar, AppAnsCard, AnsCard, RecQuesCard, Editor, Toolbar},
   data() {
     return {
       top: false,
@@ -122,6 +123,7 @@ export default {
     const init = () => {
       let router = useRouter()
       qid.value = router.currentRoute.value.params.qid
+      let opId = router.currentRoute.value.params.opId
       getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
@@ -146,6 +148,9 @@ export default {
                   }
                   for (let i = 0; i < tags.value.length; i++) {
                     tagNamesArray.value.push(tags.value[i].tagName)
+                  }
+                  if(opId == 1) {
+                    toEdit()
                   }
                 }
             )
@@ -789,7 +794,7 @@ export default {
             </v-btn>
           </v-col>
         </v-row>
-        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0px">
+        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0">
           <Toolbar
               style="border-bottom: 1px solid #ccc;"
               :editor="editorRef1"

@@ -47,7 +47,7 @@ export default {
     });
 
     const goto = () => {
-      router.push("/QuesInfo/" + props.question.quesId).then(
+      router.push("/QuesInfo/" + props.question.quesId + "/0").then(
           () => {
             router.go(0)
           }
