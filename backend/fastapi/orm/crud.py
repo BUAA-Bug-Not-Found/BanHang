@@ -29,8 +29,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 def search_user_by_word(db: Session, word: str, offset: int, limit: int) -> list[Type[User]]:
     return (db.query(models.User)
-            .filter(or_(*[models.User.username.like(f"%{word}%")],
-                        *[models.User.email.like(f"%{word}%")]))
+            .filter(or_(*[models.User.username.like(f"%{word}%")]))
             .order_by(models.User.create_at.asc())
             .offset(offset).limit(limit).all())
 
