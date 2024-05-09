@@ -428,7 +428,7 @@ def get_fans_by_id(id:int,db: Session = Depends(get_db),
     user = crud.get_user_by_id(db, id)
     if user is None:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username, 'sign':fan.sign}
+    fans = [{'id':fan.id, 'headUrl':fan.userAvatarURL, 'nickname':fan.username, 'sign':fan.sign}
             for fan in user.followers]
     return {'fans':fans}
 
@@ -451,7 +451,7 @@ def get_stars_by_id(id:int, db: Session = Depends(get_db),
     user = crud.get_user_by_id(db, id)
     if user is None:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    stars = [{'email':star.email, 'headUrl':star.userAvatarURL, 'nickname':star.username, 'sign': star.sign}
+    stars = [{'id':star.id, 'headUrl':star.userAvatarURL, 'nickname':star.username, 'sign': star.sign}
             for star in user.followed]
     return {'stars':stars}
 
