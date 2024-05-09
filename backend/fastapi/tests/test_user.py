@@ -62,16 +62,16 @@ def test_follow_and_search(mock_user_data, new_database):
     register_login_user(client, mock_user_data)
     user2 = client.get("check_login_state").json()
     assert user2['email'] == mock_user_data["email"]
-    res = client.get("/queryStar", params={"email1":user2["email"], "email2":user1["email"]}).json()
+    res = client.get("/queryStarById", params={"id1":user2["uid"], "id2":user1["uid"]}).json()
     assert res['isStar'] == False
-    client.post("/setStarState", json={'email1': user2['email'], 'email2': user1['email'],
+    client.post("/setStarStateById", json={'id1': user2['uid'], 'id2': user1['uid'],
                                        'state':True})
-    res = client.get("/queryStar", params={"email1": user2["email"], "email2": user1["email"]}).json()
+    res = client.get("/queryStarById", params={"id1": user2["uid"], "id2": user1["uid"]}).json()
     assert res['isStar'] == True
-    res = client.get("/getFansByEmail", params={'email': user1['email']}).json()
+    res = client.get("/getFansById", params={'id': user1['uid']}).json()
     assert len(res['fans']) == 1
     assert res['fans'][0]['email'] == user2['email']
-    res = client.get("/getStarsByEmail", params={'email': user2['email']}).json()
+    res = client.get("/getStarsById", params={'id': user2['uid']}).json()
     assert len(res['stars']) == 1
     assert res['stars'][0]['email'] == user1['email']
 
@@ -103,32 +103,35 @@ def test_follow_and_search(mock_user_data, new_database):
 
 def test_set_sign(mock_user_data, new_database):
     register_login_user(client, mock_user_data)
+    user = client.get("check_login_state").json()
     res = client.put("/logout")
-    res = client.post("/setSignByEmail", json={'email':mock_user_data['email'], 'sign':"testsign"})
+    res = client.post("/setSignById", json={'id':user['uid'], 'sign':"testsign"})
     assert res.status_code == 400
     res = client.put("/login", json=mock_user_data)
-    res = client.post("/setSignByEmail", json={'email': mock_user_data['email'], 'sign': "testsign"})
+    res = client.post("/setSignById", json={'id': user['uid'], 'sign': "testsign"})
     assert res.status_code == 200
     client.put('/logout')
-    res = client.get("/getInfoByEmail",params={'email':mock_user_data['email']})
+    res = client.get("/getOtherInfosById",params={'id':user['uid']})
     assert res.json()['sign'] == 'testsign'
 
 def test_set_nickname(mock_user_data, new_database):
     register_login_user(client, mock_user_data)
+    user = client.get("check_login_state").json()
     client.put('/logout')
-    res = client.post('/setNicknameByEmail',
-                      json={'email':mock_user_data['email'], 'nickname':"testnickname"})
+    res = client.post('/setNicknameById',
+                      json={'id':user['uid'], 'nickname':"testnickname"})
     assert res.status_code == 400
     res = client.put('/login', json=mock_user_data)
-    res = client.post('/setNicknameByEmail',
-                      json={'email': mock_user_data['email'], 'nickname': "testnickname"})
+    res = client.post('/setNicknameById',
+                      json={'id': user['uid'], 'nickname': "testnickname"})
     assert res.status_code == 200
-    res = client.get("/getInfoByEmail", params={'email': mock_user_data['email']})
+    res = client.get("/getOtherInfosById",params={'id':user['uid']})
     assert res.json()['nickname'] == 'testnickname'
 
 def test_set_head_url(mock_user_data, new_database):
     register_login_user(client, mock_user_data)
-    client.post("/setHeadImageByEmail", json={'email':mock_user_data['email'],
+    user = client.get("check_login_state").json()
+    client.post("/setHeadImageById", json={'id':user['uid'],
                                               'url':"http://newavator.url"})
-    res = client.get("/getInfoByEmail", params={'email': mock_user_data['email']}).json()
+    res = client.get("/getOtherInfosById", params={'id': user['uid']}).json()
     assert res['url'] == 'http://newavator.url'

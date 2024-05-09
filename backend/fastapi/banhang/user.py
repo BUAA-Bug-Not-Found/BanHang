@@ -130,7 +130,7 @@ class UserInfoResponse(BaseModel):
     url: str
     user_id: int
     email: str
-@router.get("/getInfoByEmail", tags=['用户中心'],response_model=UserInfoResponse,
+@router.get("/getInfoByEmail", tags=['用户中心'],response_model=UserInfoResponse, # todo deprecated
             responses={400: {"model": excResponse}})
 def get_info_by_email(email:str, db:Session = Depends(get_db)):
     user = crud.get_user_by_email(db, email)
@@ -150,10 +150,10 @@ def get_current_user_info(current_user: Optional[dict] = Depends(authorize), db:
     return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
             'user_id':user.id, 'email': user.email}
 
-class SetSignRequest(BaseModel):
+class SetSignRequest(BaseModel):# todo deprecated
     email:str
     sign:str
-@router.post("/setSignByEmail", tags=['用户中心'], response_model=successResponse,
+@router.post("/setSignByEmail", tags=['用户中心'], response_model=successResponse, # todo deprecated
              responses={400: {"model": excResponse}})
 def set_sign_by_email(req:SetSignRequest, current_user: Optional[dict] = Depends(authorize),
                       db:Session = Depends(get_db)):
@@ -166,10 +166,26 @@ def set_sign_by_email(req:SetSignRequest, current_user: Optional[dict] = Depends
     user = crud.set_sign_by_email(db, req.email, req.sign)
     return successResponse()
 
-class SetNicknameRequest(BaseModel):
+class SetSignRequestNew(BaseModel):# todo deprecated
+    id:int
+    sign:str
+@router.post("/setSignById", tags=['用户中心'], response_model=successResponse,
+             responses={400: {"model": excResponse}})
+def set_sign_by_id(req:SetSignRequestNew, current_user: Optional[dict] = Depends(authorize),
+                      db:Session = Depends(get_db)):
+    if not current_user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
+    user = crud.get_user_by_id(db, req.id)
+    current_user_instance = crud.get_user_by_id(db, current_user['uid'])
+    if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
+    user = crud.set_sign_by_id(db, req.id, req.sign)
+    return successResponse()
+
+class SetNicknameRequest(BaseModel): # todo deprecated
     email:str
     nickname:str
-@router.post("/setNicknameByEmail", tags=['用户中心'], response_model=successResponse,
+@router.post("/setNicknameByEmail", tags=['用户中心'], response_model=successResponse, #todo deprecated
              responses={400: {"model": excResponse}})
 def set_nickname_by_email(req:SetNicknameRequest,current_user: Optional[dict] = Depends(authorize),
                       db:Session = Depends(get_db)):
@@ -185,13 +201,33 @@ def set_nickname_by_email(req:SetNicknameRequest,current_user: Optional[dict] = 
     user = crud.set_username_by_email(db, req.email, req.nickname)
     return successResponse()
 
+
+class SetNicknameRequestNew(BaseModel):
+    id: int
+    nickname: str
+@router.post("/setNicknameById", tags=['用户中心'], response_model=successResponse,
+             responses={400: {"model": excResponse}})
+def set_nickname_by_id(req:SetNicknameRequestNew,current_user: Optional[dict] = Depends(authorize),
+                      db:Session = Depends(get_db)):
+    if not current_user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
+    user = crud.get_user_by_id(db, req.id)
+    current_user_instance = crud.get_user_by_id(db, current_user['uid'])
+    if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
+    if not checkNickname(req.nickname):
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
+    user = crud.set_username_by_id(db, req.id, req.nickname)
+    return successResponse()
+
 class GetAnonyBlogResponse(BaseModel):
     blogTitle:str
     firstPhotoUrl:str
     time: datetime
     blogId: int
     blogText: str
-@router.get("/getAnonyBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse],
+@router.get("/getAnonyBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse], # todo deprecated
             responses={400: {"model": excResponse}})
 def get_anonyBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
                             db:Session = Depends(get_db)):
@@ -209,12 +245,30 @@ def get_anonyBlogs_by_email(email:str,current_user: Optional[dict] = Depends(aut
                                  blogText = blog.content)
             for blog in blogs]
 
+@router.get("/getAnonyBlogsById", tags=['用户中心'], response_model=List[GetAnonyBlogResponse],
+            responses={400: {"model": excResponse}})
+def get_anonyBlogs_by_id(id: int,current_user: Optional[dict] = Depends(authorize),
+                            db:Session = Depends(get_db)):
+    if not current_user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
+    user = crud.get_user_by_id(db, id)
+    current_user_instance = crud.get_user_by_id(db, current_user['uid'])
+    if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
+    blogs = crud.get_blog_by_user_id(db, id)
+    return [GetAnonyBlogResponse(blogTitle = blog.title,
+                                 firstPhotoUrl = blog.images[0].image_url if len(blog.images) > 0 else "",
+                                 time = blog.create_at,
+                                 blogId = blog.id,
+                                 blogText = blog.content)
+            for blog in blogs]
+
 class GetHelpBlogResponse(BaseModel):
     blogTitle:str
     firstPhotoUrl:str
     time: datetime
     blogId: int
-@router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetHelpBlogResponse],
+@router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetHelpBlogResponse], # todo deprecated
             responses={400: {"model": excResponse}})
 def get_helpBlogs_by_email(email:str,#current_user: Optional[dict] = Depends(authorize),
                             db:Session = Depends(get_db)):
@@ -233,9 +287,28 @@ def get_helpBlogs_by_email(email:str,#current_user: Optional[dict] = Depends(aut
                                  blogId = question.id)
             for question in questions]
 
+@router.get("/getHelpBlogsById", tags=['用户中心'], response_model=List[GetHelpBlogResponse],
+            responses={400: {"model": excResponse}})
+def get_helpBlogs_by_id(id: int,#current_user: Optional[dict] = Depends(authorize),
+                            db:Session = Depends(get_db)):
+    # if not current_user:
+    #     pass
+    #     # raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户未登录"})
+    # user = crud.get_user_by_email(db, email)
+    # current_user_instance = crud.get_user_by_id(db, current_user['uid'])
+    # if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
+    #     pass
+    #     # raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户无权限"})
+    questions = crud.get_questions_by_user_id(db, id)
+    return [GetHelpBlogResponse(blogTitle = question.content,
+                                 firstPhotoUrl = question.images[0].image_url if len(question.images) > 0 else "",
+                                 time = question.create_at,
+                                 blogId = question.id)
+            for question in questions]
+
 class QueryStarResponse(BaseModel):
     isStar: bool
-@router.get("/queryStar", tags=["用户中心"], response_model=QueryStarResponse,
+@router.get("/queryStar", tags=["用户中心"], response_model=QueryStarResponse, # todo deprecated
             responses={400: {"model": excResponse}})
 def query_star(email1: str, email2: str, db:Session = Depends(get_db)):
     user1 = crud.get_user_by_email(db, email1)
@@ -244,12 +317,21 @@ def query_star(email1: str, email2: str, db:Session = Depends(get_db)):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
     return {"isStar": user2 in user1.followed}
 
-class SetStarRequest(BaseModel):
+@router.get("/queryStarById", tags=["用户中心"], response_model=QueryStarResponse,
+            responses={400: {"model": excResponse}})
+def query_star_by_id(id1: int, id2: int, db:Session = Depends(get_db)):
+    user1 = crud.get_user_by_id(db, id1)
+    user2 = crud.get_user_by_id(db, id2)
+    if not user1 or not user2:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
+    return {"isStar": user2 in user1.followed}
+
+class SetStarRequest(BaseModel): # todo deprecated
     email1: str
     email2: str
     state: bool
 
-@router.post("/setStarState", response_model=successResponse, tags=["用户中心"],
+@router.post("/setStarState", response_model=successResponse, tags=["用户中心"], # todo deprecated
              responses={400: {"model": excResponse}})
 def set_star_state(req:SetStarRequest, db:Session = Depends(get_db),
                    current_user: Optional[dict] = Depends(authorize)):
@@ -263,11 +345,30 @@ def set_star_state(req:SetStarRequest, db:Session = Depends(get_db),
     crud.set_star_state_by_email(db, req.email1, req.email2, is_followed=req.state)
     return successResponse()
 
+class SetStarRequestNew(BaseModel):
+    id1: int
+    id2: int
+    state: bool
+@router.post("/setStarStateById", response_model=successResponse, tags=["用户中心"],
+             responses={400: {"model": excResponse}})
+def set_star_state_by_id(req:SetStarRequestNew, db:Session = Depends(get_db),
+                   current_user: Optional[dict] = Depends(authorize)):
+    current_user_isntance = crud.get_user_by_id(db, current_user['uid'])
+    user1 = crud.get_user_by_id(db, req.id1)
+    user2 = crud.get_user_by_id(db, req.id2)
+    if not user1 or not user2:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
+    if current_user_isntance.privilege == 0 and current_user_isntance.email != user1.email:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"无权修改别人的follow状态"})
+    crud.set_star_state_by_user_id(db, req.id1, req.id2, is_followed=req.state)
+    return successResponse()
+
 class UserResponse(BaseModel):
     nickname:str
     sign:str
     url:str
-    email: str
+    email: str # todo deprecated
+    id: int
 class UserSearchResponse(BaseModel):
     users: List[UserResponse]
     userSum: int
@@ -295,7 +396,7 @@ def search_questions_by_content(req:SearchUsersRequest,db: Session = Depends(get
     limit = pageSize
     db_users= crud.search_user_by_word(db, req.searchContent, offset=offset, limit=limit)
     users = [{'nickname':user.username, 'sign':user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
-              'email': user.email}
+              'email': user.email, 'id':user.id}
              for user in db_users]
     return {"users": users,
             "userSum": crud.get_search_user_sum_by_word(db, req.searchContent, offset=offset, limit=limit)}
@@ -318,10 +419,20 @@ def get_fans_by_email(email:str,db: Session = Depends(get_db),
             for fan in user.followers]
     return {'fans':fans}
 
+@router.get("/getFansById", tags=['用户中心'], response_model=getFansResponse)
+def get_fans_by_id(id:int,db: Session = Depends(get_db),
+                      current_user: Optional[dict] = Depends(authorize)):
+    user = crud.get_user_by_id(db, id)
+    if user is None:
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
+    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username, 'sign':fan.sign}
+            for fan in user.followers]
+    return {'fans':fans}
+
 class getStarsResponse(BaseModel):
     stars: List[FansResponse]
 
-@router.get("/getStarsByEmail", tags=['用户中心'], response_model=getStarsResponse)
+@router.get("/getStarsByEmail", tags=['用户中心'], response_model=getStarsResponse) # todo deprecated
 def get_stars_by_email(email:str, db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_email(db, email)
@@ -331,10 +442,20 @@ def get_stars_by_email(email:str, db: Session = Depends(get_db),
             for star in user.followed]
     return {'stars':stars}
 
-class SetUserHeadUrlRequest(emailRequest):
+@router.get("/getStarsById", tags=['用户中心'], response_model=getStarsResponse)
+def get_stars_by_id(id:int, db: Session = Depends(get_db),
+                      current_user: Optional[dict] = Depends(authorize)):
+    user = crud.get_user_by_id(db, id)
+    if user is None:
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
+    stars = [{'email':star.email, 'headUrl':star.userAvatarURL, 'nickname':star.username, 'sign': star.sign}
+            for star in user.followed]
+    return {'stars':stars}
+
+class SetUserHeadUrlRequest(emailRequest): # todo deprecated
     url:str
 
-@router.post("/setHeadImageByEmail", tags=['用户中心'], response_model=successResponse)
+@router.post("/setHeadImageByEmail", tags=['用户中心'], response_model=successResponse) # todo deprecated
 def set_head_image_by_email(req:SetUserHeadUrlRequest, db: Session = Depends(get_db),
                             current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_email(db, req.email)
@@ -345,8 +466,23 @@ def set_head_image_by_email(req:SetUserHeadUrlRequest, db: Session = Depends(get
     crud.set_user_head_url_by_email(db, req.email, req.url)
     return successResponse()
 
+class SetUserHeadUrlRequestNew(BaseModel):
+    url:str
+    id:int
+@router.post("/setHeadImageById", tags=['用户中心'], response_model=successResponse)
+def set_head_image_by_id(req:SetUserHeadUrlRequestNew, db: Session = Depends(get_db),
+                            current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "请登录"})
+    user = crud.get_user_by_id(db, req.id)
+    cur_user = crud.get_user_by_id(db, current_user['uid'])
+    if user is None or (req.id != cur_user.id and cur_user.privilege == 0):
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户不存在" if not user else "用户无权限"})
+    crud.set_user_head_url_by_id(db, req.id, req.url)
+    return successResponse()
 
-@router.get("/getInfoByUserId", tags=['用户中心'],response_model=UserInfoResponse,
+@router.get("/getInfoByUserId", tags=['用户中心'],response_model=UserInfoResponse, # todo deprecated
             responses={400: {"model": excResponse}})
 def get_info_by_id(userId:int, db:Session = Depends(get_db)):
     user = crud.get_user_by_id(db, userId)
@@ -354,3 +490,17 @@ def get_info_by_id(userId:int, db:Session = Depends(get_db)):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
     return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
             'user_id':user.id, 'email': user.email}
+
+class OtherUserInfoResponse(BaseModel):
+    nickname: str
+    sign: str
+    url: str
+@router.get("/getOtherInfosById", tags=['用户中心'],response_model=OtherUserInfoResponse,
+            responses={400: {"model": excResponse}})
+def get_other_info_by_id(id:int, db:Session = Depends(get_db)):
+    user = crud.get_user_by_id(db, id)
+    if not user:
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
+    return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else ""}
+
+
