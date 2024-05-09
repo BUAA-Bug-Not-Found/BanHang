@@ -114,7 +114,7 @@
         this.email = userStateStore().email;
         this.sign = userStateStore().sign;
         if (!this.email) {
-          showTip("请首先登陆", false)
+          showTip("请首先登录", false)
           router.replace({path: "loginPage"})
         }
         if (this.sign === "" || !this.sign) {
@@ -193,7 +193,7 @@
         // router.push('/blogView/' + _blogId);
       },
       clickHelpItem(_blogId) {
-        router.push('/QuesInfo/' + _blogId);
+        router.push('/QuesInfo/' + _blogId + "/0");
       }
     },
   };

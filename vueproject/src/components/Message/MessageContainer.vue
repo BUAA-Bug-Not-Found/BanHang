@@ -1,9 +1,9 @@
 <template>
   <v-card :class="{ 'pc-container': !display.smAndDown.valueOf(), 'pe-container': display.smAndDown.valueOf() }">
     <div v-if="!isLogin">
-      <div>您还没有登陆</div>
+      <div>您还没有登录</div>
     </div>
-    <div v-else-if="this.curUserId == 0">
+    <div v-else-if="this.curUserId == 0" :class="{'contact-container-pc': !display.smAndDown.valueOf(), 'contact-container-pe': display.smAndDown.valueOf() }">
       <div v-if="this.contactList.length == 0">
         您还没有联系人
       </div>
@@ -33,7 +33,7 @@
             <img :src="myAvatar" class="profile-photo" />
           </div>
           <div v-else class="message-left">
-            <img :src="curAvatar" class="profile-photo" />
+            <img :src="curAvatar" class="profile-photo" @click="gotoIndex()"/>
             <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
               <div class="time">{{ this.formatDateTime(message.time) }}</div>
               <div class="content">
@@ -58,6 +58,7 @@ import axios from 'axios';
 import userStateStore from '@/store';
 import { useDisplay } from 'vuetify'
 import { $bus } from '@/store';
+import router from "@/router";
 
 export default {
   name: "MessageContainer",
@@ -111,6 +112,9 @@ export default {
     }
   },
   methods: {
+    gotoIndex() {
+      router.push('/othersCenter/' + this.curUserId)
+    },
     updateData() {
       if (this.isLogin) {
         if (this.curUserId != 0) {
@@ -218,7 +222,6 @@ export default {
   max-height: calc(100vh - 56px - 56px - 70px - 54px + 3px);
   background-color: rgb(238, 238, 238);
 }
-
 .message-container-pc {
   /* 可根据实际需要设置高度 */
   display: flex;
@@ -229,6 +232,24 @@ export default {
   max-height: calc(100vh - 64px - 56px - 70px + 3px);
   background-color: rgb(238, 238, 238);
 }
+
+.contact-container-pe {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 56px - 54px + 3px);
+}
+
+.contact-container-pc {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 64px + 3px);
+}
+
+
 .input {
   height: 56px;
   display: flex;

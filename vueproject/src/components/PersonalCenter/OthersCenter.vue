@@ -77,7 +77,7 @@ import { getHelpBlogs, getOtherInfos } from './PersonalCenterAPI';
 export default {
   created() {
     if (!userStateStore().email) {
-        showTip("请首先登陆", false)
+        showTip("请首先登录", false)
         router.replace({path: "/loginPage"})
         return
       }
@@ -102,7 +102,7 @@ export default {
       getHelpBlogs(this.otherId).then((_helpBlogs) => {
         this.otherBlogs = _helpBlogs;
       })
-      // 当用户没有登陆的时候，这时候是无法正常queryStar的
+      // 当用户没有登录的时候，这时候是无法正常queryStar的
       queryStar(userStateStore().user_id, this.otherId).then((res) => {
         this.isStar = res.isStar
       }).catch(() => {
@@ -186,7 +186,7 @@ export default {
     },
     clickHelpItem(_blogId) {
       // router.push({name: 'QuesInfo', params: {qid: _blogId}});
-      router.push('/QuesInfo/' + _blogId);
+      router.push('/QuesInfo/' + _blogId + "/0");
     },
     truncate(content) {
       const strippedContent = String(content).replace(/<[^>]*>/g, "")

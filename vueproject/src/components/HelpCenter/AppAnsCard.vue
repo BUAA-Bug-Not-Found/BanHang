@@ -106,9 +106,9 @@ export default {
           <UserAvatar :userId="ans.userId"/>
         </v-col>
         <v-col cols="10">
-          <div style="display: flex; justify-content: space-between;margin-top: 10px">
-            <span style="font-size: 15px">{{ ans.userName }}</span>
-            <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>
+          <div style="margin-top: 10px">
+            <div style="font-size: 15px">{{ ans.userName }}</div>
+            <div style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</div>
           </div>
           <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
           <div style="margin-bottom: 5px">

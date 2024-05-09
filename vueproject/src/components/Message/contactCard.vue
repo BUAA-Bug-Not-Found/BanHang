@@ -53,6 +53,7 @@ export default {
 .box-card {
     border-radius: 5; /* 去除圆角 */
     height: 70px;
+    min-height: 70px;
     align-items: center;
     position: flex;
     display: flex;

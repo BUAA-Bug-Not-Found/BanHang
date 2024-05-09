@@ -76,7 +76,7 @@ const routes = [
                 component: InterestList
             },
             {
-                path: '/QuesInfo/:qid',
+                path: '/QuesInfo/:qid/:opId',
                 name: "QuesInfo",
                 component: QuesInfo
             },
