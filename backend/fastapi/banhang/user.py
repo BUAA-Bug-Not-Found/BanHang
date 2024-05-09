@@ -62,6 +62,8 @@ def login(req:loginRequest,request:Request, response: Response, db: Session = De
     if not user or (user.password != req.password and update_password_to_hash(req.password) != user.password):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password",
                                                                        'id':0})
+    if not req.email.endswith("buaa.edu.cn"):
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"邮箱不是北航邮箱，目前仅北航使用"})
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
                         samesite='none',
                         secure= False if os.environ.get("CHECKCODE") is not None else True )
