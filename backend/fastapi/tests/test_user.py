@@ -70,10 +70,10 @@ def test_follow_and_search(mock_user_data, new_database):
     assert res['isStar'] == True
     res = client.get("/getFansById", params={'id': user1['uid']}).json()
     assert len(res['fans']) == 1
-    assert res['fans'][0]['email'] == user2['email']
+    assert res['fans'][0]['id'] == user2['uid']
     res = client.get("/getStarsById", params={'id': user2['uid']}).json()
     assert len(res['stars']) == 1
-    assert res['stars'][0]['email'] == user1['email']
+    assert res['stars'][0]['id'] == user1['uid']
 
     res = (client.post("/searchUserAPage",
                       json={'searchContent':mock_user_data['username'][2:-4],

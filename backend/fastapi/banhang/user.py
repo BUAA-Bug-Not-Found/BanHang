@@ -52,17 +52,20 @@ def checkNickname(nickname:str)->bool:
 
 def update_password_to_hash(password:str)->str:
     return hashlib.sha256((password+"banhang").encode()).hexdigest()
-
-@router.put("/login",tags=["注册登录"], response_model=successResponse,
+class LoginResponse(BaseModel):
+    isSuccess:bool = True
+    id:int
+@router.put("/login",tags=["注册登录"], response_model=LoginResponse,
             responses={400: {"model": excResponse}})
 def login(req:loginRequest,request:Request, response: Response, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
     if not user or (user.password != req.password and update_password_to_hash(req.password) != user.password):
-        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password"})
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password",
+                                                                       'id':0})
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
                         samesite='none',
                         secure= False if os.environ.get("CHECKCODE") is not None else True )
-    return {"isSuccess":True}
+    return {"isSuccess":True,'id':user.id}
 
 @router.put("/logout",tags=["注册登录"], response_model=successResponse,
             responses={400: {"model": excResponse}})
@@ -401,13 +404,21 @@ def search_questions_by_content(req:SearchUsersRequest,db: Session = Depends(get
     return {"users": users,
             "userSum": crud.get_search_user_sum_by_word(db, req.searchContent, offset=offset, limit=limit)}
 
-class FansResponse(BaseModel):
+class FansResponse(BaseModel): # todo deprecated
     email: str
     headUrl: str
     nickname: str
     sign: str
-class getFansResponse(BaseModel):
+class getFansResponse(BaseModel): # todo deprecated
     fans: List[FansResponse]
+
+class FansResponseNew(BaseModel):
+    id: int
+    headUrl: str
+    nickname: str
+    sign: str
+class getFansResponseNew(BaseModel):
+    fans: List[FansResponseNew]
 
 @router.get("/getFansByEmail", tags=['用户中心'], response_model=getFansResponse)
 def get_fans_by_email(email:str,db: Session = Depends(get_db),
@@ -419,18 +430,21 @@ def get_fans_by_email(email:str,db: Session = Depends(get_db),
             for fan in user.followers]
     return {'fans':fans}
 
-@router.get("/getFansById", tags=['用户中心'], response_model=getFansResponse)
+@router.get("/getFansById", tags=['用户中心'], response_model=getFansResponseNew)
 def get_fans_by_id(id:int,db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_id(db, id)
     if user is None:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    fans = [{'email':fan.email, 'headUrl':fan.userAvatarURL, 'nickname':fan.username, 'sign':fan.sign}
+    fans = [{'id':fan.id, 'headUrl':fan.userAvatarURL, 'nickname':fan.username, 'sign':fan.sign}
             for fan in user.followers]
     return {'fans':fans}
 
 class getStarsResponse(BaseModel):
     stars: List[FansResponse]
+
+class getStarsResponseNew(BaseModel):
+    stars: List[FansResponseNew]
 
 @router.get("/getStarsByEmail", tags=['用户中心'], response_model=getStarsResponse) # todo deprecated
 def get_stars_by_email(email:str, db: Session = Depends(get_db),
@@ -442,13 +456,13 @@ def get_stars_by_email(email:str, db: Session = Depends(get_db),
             for star in user.followed]
     return {'stars':stars}
 
-@router.get("/getStarsById", tags=['用户中心'], response_model=getStarsResponse)
+@router.get("/getStarsById", tags=['用户中心'], response_model=getStarsResponseNew)
 def get_stars_by_id(id:int, db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_id(db, id)
     if user is None:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    stars = [{'email':star.email, 'headUrl':star.userAvatarURL, 'nickname':star.username, 'sign': star.sign}
+    stars = [{'id':star.id, 'headUrl':star.userAvatarURL, 'nickname':star.username, 'sign': star.sign}
             for star in user.followed]
     return {'stars':stars}
 
