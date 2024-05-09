@@ -50,13 +50,19 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def set_user_head_url_by_email(db: Session, email: str, url):
+def set_user_head_url_by_email(db: Session, email: str, url): # todo deprecated
     user = get_user_by_email(db, email)
     user.userAvatarURL = url
     db.commit()
     db.refresh(user)
     return user
 
+def set_user_head_url_by_id(db: Session, id: int, url): # todo deprecated
+    user = get_user_by_id(db, id)
+    user.userAvatarURL = url
+    db.commit()
+    db.refresh(user)
+    return user
 
 def create_checkcode_record(db: Session, record: schemas.EmailCheck):
     if tmp := db.query(models.CheckCode).filter(models.CheckCode.email == record.email).first():
@@ -84,23 +90,37 @@ def set_password_by_email(db: Session, password: str, email: str):
     db.commit()
 
 
-def set_sign_by_email(db: Session, email: str, sign: str):
+def set_sign_by_email(db: Session, email: str, sign: str): # todo deprecated
     user = get_user_by_email(db, email)
     user.sign = sign
     db.commit()
     db.refresh(user)
     return user
 
+def set_sign_by_id(db: Session, id: int, sign: str):
+    user = get_user_by_id(db, id)
+    user.sign = sign
+    db.commit()
+    db.refresh(user)
+    return user
 
-def set_username_by_email(db: Session, email: str, username: str):
+
+def set_username_by_email(db: Session, email: str, username: str): # todo deprecated
     user = get_user_by_email(db, email)
     user.username = username
     db.commit()
     db.refresh(user)
     return user
 
+def set_username_by_id(db: Session, id: int, username: str):
+    user = get_user_by_id(db, id)
+    user.username = username
+    db.commit()
+    db.refresh(user)
+    return user
 
-def set_star_state_by_email(db: Session, email1: str, email2: str, is_followed: bool):
+
+def set_star_state_by_email(db: Session, email1: str, email2: str, is_followed: bool): # todo deprecated
     user1 = get_user_by_email(db, email1)
     user2 = get_user_by_email(db, email2)
     if is_followed:
@@ -112,6 +132,17 @@ def set_star_state_by_email(db: Session, email1: str, email2: str, is_followed: 
             user1.followed.remove(user2)
             db.commit()
 
+def set_star_state_by_user_id(db: Session, id1: int, id2: int, is_followed: bool):
+    user1 = get_user_by_id(db, id1)
+    user2 = get_user_by_id(db, id2)
+    if is_followed:
+        if user2 not in user1.followed:
+            user1.followed.append(user2)
+            db.commit()
+    else:
+        if user2 in user1.followed:
+            user1.followed.remove(user2)
+            db.commit()
 
 def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymous: bool, image_urls: list[str],
                 tag_ids: list[int]):
@@ -164,8 +195,12 @@ def get_blog_by_blog_id(db: Session, blog_id: int):
             .filter(models.Blog.id == blog_id).first())
 
 # 未更新 deleted 相关内容，被鹿哥调用
-def get_blog_by_email(db: Session, email: str):
+def get_blog_by_email(db: Session, email: str): # todo deprecated
     user = get_user_by_email(db, email)
+    return db.query(models.Blog).filter(models.Blog.user_id == user.id).all()
+
+def get_blog_by_user_id(db: Session, id: int):
+    user = get_user_by_id(db, id)
     return db.query(models.Blog).filter(models.Blog.user_id == user.id).all()
 
 
@@ -483,9 +518,12 @@ def get_search_question_sum_by_word_list(db: Session, word_list: List[str], offs
     )
 
 
-def get_questions_by_email(db: Session, email: str) -> List[models.Question]:
+def get_questions_by_email(db: Session, email: str) -> List[models.Question]: # todo deprecated
     user = get_user_by_email(db, email)
+    return db.query(models.Question).filter(models.Question.user_id == user.id).all()
 
+def get_questions_by_user_id(db: Session, id: int) -> List[models.Question]:
+    user = get_user_by_id(db, id)
     return db.query(models.Question).filter(models.Question.user_id == user.id).all()
 
 
