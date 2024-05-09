@@ -1,10 +1,11 @@
 import datetime
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime,Table
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy.sql import func
 
 from orm.database import Base
+from typing import Optional, List
 
 
 
@@ -97,7 +98,9 @@ class BlogComment(Base):
     user = relationship("User", back_populates="blog_comments")
     blog = relationship("Blog", back_populates="comments")
 
-    reply_to_comment = relationship('BlogComment', foreign_keys=[reply_to_comment_id])
+    comments: Mapped[List["BlogComment"]] = relationship(back_populates="reply_to_comment")
+    reply_to_comment: Mapped[Optional["BlogComment"]] = relationship(back_populates="comments", remote_side=id)
+    
 
 class BlogTag(Base):
     __tablename__ = 'blog_tags'
