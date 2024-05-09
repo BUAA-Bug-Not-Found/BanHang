@@ -76,6 +76,8 @@ def get_blog_by_blog_id(blog_id: BlogId,
 def create_blog(blog: schemas.BlogBase,
 				uid: int,
 				db: Session = Depends(get_db)):
+	if uid == None:
+		return {"response":"error", "description":"Please login first"}
 	for tag_id in blog.tagList:
 		if crud.get_blog_tag_by_id(db, tag_id) == None:
 			return {"response": f"No corresponding tag ID ({tag_id}) exists"}
@@ -97,6 +99,8 @@ def create_blog(blog: schemas.BlogBase,
 def delete_blog_by_blog_id(blog_id: BlogId,
 				uid: int,
 				db: Session = Depends(get_db)):
+	if uid == None:
+		return {"response":"error", "description":"Please login first"}
 	db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
 	if db_blog == None:
 		return {"response":"error", "description":"No corresponding blog ID exists"}
@@ -144,6 +148,8 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
 def create_blog_comment(blog_comment: schemas.BlogCommentBase,
 						uid: int,
 						db: Session = Depends(get_db)):
+	if uid == None:
+		return {"response":"error", "description":"Please login first"}
 	db_blog = crud.get_blog_by_blog_id(db, blog_comment.blogId)
 	if db_blog == None:
 		return {"response":"error", "description":"No corresponding blog ID exists"}
@@ -158,6 +164,15 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
 	if db_blog_comment == None:
 		return {"response":"error"}
 	else:
+		host_user_id = 50
+		if blog_comment.replyToCommentId == None:
+			
+			guest_user_id = db_blog.user_id
+			content = f"您的帖子「{db_blog.title}」有了新回复：{blog_comment.commentContent}"
+		else:
+			guest_user_id = db_blog_comment.reply_to_comment.user_id
+			content = f"您在帖子「{db_blog.title}」的评论有了新回复：{blog_comment.commentContent}"
+		crud.send_message(db, host_user_id, guest_user_id, content)
 		return {"response":"success"}
 	
 	
