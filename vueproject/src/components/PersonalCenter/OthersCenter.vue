@@ -186,7 +186,7 @@ export default {
     },
     clickHelpItem(_blogId) {
       // router.push({name: 'QuesInfo', params: {qid: _blogId}});
-      router.push('/QuesInfo/' + _blogId);
+      router.push('/QuesInfo/' + _blogId + "/0");
     },
     truncate(content) {
       const strippedContent = String(content).replace(/<[^>]*>/g, "")
