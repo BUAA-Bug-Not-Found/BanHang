@@ -97,8 +97,7 @@ class BlogComment(Base):
     user = relationship("User", back_populates="blog_comments")
     blog = relationship("Blog", back_populates="comments")
 
-    parent = relationship('BlogComment', remote_side=[id], back_populates='replies')
-    replies = relationship('BlogComment', back_populates='parent')
+    reply_to_comment = relationship('BlogComment', foreign_keys=[reply_to_comment_id])
 
 class BlogTag(Base):
     __tablename__ = 'blog_tags'
