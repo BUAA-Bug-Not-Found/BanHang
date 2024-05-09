@@ -41,8 +41,10 @@ def get_search_user_sum_by_word(db: Session, word: str, offset: int, limit: int)
                 .order_by(models.User.create_at.asc()).all()))
 
 
+# 引入 https://source.boringavatars.com 作为用户默认头像
 def create_user(db: Session, user: schemas.UserCreate):
-    db_user = models.User(username=user.username, password=user.password, email=user.email)
+    userAvatarURL = "https://source.boringavatars.com/beam/500/" + user.username + "?square"
+    db_user = models.User(username=user.username, password=user.password, email=user.email, userAvatarURL=userAvatarURL)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
