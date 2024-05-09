@@ -77,6 +77,7 @@ import userStateStore from '../../store';
 import {setSign, setNickname, setHeadImage} from "@/components/PersonalCenter/PersonalCenterAPI";
 import router from "@/router";
 import { isNicknameFormatOk, isSignFormatOk, NICKNAME_FORMAT_TIP, showTip, SIGN_FORMAT_TIP } from "../AccountManagement/AccountManagementAPI";
+import {$bus} from '@/store';
 
 export default {
     name: "EditPersonalInfo",
@@ -142,26 +143,49 @@ export default {
             } else if (!isNicknameFormatOk(this.nickname)) {
                 showTip(NICKNAME_FORMAT_TIP, false, 5000)
             } else {
-                setSign(this.sign, userStateStore().email)
-                .then((res) => {
-                    if (res.isSuccess) {
+                // setSign(this.sign, userStateStore().user_id)
+                // .then((res) => {
+                //     if (res.isSuccess) {
+                //         userStateStore().sign = this.sign
+                //     }
+                // })
+                // setNickname(this.nickname, userStateStore().user_id)
+                //     .then((res) => {
+                //         if (res.isSuccess) {
+                //             userStateStore().nickname = this.nickname;
+                //         }
+                //     })
+                // // 保存头像
+                // setHeadImage(userStateStore().user_id, this.headImage1)
+                //     .then((res) => {
+                //         if (res.isSuccess) {
+                //             userStateStore().headImage = this.headImage1;
+                //             router.push({path: "/personalCenter"});
+                //         }
+                //     })
+
+                // 等待全部执行完
+                Promise.all([
+                    setSign(this.sign, userStateStore().user_id),
+                    setNickname(this.nickname, userStateStore().user_id),
+                    setHeadImage(userStateStore().user_id, this.headImage1)
+                ]).then(results => {
+                    const allSuccess = results.every(res => res.isSuccess);
+                    if (allSuccess) {
+                        showTip("修改成功", true)
                         userStateStore().sign = this.sign
+                        userStateStore().nickname = this.nickname;
+                        userStateStore().user_name = this.nickname;
+                        userStateStore().headImage = this.headImage1;
+                        $bus.emit('updateIndexNH')
+                        router.push({path: "/personalCenter"});
+                    } else {
+                        showTip("出现异常", false)
                     }
+                }).catch(() => {
+                    showTip("出现异常", false)
                 })
-                setNickname(this.nickname, userStateStore().email)
-                    .then((res) => {
-                        if (res.isSuccess) {
-                            userStateStore().nickname = this.nickname;
-                        }
-                    })
-                // 保存头像
-                setHeadImage(userStateStore().email, this.headImage1)
-                    .then((res) => {
-                        if (res.isSuccess) {
-                            userStateStore().headImage = this.headImage1;
-                            router.push({path: "/personalCenter"});
-                        }
-                    })
+                
             }
         },
         clickGoBack() {

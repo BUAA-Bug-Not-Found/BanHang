@@ -66,7 +66,7 @@ const routes = [
                 component: LoginPage
             },
             {
-                path: '/othersCenter/:e',
+                path: '/othersCenter/:id',
                 name: 'othersCenter',
                 component: OthersCenter
             },

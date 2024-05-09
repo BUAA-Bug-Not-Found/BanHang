@@ -51,7 +51,8 @@ export default {
 
     const goHomePage = () => {
       if(props.userId !== UserStateStore.getUserId) {
-        router.push('/othersCenter/' + email.value)
+        // router.push('/othersCenter/' + email.value)
+        router.push('/othersCenter/' + props.userId)
       } else {
         router.push("/personalCenter")
       }

@@ -20,7 +20,7 @@
                   :key="index"
                   :nickname="post.nickname"
                   :sign="post.sign"
-                  :email="post.email"
+                  :id="post.id"
                   :headImage="post.headUrl"
                 />
                 <!-- <v-list-item v-for="(content, index) in stars" :key="index">
@@ -43,7 +43,7 @@
                     :key="index"
                     :nickname="post.nickname"
                     :sign="post.sign"
-                    :email="post.email"
+                    :id="post.id"
                     :headImage="post.headUrl"
                   />
 
@@ -81,10 +81,10 @@ export default {
     created() {
       checkLogin();
         // 拿到stars和fans列表
-        getStars(userStateStore().email).then((res) => {
+        getStars(userStateStore().user_id).then((res) => {
             this.stars = res.stars
         })
-        getFans(userStateStore().email).then((res) => {
+        getFans(userStateStore().user_id).then((res) => {
             this.fans = res.fans
         })
     },
@@ -98,10 +98,10 @@ export default {
         }
     },
     methods: {
-        clickOtherUser(_email) {
+        clickOtherUser(_id) {
             // 展示_email对应的用户的首页
             // 传名的话, 就只有名, 而不要表示路径分隔的斜杠了
-            router.push({name: "othersCenter", params: {"e": _email}})
+            router.push({name: "othersCenter", params: {"id": _id}})
         }
     }
 }

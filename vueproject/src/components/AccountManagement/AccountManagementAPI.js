@@ -27,20 +27,6 @@ export function tryLogin(_email, _password) {
     })
 }
 
-export function getPasswordByEmail(_email) {
-    return axios.request({
-        url: "/getPasswordByEmail",
-        method: "get",
-        params: {
-            "email": _email
-        }
-    }).then((reply) => {
-        return reply.data
-    }).catch(() => {
-        return false
-    })
-}
-
 export function tryResetPassword(_email, _password, _checkCode) {
     return axios.request({
         url: "/resetPassword",
@@ -58,21 +44,21 @@ export function tryResetPassword(_email, _password, _checkCode) {
     })
 }
 
-export function getUserInfos(_email) {
-    return axios.request({
-        url: "/getInfoByEmail",
-        method: "get",
-        params: { // 对于get类型的接口, 这里的变量值要用params
-            "email": _email
-        }
-    }).then((reply) => {
-        // 这个data是json格式的
-        return reply.data
-    }).catch(() => {
-        // 错误处理 TODO
-        return false
-    })
-}
+// export function getUserInfos(_email) {
+//     return axios.request({
+//         url: "/getInfoByEmail",
+//         method: "get",
+//         params: { // 对于get类型的接口, 这里的变量值要用params
+//             "email": _email
+//         }
+//     }).then((reply) => {
+//         // 这个data是json格式的
+//         return reply.data
+//     }).catch(() => {
+//         // 错误处理 TODO
+//         return false
+//     })
+// }
 
 export function getInfoByUserId(_id) {
     return axios.request({

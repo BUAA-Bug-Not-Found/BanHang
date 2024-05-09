@@ -31,10 +31,10 @@ export default {
             type: String,
             required: true
         },
-        email: {
-            type: String,
-            required: true
-        },
+        // email: {
+        //     type: String,
+        //     required: true
+        // },
         headImage: {
             type: String,
             required: true
@@ -42,13 +42,17 @@ export default {
         sign: {
             type: String,
             required: true
+        },
+        id: {
+            type: Number,
+            required: true
         }
     },
 
     methods: {
         clickHeadImage() {
             // 跳转到otherCenter
-            router.push({name: "othersCenter", params: {"e": this.email}})
+            router.push({name: "othersCenter", params: {"id": this.id}})
         }
     }
 };

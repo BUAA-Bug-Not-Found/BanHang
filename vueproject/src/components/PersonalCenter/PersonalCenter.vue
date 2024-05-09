@@ -121,10 +121,10 @@
           this.sign = "快介绍一下自己吧~"
         }
         // 加载一下匿名贴和互助贴
-        getHelpBlogs(userStateStore().email).then((res) => {
+        getHelpBlogs(userStateStore().user_id).then((res) => {
           this.helpBlogs = res
         })
-        getWaterBlogs(userStateStore().email).then((res) => {
+        getWaterBlogs(userStateStore().user_id).then((res) => {
           this.waterBlogs = res
         })
     },

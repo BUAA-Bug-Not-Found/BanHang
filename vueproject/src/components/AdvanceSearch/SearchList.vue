@@ -66,7 +66,7 @@
           :key="index"
           :nickname="post.nickname"
           :sign="post.sign"
-          :email="post.email"
+          :id="post.id"
           :headImage="post.url"
       >
         <!-- <v-divider style="margin-top: 0px;"></v-divider> -->
