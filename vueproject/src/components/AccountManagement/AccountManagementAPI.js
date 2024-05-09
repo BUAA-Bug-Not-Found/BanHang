@@ -153,7 +153,7 @@ export function isSignFormatOk(sign) {
 
 export function checkLogin() {
     if (!userStateStore().email) {
-          showTip("请首先登陆", false)
+          showTip("请首先登录", false)
           router.replace({path: "/loginPage"})
     }
 }
