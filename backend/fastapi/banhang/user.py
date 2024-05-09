@@ -52,17 +52,20 @@ def checkNickname(nickname:str)->bool:
 
 def update_password_to_hash(password:str)->str:
     return hashlib.sha256((password+"banhang").encode()).hexdigest()
-
-@router.put("/login",tags=["注册登录"], response_model=successResponse,
+class LoginResponse(BaseModel):
+    isSuccess:bool = True
+    id:int
+@router.put("/login",tags=["注册登录"], response_model=LoginResponse,
             responses={400: {"model": excResponse}})
 def login(req:loginRequest,request:Request, response: Response, db: Session = Depends(get_db)):
     user = crud.get_user_by_email(db, req.email)
     if not user or (user.password != req.password and update_password_to_hash(req.password) != user.password):
-        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password"})
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password",
+                                                                       'id':0})
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
                         samesite='none',
                         secure= False if os.environ.get("CHECKCODE") is not None else True )
-    return {"isSuccess":True}
+    return {"isSuccess":True,'id':user.id}
 
 @router.put("/logout",tags=["注册登录"], response_model=successResponse,
             responses={400: {"model": excResponse}})
