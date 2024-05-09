@@ -134,7 +134,7 @@ class UserInfoResponse(BaseModel):
     user_id: int
     email: str
 @router.get("/getInfoByEmail", tags=['用户中心'],response_model=UserInfoResponse, # todo deprecated
-            responses={400: {"model": excResponse}})
+            responses={400: {"model": excResponse}}, deprecated=True)
 def get_info_by_email(email:str, db:Session = Depends(get_db)):
     user = crud.get_user_by_email(db, email)
     if not user:
@@ -156,7 +156,7 @@ def get_current_user_info(current_user: Optional[dict] = Depends(authorize), db:
 class SetSignRequest(BaseModel):# todo deprecated
     email:str
     sign:str
-@router.post("/setSignByEmail", tags=['用户中心'], response_model=successResponse, # todo deprecated
+@router.post("/setSignByEmail", tags=['用户中心'], response_model=successResponse, deprecated=True, # todo deprecated
              responses={400: {"model": excResponse}})
 def set_sign_by_email(req:SetSignRequest, current_user: Optional[dict] = Depends(authorize),
                       db:Session = Depends(get_db)):
@@ -188,7 +188,7 @@ def set_sign_by_id(req:SetSignRequestNew, current_user: Optional[dict] = Depends
 class SetNicknameRequest(BaseModel): # todo deprecated
     email:str
     nickname:str
-@router.post("/setNicknameByEmail", tags=['用户中心'], response_model=successResponse, #todo deprecated
+@router.post("/setNicknameByEmail", tags=['用户中心'], response_model=successResponse, deprecated=True, #todo deprecated
              responses={400: {"model": excResponse}})
 def set_nickname_by_email(req:SetNicknameRequest,current_user: Optional[dict] = Depends(authorize),
                       db:Session = Depends(get_db)):
@@ -230,7 +230,7 @@ class GetAnonyBlogResponse(BaseModel):
     time: datetime
     blogId: int
     blogText: str
-@router.get("/getAnonyBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse], # todo deprecated
+@router.get("/getAnonyBlogsByEmail", tags=['用户中心'], response_model=List[GetAnonyBlogResponse], deprecated=True, # todo deprecated
             responses={400: {"model": excResponse}})
 def get_anonyBlogs_by_email(email:str,current_user: Optional[dict] = Depends(authorize),
                             db:Session = Depends(get_db)):
@@ -271,7 +271,7 @@ class GetHelpBlogResponse(BaseModel):
     firstPhotoUrl:str
     time: datetime
     blogId: int
-@router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetHelpBlogResponse], # todo deprecated
+@router.get("/getHelpBlogsByEmail", tags=['用户中心'], response_model=List[GetHelpBlogResponse], deprecated=True, # todo deprecated
             responses={400: {"model": excResponse}})
 def get_helpBlogs_by_email(email:str,#current_user: Optional[dict] = Depends(authorize),
                             db:Session = Depends(get_db)):
@@ -311,7 +311,7 @@ def get_helpBlogs_by_id(id: int,#current_user: Optional[dict] = Depends(authoriz
 
 class QueryStarResponse(BaseModel):
     isStar: bool
-@router.get("/queryStar", tags=["用户中心"], response_model=QueryStarResponse, # todo deprecated
+@router.get("/queryStar", tags=["用户中心"], response_model=QueryStarResponse, deprecated=True, # todo deprecated
             responses={400: {"model": excResponse}})
 def query_star(email1: str, email2: str, db:Session = Depends(get_db)):
     user1 = crud.get_user_by_email(db, email1)
@@ -334,7 +334,7 @@ class SetStarRequest(BaseModel): # todo deprecated
     email2: str
     state: bool
 
-@router.post("/setStarState", response_model=successResponse, tags=["用户中心"], # todo deprecated
+@router.post("/setStarState", response_model=successResponse, tags=["用户中心"], deprecated=True, # todo deprecated
              responses={400: {"model": excResponse}})
 def set_star_state(req:SetStarRequest, db:Session = Depends(get_db),
                    current_user: Optional[dict] = Depends(authorize)):
@@ -420,7 +420,7 @@ class FansResponseNew(BaseModel):
 class getFansResponseNew(BaseModel):
     fans: List[FansResponseNew]
 
-@router.get("/getFansByEmail", tags=['用户中心'], response_model=getFansResponse)
+@router.get("/getFansByEmail", tags=['用户中心'], response_model=getFansResponse, deprecated=True) # todo deprecated
 def get_fans_by_email(email:str,db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_email(db, email)
@@ -446,7 +446,7 @@ class getStarsResponse(BaseModel):
 class getStarsResponseNew(BaseModel):
     stars: List[FansResponseNew]
 
-@router.get("/getStarsByEmail", tags=['用户中心'], response_model=getStarsResponse) # todo deprecated
+@router.get("/getStarsByEmail", tags=['用户中心'], response_model=getStarsResponse, deprecated=True) # todo deprecated
 def get_stars_by_email(email:str, db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_email(db, email)
@@ -469,7 +469,7 @@ def get_stars_by_id(id:int, db: Session = Depends(get_db),
 class SetUserHeadUrlRequest(emailRequest): # todo deprecated
     url:str
 
-@router.post("/setHeadImageByEmail", tags=['用户中心'], response_model=successResponse) # todo deprecated
+@router.post("/setHeadImageByEmail", tags=['用户中心'], response_model=successResponse, deprecated=True) # todo deprecated
 def set_head_image_by_email(req:SetUserHeadUrlRequest, db: Session = Depends(get_db),
                             current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_email(db, req.email)
@@ -496,7 +496,7 @@ def set_head_image_by_id(req:SetUserHeadUrlRequestNew, db: Session = Depends(get
     crud.set_user_head_url_by_id(db, req.id, req.url)
     return successResponse()
 
-@router.get("/getInfoByUserId", tags=['用户中心'],response_model=UserInfoResponse, # todo deprecated
+@router.get("/getInfoByUserId", tags=['用户中心'],response_model=UserInfoResponse, deprecated=True, # todo deprecated
             responses={400: {"model": excResponse}})
 def get_info_by_id(userId:int, db:Session = Depends(get_db)):
     user = crud.get_user_by_id(db, userId)
