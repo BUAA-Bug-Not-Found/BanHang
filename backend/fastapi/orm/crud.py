@@ -2,7 +2,7 @@ import datetime
 import os
 from typing import List, Type, Dict
 
-from fastapi import  BackgroundTasks
+from fastapi import BackgroundTasks
 from sqlalchemy.orm import Session, aliased
 from orm import models, schemas
 from sqlalchemy import or_, and_, desc, func, case, distinct, exists
@@ -51,19 +51,13 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def set_user_head_url_by_email(db: Session, email: str, url): # todo deprecated
-    user = get_user_by_email(db, email)
-    user.userAvatarURL = url
-    db.commit()
-    db.refresh(user)
-    return user
-
-def set_user_head_url_by_id(db: Session, id: int, url): # todo deprecated
+def set_user_head_url_by_id(db: Session, id: int, url):
     user = get_user_by_id(db, id)
     user.userAvatarURL = url
     db.commit()
     db.refresh(user)
     return user
+
 
 def create_checkcode_record(db: Session, record: schemas.EmailCheck):
     if tmp := db.query(models.CheckCode).filter(models.CheckCode.email == record.email).first():
@@ -91,13 +85,6 @@ def set_password_by_email(db: Session, password: str, email: str):
     db.commit()
 
 
-def set_sign_by_email(db: Session, email: str, sign: str): # todo deprecated
-    user = get_user_by_email(db, email)
-    user.sign = sign
-    db.commit()
-    db.refresh(user)
-    return user
-
 def set_sign_by_id(db: Session, id: int, sign: str):
     user = get_user_by_id(db, id)
     user.sign = sign
@@ -106,13 +93,6 @@ def set_sign_by_id(db: Session, id: int, sign: str):
     return user
 
 
-def set_username_by_email(db: Session, email: str, username: str): # todo deprecated
-    user = get_user_by_email(db, email)
-    user.username = username
-    db.commit()
-    db.refresh(user)
-    return user
-
 def set_username_by_id(db: Session, id: int, username: str):
     user = get_user_by_id(db, id)
     user.username = username
@@ -120,18 +100,6 @@ def set_username_by_id(db: Session, id: int, username: str):
     db.refresh(user)
     return user
 
-
-def set_star_state_by_email(db: Session, email1: str, email2: str, is_followed: bool): # todo deprecated
-    user1 = get_user_by_email(db, email1)
-    user2 = get_user_by_email(db, email2)
-    if is_followed:
-        if user2 not in user1.followed:
-            user1.followed.append(user2)
-            db.commit()
-    else:
-        if user2 in user1.followed:
-            user1.followed.remove(user2)
-            db.commit()
 
 def set_star_state_by_user_id(db: Session, id1: int, id2: int, is_followed: bool):
     user1 = get_user_by_id(db, id1)
@@ -144,6 +112,7 @@ def set_star_state_by_user_id(db: Session, id1: int, id2: int, is_followed: bool
         if user2 in user1.followed:
             user1.followed.remove(user2)
             db.commit()
+
 
 def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymous: bool, image_urls: list[str],
                 tag_ids: list[int]):
@@ -195,10 +164,6 @@ def get_blog_by_blog_id(db: Session, blog_id: int):
     return (db.query(models.Blog)
             .filter(models.Blog.id == blog_id).first())
 
-# 未更新 deleted 相关内容，被鹿哥调用
-def get_blog_by_email(db: Session, email: str): # todo deprecated
-    user = get_user_by_email(db, email)
-    return db.query(models.Blog).filter(models.Blog.user_id == user.id).all()
 
 def get_blogs_by_user_id(db: Session, id: int, not_deleted: bool = False):
     user = get_user_by_id(db, id)
@@ -214,7 +179,8 @@ def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False, 
             .offset(offset).limit(limit).all())
 
 
-def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False, not_deleted: bool = False):
+def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: int = 10, asc: bool = False,
+                        not_deleted: bool = False):
     return (db.query(models.Blog)
             .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
             .join(models.BlogTag, models.Blog.tags)
@@ -223,12 +189,13 @@ def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: i
             .offset(offset).limit(limit).all())
 
 
-def get_blogs_by_search_content(db: Session, search_content: str, offset: int, limit: int, asc: int, not_deleted: bool = False):
+def get_blogs_by_search_content(db: Session, search_content: str, offset: int, limit: int, asc: int,
+                                not_deleted: bool = False):
     word_list = [x.strip() for x in search_content.split(" ") if x != ""]
     return (db.query(models.Blog)
             .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
             .filter(
-            or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
+        or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
             .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
             .offset(offset).limit(limit).all())
 
@@ -286,6 +253,7 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
                                                      (models.UserQuestionLike.question_id == models.Question.id)))
                 .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
                 .filter(models.Question.user_id == models.User.id)
+                .filter(models.Question.delated == False)
                 .group_by(models.Question.id, models.Question.delated, models.Question.archived)
                 ).order_by(models.Question.create_at.asc()).offset(offset).limit(limit)
     else:
@@ -308,6 +276,7 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
                                                      (models.UserQuestionLike.question_id == models.Question.id)))
                 .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
                 .filter(models.Question.user_id == models.User.id)
+                .filter(models.Question.delated == False)
                 .group_by(models.Question.id,
                           models.Question.delated,
                           models.Question.archived,
@@ -371,6 +340,7 @@ def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: boo
                                                       (models.UserQuestionLike.question_id == models.Question.id)))
                  .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
                  .filter(models.Question.user_id == models.User.id)
+                 .filter(models.Question.delated == False)
                  .filter(exists().where((models.QuestionQuestionTag.question_id == models.Question.id) &
                                         (models.QuestionQuestionTag.question_tag_id == tag.id)))
                  .group_by(models.Question.id, models.Question.delated, models.Question.archived)
@@ -382,11 +352,15 @@ def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: boo
 
 
 def get_question_sum_by_tag_id(db: Session, tagId):
-    return len(db.query(models.QuestionTag).filter(models.QuestionTag.id == tagId).first().questions)
+    return len(db.query(models.QuestionQuestionTag.question_tag_id, models.Question.id)
+               .filter(models.QuestionQuestionTag.question_tag_id == tagId)
+               .filter(models.Question.delated == False)
+               .filter(models.QuestionQuestionTag.question_id == models.Question.id)
+               .all())
 
 
 def get_question_num(db: Session):
-    return len(db.query(models.Question).all())
+    return len(db.query(models.Question).filter(models.Question.delated == False).all())
 
 
 def get_all_question_tags(db: Session):
@@ -439,7 +413,7 @@ def get_question_by_id(db: Session, id: int) -> models.Question:
 
 def delete_question_by_id(db: Session, id: int):
     question = get_question_by_id(db, id)
-    db.delete(question)
+    question.delated = True
     db.commit()
 
 
@@ -508,6 +482,7 @@ def search_question_by_word_list(db: Session, word_list: List[str], offset: int,
             .order_by(
         models.Question.create_at.desc() if asc == 2 else desc(models.Question.liked_user_count) if asc == 3 else
         models.Question.create_at.desc())
+            .filter(models.Question.delated == False)
             .offset(offset).limit(limit).all())
 
 
@@ -515,15 +490,12 @@ def get_search_question_sum_by_word_list(db: Session, word_list: List[str], offs
     return len(
         (db.query(models.Question)
          .filter(or_(*[models.Question.content.like(f"%{word}%") for word in word_list]))
+         .filter(models.Question.delated == False)
          .order_by(
             models.Question.create_at.desc() if asc == 2 else desc(models.Question.liked_user_count) if asc == 3 else
             models.Question.create_at.desc()).all())
     )
 
-
-def get_questions_by_email(db: Session, email: str) -> List[models.Question]: # todo deprecated
-    user = get_user_by_email(db, email)
-    return db.query(models.Question).filter(models.Question.user_id == user.id).all()
 
 def get_questions_by_user_id(db: Session, id: int) -> List[models.Question]:
     user = get_user_by_id(db, id)
@@ -572,7 +544,7 @@ def set_ans_accept(db: Session, is_accepted: bool, question_comment_id: int):
 
 
 def set_like_question(db: Session, user_id: int, question_id: int, is_like: bool,
-                            background_tasks: BackgroundTasks):
+                      background_tasks: BackgroundTasks):
     question = get_question_by_id(db, question_id)
     user = get_user_by_id(db, user_id)
     if is_like:
@@ -588,7 +560,7 @@ def set_like_question(db: Session, user_id: int, question_id: int, is_like: bool
 
 
 def set_like_question_comment(db: Session, user_id: int, question_comment_id: int, is_like: bool,
-                            background_tasks: BackgroundTasks):
+                              background_tasks: BackgroundTasks):
     comment = get_question_comment_by_id(db, question_comment_id)
     user = get_user_by_id(db, user_id)
     if is_like:
@@ -607,6 +579,7 @@ def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
     return db.query(Conversation).filter(
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
 
+
 def send_message_for_question_answer(comment_id: int):
     print("back_send_message_for_answer: {}".format(comment_id))
     db = SessionLocal()
@@ -620,7 +593,8 @@ def send_message_for_question_answer(comment_id: int):
     finally:
         db.close()
 
-def send_message_for_like_question_comment(comment_id: int, like_user:int):
+
+def send_message_for_like_question_comment(comment_id: int, like_user: int):
     print("back_send_message_for {} like_answer {}".format(like_user, comment_id))
     db = SessionLocal()
     try:
@@ -632,7 +606,8 @@ def send_message_for_like_question_comment(comment_id: int, like_user:int):
     finally:
         db.close()
 
-def send_message_for_like_question(question_id: int, like_user:int):
+
+def send_message_for_like_question(question_id: int, like_user: int):
     print("back_send_message_for {} like_question {}".format(like_user, question_id))
     db = SessionLocal()
     try:
