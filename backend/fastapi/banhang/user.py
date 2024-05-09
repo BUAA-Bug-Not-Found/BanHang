@@ -404,13 +404,21 @@ def search_questions_by_content(req:SearchUsersRequest,db: Session = Depends(get
     return {"users": users,
             "userSum": crud.get_search_user_sum_by_word(db, req.searchContent, offset=offset, limit=limit)}
 
-class FansResponse(BaseModel):
+class FansResponse(BaseModel): # todo deprecated
     email: str
     headUrl: str
     nickname: str
     sign: str
-class getFansResponse(BaseModel):
+class getFansResponse(BaseModel): # todo deprecated
     fans: List[FansResponse]
+
+class FansResponseNew(BaseModel):
+    id: int
+    headUrl: str
+    nickname: str
+    sign: str
+class getFansResponseNew(BaseModel):
+    fans: List[FansResponseNew]
 
 @router.get("/getFansByEmail", tags=['用户中心'], response_model=getFansResponse)
 def get_fans_by_email(email:str,db: Session = Depends(get_db),
@@ -422,7 +430,7 @@ def get_fans_by_email(email:str,db: Session = Depends(get_db),
             for fan in user.followers]
     return {'fans':fans}
 
-@router.get("/getFansById", tags=['用户中心'], response_model=getFansResponse)
+@router.get("/getFansById", tags=['用户中心'], response_model=getFansResponseNew)
 def get_fans_by_id(id:int,db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_id(db, id)
@@ -435,6 +443,9 @@ def get_fans_by_id(id:int,db: Session = Depends(get_db),
 class getStarsResponse(BaseModel):
     stars: List[FansResponse]
 
+class getStarsResponseNew(BaseModel):
+    stars: List[FansResponseNew]
+
 @router.get("/getStarsByEmail", tags=['用户中心'], response_model=getStarsResponse) # todo deprecated
 def get_stars_by_email(email:str, db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
@@ -445,7 +456,7 @@ def get_stars_by_email(email:str, db: Session = Depends(get_db),
             for star in user.followed]
     return {'stars':stars}
 
-@router.get("/getStarsById", tags=['用户中心'], response_model=getStarsResponse)
+@router.get("/getStarsById", tags=['用户中心'], response_model=getStarsResponseNew)
 def get_stars_by_id(id:int, db: Session = Depends(get_db),
                       current_user: Optional[dict] = Depends(authorize)):
     user = crud.get_user_by_id(db, id)
