@@ -45,7 +45,6 @@ import {goToOtherUser, uploadComment} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import UserStateStore from "@/store";
-import router from "@/router";
 
 export default {
   name: "CommentShow",
@@ -137,7 +136,7 @@ export default {
                   showClose: true,
                   type: 'success',
                 })
-                router.go(0)
+                location.reload()
               } else {
                 ElMessage({
                   message: '评论失败，请修改内容或稍后再试',
