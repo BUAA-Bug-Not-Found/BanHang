@@ -51,7 +51,7 @@ def mock_user_data():
     return {
         "username": "testuser",
         "password": "testpass",
-        "email": "testemail@test.com",
+        "email": "testemail@buaa.edu.cn",
         "checkCode": "123456"
     }
 
