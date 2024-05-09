@@ -87,7 +87,7 @@ export default {
         this.sign = userStateStore().sign
         this.headImage1 = userStateStore().headImage
         if (!userStateStore().email) {
-            showTip("请首先登陆", false)
+            showTip("请首先登录", false)
             router.replace({path: "loginPage"})
         }
         this.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

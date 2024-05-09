@@ -1,7 +1,7 @@
 <template>
   <v-card :class="{ 'pc-container': !display.smAndDown.valueOf(), 'pe-container': display.smAndDown.valueOf() }">
     <div v-if="!isLogin">
-      <div>您还没有登陆</div>
+      <div>您还没有登录</div>
     </div>
     <div v-else-if="this.curUserId == 0">
       <div v-if="this.contactList.length == 0">
