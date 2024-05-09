@@ -33,7 +33,7 @@
             <img :src="myAvatar" class="profile-photo" />
           </div>
           <div v-else class="message-left">
-            <img :src="curAvatar" class="profile-photo" />
+            <img :src="curAvatar" class="profile-photo" @click="gotoIndex()"/>
             <div style="display: flex;flex-direction: column;   align-items: flex-start; justify-content: flex-start;">
               <div class="time">{{ this.formatDateTime(message.time) }}</div>
               <div class="content">
@@ -58,6 +58,7 @@ import axios from 'axios';
 import userStateStore from '@/store';
 import { useDisplay } from 'vuetify'
 import { $bus } from '@/store';
+import router from "@/router";
 
 export default {
   name: "MessageContainer",
@@ -111,6 +112,9 @@ export default {
     }
   },
   methods: {
+    gotoIndex() {
+      router.push('/othersCenter/' + this.curUserId)
+    },
     updateData() {
       if (this.isLogin) {
         if (this.curUserId != 0) {
