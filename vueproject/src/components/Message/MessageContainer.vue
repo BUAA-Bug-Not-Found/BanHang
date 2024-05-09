@@ -8,7 +8,7 @@
         您还没有联系人
       </div>
       <contactCard v-else v-for="(item, index) in contactList" :key="index" :user_name="item.userName" :user_id="item.userId"
-        :avatar="item.userAvatarUrl" :last_message="item.lastMessage" @open-message="handleContactClicked" />
+        :avatar="item.userAvatarUrl" :last_message="item.lastMessage" :unreadMessageNum="item.unreadMessageNum" @open-message="handleContactClicked" />
     </div>
 
     <div v-else style="height: 100%; display: flex; flex-direction: column;;">
