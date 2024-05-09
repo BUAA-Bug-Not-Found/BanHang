@@ -47,7 +47,7 @@ export default {
 
     const url = ref('')
 
-    const email = ref('')
+    // const email = ref('')
 
     const goHomePage = () => {
       if(props.userId !== UserStateStore.getUserId) {
@@ -61,7 +61,7 @@ export default {
     const init = () => {
       getInfoByUserIdAPI(props.userId).then(
           (res) => {
-            email.value = res.email
+            // email.value = res.email
             nickname.value = res.nickname
             url.value = res.url
             sign.value = res.sign
