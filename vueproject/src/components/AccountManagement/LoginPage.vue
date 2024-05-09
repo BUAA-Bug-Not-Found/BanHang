@@ -25,7 +25,7 @@
 
 <script>
 import router from '@/router';
-import { getUserInfos, showTip, tryLogin, hashPassword} from "./AccountManagementAPI.js";
+import { showTip, tryLogin, hashPassword, getInfoByUserId} from "./AccountManagementAPI.js";
 import {userStateStore} from "../../store/index";
 import "element-plus/dist/index.css";
 
@@ -68,13 +68,20 @@ export default {
                 
                 tryLogin(this.email, hashPassword(this.password)).then((res) => {
                     if (res.isSuccess) { // 用户信息验证成功
-                        getUserInfos(this.email).then((ret) => {
+                        // getUserInfos(this.email).then((ret) => {
+                        //     const st = userStateStore();
+                        //     // 存储用户信息
+                        //     st.login_store_info(ret, this.email);
+                        //     showTip("登录成功 !", true)
+                        //     this.$router.push({name: 'blogList', params: {tagId: -1}})
+                        // })
+                        getInfoByUserId(res.id).then((ret) => {
                             const st = userStateStore();
-                            // 存储用户信息
-                            st.login_store_info(ret, this.email);
+                            st.login_store_info(ret, this.email, res.id);
                             showTip("登录成功 !", true)
                             this.$router.push({name: 'blogList', params: {tagId: -1}})
                         })
+
                     } else { // 验证失败
                         showTip("信息验证失败, 请重新输入!!", false)
                     }

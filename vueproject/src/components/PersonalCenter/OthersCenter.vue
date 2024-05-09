@@ -72,8 +72,8 @@
 import router from '@/router';
 import {queryStar, setStarState} from '@/components/PersonalCenter/PersonalCenterAPI';
 import userStateStore from '../../store';
-import { getUserInfos, showTip } from '../AccountManagement/AccountManagementAPI';
-import { getHelpBlogs } from './PersonalCenterAPI';
+import { showTip } from '../AccountManagement/AccountManagementAPI';
+import { getHelpBlogs, getOtherInfos } from './PersonalCenterAPI';
 export default {
   created() {
     if (!userStateStore().email) {
@@ -81,21 +81,29 @@ export default {
         router.replace({path: "/loginPage"})
         return
       }
-      this.otherEmail = router.currentRoute.value.params.e
+      this.otherId = router.currentRoute.value.params.id
       // 拉取该用户的信息
-      getUserInfos(this.otherEmail).then((_infos) => {
+      getOtherInfos(this.otherId).then((_infos) => {
         if (_infos === false) {
           showTip("应用出错!", false)
         } else {
           this.infos = _infos
         }
       })
+
+      // getUserInfos(this.otherEmail).then((_infos) => {
+      //   if (_infos === false) {
+      //     showTip("应用出错!", false)
+      //   } else {
+      //     this.infos = _infos
+      //   }
+      // })
       // 拉取该用户的互助贴
-      getHelpBlogs(this.otherEmail).then((_helpBlogs) => {
+      getHelpBlogs(this.otherId).then((_helpBlogs) => {
         this.otherBlogs = _helpBlogs;
       })
       // 当用户没有登陆的时候，这时候是无法正常queryStar的
-      queryStar(userStateStore().email, this.otherEmail).then((res) => {
+      queryStar(userStateStore().user_id, this.otherId).then((res) => {
         this.isStar = res.isStar
       }).catch(() => {
         showTip("应用出错!!", false)
@@ -108,10 +116,10 @@ export default {
         "headUrl": "",
         "nickname": "",
         "sign": "",
-        "user_id": 8
       },
       otherBlogs: [],
-      otherEmail: '', // TODO 这里要填充
+      otherEmail: '', 
+      otherId: '',
       isStar: false,
       images: [
         'https://via.placeholder.com/150',
@@ -123,11 +131,11 @@ export default {
     // 可以添加其他方法
     clickHeart() {
       const s = userStateStore()
-      if (s.email === this.otherEmail) {
+      if (s.user_id === this.otherId) {
         showTip("不能关注自己!", false)
         return
       }
-      setStarState(s.email, this.otherEmail, !this.isStar)
+      setStarState(s.user_id, this.otherId, !this.isStar)
             .then((res) => {
               // 收到回复
               if (res.isSuccess) {
@@ -147,13 +155,13 @@ export default {
             })
     }, 
     clickChat() {
-      if (userStateStore().email === this.otherEmail) {
+      if (userStateStore().user_id === this.otherId) {
         showTip("不能和自己聊天!", false)
         return
       }
       // 跳转到聊天窗口, 传递一个参数
       localStorage.setItem('MessageInterface', JSON.stringify({
-        user_id: this.infos.user_id,
+        user_id: this.otherId,
         user_name: this.infos.nickname,
         avatar: this.infos.headUrl
       }))

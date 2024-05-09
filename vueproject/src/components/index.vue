@@ -1,7 +1,7 @@
 <script>
 import {useDisplay} from 'vuetify'
 import {useRouter} from 'vue-router'
-import {ref} from "vue";
+import { ref} from "vue";
 import userStateStore from '@/store';
 import { $bus } from '@/store';
 import { isApp, version } from '@/store';
@@ -15,10 +15,10 @@ export default {
     const store = userStateStore()
     const display = useDisplay()
     const isLogin = ref(store.isAuthentic);
-    const user_name = ref(store.user_name);
+    const user_name = ref(store.nickname);
     const avatar = ref(store.headImage);
     const showDialog = ref(false)
-
+    
     const searchContent = ref("")
     const unreadMessageNum = ref('...')
 
@@ -45,9 +45,13 @@ export default {
       avatar.value = data.avatar
       getUnreadMessageNum();
     }
+    const updateIndexNH = () => {
+      user_name.value = userStateStore().nickname
+      avatar.value = userStateStore().headImage
+    }
     $bus.on('updateIndexData', updateUserData);
     $bus.on('updateUnreadData', getUnreadMessageNum);
-
+    $bus.on('updateIndexNH', updateIndexNH);
     const timer = setInterval(() => {
       getUnreadMessageNum();
     }, 20000);
@@ -177,9 +181,10 @@ export default {
       </v-btn>
       <v-col v-if="isLogin">
         <v-avatar color="surface-variant" size="32" style="margin-right: 5px" @click="gotoLoginOrPersonalIndex()">
-          <v-img :src="this.avatar"/>
+          <v-img :src=" this.avatar"/>
         </v-avatar>
         {{ user_name }}
+        <!-- {{ store.nickname }} -->
       </v-col>
       <v-col v-else>
         <v-btn elevation="2" color="blue-darken-2" variant="flat" class="text-none" @click="gotoLoginOrPersonalIndex()">Login</v-btn>

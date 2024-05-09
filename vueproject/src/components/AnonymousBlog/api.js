@@ -1,5 +1,5 @@
 import axios from "axios";
-import {getInfoByUserId} from "@/components/AccountManagement/AccountManagementAPI";
+// import {getInfoByUserId} from "@/components/AccountManagement/AccountManagementAPI";
 
 export function uploadfile(file) {
     return axios.post('/uploadfile', file,
@@ -117,15 +117,16 @@ export function getALlBlogTags() {
 }
 
 export function goToOtherUser(otherUserId) {
-    let otherUserEmail = null
-    getInfoByUserId(otherUserId).then((info) => {
-        if (info == "false") {
-            otherUserEmail = null
-        } else {
-            otherUserEmail = info.email
-            this.$router.push({name: 'othersCenter', params: {"e": otherUserEmail}})
-        }
-    })
+    // let otherUserEmail = null
+    // getInfoByUserId(otherUserId).then((info) => {
+    //     if (info == "false") {
+    //         otherUserEmail = null
+    //     } else {
+    //         otherUserEmail = info.email
+    //         this.$router.push({name: 'othersCenter', params: {"e": otherUserEmail}})
+    //     }
+    // })
+    this.$router.push({name: 'othersCenter', params: {"id": otherUserId}})
 }
 
 export async function getTags() {

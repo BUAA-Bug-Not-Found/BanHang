@@ -1,13 +1,14 @@
 import axios from "axios";
+import { showTip } from "../AccountManagement/AccountManagementAPI";
 
 export function queryStar(_a, _b) {
     // a b email
     return axios.request({
-        url: "/queryStar",
+        url: "/queryStarById",
         method: "get",
         params: {
-            "email1": _a,
-            "email2": _b
+            "id1": _a,
+            "id2": _b
         }
     }).then((reply) => {
         return reply.data
@@ -18,11 +19,11 @@ export function queryStar(_a, _b) {
 
 export function setStarState(_a, _b, _state) {
     return axios.request({
-        url: "/setStarState",
+        url: "/setStarStateById",
         method: "post",
         data: {
-            "email1": _a,
-            "email2": _b,
+            "id1": _a,
+            "id2": _b,
             "state": _state
         }
     }).then((reply) => {
@@ -32,13 +33,13 @@ export function setStarState(_a, _b, _state) {
     })
 }
 
-export function setNickname(_a, _email) {
+export function setNickname(_a, _id) {
     return axios.request({
-        url: "/setNicknameByEmail",
+        url: "/setNicknameById",
         method: "post",
         data: {
             "nickname": _a,
-            "email": _email
+            "id": _id
         }
     }).then((reply) => {
         return reply.data
@@ -47,14 +48,14 @@ export function setNickname(_a, _email) {
     })
 }
 
-export function setSign(_a, _email) {
+export function setSign(_a, _id) {
     return axios.request({
         // 
-        url: "/setSignByEmail",
+        url: "/setSignById",
         method: "post",
         data: {
             "sign": _a,
-            "email": _email
+            "id": _id
         }
     }).then((reply) => {
         return reply.data
@@ -63,12 +64,29 @@ export function setSign(_a, _email) {
     })
 }
 
-export function getHelpBlogs(_email) {
+export function setHeadImage(_id, _url) {
+    // 
     return axios.request({
-        url: "/getHelpBlogsByEmail",
+        // 
+        url: "/setHeadImageById",
+        method: "post",
+        data: {
+            "id": _id,
+            "url": _url
+        }
+    }).then((reply) => {
+        return reply.data
+    }).catch(() => {
+        
+    })
+}
+
+export function getHelpBlogs(_id) {
+    return axios.request({
+        url: "/getHelpBlogsById",
         method: "get",
         params: {
-            "email": _email
+            "id": _id
         },
         withCredentials: true
     }).then((reply) => {
@@ -78,12 +96,12 @@ export function getHelpBlogs(_email) {
     })
 }
 
-export function getWaterBlogs(_email) {
+export function getWaterBlogs(_id) {
     return axios.request({
-        url: "/getAnonyBlogsByEmail",
+        url: "/getAnonyBlogsById",
         method: "get",
         params: {
-            "email": _email
+            "id": _id
         }
     }).then((reply) => {
         return reply.data
@@ -92,13 +110,27 @@ export function getWaterBlogs(_email) {
     })
 }
 
-export function getStars(_email) {
+export function getStars(_id) {
     // 
     return axios.request({
-        url: "/getStarsByEmail",
+        url: "/getStarsById",
         method: "get",
         params: {
-            "email": _email
+            "id": _id
+        }
+    }).then((reply) => {
+        return reply.data
+    }).catch(() => {
+        showTip("网络异常", false)
+    })
+}
+
+export function getFans(_id) {
+    return axios.request({
+        url: "/getFansById",
+        method: "get",
+        params: {
+            "id": _id
         }
     }).then((reply) => {
         return reply.data
@@ -107,33 +139,18 @@ export function getStars(_email) {
     })
 }
 
-export function getFans(_email) {
+export function getOtherInfos(_id) {
     return axios.request({
-        url: "/getFansByEmail",
+        url: "/getOtherInfosById",
         method: "get",
-        params: {
-            "email": _email
+        params: { // 对于get类型的接口, 这里的变量值要用params
+            "id": _id
         }
     }).then((reply) => {
+        // 这个data是json格式的
         return reply.data
     }).catch(() => {
-        
-    })
-}
-
-export function setHeadImage(_email, _url) {
-    // 
-    return axios.request({
-        // 
-        url: "/setHeadImageByEmail",
-        method: "post",
-        data: {
-            "email": _email,
-            "url": _url
-        }
-    }).then((reply) => {
-        return reply.data
-    }).catch(() => {
-        
+        // 错误处理 TODO
+        return false
     })
 }

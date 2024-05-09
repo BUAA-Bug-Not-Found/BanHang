@@ -3,7 +3,7 @@ import mitt from "mitt"
 
 export const $bus = mitt();
 export const isApp = false;
-export const version = ['v0.0.2', 'alpha']
+export const version = ['v0.0.3', 'alpha']
 export const userStateStore = defineStore("user", {
     state: () => {
         if (isApp) {
@@ -13,7 +13,6 @@ export const userStateStore = defineStore("user", {
                 return {
                     user_id: perviousData['user_id'],
                     user_name: perviousData['user_name'],
-                    profile_photo: perviousData['profile_photo'],
                     register_date: perviousData['register_date'],
                     isAuthentic: perviousData['isAuthentic'],
                     email: perviousData['email'],
@@ -26,7 +25,6 @@ export const userStateStore = defineStore("user", {
         return {
             user_id: 0,
             user_name: "未登录",
-            profile_photo: "src/assets/images/default-avatar.png",
             register_date: "default",
             isAuthentic: false,
             email: "",
@@ -49,9 +47,6 @@ export const userStateStore = defineStore("user", {
         getUserId: (state) => {
             return state.user_id
         },
-        getProfilePhoto: (state) => {
-            return state.profile_photo
-        },
         getRegisterDate: (state) => {
             return state.register_date
         },
@@ -61,28 +56,13 @@ export const userStateStore = defineStore("user", {
     },
 
     actions: {
-        async login_store_info(accountInfo, _email) {
-            // this.user_id = accountInfo.user_id
-            // this.user_name = accountInfo.user_name
-            // if (accountInfo.profile_photo.substring(0, 3) === "/9j") {
-            //     this.profile_photo = 'data:image/jpg;base64,' + accountInfo.profile_photo
-            // } else if (accountInfo.profile_photo.substring(0, 3) === "iVB") {
-            //     this.profile_photo = 'data:image/png;base64,' + accountInfo.profile_photo
-            // } else {
-            //     this.profile_photo = "src/assets/image/default-avatar.png"
-            // }
-            // this.register_date = accountInfo.register_date
-            // this.isAuthentic = true
-            // console.log("accountInfo")
-            // console.log(accountInfo)
-            
+        async login_store_info(accountInfo, _email, _id) {
             this.email = _email;
             this.headImage = accountInfo.url;
             this.nickname = accountInfo.nickname;
             this.sign = accountInfo.sign;
-            this.user_id = accountInfo.user_id;
+            this.user_id = _id;
             this.user_name = this.nickname;
-            this.profile_photo = this.headImage;
             this.isAuthentic = true;
             $bus.emit("updateIndexData", {
                 isLogin: true,
@@ -93,7 +73,6 @@ export const userStateStore = defineStore("user", {
                 localStorage.setItem("userInfo", JSON.stringify({
                     user_id: this.user_id,
                     user_name: this.user_name,
-                    profile_photo: this.profile_photo,
                     register_date: this.register_date,
                     isAuthentic: this.isAuthentic,
                     email: this.email,
@@ -104,7 +83,7 @@ export const userStateStore = defineStore("user", {
             }
         },
         async reg_success_info(accountInfo) {
-            this.user_name = accountInfo.user_name
+            this.user_name = accountInfo.nickname
             this.isAuthentic = true
         },
         async logout() {
