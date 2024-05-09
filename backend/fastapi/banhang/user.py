@@ -62,6 +62,8 @@ def login(req:loginRequest,request:Request, response: Response, db: Session = De
     if not user or (user.password != req.password and update_password_to_hash(req.password) != user.password):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid username or password",
                                                                        'id':0})
+    if not req.email.endswith("buaa.edu.cn"):
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"邮箱不是北航邮箱，目前仅北航使用"})
     response.set_cookie(key="Auth", value=generate_jwt_token(user.id, user.username),
                         samesite='none',
                         secure= False if os.environ.get("CHECKCODE") is not None else True )
@@ -78,6 +80,8 @@ def logout(response: Response):
 def register(req:registerRequest, db: Session = Depends(get_db)):
     if not crud.is_valid_checkCode(db, req.checkCode, req.email):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"Invalid check"})
+    if not req.email.endswith("buaa.edu.cn"):
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"邮箱不是北航邮箱，目前仅北航使用"})
     user = crud.get_user_by_email(db, req.email)
     if user:
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"user exists"})
@@ -105,6 +109,8 @@ def send_check_code(req: emailRequest, db:Session = Depends(get_db)):
         checkcode = int(os.environ.get("CHECKCODE"))
     if not is_valid_email(req.email):
         raise EXC.UniException(key = "isSuccess", value=False, others={"description":"invalid email"})
+    if not req.email.endswith("buaa.edu.cn"):
+        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"邮箱不是北航邮箱，目前仅北航使用"})
     try:
         if os.environ.get("CHECKCODE") is None:
             MailSender.send_by_buaa_mail(req.email, checkcode)
