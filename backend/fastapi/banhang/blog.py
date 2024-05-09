@@ -6,7 +6,6 @@ import orm.crud as crud
 from pydantic import BaseModel, field_validator
 from tools.check_user import check_user
 from typing import List
-from banhang.message import send_message, MessageCreate
 
 def get_blog_from_db_blog(db, db_blog):
 	db_images = db_blog.images
@@ -159,12 +158,6 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
 	if db_blog_comment == None:
 		return {"response":"error"}
 	else:
-		if blog_comment.replyToCommentId == None:
-			send_message(db, 50, message_create=MessageCreate(targetUserId=db_blog.user_id,
-													 content=f"你的帖子有了新回复 {blog_comment.commentContent}"))
-		else:
-			send_message(db, 50, message_create=MessageCreate(targetUserId=db_blog_comment.reply_to_comment.user_id,
-													 content=f"你的评论有了新回复 {blog_comment.commentContent}"))
 		return {"response":"success"}
 	
 	
