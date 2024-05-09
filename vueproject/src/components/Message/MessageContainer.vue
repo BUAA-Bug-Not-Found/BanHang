@@ -3,7 +3,7 @@
     <div v-if="!isLogin">
       <div>您还没有登陆</div>
     </div>
-    <div v-else-if="this.curUserId == 0">
+    <div v-else-if="this.curUserId == 0" :class="{'contact-container-pc': !display.smAndDown.valueOf(), 'contact-container-pe': display.smAndDown.valueOf() }">
       <div v-if="this.contactList.length == 0">
         您还没有联系人
       </div>
@@ -218,7 +218,6 @@ export default {
   max-height: calc(100vh - 56px - 56px - 70px - 54px + 3px);
   background-color: rgb(238, 238, 238);
 }
-
 .message-container-pc {
   /* 可根据实际需要设置高度 */
   display: flex;
@@ -229,6 +228,24 @@ export default {
   max-height: calc(100vh - 64px - 56px - 70px + 3px);
   background-color: rgb(238, 238, 238);
 }
+
+.contact-container-pe {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 56px - 54px + 3px);
+}
+
+.contact-container-pc {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 64px + 3px);
+}
+
+
 .input {
   height: 56px;
   display: flex;
