@@ -18,7 +18,7 @@ else:
     SQLALCHEMY_DATABASE_URL = "sqlite:///{}".format(dbPath)
 
 Base = declarative_base()
-engine = create_engine(SQLALCHEMY_DATABASE_URL) if SQLALCHEMY_DATABASE_URL.startswith("postgresql") else \
+engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_size=32, max_overflow=1000) if SQLALCHEMY_DATABASE_URL.startswith("postgresql") else \
     create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
