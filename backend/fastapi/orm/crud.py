@@ -508,7 +508,8 @@ def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionC
                                      question=get_question_by_id(db, questionCommentCreat.questionId),
                                      content=questionCommentCreat.content,
                                      images=[get_question_comment_image_by_id(db, imageid)
-                                             for imageid in questionCommentCreat.questionCommentImageids])
+                                             for imageid in questionCommentCreat.questionCommentImageids],
+                                     reply_comment_id=questionCommentCreat.replyCommentId)
     db.add(comment)
     db.commit()
     db.refresh(comment)

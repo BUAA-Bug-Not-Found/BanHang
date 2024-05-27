@@ -162,6 +162,7 @@ class QuestionComment(Base):
     create_at = Column(DateTime, server_default=func.now())
     delated = Column(Boolean, default=False)
     accepted = Column(Boolean, default=False)
+    reply_comment_id = Column(Integer, ForeignKey('question_comments.id'), nullable=True)
 
     question = relationship("Question", back_populates="comments")
     user = relationship("User", back_populates="question_comments")

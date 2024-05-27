@@ -106,6 +106,7 @@ class QuestionCommentCreat(BaseModel):
     userId:int
     questionCommentImageids: List[int]
     questionId: int = 0
+    replyCommentId: int = -1
 class MessageShow(BaseModel):
     senderName: str
     senderId: int

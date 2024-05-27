@@ -285,6 +285,37 @@ def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Ses
     ))
     return {"isSuccess": True}
 
+class ReplyAnswerRequest(BaseModel):
+    replyCommentId: int
+    ansContent: AnsContent
+
+@router.post("/replyComment", tags=["Question"], response_model=successResponse)
+def get_question_answer_by_id(ans_req:ReplyAnswerRequest, background_tasks: BackgroundTasks,
+                              db: Session = Depends(get_db), current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
+    target_comment = crud.get_question_comment_by_id(db, ans_req.replyCommentId)
+    if not target_comment:
+        raise UniException(key="isSuccess", value=False, others={"description": "回答id不存在"})
+    # target_question = target_comment.question
+    comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(
+        content=ans_req.ansContent.content,
+        userId=current_user['uid'],
+        questionCommentImageids=[],
+        questionId=target_comment.question_id,
+        replyCommentId=target_comment.id
+    ), background_tasks)
+    check_question_comment_image_to_id(ans_req.ansContent.imageList, db, comment.id)
+    comment = crud.update_question_comment(db, comment.id, schemas.QuestionCommentCreat(
+        content=ans_req.ansContent.content,
+        userId=current_user['uid'],
+        questionCommentImageids=[],
+        questionId=target_comment.question_id,
+        replyCommentId=target_comment.id
+    ))
+    return successResponse()
+
+
 
 @router.post("/updateAns", tags=["Question"], response_model=successResponse,
              responses={400: {"model": excResponse}})
@@ -412,6 +443,7 @@ class QuestionAnswerResponse(BaseModel):
     ansTime: datetime
     ifUserLike: bool
     likeSum: int
+    replyAnsId: int
 
 
 class GetQuestionAnswerResponse(BaseModel):
@@ -432,10 +464,12 @@ def get_question_answer_by_id(ansId: int, db: Session = Depends(get_db),
         ansState=0 if answer.delated else 1 if not answer.accepted else 2,
         ansTime=answer.create_at,
         ifUserLike=current_user is not None and answer in crud.get_user_by_id(db, current_user['uid']).liked_question_comments,
-        likeSum=len(answer.liked_users)
+        likeSum=len(answer.liked_users),
+        replyAnsId=answer.reply_comment_id if answer.reply_comment_id else -1
     )
 
     return {"ifExist": True, "answer": question_answer_response}
+
 
 
 class TagResponse(BaseModel):
