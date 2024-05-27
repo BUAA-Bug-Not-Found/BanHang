@@ -176,3 +176,51 @@ def test_solved_question(mock_question_data, mock_user_data, new_database, mock_
     blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["quesState"] == 3
+
+def test_comment_to_comment(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
+    # 注册登录
+    register_login_user(client, mock_user_data)
+    # 上传blog
+    res = client.post("/uploadQues", json = mock_question_data)
+    assert res.status_code == 200
+    # 检查blog是否存在
+    blogs = client.get("/getQuestions",params = {"pageNo": 1,"pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+    idlist = blogs["questions"][0]['tagIdList']
+
+    blogs = client.get('/getQuestionsByTagId', params = {"pageNo": 1,"pageSize": 100, 'tagId':idlist[0]}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+    blog = blogs['questions'][0]
+
+
+    mock_question_comment_data['quesId'] = blogs['questions'][0]['quesId']
+    # 尝试comment
+    res = client.post("/answerQues", json = mock_question_comment_data)
+    assert res.status_code == 200
+    ans = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
+    assert ans["ifExist"] == True
+    assert len(ans['question']['ansIdList']) == 1
+    answerid = ans['question']['ansIdList'][0]
+
+    ans1 = client.get('/getAnsById', params={"ansId": answerid}).json()
+    assert ans1["ifExist"] == True
+    assert ans1['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
+
+    # 尝试comment comment
+    mock_question_comment_data['replyCommentId'] = answerid
+    mock_question_comment_data['ansContent']['content'] = "hahaha"
+
+    res = client.post('/replyComment', json=mock_question_comment_data)
+    assert res.status_code == 200
+    ans = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
+    assert ans["ifExist"] == True
+    assert len(ans['question']['ansIdList']) == 2
+    answerid1 = ans['question']['ansIdList'][1]
+    ans1 = client.get('/getAnsById', params={"ansId": answerid1}).json()
+    assert ans1["ifExist"] == True
+    assert ans1['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
+    assert ans1['answer']['replyAnsId'] == answerid
