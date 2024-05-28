@@ -134,7 +134,9 @@ export default {
                    color="blue-grey-lighten-2" @click="setLikeQues">
               {{ likeSum }}
             </v-btn>
-            <v-btn variant="text" prepend-icon="mdi-message-reply-text" size="small" color="blue-grey-lighten-2">
+            <v-btn variant="text" prepend-icon="mdi-message-reply-text" size="small"
+                   @click="goto('/QuesInfo/' + question.quesId + '/0')"
+                   color="blue-grey-lighten-2">
               {{ question.ansSum }}
             </v-btn>
             <v-menu v-show="isHovering || menuClick" :location="'bottom'">
