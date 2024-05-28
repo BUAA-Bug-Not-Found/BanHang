@@ -36,6 +36,8 @@ class User(Base):
                                            back_populates="liked_users")
     liked_questions = relationship("Question", secondary="user_question_likes",
                                    back_populates="liked_users")
+    focused_questions = relationship("Question", secondary="user_question_focuses",
+                                   back_populates="focused_users")
     followed = relationship(
         "User",
         secondary=user_user_stars,
@@ -140,6 +142,8 @@ class Question(Base):
     user = relationship("User", back_populates="questions")
     liked_users = relationship("User", secondary="user_question_likes",
                                back_populates="liked_questions")
+    focused_users = relationship("User", secondary="user_question_focuses",
+                               back_populates="focused_questions")
     tags = relationship("QuestionTag", secondary="question_question_tags", back_populates="questions")
 
 
@@ -187,6 +191,11 @@ class UserQuestionCommentLike(Base):
 
 class UserQuestionLike(Base):
     __tablename__ = 'user_question_likes'
+    question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
+class UserQuestionFocus(Base):
+    __tablename__ = 'user_question_focuses'
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
 
