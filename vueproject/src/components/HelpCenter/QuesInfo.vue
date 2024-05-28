@@ -104,6 +104,7 @@ export default {
             likeSum.value = res.question.likeSum
             recommendQues.value = []
             avatarShow.value = true
+            ifFocus.value = res.question.ifUserFocus
             try {
               fetchAdvise()
             } catch (e) {
@@ -134,6 +135,7 @@ export default {
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
             avatarShow.value = true
+            ifFocus.value = res.question.ifUserFocus
             recommendQues.value = []
             try {
               fetchAdvise()
