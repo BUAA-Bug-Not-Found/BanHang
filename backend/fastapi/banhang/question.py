@@ -34,6 +34,7 @@ class GetQuestionsResponse(BaseModel):
     ansSum: int
     likeSum: int
     tagIdList: List[int]
+    ifUserFocus:bool
 
 
 class GetQuestionsNewResponse(BaseModel):
@@ -81,6 +82,7 @@ def get_questions_by_page(pageNo: int = Query(..., description="页面号，从 
         retquestion['ansSum'] = question.ans_sum
         retquestion['likeSum'] = question.like_sum
         retquestion['tagIdList'] = questions_tags[question.question_id]
+        retquestion['ifUserFocus'] = question.if_user_focus
         questions.append(retquestion)
     return {"questions": questions, "quesSum": crud.get_question_num(db)}
 
@@ -134,6 +136,7 @@ def get_questions_by_tag_id(pageNo: int = Query(..., description="页面号，�
         retquestion['ansSum'] = question.ans_sum
         retquestion['likeSum'] = question.like_sum
         retquestion['tagIdList'] = questions_tags[question.question_id]
+        retquestion['ifUserFocus'] = question.if_user_focus
         questions.append(retquestion)
     return {"questions": questions, "quesSum": crud.get_question_sum_by_tag_id(db, tagId)}
 
@@ -290,7 +293,7 @@ class ReplyAnswerRequest(BaseModel):
     ansContent: AnsContent
 
 @router.post("/replyComment", tags=["Question"], response_model=successResponse)
-def get_question_answer_by_id(ans_req:ReplyAnswerRequest, background_tasks: BackgroundTasks,
+def reply_comment(ans_req:ReplyAnswerRequest, background_tasks: BackgroundTasks,
                               db: Session = Depends(get_db), current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
@@ -382,6 +385,22 @@ def set_question_like(set_like_ques: setLikeQuestion, background_tasks: Backgrou
     crud.set_like_question(db, current_user['uid'], quesId, like, background_tasks)
     return {"isSuccess": True}
 
+class SetFocusQuestionRequest(BaseModel):
+    quesId:int
+    ifFocus:int
+@router.post("/setFocusQues", tags=["Question"], response_model=successResponse,
+             responses={400: {"model": excResponse}})
+def set_question_focus(set_focus_ques: SetFocusQuestionRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db),
+                      current_user: Optional[dict] = Depends(authorize)):
+    focus = set_focus_ques.ifFocus == 1
+    quesId = set_focus_ques.quesId
+    if not current_user:
+        raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
+    if not crud.get_question_by_id(db, quesId):
+        raise UniException(key="isSuccess", value=False, others={"description": "问题不存在"})
+    crud.set_focus_question(db, current_user['uid'], quesId, focus, background_tasks)
+    return {"isSuccess": True}
+
 
 @router.post("/setLikeAns", tags=["Question"], response_model=successResponse,
              responses={400: {"model": excResponse}})
@@ -407,6 +426,7 @@ class QuestionResponse(BaseModel):
     likeSum: int
     tagIdList: List[int]
     ansIdList: List[int]
+    ifUserFocus: bool
 
 
 class GetQuestionResponse(BaseModel):
@@ -429,7 +449,8 @@ def get_question_by_id(quesId: int, db: Session = Depends(get_db),
         ifUserLike=current_user is not None and question in crud.get_user_by_id(db, current_user['uid']).liked_questions,
         likeSum=len(question.liked_users),
         tagIdList=[tag.id for tag in question.tags],
-        ansIdList=[ans.id for ans in question.comments]
+        ansIdList=[ans.id for ans in question.comments],
+        ifUserFocus=current_user is not None and question in crud.get_user_by_id(db, current_user['uid']).focused_questions
     )
 
     return {"ifExist": True, "question": question_response}
@@ -515,6 +536,7 @@ def search_questions_by_content(search_questions_request:SearchQuestionsRequest,
     limit = pageSize
     db_questions= crud.search_question_by_word_list(db, wordlist, offset=offset, limit=limit, asc=sort_mode)
     questions = []
+    current_user = crud.get_user_by_id(db, current_user["uid"]) if current_user else None
     for question in db_questions:
         # quesId,userId,userName,
         # quesContent,quesState,quesTime,
@@ -533,11 +555,13 @@ def search_questions_by_content(search_questions_request:SearchQuestionsRequest,
                     3
         retquestion['quesTime'] = question.create_at
         retquestion['ifUserLike'] = (
-            crud.get_user_by_id(db, current_user["uid"]) in question.liked_users if current_user else
-            False)
+            current_user in question.liked_users if current_user else False)
         retquestion['ansSum'] = len(question.comments)
         retquestion['likeSum'] = len(question.liked_users)
         retquestion['tagIdList'] = [tag.id for tag in question.tags]
+        retquestion['ifUserFocus'] = (
+            current_user in question.focused_users if current_user else False
+        )
         questions.append(retquestion)
     return {"questions": questions,
             "quesSum": crud.get_search_question_sum_by_word_list(db, wordlist, offset=offset, limit=limit, asc=2)}

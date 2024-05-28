@@ -245,12 +245,16 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
                          models.Question.create_at.label('question_create_at'),
                          case((func.count(models.UserQuestionLike.user_id) > 0, True), else_=False).label(
                              'if_user_like'),
+                         case((func.count(models.UserQuestionFocus.user_id) > 0, True), else_=False).label(
+                             'if_user_focus'),
                          func.count(distinct(models.QuestionComment.id)).label('ans_sum'),
                          func.count(distinct(uqlike.user_id)).label('like_sum'),
                          )
                 .outerjoin(models.QuestionComment, (models.Question.id == models.QuestionComment.question_id))
                 .outerjoin(models.UserQuestionLike, ((models.UserQuestionLike.user_id == input_user_id) &
                                                      (models.UserQuestionLike.question_id == models.Question.id)))
+                .outerjoin(models.UserQuestionFocus, ((models.UserQuestionFocus.user_id == input_user_id) &
+                                                      (models.UserQuestionFocus.question_id == models.Question.id)))
                 .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
                 .filter(models.Question.user_id == models.User.id)
                 .filter(models.Question.delated == False)
@@ -268,12 +272,16 @@ def get_questions(db: Session, offset: int = 0, limit: int = 10, asc: bool = Fal
                          models.Question.create_at.label('question_create_at'),
                          case((func.count(models.UserQuestionLike.user_id) > 0, True), else_=False).label(
                              'if_user_like'),
+                         case((func.count(models.UserQuestionFocus.user_id) > 0, True), else_=False).label(
+                             'if_user_focus'),
                          func.count(distinct(models.QuestionComment.id)).label('ans_sum'),
                          func.count(distinct(uqlike.user_id)).label('like_sum'),
                          )
                 .outerjoin(models.QuestionComment, (models.Question.id == models.QuestionComment.question_id))
                 .outerjoin(models.UserQuestionLike, ((models.UserQuestionLike.user_id == input_user_id) &
                                                      (models.UserQuestionLike.question_id == models.Question.id)))
+                .outerjoin(models.UserQuestionFocus, ((models.UserQuestionFocus.user_id == input_user_id) &
+                                                      (models.UserQuestionFocus.question_id == models.Question.id)))
                 .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
                 .filter(models.Question.user_id == models.User.id)
                 .filter(models.Question.delated == False)
@@ -332,12 +340,16 @@ def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: boo
                           models.Question.create_at.label('question_create_at'),
                           case((func.count(models.UserQuestionLike.user_id) > 0, True), else_=False).label(
                               'if_user_like'),
+                          case((func.count(models.UserQuestionFocus.user_id) > 0, True), else_=False).label(
+                              'if_user_focus'),
                           func.count(distinct(models.QuestionComment.id)).label('ans_sum'),
                           func.count(distinct(uqlike.user_id)).label('like_sum'),
                           )
                  .outerjoin(models.QuestionComment, (models.Question.id == models.QuestionComment.question_id))
                  .outerjoin(models.UserQuestionLike, ((models.UserQuestionLike.user_id == input_user_id) &
                                                       (models.UserQuestionLike.question_id == models.Question.id)))
+                 .outerjoin(models.UserQuestionFocus, ((models.UserQuestionFocus.user_id == input_user_id) &
+                                                       (models.UserQuestionFocus.question_id == models.Question.id)))
                  .outerjoin(uqlike, (uqlike.question_id == models.Question.id))
                  .filter(models.Question.user_id == models.User.id)
                  .filter(models.Question.delated == False)
@@ -575,6 +587,20 @@ def set_like_question_comment(db: Session, user_id: int, question_comment_id: in
             comment.liked_users.remove(user)
             db.commit()
 
+def set_focus_question(db: Session, user_id: int, question_id: int, is_focus: bool,background_tasks: BackgroundTasks):
+    question = get_question_by_id(db, question_id)
+    user = get_user_by_id(db, user_id)
+    if is_focus:
+        if user not in question.focused_users:
+            question.focused_users.append(user)
+            db.commit()
+            if os.getenv("BANHANG_TEST") is None:
+                background_tasks.add_task(send_message_for_focus_question, question_id, user_id)
+    else:
+        if user in question.focused_users:
+            question.focused_users.remove(user)
+            db.commit()
+
 
 def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
     return db.query(Conversation).filter(
@@ -586,11 +612,26 @@ def send_message_for_question_answer(comment_id: int):
     db = SessionLocal()
     try:
         comment = get_question_comment_by_id(db, comment_id)
-        target_user_id = comment.question.user_id
-        send_message(db, 34, target_user_id,
-                     "自动提示：【{}】 回答了您提出的“{}”问题： {}".format(comment.user.username,
-                                                                       comment.question.content,
-                                                                       comment.content))
+        target_comment = None
+        if comment.reply_comment_id and comment.reply_comment_id != -1:
+            target_comment = get_question_comment_by_id(db, comment.reply_comment_id)
+        if target_comment:
+            send_message(db, 34, target_comment.user_id,
+                         "自动提示：【{}】 回复了您的问题回答: {}".format(comment.user.username,
+                                                                       target_comment.content))
+        else:
+            target_user_id = comment.question.user_id
+            target_question = comment.question
+            send_message(db, 34, target_user_id,
+                         "自动提示：【{}】 回答了您提出的“{}”问题： {}".format(comment.user.username,
+                                                                           target_question.content,
+                                                                           comment.content))
+            for user in target_question.focused_users:
+                send_message(db, 34, user.id,
+                             "自动提示：【{}】 回答了您关注的问题「{}」： {}".format(comment.user.username,
+                                                                               target_question.content,
+                                                                               comment.content))
+
     finally:
         db.close()
 
@@ -607,6 +648,16 @@ def send_message_for_like_question_comment(comment_id: int, like_user: int):
     finally:
         db.close()
 
+def send_message_for_focus_question(question_id: int, like_user: int):
+    print("back_send_message_for {} focus question {}".format(like_user, question_id))
+    db = SessionLocal()
+    try:
+        question = get_question_by_id(db, question_id)
+        user = get_user_by_id(db, like_user)
+        send_message(db, 34, question.user_id,
+                     "自动提示：【{}】 关注了您提出问题：“{}”".format(user.username, question.content))
+    finally:
+        db.close()
 
 def send_message_for_like_question(question_id: int, like_user: int):
     print("back_send_message_for {} like_question {}".format(like_user, question_id))

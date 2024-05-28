@@ -75,6 +75,13 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert ans["question"]['ifUserLike'] == True
     assert ans["question"]['likeSum'] == 1
 
+    # 尝试focus ques
+    res = client.post("/setFocusQues", json={'quesId': blog['quesId'], 'ifFocus': 1})
+    assert res.status_code == 200
+    ans = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
+    assert ans["ifExist"] == True
+    assert ans["question"]['ifUserFocus'] == True
+
     # 尝试like comment
     res = client.post("/setLikeAns", json = {'ansId': answerid, 'setType': 1})
     assert res.status_code == 200
