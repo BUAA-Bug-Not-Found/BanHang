@@ -463,7 +463,7 @@ export default {
     const ifFocus = ref(false)
 
     const focusQuestion = () => {
-      setFocusQues(question.value.quesId, !ifFocus.value).then(
+      setFocusQues(qid.value, !ifFocus.value).then(
           (res) => {
             if (res.isSuccess === true) {
               ifFocus.value = !ifFocus.value
