@@ -266,7 +266,7 @@ export function replyComment(replyCommentId, content, imageList) {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             data: JSON.stringify({
-                quesId: replyCommentId,
+                replyCommentId: replyCommentId,
                 ansContent: {
                     content: content,
                     imageList: imageList
