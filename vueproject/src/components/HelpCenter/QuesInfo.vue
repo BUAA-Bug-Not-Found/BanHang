@@ -11,7 +11,7 @@ import {
   formatDate,
   getQuestionsApi,
   getQuestionsByTagIdApi,
-  getTagsApi, replyComment,
+  getTagsApi, replyComment, setFocusQues,
   setLikeQuesApi, updateQuesApi,
   uploadAnsApi, uploadFileApi
 } from "@/components/HelpCenter/api";
@@ -104,6 +104,7 @@ export default {
             likeSum.value = res.question.likeSum
             recommendQues.value = []
             avatarShow.value = true
+            ifFocus.value = res.question.ifUserFocus
             try {
               fetchAdvise()
             } catch (e) {
@@ -134,6 +135,7 @@ export default {
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
             avatarShow.value = true
+            ifFocus.value = res.question.ifUserFocus
             recommendQues.value = []
             try {
               fetchAdvise()
@@ -457,6 +459,20 @@ export default {
       }
     }
 
+    const ifFocus = ref(false)
+
+    const focusQuestion = () => {
+      setFocusQues(question.value.quesId, !ifFocus.value).then(
+          (res) => {
+            if (res.isSuccess === true) {
+              ifFocus.value = !ifFocus.value
+            } else {
+              ElMessage.error("网络连接失败，请稍后再试")
+            }
+          }
+      )
+    }
+
     return {
       replyIndex,
       menuClick,
@@ -512,7 +528,9 @@ export default {
       commentHtml,
       uploadComment,
       toReplyComment,
-      commentUserName
+      commentUserName,
+      focusQuestion,
+      ifFocus
     };
   },
 };
@@ -569,7 +587,8 @@ export default {
                   </v-col>
                 </div>
                 <div style="margin-bottom: 20px">
-                  <v-btn color="blue-lighten-1">关注问题</v-btn>
+                  <v-btn color="blue-lighten-1" v-if="!ifFocus" @click="focusQuestion">关注问题</v-btn>
+                  <v-btn color="grey-lighten-2" v-else @click="focusQuestion">取消关注</v-btn>
                   <v-btn v-if="!openAns" style="margin-left:15px" variant="outlined" color="blue-lighten-1"
                          prepend-icon="mdi-pen" @click="openAns = true;openComment = false">写回答
                   </v-btn>
@@ -582,7 +601,8 @@ export default {
                          color="blue-grey-lighten-2">
                     好问题 {{ likeSum }}
                   </v-btn>
-                  <v-btn variant="text" prepend-icon="mdi-message-reply-text" color="blue-grey-lighten-2">
+                  <v-btn variant="text" prepend-icon="mdi-message-reply-text"
+                         @click="openAns = true;openComment = false" color="blue-grey-lighten-2">
                     {{ question.ansIdList.length }} 条回答
                   </v-btn>
                   <v-menu v-show="menuClick" :location="'bottom'">
