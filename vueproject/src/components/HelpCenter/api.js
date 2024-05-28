@@ -141,25 +141,6 @@ export function uploadAnsApi(quesId, content, imageList) {
     })
 }
 
-export function updateAnsApi(quesId, content, imageList) {
-    return axios.request(
-        {
-            url: '/answerQues',
-            method: 'post',
-            headers: {'Content-Type': 'application/json'},
-            data: JSON.stringify({
-                quesId: quesId,
-                ansContent: {
-                    content: content,
-                    imageList: imageList
-                },
-            })
-        }
-    ).then(response => {
-        return response.data
-    })
-}
-
 export function getAnsById(ansId) {
     return axios.request(
         {
@@ -276,4 +257,39 @@ export function formatDate(time) {
     let minutes = ('0' + date.getMinutes()).slice(-2); // 保证两位数
 
     return `${year}.${month}.${day} ${hours}:${minutes}`
+}
+
+export function replyComment(replyCommentId, content, imageList) {
+    return axios.request(
+        {
+            url: '/replyComment',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                quesId: replyCommentId,
+                ansContent: {
+                    content: content,
+                    imageList: imageList
+                },
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function setFocusQues(quesId, ifFocus) {
+    return axios.request(
+        {
+            url: '/setFocusQues',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                quesId: quesId,
+                ifFocus: ifFocus == true ? 1: 0
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
 }

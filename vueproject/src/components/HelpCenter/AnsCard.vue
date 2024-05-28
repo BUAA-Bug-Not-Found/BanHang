@@ -10,7 +10,7 @@ export default {
   methods: {formatDate},
   components: {UserAvatar},
   props: ["ansId", "index"],
-  emits: ["delAns", "editAns"],
+  emits: ["delAns", "editAns", "replyAnswer"],
   setup(props, context) {
 
     const init = () => {
@@ -73,6 +73,10 @@ export default {
       )
     }
 
+    const replyAns = () => {
+      context.emit("replyAnswer", {index: props.ansId, commentUserName: ans.value.userName})
+    }
+
     return {
       ans,
       ansIdRef,
@@ -81,7 +85,8 @@ export default {
       likeSum,
       delDialog,
       isUser,
-      delAnswer
+      delAnswer,
+      replyAns
     };
   },
 };
@@ -105,7 +110,11 @@ export default {
         </v-col>
         <v-col cols="10">
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
-            <span style="font-size: 15px">{{ ans.userName }}</span>
+            <span style="font-size: 15px">{{ ans.userName }}
+              <span v-if="ans.replyAnsId != -1">
+                <v-icon>mdi-comment-arrow-right-outline</v-icon> {{ans.replyAnsUserName}}
+              </span>
+            </span>
             <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>
           </div>
           <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
@@ -118,10 +127,11 @@ export default {
             >
               {{ likeSum }}
             </v-btn>
-<!--            <v-btn-->
-<!--                :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"-->
-<!--                color="blue-grey-lighten-2">-->
-<!--            </v-btn>-->
+            <v-btn
+                :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"
+                @click="replyAns"
+                color="blue-grey-lighten-2">
+            </v-btn>
             <v-btn v-if="isUser"
                    :icon="'mdi-delete-circle'" variant="text" size="small"
                    color="blue-grey-lighten-2"
