@@ -854,8 +854,96 @@ export default {
       <div style="height: 200px"></div>
     </div>
   </div>
+  <v-bottom-sheet v-if="!display.smAndDown.value" v-model="sheet1" inset>
+    <v-card
+        class="text-center"
+        height="800"
+    >
+      <v-card-text>
+        <v-row align="center" style="margin-bottom: 5px">
+          <v-col cols="4" offset="4">
+            编辑问题
+          </v-col>
+          <v-col cols="4">
+            <v-btn variant="text" @click="updateQues">
+              发布
+            </v-btn>
+            <v-btn variant="text" @click="sheet1 = !sheet1">
+              close
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col v-for="(image,index) in editImgList"
+                 :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+          >
+            <div class="avatar-wrapper">
+              <div class="right-top">
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1"
+                       icon="mdi-close"></v-btn>
+              </div>
+              <el-image
+                  class="avatar"
+                  :src="image"
+                  :fit="'cover'"
+                  @click="showPic(editImgList)"
+              />
+            </div>
+          </v-col>
+          <v-col :cols="display.smAndDown.value? 4 : 3">
+            <el-form style="width: 100%">
+              <el-upload
+                  class="avatar-uploader"
+                  action="#"
+                  :show-file-list="false"
+                  :auto-upload="false"
+                  :on-change="handleChange"
+                  accept=".jpg,.png"
+              >
+                <el-icon class="avatar-uploader-icon">
+                  <Plus/>
+                </el-icon>
+              </el-upload>
+            </el-form>
+          </v-col>
+        </v-row>
 
-  <v-bottom-sheet v-model="sheet1">
+        <div>
+          <v-select
+              v-model="editTagList"
+              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray"
+              multiple
+              label="添加标签"
+              density="default"
+          >
+            <template v-slot:selection="{item, index}">
+              <v-chip size="x-small" :color="findTagColor(index)">
+                <v-icon>{{ findTagIcon(index) }}</v-icon>
+                {{ item.title }}
+              </v-chip>
+            </template>
+          </v-select>
+        </div>
+
+        <div style="border: 1px solid #ccc">
+          <Editor
+              style="height: 350px; overflow-y: hidden;"
+              v-model="editHtml"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="handleCreated2"
+          />
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef2"
+              :defaultConfig="toolbarConfig2"
+              :mode="mode"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-bottom-sheet>
+  <v-bottom-sheet v-model="sheet1" v-else >
     <v-card
         class="text-center"
         height="800"
