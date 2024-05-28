@@ -678,6 +678,9 @@ export default {
                    style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
                 <span style="font-weight: bold;font-size: 20px">回复 </span> {{commentUserName}}
                 <span>
+                  <v-btn prepend-icon="mdi-window-close" style="margin-right: 10px" variant="outlined" @click="openComment = false">
+                  取消回复
+                </v-btn>
                 <v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
                   发送回复
                 </v-btn>
@@ -1032,7 +1035,7 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
-  <v-bottom-sheet v-model="sheet2">
+  <v-bottom-sheet v-model="sheet2" v-if="display.smAndDown.value">
     <v-card
         class="text-center"
         height="500"
@@ -1067,7 +1070,7 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
-  <v-bottom-sheet v-model="sheet3">
+  <v-bottom-sheet v-model="sheet3" v-if="display.smAndDown.value">
     <v-card
         class="text-center"
         height="500"
