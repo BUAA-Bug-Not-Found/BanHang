@@ -431,6 +431,7 @@ export default {
       commentUserName.value = params.commentUserName
       replyIndex.value = params.index
       openComment.value = true
+      sheet3.value = true
       openAns.value = false
     }
 
@@ -472,6 +473,8 @@ export default {
           }
       )
     }
+
+    const sheet3 = ref(false)
 
     return {
       replyIndex,
@@ -530,7 +533,8 @@ export default {
       toReplyComment,
       commentUserName,
       focusQuestion,
-      ifFocus
+      ifFocus,
+      sheet3
     };
   },
 };
@@ -730,7 +734,6 @@ export default {
       </div>
     </div>
     <div v-else>
-
       <div class="dials" v-if="dialShow">
         <!-- 点赞 -->
         <div style="margin-bottom: 10px">
@@ -761,6 +764,18 @@ export default {
                  @click="sheet2 = !sheet2"
           />
         </div>
+        <div style="margin-bottom: 10px">
+          <v-btn icon="mdi-delete-clock" size="small" @click="delDialog = !delDialog"></v-btn>
+        </div>
+        <div style="margin-bottom: 10px">
+          <v-btn icon="mdi-book-edit" size="small" @click="toEdit"></v-btn>
+        </div>
+        <div style="margin-bottom: 10px">
+          <v-btn icon="mdi-chevron-up"
+                 size="small"
+                 @click="goTop"
+          />
+        </div>
       </div>
       <div class="dials" v-else>
         <div>
@@ -770,23 +785,10 @@ export default {
           />
         </div>
       </div>
-      <v-row style="margin-left: 12px;margin-right: 12px">
+      <v-row>
         <v-col cols="12">
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
-            <div style="display: flex; align-items: center;">
-              <v-col cols="2" style="justify-content: end;margin-right: 5px">
-                <UserAvatar :userId="question.userId"/>
-              </v-col>
-              <v-col cols="6">
-                <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
-                <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
-              </v-col>
-              <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
-                <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
-                <v-btn variant="text" icon="mdi-book-edit" size="large" @click="toEdit"></v-btn>
-              </v-col>
-            </div>
-            <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
+            <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px;font-size: 25px;font-weight: bold;"
                  v-dompurify-html="question.quesContent.content"/>
             <v-row>
               <v-col v-for="(image,index) in question.quesContent.imageList"
@@ -802,15 +804,16 @@ export default {
                 </div>
               </v-col>
             </v-row>
-            <div style="margin-left: 10px;margin-bottom: 10px;margin-top: 10px">
-              <v-btn :prepend-icon=" !userLike ?
-                  'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"
-                     color="blue-grey-lighten-2" @click="setLikeQues">
-                {{ likeSum }}
-              </v-btn>
-              <v-btn variant="text" prepend-icon="mdi-message-reply-text" size="small" color="blue-grey-lighten-2">
-                {{ question.ansSum }}
-              </v-btn>
+            <div style="display: flex; align-items: center;margin-bottom: 10px;margin-top: 5px">
+              <div style="margin-left: 15px">
+                <UserAvatar :userId="question.userId"/>
+              </div>
+              <div style="margin-left: 5px">
+                <p style="font-size: 15px;margin-top: 10px">{{ question.userName }}</p>
+                <p style="font-size: 10px;color: gray">{{ formatDate(question.quesTime) }}</p>
+              </div>
+            </div>
+            <div style="margin-left: 10px;margin-bottom: 10px;">
               <v-chip v-for="tag in disTags" size="small"
                       :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
                       @click="tagClick(tag.tagId)"
@@ -819,15 +822,31 @@ export default {
                 {{ tag.tagName }}
               </v-chip>
             </div>
+            <v-row style="margin-left: 10px;height:60px;font-size:12px;color: grey">
+              <v-col cols="4">
+                <span style="margin-right: 4px;color: black">{{ likeSum }}</span> 点赞  ·
+                <span style="margin-right: 4px;margin-left: 3px;color: black">{{ question.ansIdList.length }}</span> 回复
+              </v-col>
+              <v-col offset="4">
+                <v-btn :prepend-icon="'mdi-focus-field'"
+                       color="blue-lighten-1" v-if="!ifFocus"
+                       size="small"
+                       @click="focusQuestion" variant="outlined" >关注问题</v-btn>
+                <v-btn :prepend-icon="'mdi-focus-field'"
+                       color="grey-lighten-2" v-else
+                       size="small"
+                       @click="focusQuestion" variant="outlined" >取消关注</v-btn>
+              </v-col>
+            </v-row>
           </v-card>
-
+          <div style="width: 100%;height: 10px;background-color: floralwhite"></div>
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部评论 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
             <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
-              <AppAnsCard :ansId="ans" :index="index" @delAns="delAns"/>
+              <AppAnsCard :ansId="ans" :index="index" @delAns="delAns" @replyAnswer="toReplyComment"/>
             </div>
           </v-card>
         </v-col>
@@ -835,8 +854,7 @@ export default {
       <div style="height: 200px"></div>
     </div>
   </div>
-
-  <v-bottom-sheet v-model="sheet1" inset>
+  <v-bottom-sheet v-if="!display.smAndDown.value" v-model="sheet1" inset>
     <v-card
         class="text-center"
         height="800"
@@ -925,7 +943,96 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
-  <v-bottom-sheet v-model="sheet2" inset>
+  <v-bottom-sheet v-model="sheet1" v-else >
+    <v-card
+        class="text-center"
+        height="800"
+    >
+      <v-card-text>
+        <v-row align="center" style="margin-bottom: 5px">
+          <v-col cols="4" offset="4">
+            编辑问题
+          </v-col>
+          <v-col cols="4">
+            <v-btn variant="text" @click="updateQues">
+              发布
+            </v-btn>
+            <v-btn variant="text" @click="sheet1 = !sheet1">
+              close
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col v-for="(image,index) in editImgList"
+                 :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+          >
+            <div class="avatar-wrapper">
+              <div class="right-top">
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1"
+                       icon="mdi-close"></v-btn>
+              </div>
+              <el-image
+                  class="avatar"
+                  :src="image"
+                  :fit="'cover'"
+                  @click="showPic(editImgList)"
+              />
+            </div>
+          </v-col>
+          <v-col :cols="display.smAndDown.value? 4 : 3">
+            <el-form style="width: 100%">
+              <el-upload
+                  class="avatar-uploader"
+                  action="#"
+                  :show-file-list="false"
+                  :auto-upload="false"
+                  :on-change="handleChange"
+                  accept=".jpg,.png"
+              >
+                <el-icon class="avatar-uploader-icon">
+                  <Plus/>
+                </el-icon>
+              </el-upload>
+            </el-form>
+          </v-col>
+        </v-row>
+
+        <div>
+          <v-select
+              v-model="editTagList"
+              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray"
+              multiple
+              label="添加标签"
+              density="default"
+          >
+            <template v-slot:selection="{item, index}">
+              <v-chip size="x-small" :color="findTagColor(index)">
+                <v-icon>{{ findTagIcon(index) }}</v-icon>
+                {{ item.title }}
+              </v-chip>
+            </template>
+          </v-select>
+        </div>
+
+        <div style="border: 1px solid #ccc">
+          <Editor
+              style="height: 350px; overflow-y: hidden;"
+              v-model="editHtml"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="handleCreated2"
+          />
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef2"
+              :defaultConfig="toolbarConfig2"
+              :mode="mode"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-bottom-sheet>
+  <v-bottom-sheet v-model="sheet2">
     <v-card
         class="text-center"
         height="500"
@@ -955,6 +1062,44 @@ export default {
               :defaultConfig="editorConfig"
               :mode="mode"
               @onCreated="handleCreated1"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-bottom-sheet>
+  <v-bottom-sheet v-model="sheet3">
+    <v-card
+        class="text-center"
+        height="500"
+    >
+      <v-card-text>
+        <v-row align="center" style="margin-bottom: 5px">
+          <v-col cols="4" offset="4">
+            发布评论
+          </v-col>
+          <v-col cols="4">
+            <v-btn prepend-icon="mdi-message-reply-text"
+                   color="primary" @click="uploadComment">
+              回复
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row style="margin: 10px">
+          <span style="font-weight: bold;margin-right: 8px">回复 </span> {{commentUserName}}
+        </v-row>
+        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0">
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef3"
+              :defaultConfig="toolbarConfig1"
+              :mode="mode"
+          />
+          <Editor
+              style="height: 250px; overflow-y: hidden;"
+              v-model="commentHtml"
+              :defaultConfig="replyAnsConfig"
+              :mode="mode"
+              @onCreated="handleCreated3"
           />
         </div>
       </v-card-text>

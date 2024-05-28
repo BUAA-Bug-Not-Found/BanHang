@@ -39,7 +39,7 @@ import router from "@/router";
 
 export default {
   name: "UserAvatar",
-  props: ["userId"],
+  props: ["userId", "size"],
   setup(props) {
     const nickname = ref('')
 
