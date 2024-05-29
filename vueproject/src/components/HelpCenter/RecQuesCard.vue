@@ -48,7 +48,7 @@ export default {
     });
 
     const goto = () => {
-      router.push("/QuesInfo/" + props.question.quesId).then(
+      router.push("/QuesInfo/" + props.question.quesId + "/0").then(
           context.emit("refresh", props.question.quesId)
       )
     }

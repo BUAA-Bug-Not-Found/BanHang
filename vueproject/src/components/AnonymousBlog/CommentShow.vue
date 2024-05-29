@@ -14,29 +14,82 @@
         <span class="time">{{ formatDate(time) }}</span>
       </div>
     </div>
-    <div class="content" @click="showInput">
-<!--      <span style="white-space: pre-line" v-html="content"></span>-->
-      <div style="white-space: pre-line" v-dompurify-html="content"/>
+    <div v-if="!useDisplay().smAndDown.value">
+      <div class="content" @click="showInput">
+        <!--      <span style="white-space: pre-line" v-html="content"></span>-->
+        <div style="white-space: pre-line" v-dompurify-html="content"/>
+      </div>
+    </div>
+    <div v-else>
+      <div class="content" @click="showBottomSheet">
+        <!--      <span style="white-space: pre-line" v-html="content"></span>-->
+        <div style="white-space: pre-line" v-dompurify-html="content"/>
+      </div>
     </div>
     <div v-show="replyToCommentId === null && replies.length > 0" class="expand-button">
-      <button @click="toggleReplies" style="font-size: 12px; color: darkgray">{{ isOpen ? '收起回复' : '展开回复' }}</button>
+      <button @click="toggleReplies" style="font-size: 12px; color: darkgray">{{
+          isOpen ? '收起回复' : '展开回复'
+        }}
+      </button>
     </div>
-    <div v-show="isOpen && replies.length > 0">
-      <ReplyList :comments="replies"/>
-    </div>
+
+
     <div v-show="isInputVisible" class="reply-input">
-      <v-textarea v-model="replyContent" placeholder="请输入回复内容"></v-textarea>
-      <label>
-        <input type="checkbox" v-model="isAnonymous"/>匿名发送
-      </label>
-      <v-btn @click.stop="sendReply" class="ma-2" color="green">发送
-        <v-icon
-            icon="mdi-checkbox-marked-circle"
-            end
-        ></v-icon>
-      </v-btn>
+      <v-textarea
+          v-model="replyContent"
+          placeholder="请输入回复内容"
+          outlined
+          rows="3"
+          class="reply-textarea"
+      ></v-textarea>
+      <div class="anonymous-and-sendbutton">
+        <v-checkbox
+            v-model="isAnonymous"
+            label="匿名发送"
+            class="anonymous-checkbox"
+            color="primary"
+        ></v-checkbox>
+        <v-btn @click.stop="sendReply" color="primary" class="send-button">
+          发送
+          <v-icon end>mdi-checkbox-marked-circle</v-icon>
+        </v-btn>
+      </div>
     </div>
+
+    <div v-show="isOpen && replies.length > 0">
+      <ReplyList :comments="replies" :top-comment-id="this.commentId"/>
+    </div>
+
   </v-card>
+
+
+  <v-bottom-sheet
+      v-model="bottomSheet"
+      v-if="useDisplay().smAndDown.value"
+      class="transparent-bottom-sheet">
+    <div class="reply-input">
+      <v-textarea
+          v-model="replyContent"
+          placeholder="请输入回复内容"
+          outlined
+          rows="3"
+          class="reply-textarea"
+      ></v-textarea>
+      <div class="anonymous-and-sendbutton">
+        <v-checkbox
+            v-model="isAnonymous"
+            label="匿名发送"
+            class="anonymous-checkbox"
+            color="primary"
+        ></v-checkbox>
+        <v-btn @click.stop="sendReply" color="primary" class="send-button">
+          发送
+          <v-icon end>mdi-checkbox-marked-circle</v-icon>
+        </v-btn>
+      </div>
+    </div>
+  </v-bottom-sheet>
+
 </template>
 
 <script>
@@ -45,7 +98,7 @@ import {goToOtherUser, uploadComment} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import UserStateStore from "@/store";
-import router from "@/router";
+import {useDisplay} from "vuetify";
 
 export default {
   name: "CommentShow",
@@ -93,10 +146,12 @@ export default {
       isOpen: false,
       isInputVisible: false,
       replyContent: "",
-      isAnonymous: false
+      isAnonymous: false,
+      bottomSheet: false
     };
   },
   methods: {
+    useDisplay,
     goToOtherUser,
     formatDate(time) {
       let date = new Date(Date.parse(time))
@@ -117,7 +172,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.isInputVisible = true;
+      this.isInputVisible = !this.isInputVisible;
+    },
+    showBottomSheet() {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
+      this.bottomSheet = !this.bottomSheet;
     },
     sendReply() {
       // 将回复内容和是否匿名发送提交给后端或其他逻辑处理
@@ -137,7 +200,7 @@ export default {
                   showClose: true,
                   type: 'success',
                 })
-                router.go(0)
+                location.reload()
               } else {
                 ElMessage({
                   message: '评论失败，请修改内容或稍后再试',
@@ -214,31 +277,62 @@ export default {
 }
 
 .reply-input {
-  margin-left: 2%;
-  margin-right: 2%;
-  margin-bottom: 2%;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  margin-left: 1%;
+  margin-right: 1%;
+  margin-bottom: 15px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   padding: 10px;
   z-index: 1; /* 确保在其他内容之上 */
 }
 
-.reply-input textarea {
-  width: 100%;
-  margin-bottom: 10px;
+.reply-textarea {
+  margin-bottom: 1px;
 }
 
-.reply-input button {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 3px;
-  padding: 5px 10px;
-  cursor: pointer;
+.anonymous-and-sendbutton {
+  margin-top: -15px;
+  margin-bottom: -12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.reply-input label {
-  margin-left: 5px;
+.anonymous-checkbox {
+  margin-right: 10px;
 }
+
+.send-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+}
+
+.transparent-bottom-sheet {
+  background-color: transparent !important;
+}
+
+.white-background {
+  background-color: white;
+}
+
+/*.reply-input textarea {*/
+/*  width: 100%;*/
+/*  margin-bottom: 10px;*/
+/*}*/
+
+/*.reply-input button {*/
+/*  background-color: #007bff;*/
+/*  color: #fff;*/
+/*  border: none;*/
+/*  border-radius: 3px;*/
+/*  padding: 5px 10px;*/
+/*  cursor: pointer;*/
+/*}*/
+
+/*.reply-input label {*/
+/*  margin-left: 5px;*/
+/*}*/
 </style>

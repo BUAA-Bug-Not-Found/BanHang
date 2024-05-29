@@ -1,7 +1,7 @@
 <template>
   <v-card class="blog-view">
     <!-- 用户信息部分 -->
-    <div class="user-info" @click="goToOtherUser(userId)">
+    <div class="user-info">
       <div v-if="userId !== -1" class="avatar-with-username">
         <UserAvatar :userId="userId"></UserAvatar>
         <span class="username">{{ userName }}</span>
@@ -44,12 +44,13 @@
       </div>
     </div>
 
-    <div style="margin-left: 5px;margin-bottom: 10px;margin-top: 30px; display: flex; justify-content: flex-start;">
+    <div
+        style="margin-left: 5px; margin-bottom: 10px; margin-top: 30px; display: flex; justify-content: flex-start; flex-wrap: wrap;">
       <v-chip v-for="tag in tagList" size="small"
               :key="tag.tagId" :color="tag.tagColor"
               @click="gotoBlogList(tag.tagId)"
               :class="`cursor-pointer`"
-              style="margin-left: 1%">
+              style="margin-left: 1%; margin-bottom: 5px;">
         <v-icon>{{ tag.tagIcon }}</v-icon>
         {{ tag.tagName }}
       </v-chip>
@@ -57,32 +58,94 @@
 
 
     <!-- 评论按钮 -->
-    <div v-if="!showCommentInput" class="comment-input">
-      <v-btn @click="toggleCommentInput" class="ma-2" color="blue">添加评论
-        <v-icon
-            icon="mdi-message-text"
-            end
-        ></v-icon>
-      </v-btn>
-    </div>
-    <!-- 评论输入框 -->
-    <div v-if="showCommentInput" class="comment-input">
-      <v-textarea v-model="newComment" placeholder="输入您的评论"></v-textarea>
-      <div class="anonymous-and-addbutton">
-        <v-checkbox v-model="commentAnonymous" label="匿名发布" class="anonymous-checkbox"></v-checkbox>
-        <v-btn @click="addComment(null)" class="ma-2" color="green">提交评论
+
+    <div v-if="!useDisplay().smAndDown.value">
+      <div v-if="!showCommentInput" >
+        <v-btn @click="toggleCommentInput" class="ma-2" color="blue" style="width: 96%">添加评论
           <v-icon
-              icon="mdi-checkbox-marked-circle"
+              icon="mdi-message-text"
+              end
+          ></v-icon>
+        </v-btn>
+      </div>
+    </div>
+    <div v-else>
+      <div >
+        <v-btn @click="showBottomSheet" class="ma-2" color="blue" style="width: 96%">添加评论
+          <v-icon
+              icon="mdi-message-text"
               end
           ></v-icon>
         </v-btn>
       </div>
     </div>
 
+    <div v-if="showCommentInput" >
+      <v-btn @click="toggleCommentInput" class="ma-2" color="red" style="width: 96%">取消评论
+        <v-icon
+            icon="mdi-cancel"
+            end
+        ></v-icon>
+      </v-btn>
+    </div>
+
+    <!-- 评论输入框 -->
+    <div v-if="showCommentInput" class="comment-input">
+      <v-textarea
+          v-model="newComment"
+          placeholder="输入您的评论"
+          outlined
+          rows="3"
+          class="comment-textarea"
+      ></v-textarea>
+      <div class="anonymous-and-addbutton">
+        <v-checkbox
+            v-model="commentAnonymous"
+            label="匿名发布"
+            class="anonymous-checkbox"
+            color="primary"
+        ></v-checkbox>
+        <v-btn @click="addComment(null)" color="primary" class="submit-button">
+          提交评论
+          <v-icon end>mdi-checkbox-marked-circle</v-icon>
+        </v-btn>
+      </div>
+    </div>
+
+
   </v-card>
 
   <!-- 评论列表 -->
   <CommentList :comments="comments"/>
+
+
+  <v-bottom-sheet
+      v-model="bottomSheet"
+      v-if="useDisplay().smAndDown.value"
+      class="transparent-bottom-sheet">
+    <div class="comment-input">
+      <v-textarea
+          v-model="newComment"
+          placeholder="输入您的评论"
+          outlined
+          rows="3"
+          class="comment-textarea white-background"
+      ></v-textarea>
+      <div class="anonymous-and-addbutton white-background">
+        <v-checkbox
+            v-model="commentAnonymous"
+            label="匿名发布"
+            class="anonymous-checkbox"
+            color="primary"
+        ></v-checkbox>
+        <v-btn @click="addComment(null)" color="primary" class="submit-button">
+          提交评论
+          <v-icon end>mdi-checkbox-marked-circle</v-icon>
+        </v-btn>
+      </div>
+    </div>
+  </v-bottom-sheet>
+
 </template>
 
 <script>
@@ -125,7 +188,8 @@ export default {
       comments: [],
       showCommentInput: false,
       newComment: '',
-      commentAnonymous: false
+      commentAnonymous: false,
+      bottomSheet: false
     };
   },
 
@@ -190,6 +254,17 @@ export default {
         return
       }
       this.showCommentInput = !this.showCommentInput;
+    },
+    closeCommentInput() {
+      this.showCommentInput = !this.showCommentInput;
+    },
+    showBottomSheet() {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
+      this.bottomSheet = !this.bottomSheet;
     },
     addComment(replyToId) {
       const state = UserStateStore()
@@ -315,20 +390,45 @@ export default {
 }
 
 .comment-input {
-  display: flex;
-  flex-direction: column;
-  margin-top: 10px;
+  margin-left: 1%;
+  margin-right: 1%;
+  margin-bottom: 15px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1; /* 确保在其他内容之上 */
+}
+
+.comment-textarea {
+  margin-bottom: 1px;
 }
 
 .anonymous-and-addbutton {
+  margin-top: -15px;
+  margin-bottom: -12px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
 }
 
 .anonymous-checkbox {
-  margin-left: 1%;
+  margin-right: 10px;
 }
 
+.submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+}
+
+.transparent-bottom-sheet {
+  background-color: transparent !important;
+}
+
+.white-background {
+  background-color: white;
+}
 
 </style>

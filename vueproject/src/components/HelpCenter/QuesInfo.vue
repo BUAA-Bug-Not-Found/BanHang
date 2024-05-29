@@ -11,7 +11,7 @@ import {
   formatDate,
   getQuestionsApi,
   getQuestionsByTagIdApi,
-  getTagsApi,
+  getTagsApi, replyComment, setFocusQues,
   setLikeQuesApi, updateQuesApi,
   uploadAnsApi, uploadFileApi
 } from "@/components/HelpCenter/api";
@@ -21,10 +21,11 @@ import router from "@/router";
 import UserStateStore, {userStateStore} from "@/store";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {api as viewerApi} from "v-viewer";
+import {Plus} from "@element-plus/icons-vue";
 
 export default {
   name: "QuesInfo",
-  components: {UserAvatar, AppAnsCard, AnsCard, RecQuesCard, Editor, Toolbar},
+  components: {Plus, UserAvatar, AppAnsCard, AnsCard, RecQuesCard, Editor, Toolbar},
   data() {
     return {
       top: false,
@@ -39,7 +40,7 @@ export default {
     handleScroll() {
       // 假设 right-panel 初始时离顶部有200px的距离
       let scrollDistance = window.pageYOffset || document.documentElement.scrollTop;
-      let threshold = 60;
+      let threshold = 450;
 
       this.top = !(scrollDistance < threshold || scrollDistance === 0);
     }
@@ -95,12 +96,15 @@ export default {
     const refresh = (index) => {
       qid.value = index
       question.value.ansIdList = []
+      avatarShow.value = false
       getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
             recommendQues.value = []
+            avatarShow.value = true
+            ifFocus.value = res.question.ifUserFocus
             try {
               fetchAdvise()
             } catch (e) {
@@ -119,14 +123,19 @@ export default {
       )
     }
 
+    const avatarShow = ref(false)
+
     const init = () => {
       let router = useRouter()
       qid.value = router.currentRoute.value.params.qid
+      let opId = router.currentRoute.value.params.opId
       getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            avatarShow.value = true
+            ifFocus.value = res.question.ifUserFocus
             recommendQues.value = []
             try {
               fetchAdvise()
@@ -147,6 +156,9 @@ export default {
                   for (let i = 0; i < tags.value.length; i++) {
                     tagNamesArray.value.push(tags.value[i].tagName)
                   }
+                  if (opId == 1) {
+                    toEdit()
+                  }
                 }
             )
           }
@@ -164,6 +176,8 @@ export default {
 
     const editorRef2 = shallowRef()
 
+    const editorRef3 = shallowRef()
+
     const toolbarConfig1 = {
       excludeKeys: ['undo', 'redo', 'fontSize', 'fontFamily',
         'lineHeight', 'group-justify', 'group-video',
@@ -178,7 +192,13 @@ export default {
       ],
     }
 
-    const editorConfig = {placeholder: '请输入内容...'}
+    const editorConfig = {
+      placeholder: '请输入内容...'
+    }
+
+    const replyAnsConfig = {
+      placeholder: '回复某人'
+    }
 
     onBeforeUnmount(() => {
       const editor1 = editorRef1.value
@@ -187,7 +207,11 @@ export default {
 
       const editor2 = editorRef2.value
       if (editor2 == null) return
-      editor1.destroy()
+      editor2.destroy()
+
+      const editor3 = editorRef3.value
+      if (editor3 == null) return
+      editor3.destroy()
     })
 
     const handleCreated1 = (editor) => {
@@ -196,6 +220,10 @@ export default {
 
     const handleCreated2 = (editor) => {
       editorRef2.value = editor // 记录 editor 实例，重要！
+    }
+
+    const handleCreated3 = (editor) => {
+      editorRef3.value = editor // 记录 editor 实例，重要！
     }
 
     const userLike = ref(false)
@@ -220,7 +248,7 @@ export default {
                   ElMessage.success("回答已上传")
                   replyHtml.value = ''
                   imageList.value = []
-                  sheet2.value=false
+                  sheet2.value = false
                   router.go(0)
                 } else {
                   ElMessage.error("回答失败，请稍后再试")
@@ -383,7 +411,74 @@ export default {
 
     const dialShow = ref(false)
 
+    const goTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const menuClick = ref(false);
+
+    const openAns = ref(false)
+
+    const replyIndex = ref(-1)
+
+    const openComment = ref(false)
+
+    const commentHtml = ref('')
+
+    const commentUserName = ref('')
+
+    const toReplyComment = (params) => {
+      commentUserName.value = params.commentUserName
+      replyIndex.value = params.index
+      openComment.value = true
+      sheet3.value = true
+      openAns.value = false
+    }
+
+    const uploadComment = () => {
+      if (!userStateStore().isAuthentic) {
+        ElMessage.error("请先登录")
+        router.push('/loginPage')
+      } else {
+        if (String(commentHtml.value).replace(/<[^>]*>/g, "") === '') {
+          ElMessage.error("不能上传空白答案")
+        } else {
+          replyComment(replyIndex.value, commentHtml.value, imageList.value).then(
+              (res) => {
+                if (res.isSuccess === true) {
+                  ElMessage.success("回答已上传")
+                  commentHtml.value = ''
+                  imageList.value = []
+                  sheet2.value = false
+                  router.go(0)
+                } else {
+                  ElMessage.error("回答失败，请稍后再试")
+                }
+              }
+          )
+        }
+      }
+    }
+
+    const ifFocus = ref(false)
+
+    const focusQuestion = () => {
+      setFocusQues(qid.value, !ifFocus.value).then(
+          (res) => {
+            if (res.isSuccess === true) {
+              ifFocus.value = !ifFocus.value
+            } else {
+              ElMessage.error("网络连接失败，请稍后再试")
+            }
+          }
+      )
+    }
+
+    const sheet3 = ref(false)
+
     return {
+      replyIndex,
+      menuClick,
       tagClick,
       truncate,
       disTags,
@@ -391,6 +486,7 @@ export default {
       question,
       tags,
       goAnchor,
+      replyAnsConfig,
       mode: 'default',
       replyHtml,
       handleCreated1,
@@ -425,7 +521,20 @@ export default {
       delPic,
       refresh,
       dialShow,
-      sheet2
+      sheet2,
+      goTop,
+      avatarShow,
+      openAns,
+      openComment,
+      editorRef3,
+      handleCreated3,
+      commentHtml,
+      uploadComment,
+      toReplyComment,
+      commentUserName,
+      focusQuestion,
+      ifFocus,
+      sheet3
     };
   },
 };
@@ -437,123 +546,174 @@ export default {
       <div class="left-buttons">
         <!-- 点赞 -->
         <div>
-          <v-btn :icon="!userLike ?
-              'mdi-thumb-up-outline' : 'mdi-thumb-up'"
+          <v-btn :icon="'mdi-chevron-up'"
                  color="light-blue-darken-1"
-                 size="small" @click="setLikeQues"
-                 v-if="likeSum === 0"
+                 @click="goTop"
           />
-          <v-badge v-else :content="likeSum" color="red-lighten-1" offset-x="5" offset-y="5">
-            <v-btn :icon="!userLike ?
-              'mdi-thumb-up-outline' : 'mdi-thumb-up'"
-                   color="light-blue-darken-1"
-                   size="small" @click="setLikeQues"
-            />
-          </v-badge>
-        </div>
-        <!-- 评论 -->
-        <div style="margin-top: 25px">
-          <a href="javascript:void(0)" @click="goAnchor('comment')" v-if="question.ansSum !== 0">
-            <v-btn icon="mdi-message-reply-outline" size="small" color="light-blue-darken-1"/>
-          </a>
-          <v-badge v-else :content="question.ansSum" color="red-lighten-1" offset-x="5" offset-y="5">
-            <a href="javascript:void(0)" @click="goAnchor('comment')">
-              <v-btn icon="mdi-message-reply-outline" size="small" color="light-blue-darken-1"/>
-            </a>
-          </v-badge>
         </div>
       </div>
       <v-row>
-        <v-col cols="8" offset="1">
-          <v-card elevation="1" style="margin-top: 10px;text-align: left">
-            <div style="display: flex; align-items: center;margin-left: 10px">
-              <UserAvatar :userId="question.userId"></UserAvatar>
-              <v-col cols="7">
-                <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
-                <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
-              </v-col>
-              <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
-                <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
-                <v-btn variant="text" icon="mdi-book-edit" size="large" @click="toEdit"></v-btn>
-              </v-col>
-            </div>
-            <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
-                 v-dompurify-html="question.quesContent.content"/>
-            <v-row style="margin: 10px">
-              <v-col v-for="(image,index) in question.quesContent.imageList"
-                     :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
-              >
-                <div class="avatar-wrapper">
-                  <el-image
-                      class="avatar"
-                      :src="image"
-                      :fit="'cover'"
-                      @click="showPic(question.quesContent.imageList)"
-                  />
+        <v-col cols="12">
+          <v-card elevation="1" style="text-align: left">
+            <v-row>
+              <v-col cols="8" offset="1">
+                <div style="margin-left: 10px;margin-bottom: 10px;margin-top: 30px">
+                  <v-chip v-for="tag in disTags"
+                          :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
+                          @click="tagClick(tag.tagId)"
+                          :class="`cursor-pointer`"
+                          style="margin-left: 3px">
+                    <v-icon>{{ tag.tagIcon }}</v-icon>
+                    {{ tag.tagName }}
+                  </v-chip>
+                </div>
+                <div style="margin-left: 20px;margin-right: 20px;margin-top: 10px;font-weight: bold;font-size: 25px"
+                     v-dompurify-html="question.quesContent.content"/>
+                <v-row style="margin: 10px">
+                  <v-col v-for="(image,index) in question.quesContent.imageList"
+                         :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+                  >
+                    <div class="avatar-wrapper">
+                      <el-image
+                          class="avatar"
+                          :src="image"
+                          :fit="'cover'"
+                          @click="showPic(question.quesContent.imageList)"
+                      />
+                    </div>
+                  </v-col>
+                </v-row>
+                <div style="display: flex; align-items: center;margin-left: 10px">
+                  <UserAvatar v-if="avatarShow" :userId="question.userId"></UserAvatar>
+                  <v-col cols="7">
+                    <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
+                    <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
+                  </v-col>
+                </div>
+                <div style="margin-bottom: 20px">
+                  <v-btn color="blue-lighten-1" v-if="!ifFocus" @click="focusQuestion">关注问题</v-btn>
+                  <v-btn color="grey-lighten-2" v-else @click="focusQuestion">取消关注</v-btn>
+                  <v-btn v-if="!openAns" style="margin-left:15px" variant="outlined" color="blue-lighten-1"
+                         prepend-icon="mdi-pen" @click="openAns = true;openComment = false">写回答
+                  </v-btn>
+                  <v-btn v-if="openAns" style="margin-left:15px" variant="outlined"
+                         prepend-icon="mdi-window-close" @click="openAns = false">取消回答
+                  </v-btn>
+                  <v-btn :prepend-icon="!userLike ?
+                  'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text"
+                         @click="setLikeQues"
+                         color="blue-grey-lighten-2">
+                    好问题 {{ likeSum }}
+                  </v-btn>
+                  <v-btn variant="text" prepend-icon="mdi-message-reply-text"
+                         @click="openAns = true;openComment = false" color="blue-grey-lighten-2">
+                    {{ question.ansIdList.length }} 条回答
+                  </v-btn>
+                  <v-menu v-show="menuClick" :location="'bottom'">
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                          size="28px"
+                          v-bind="props"
+                          variant="text"
+                          @click="menuClick = !menuClick"
+                          class="rounded-circle"
+                      >
+                        <template v-slot:prepend>
+                          <v-icon size="15">mdi-dots-vertical</v-icon>
+                        </template>
+                      </v-btn>
+                    </template>
+                    <v-list>
+                      <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
+                        <v-icon size="22" color="red-darken-1">mdi-delete-clock</v-icon>
+                        删除
+                      </v-list-item>
+                      <v-list-item density="compact" v-if="isUser" color="primary" @click="toEdit">
+                        <v-icon size="22" color="blue-darken-1">mdi-book-edit</v-icon>
+                        修改
+                      </v-list-item>
+                      <v-list-item density="compact">
+                        举报
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </div>
               </v-col>
             </v-row>
-            <div style="margin-left: 10px;margin-bottom: 10px;margin-top: 30px">
-              <v-chip v-for="tag in disTags" size="small"
-                      :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
-                      @click="tagClick(tag.tagId)"
-                      :class="`cursor-pointer`"
-                      style="margin-left: 3px">
-                <v-icon>{{ tag.tagIcon }}</v-icon>
-                {{ tag.tagName }}
-              </v-chip>
-            </div>
           </v-card>
-
-          <v-card elevation="1" style="margin-top: 10px;text-align: left">
-            <div id="comment"
-                 style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
-              <span style="font-weight: bold;font-size: 20px">评论 </span>
-              <span>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="8" offset="1">
+          <v-card elevation="1" style="text-align: left">
+            <div v-if="openAns">
+              <div id="comment"
+                   style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
+                <span style="font-weight: bold;font-size: 20px">评论 </span>
+                <span>
                 <v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadAnswer">
                   发送回复
                 </v-btn>
               </span>
+              </div>
+              <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
+                <Toolbar
+                    style="border-bottom: 1px solid #ccc"
+                    :editor="editorRef1"
+                    :defaultConfig="toolbarConfig1"
+                    :mode="mode"
+                />
+                <Editor
+                    style="height: 250px; overflow-y: hidden;"
+                    v-model="replyHtml"
+                    :defaultConfig="editorConfig"
+                    :mode="mode"
+                    @onCreated="handleCreated1"
+                />
+              </div>
             </div>
-            <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
-              <Toolbar
-                  style="border-bottom: 1px solid #ccc"
-                  :editor="editorRef1"
-                  :defaultConfig="toolbarConfig1"
-                  :mode="mode"
-              />
-              <Editor
-                  style="height: 250px; overflow-y: hidden;"
-                  v-model="replyHtml"
-                  :defaultConfig="editorConfig"
-                  :mode="mode"
-                  @onCreated="handleCreated1"
-              />
+
+            <div v-if="openComment">
+              <div
+                   style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
+                <span style="font-weight: bold;font-size: 20px">回复 </span> {{commentUserName}}
+                <span>
+                  <v-btn prepend-icon="mdi-window-close" style="margin-right: 10px" variant="outlined" @click="openComment = false">
+                  取消回复
+                </v-btn>
+                <v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
+                  发送回复
+                </v-btn>
+              </span>
+              </div>
+              <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
+                <Toolbar
+                    style="border-bottom: 1px solid #ccc"
+                    :editor="editorRef3"
+                    :defaultConfig="toolbarConfig1"
+                    :mode="mode"
+                />
+                <Editor
+                    style="height: 250px; overflow-y: hidden;"
+                    v-model="commentHtml"
+                    :defaultConfig="replyAnsConfig"
+                    :mode="mode"
+                    @onCreated="handleCreated3"
+                />
+              </div>
             </div>
+
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部评论 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
             <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
+                     @replyAnswer="toReplyComment"
                      :ansId="ans" :index="index" @delAns="delAns"/>
             <div style="height: 100px"></div>
           </v-card>
         </v-col>
         <v-col cols="3">
-          <v-card style="width: 250px;margin-bottom: 20px;margin-top: 10px">
-            <div style="display: flex; align-items: center;justify-content: center">
-              <UserAvatar :userId="userStateStore().getUserId"/>
-              <v-col cols="7" style="text-align: left">
-                <p style="font-size: 20px;margin-top: 10px">{{ userStateStore().getUserName }}</p>
-              </v-col>
-            </div>
-            <div style="width: 75%;margin-top:3px;margin-bottom:10px;transform: translateX(12.5%)">
-              <v-divider></v-divider>
-            </div>
-            <div style="margin-bottom: 10px">
-              {{ userStateStore().sign }}
-            </div>
-          </v-card>
           <div>
             <v-card
                 :style="top ? 'position: fixed;top: 80px;width:250px;text-align:left;max-height:550px;overflow-y:scroll'
@@ -577,7 +737,6 @@ export default {
       </div>
     </div>
     <div v-else>
-
       <div class="dials" v-if="dialShow">
         <!-- 点赞 -->
         <div style="margin-bottom: 10px">
@@ -608,6 +767,18 @@ export default {
                  @click="sheet2 = !sheet2"
           />
         </div>
+        <div style="margin-bottom: 10px">
+          <v-btn icon="mdi-delete-clock" size="small" @click="delDialog = !delDialog"></v-btn>
+        </div>
+        <div style="margin-bottom: 10px">
+          <v-btn icon="mdi-book-edit" size="small" @click="toEdit"></v-btn>
+        </div>
+        <div style="margin-bottom: 10px">
+          <v-btn icon="mdi-chevron-up"
+                 size="small"
+                 @click="goTop"
+          />
+        </div>
       </div>
       <div class="dials" v-else>
         <div>
@@ -617,23 +788,10 @@ export default {
           />
         </div>
       </div>
-      <v-row style="margin-left: 12px;margin-right: 12px">
+      <v-row>
         <v-col cols="12">
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
-            <div style="display: flex; align-items: center;">
-              <v-col cols="2" style="justify-content: end;margin-right: 5px">
-                <UserAvatar :userId="question.userId"/>
-              </v-col>
-              <v-col cols="6">
-                <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
-                <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
-              </v-col>
-              <v-col cols="3" v-if="isUser" offset="1" style="display: flex; justify-content: space-around;">
-                <v-btn variant="text" icon="mdi-delete-clock" size="large" @click="delDialog = !delDialog"></v-btn>
-                <v-btn variant="text" icon="mdi-book-edit" size="large" @click="toEdit"></v-btn>
-              </v-col>
-            </div>
-            <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px"
+            <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px;font-size: 25px;font-weight: bold;"
                  v-dompurify-html="question.quesContent.content"/>
             <v-row>
               <v-col v-for="(image,index) in question.quesContent.imageList"
@@ -649,15 +807,16 @@ export default {
                 </div>
               </v-col>
             </v-row>
-            <div style="margin-left: 10px;margin-bottom: 10px;margin-top: 10px">
-              <v-btn :prepend-icon=" !userLike ?
-                  'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"
-                     color="blue-grey-lighten-2" @click="setLikeQues">
-                {{ likeSum }}
-              </v-btn>
-              <v-btn variant="text" prepend-icon="mdi-message-reply-text" size="small" color="blue-grey-lighten-2">
-                {{ question.ansSum }}
-              </v-btn>
+            <div style="display: flex; align-items: center;margin-bottom: 10px;margin-top: 5px">
+              <div style="margin-left: 15px">
+                <UserAvatar :userId="question.userId"/>
+              </div>
+              <div style="margin-left: 5px">
+                <p style="font-size: 15px;margin-top: 10px">{{ question.userName }}</p>
+                <p style="font-size: 10px;color: gray">{{ formatDate(question.quesTime) }}</p>
+              </div>
+            </div>
+            <div style="margin-left: 10px;margin-bottom: 10px;">
               <v-chip v-for="tag in disTags" size="small"
                       :key="question.quesId + '-' + tag.tagId" :color="tag.tagColor"
                       @click="tagClick(tag.tagId)"
@@ -666,15 +825,31 @@ export default {
                 {{ tag.tagName }}
               </v-chip>
             </div>
+            <v-row style="margin-left: 10px;height:60px;font-size:12px;color: grey">
+              <v-col cols="4">
+                <span style="margin-right: 4px;color: black">{{ likeSum }}</span> 点赞  ·
+                <span style="margin-right: 4px;margin-left: 3px;color: black">{{ question.ansIdList.length }}</span> 回复
+              </v-col>
+              <v-col offset="4">
+                <v-btn :prepend-icon="'mdi-focus-field'"
+                       color="blue-lighten-1" v-if="!ifFocus"
+                       size="small"
+                       @click="focusQuestion" variant="outlined" >关注问题</v-btn>
+                <v-btn :prepend-icon="'mdi-focus-field'"
+                       color="grey-lighten-2" v-else
+                       size="small"
+                       @click="focusQuestion" variant="outlined" >取消关注</v-btn>
+              </v-col>
+            </v-row>
           </v-card>
-
+          <div style="width: 100%;height: 10px;background-color: floralwhite"></div>
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部评论 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
             <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
-              <AppAnsCard :ansId="ans" :index="index" @delAns="delAns"/>
+              <AppAnsCard :ansId="ans" :index="index" @delAns="delAns" @replyAnswer="toReplyComment"/>
             </div>
           </v-card>
         </v-col>
@@ -682,8 +857,7 @@ export default {
       <div style="height: 200px"></div>
     </div>
   </div>
-
-  <v-bottom-sheet v-model="sheet1" inset :persistent="true">
+  <v-bottom-sheet v-if="!display.smAndDown.value" v-model="sheet1" inset>
     <v-card
         class="text-center"
         height="800"
@@ -772,7 +946,96 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
-  <v-bottom-sheet v-model="sheet2" inset>
+  <v-bottom-sheet v-model="sheet1" v-else >
+    <v-card
+        class="text-center"
+        height="800"
+    >
+      <v-card-text>
+        <v-row align="center" style="margin-bottom: 5px">
+          <v-col cols="4" offset="4">
+            编辑问题
+          </v-col>
+          <v-col cols="4">
+            <v-btn variant="text" @click="updateQues">
+              发布
+            </v-btn>
+            <v-btn variant="text" @click="sheet1 = !sheet1">
+              close
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col v-for="(image,index) in editImgList"
+                 :key="'image' + index" :cols="display.smAndDown.value? 4 : 3"
+          >
+            <div class="avatar-wrapper">
+              <div class="right-top">
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1"
+                       icon="mdi-close"></v-btn>
+              </div>
+              <el-image
+                  class="avatar"
+                  :src="image"
+                  :fit="'cover'"
+                  @click="showPic(editImgList)"
+              />
+            </div>
+          </v-col>
+          <v-col :cols="display.smAndDown.value? 4 : 3">
+            <el-form style="width: 100%">
+              <el-upload
+                  class="avatar-uploader"
+                  action="#"
+                  :show-file-list="false"
+                  :auto-upload="false"
+                  :on-change="handleChange"
+                  accept=".jpg,.png"
+              >
+                <el-icon class="avatar-uploader-icon">
+                  <Plus/>
+                </el-icon>
+              </el-upload>
+            </el-form>
+          </v-col>
+        </v-row>
+
+        <div>
+          <v-select
+              v-model="editTagList"
+              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray"
+              multiple
+              label="添加标签"
+              density="default"
+          >
+            <template v-slot:selection="{item, index}">
+              <v-chip size="x-small" :color="findTagColor(index)">
+                <v-icon>{{ findTagIcon(index) }}</v-icon>
+                {{ item.title }}
+              </v-chip>
+            </template>
+          </v-select>
+        </div>
+
+        <div style="border: 1px solid #ccc">
+          <Editor
+              style="height: 350px; overflow-y: hidden;"
+              v-model="editHtml"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="handleCreated2"
+          />
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef2"
+              :defaultConfig="toolbarConfig2"
+              :mode="mode"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-bottom-sheet>
+  <v-bottom-sheet v-model="sheet2" v-if="display.smAndDown.value">
     <v-card
         class="text-center"
         height="500"
@@ -789,7 +1052,7 @@ export default {
             </v-btn>
           </v-col>
         </v-row>
-        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0px">
+        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0">
           <Toolbar
               style="border-bottom: 1px solid #ccc;"
               :editor="editorRef1"
@@ -802,6 +1065,44 @@ export default {
               :defaultConfig="editorConfig"
               :mode="mode"
               @onCreated="handleCreated1"
+          />
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-bottom-sheet>
+  <v-bottom-sheet v-model="sheet3" v-if="display.smAndDown.value">
+    <v-card
+        class="text-center"
+        height="500"
+    >
+      <v-card-text>
+        <v-row align="center" style="margin-bottom: 5px">
+          <v-col cols="4" offset="4">
+            发布评论
+          </v-col>
+          <v-col cols="4">
+            <v-btn prepend-icon="mdi-message-reply-text"
+                   color="primary" @click="uploadComment">
+              回复
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-row style="margin: 10px">
+          <span style="font-weight: bold;margin-right: 8px">回复 </span> {{commentUserName}}
+        </v-row>
+        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0">
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef3"
+              :defaultConfig="toolbarConfig1"
+              :mode="mode"
+          />
+          <Editor
+              style="height: 250px; overflow-y: hidden;"
+              v-model="commentHtml"
+              :defaultConfig="replyAnsConfig"
+              :mode="mode"
+              @onCreated="handleCreated3"
           />
         </div>
       </v-card-text>
@@ -841,9 +1142,9 @@ export default {
 .left-buttons {
   position: fixed;
   z-index: 888;
-  top: 50%;
+  top: 90%;
   left: 2%;
-  transform: translateY(-50%);
+  transform: translateY(-90%);
 }
 
 .dials {

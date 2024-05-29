@@ -38,7 +38,7 @@ export default {
     });
 
     const goto = () => {
-      router.push("/QuesInfo/" + props.question.quesId);
+      router.push("/QuesInfo/" + props.question.quesId + "/0");
     }
 
     const userLike = ref(props.question.ifUserLike)
@@ -82,7 +82,7 @@ export default {
     const delDialog = ref(false)
 
     const editQues = () => {
-      context.emit("editQues", {index: props.index})
+      router.push("/QuesInfo/" + props.question.quesId + "/1");
     }
 
     const isUser = ref(UserStateStore().getUserId === props.question.userId);
@@ -149,13 +149,10 @@ export default {
             </template>
             <v-list>
               <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
-                删除
+                <v-icon size="22" color="red-darken-1">mdi-delete-clock</v-icon> 删除
               </v-list-item>
-              <v-list-item density="compact" v-if="isUser" @click="editQues">
-                修改
-              </v-list-item>
-              <v-list-item density="compact">
-                举报
+              <v-list-item density="compact" v-if="isUser" color="primary" @click="editQues">
+                <v-icon size="22" color="blue-darken-1">mdi-book-edit</v-icon> 修改
               </v-list-item>
             </v-list>
           </v-menu>

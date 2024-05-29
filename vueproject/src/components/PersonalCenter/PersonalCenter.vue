@@ -193,7 +193,7 @@
         // router.push('/blogView/' + _blogId);
       },
       clickHelpItem(_blogId) {
-        router.push('/QuesInfo/' + _blogId);
+        router.push('/QuesInfo/' + _blogId + "/0");
       }
     },
   };

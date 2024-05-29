@@ -1,10 +1,11 @@
 import datetime
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime,Table
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy.sql import func
 
 from orm.database import Base
+from typing import Optional, List
 
 
 
@@ -35,6 +36,8 @@ class User(Base):
                                            back_populates="liked_users")
     liked_questions = relationship("Question", secondary="user_question_likes",
                                    back_populates="liked_users")
+    focused_questions = relationship("Question", secondary="user_question_focuses",
+                                   back_populates="focused_users")
     followed = relationship(
         "User",
         secondary=user_user_stars,
@@ -97,7 +100,9 @@ class BlogComment(Base):
     user = relationship("User", back_populates="blog_comments")
     blog = relationship("Blog", back_populates="comments")
 
-    reply_to_comment = relationship('BlogComment', foreign_keys=[reply_to_comment_id])
+    comments: Mapped[List["BlogComment"]] = relationship(back_populates="reply_to_comment")
+    reply_to_comment: Mapped[Optional["BlogComment"]] = relationship(back_populates="comments", remote_side=id)
+    
 
 class BlogTag(Base):
     __tablename__ = 'blog_tags'
@@ -137,6 +142,8 @@ class Question(Base):
     user = relationship("User", back_populates="questions")
     liked_users = relationship("User", secondary="user_question_likes",
                                back_populates="liked_questions")
+    focused_users = relationship("User", secondary="user_question_focuses",
+                               back_populates="focused_questions")
     tags = relationship("QuestionTag", secondary="question_question_tags", back_populates="questions")
 
 
@@ -159,6 +166,7 @@ class QuestionComment(Base):
     create_at = Column(DateTime, server_default=func.now())
     delated = Column(Boolean, default=False)
     accepted = Column(Boolean, default=False)
+    reply_comment_id = Column(Integer, ForeignKey('question_comments.id'), nullable=True)
 
     question = relationship("Question", back_populates="comments")
     user = relationship("User", back_populates="question_comments")
@@ -183,6 +191,11 @@ class UserQuestionCommentLike(Base):
 
 class UserQuestionLike(Base):
     __tablename__ = 'user_question_likes'
+    question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
+class UserQuestionFocus(Base):
+    __tablename__ = 'user_question_focuses'
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
 
