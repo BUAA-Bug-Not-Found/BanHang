@@ -48,7 +48,7 @@
     <v-card
         class="mx-auto"
         width="96%"
-        :color="isHovering ? 'cyan-lighten-5' : undefined"
+        :color="isHovering ? 'grey-lighten-3' : 'white'"
         v-bind="props"
     >
       <v-row>
@@ -223,11 +223,13 @@ export default {
       menuCLick: false,
       delDialog: false,
       isCurUser: false,
+      randomColor: this.getRandomColor()
     }
   },
 
   created() {
     this.isCurUser = UserStateStore().getUserId === this.userId
+    this.randomColor = this.getRandomColor()
   },
 
   computed: {
@@ -294,6 +296,21 @@ export default {
         message: '当前您可以直接联系开发人员进行举报和删帖，再次感谢！',
         showClose: true
       })
+    },
+
+    getRandomColor() {
+      const colors = [
+        'rgba(255, 182, 193, 0.2)',  // lightpink
+        'rgba(173, 216, 230, 0.2)',  // lightblue
+        'rgba(144, 238, 144, 0.2)',  // lightgreen
+        'rgba(255, 255, 224, 0.2)',  // lightyellow
+        'rgba(221, 160, 221, 0.2)',  // plum
+        'rgba(240, 230, 140, 0.2)',  // khaki
+        'rgba(135, 206, 250, 0.2)',  // light sky blue
+        'rgba(255, 192, 203, 0.2)',  // pink
+        'rgba(176, 224, 230, 0.2)',  // powder blue
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
     }
   }
 };

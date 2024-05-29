@@ -1,6 +1,6 @@
 <template>
   <div class="comment-card">
-    <div class="user-info" >
+    <div class="user-info">
       <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
         <UserAvatar :userId="this.userId"></UserAvatar>
       </div>
@@ -10,24 +10,97 @@
         </v-avatar>
       </div>
       <div class="user-details">
-        <span class="user-name">{{ userName }}</span>
+        <div v-if="topCommentId === replyToCommentId">
+          <span class="user-name">{{ userName }}</span>
+        </div>
+        <div v-else>
+          <span class="user-name">{{ userName }}</span> → <span class="reply-to-user-name">{{
+            replyToCommentName
+          }}</span>
+        </div>
         <span class="time">{{ formatDate(time) }}</span>
       </div>
     </div>
-    <div class="content">
-      {{ content }}
+    <div v-if="!useDisplay().smAndDown.value">
+      <div class="content" @click="showInput">
+        {{ content }}
+      </div>
     </div>
+    <div v-else>
+      <div class="content" @click="showBottomSheet">
+        {{ content }}
+      </div>
+    </div>
+
+    <div v-show="isInputVisible" class="reply-input">
+      <v-textarea
+          v-model="replyContent"
+          placeholder="请输入回复内容"
+          outlined
+          rows="3"
+          class="reply-textarea"
+      ></v-textarea>
+      <div class="anonymous-and-sendbutton">
+        <v-checkbox
+            v-model="isAnonymous"
+            label="匿名发送"
+            class="anonymous-checkbox"
+            color="primary"
+        ></v-checkbox>
+        <v-btn @click.stop="sendReply" color="primary" class="send-button">
+          发送
+          <v-icon end>mdi-checkbox-marked-circle</v-icon>
+        </v-btn>
+      </div>
+    </div>
+
   </div>
+
+  <v-bottom-sheet
+      v-model="bottomSheet"
+      v-if="useDisplay().smAndDown.value"
+      class="transparent-bottom-sheet">
+    <div class="reply-input">
+      <v-textarea
+          v-model="replyContent"
+          placeholder="请输入回复内容"
+          outlined
+          rows="3"
+          class="reply-textarea"
+      ></v-textarea>
+      <div class="anonymous-and-sendbutton">
+        <v-checkbox
+            v-model="isAnonymous"
+            label="匿名发送"
+            class="anonymous-checkbox"
+            color="primary"
+        ></v-checkbox>
+        <v-btn @click.stop="sendReply" color="primary" class="send-button">
+          发送
+          <v-icon end>mdi-checkbox-marked-circle</v-icon>
+        </v-btn>
+      </div>
+    </div>
+  </v-bottom-sheet>
+
 </template>
 
 <script>
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
+import {useDisplay} from "vuetify";
+import UserStateStore from "@/store";
+import {ElMessage} from "element-plus";
+import {uploadComment} from "@/components/AnonymousBlog/api";
 
 export default {
   name: "ReplyShow",
   components: {UserAvatar},
 
   props: {
+    blogId: {
+      type: Number,
+      required: true
+    },
     commentId: {
       type: Number,
       required: true
@@ -52,9 +125,32 @@ export default {
       type: String,
       required: true
     },
+    replyToCommentId: {
+      type: Number,
+      required: true
+    },
+    replyToCommentName: {
+      type: String,
+      required: true
+    },
+    topCommentId: {
+      type: Number,
+      required: true
+    }
+  },
+
+  data() {
+    return {
+      isOpen: false,
+      isInputVisible: false,
+      replyContent: "",
+      isAnonymous: false,
+      bottomSheet: false
+    };
   },
 
   methods: {
+    useDisplay,
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
@@ -64,8 +160,61 @@ export default {
       let minutes = ('0' + date.getMinutes()).slice(-2); // 保证两位数
 
       return `${year}.${month}.${day}-${hours}:${minutes}`
-    }
+    },
 
+    showInput() {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
+      this.isInputVisible = !this.isInputVisible;
+    },
+
+    showBottomSheet() {
+      const state = UserStateStore()
+      if (!state.email) {
+        ElMessage.error("请先登录")
+        return
+      }
+      this.bottomSheet = !this.bottomSheet;
+    },
+
+    sendReply() {
+      // 将回复内容和是否匿名发送提交给后端或其他逻辑处理
+      if (this.replyContent.trim().length > 0) {
+
+        let json_set = {
+          'blogId': this.blogId,
+          'commentContent': this.replyContent,
+          'ifAnonymous': this.isAnonymous,
+          'replyToCommentId': this.commentId
+        }
+        uploadComment(json_set).then(
+            (res) => {
+              if (res.response == "success") {
+                ElMessage({
+                  message: '评论成功',
+                  showClose: true,
+                  type: 'success',
+                })
+                location.reload()
+              } else {
+                ElMessage({
+                  message: '评论失败，请修改内容或稍后再试',
+                  showClose: true,
+                  type: 'error',
+                })
+              }
+            }
+        )
+      }
+
+      // 发送完毕后，清空输入框并隐藏输入模块
+      this.replyContent = "";
+      this.isAnonymous = false;
+      this.isInputVisible = false;
+    }
   }
 }
 </script>
@@ -108,6 +257,12 @@ export default {
   text-align: left;
 }
 
+.reply-to-user-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #00b0ff; /* 可根据需要更改颜色 */
+}
+
 .time {
   font-size: 8px;
   color: #888;
@@ -118,4 +273,45 @@ export default {
   text-align: left;
 }
 
+.reply-input {
+  margin-left: 1%;
+  margin-right: 1%;
+  margin-bottom: 15px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1; /* 确保在其他内容之上 */
+}
+
+.reply-textarea {
+  margin-bottom: 1px;
+}
+
+.anonymous-and-sendbutton {
+  margin-top: -15px;
+  margin-bottom: -12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.anonymous-checkbox {
+  margin-right: 10px;
+}
+
+.send-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+}
+
+.transparent-bottom-sheet {
+  background-color: transparent !important;
+}
+
+.white-background {
+  background-color: white;
+}
 </style>
