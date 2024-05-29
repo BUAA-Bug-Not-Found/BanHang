@@ -3,12 +3,16 @@
     <ReplyShow
         v-for="(comment, index) in comments.slice().reverse()"
         :key="index"
+        :blog-id="comment.blogId"
         :comment-id="comment.commentId"
         :user-id="comment.userId"
         :user-name="comment.userName"
         :user-avatar-url="comment.userAvatarUrl"
         :content="comment.content"
         :time="comment.time"
+        :reply-to-comment-id="comment.replyToCommentId"
+        :reply-to-comment-name="getReplyToCommentName(comment.replyToCommentId)"
+        :top-comment-id="this.topCommentId"
     />
   </div>
 </template>
@@ -24,6 +28,16 @@ export default {
       type: Array,
       required: true,
     },
+    topCommentId: {
+      type: Number,
+      required: true
+    }
+  },
+  methods: {
+    getReplyToCommentName(replyToCommentId) {
+      const replyToComment = this.comments.find(comment => comment.commentId === replyToCommentId);
+      return replyToComment ? replyToComment.userName : '';
+    }
   }
 }
 </script>
