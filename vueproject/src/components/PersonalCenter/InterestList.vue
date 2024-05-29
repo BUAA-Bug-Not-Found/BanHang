@@ -23,16 +23,6 @@
                   :id="post.id"
                   :headImage="post.headUrl"
                 />
-                <!-- <v-list-item v-for="(content, index) in stars" :key="index">
-                  <div style="text-align: left; vertical-align: middle; margin-top: 10px; margin-left: 10px;">
-                    <v-avatar size="30" @click="clickOtherUser(content.email)" style="cursor: pointer;">
-                        <img :src="content.headUrl" alt="Avatar">
-                    </v-avatar>
-                    <span style="font-weight: bold; margin-left: 10px;">{{ content.nickname }}</span>
-                    <v-spacer></v-spacer>
-                </div>
-                  <v-divider style="margin-top: 10px;"></v-divider>
-                </v-list-item> -->
               </v-list>
             </v-window-item>
             
@@ -46,17 +36,6 @@
                     :id="post.id"
                     :headImage="post.headUrl"
                   />
-
-                    <!-- <v-list-item v-for="(content, index) in fans" :key="index">
-                    <div style="text-align: left; vertical-align: middle; margin-top: 10px; margin-left: 10px;">
-                        <v-avatar size="30" @click="clickOtherUser(content.email)" style="cursor: pointer;">
-                            <img :src="content.headUrl" alt="Avatar">
-                        </v-avatar>
-                        <span style="font-weight: bold; margin-left: 10px;">{{ content.nickname }}</span>
-                        <v-spacer></v-spacer>
-                    </div>
-                    <v-divider style="margin-top: 10px;"></v-divider>
-                    </v-list-item> -->
                 </v-list>
             </v-window-item>
           </v-window>

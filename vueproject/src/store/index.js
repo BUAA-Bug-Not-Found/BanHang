@@ -107,6 +107,20 @@ export const userStateStore = defineStore("user", {
                 user_name: '未登录',
                 avatar: "src/assets/images/default-avatar.png",
             })
+        },
+        async updateNewInfo(_nickname, _sign, _url) {
+            if (isApp) {
+                localStorage.setItem("userInfo", JSON.stringify({
+                    user_id: this.user_id,
+                    user_name: _nickname,
+                    register_date: this.register_date,
+                    isAuthentic: this.isAuthentic,
+                    email: this.email,
+                    nickname: _nickname,
+                    headImage: _url,
+                    sign: _sign
+                }))
+            }
         }
     }
 })
