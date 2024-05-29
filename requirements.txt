@@ -13,3 +13,5 @@ alembic
 yagmail
 pillow
 fastapi-debug-toolbar
+APScheduler
+selenium

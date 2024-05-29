@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from typing import Optional, List
 import hashlib
+from scripts.buaa_api_renewer import data as vacant_data
 
 from fastapi import Depends, FastAPI, HTTPException, APIRouter, Response, Cookie, Request
 from sqlalchemy.orm import Session
@@ -422,11 +423,51 @@ def get_other_info_by_id(id: int, db: Session = Depends(get_db)):
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
     return {"nickname": user.username, "sign": user.sign, 'url': user.userAvatarURL if user.userAvatarURL else ""}
 
-@router.get("/getInfoByUserId", tags=['用户中心'],response_model=UserInfoResponse, deprecated=True, # todo deprecated
+
+@router.get("/getInfoByUserId", tags=['用户中心'], response_model=UserInfoResponse, deprecated=True,  # todo deprecated
             responses={400: {"model": excResponse}})
-def get_info_by_id(userId:int, db:Session = Depends(get_db)):
+def get_info_by_id(userId: int, db: Session = Depends(get_db)):
     user = crud.get_user_by_id(db, userId)
     if not user:
-        raise EXC.UniException(key = "isSuccess", value=False, others={"description":"用户不存在"})
-    return {"nickname":user.username, "sign":user.sign, 'url':user.userAvatarURL if user.userAvatarURL else "",
-            'user_id':user.id, 'email': 'anonymous'}
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
+    return {"nickname": user.username, "sign": user.sign, 'url': user.userAvatarURL if user.userAvatarURL else "",
+            'user_id': user.id, 'email': 'anonymous'}
+
+
+class vacantClassroomInfo(BaseModel):
+    name: str
+    vacant_time: List[int]
+
+
+class BuildingVacantClassroomResponse(BaseModel):
+    name: str
+    vacantClassroomInfo: List[vacantClassroomInfo]
+
+
+class SchoolVacantClassroomResponse(BaseModel):
+    buildings: List[BuildingVacantClassroomResponse]
+
+
+class VacantClassroomResponse(BaseModel):
+    shahe: SchoolVacantClassroomResponse
+    xueyuanlu: SchoolVacantClassroomResponse
+
+
+@router.get('/getVacantClassroom', tags=['工具箱'], response_model=VacantClassroomResponse)
+def get_vacant_classroom(db: Session = Depends(get_db)):
+    target = [('shahe', vacant_data['vacant_classroom']['sh']),
+              ('xueyuanlu', vacant_data['vacant_classroom']['xyl'])]
+    ret = {}
+    for name, dic in target:
+        res = []
+        for k in dic:
+            added = {}
+            added['name'] = k
+            added['vacantClassroomInfo'] = []
+            for rec in dic[k]:
+                added['vacantClassroomInfo'].append({'name': rec['name'],
+                                                     'vacant_time': [int(x) for x in rec['kxsds'].strip().split(',')
+                                                                     if x.strip() != '']})
+            res.append(added)
+        ret[name]={'buildings': res}
+    return ret
