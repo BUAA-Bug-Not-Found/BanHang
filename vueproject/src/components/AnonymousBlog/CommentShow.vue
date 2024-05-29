@@ -307,7 +307,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 20px;
+  height: 28px;
 }
 
 .transparent-bottom-sheet {
