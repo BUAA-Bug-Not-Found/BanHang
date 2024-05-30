@@ -177,6 +177,7 @@ export default {
                         userStateStore().nickname = this.nickname;
                         userStateStore().user_name = this.nickname;
                         userStateStore().headImage = this.headImage1;
+                        userStateStore().updateNewInfo(this.nickname, this.sign, this.headImage1);
                         $bus.emit('updateIndexNH')
                         router.push({path: "/personalCenter"});
                     } else {

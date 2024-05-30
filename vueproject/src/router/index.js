@@ -28,7 +28,7 @@ import {createRouter, createWebHashHistory} from 'vue-router';
 import ResetPassword from "@/components/AccountManagement/ResetPassword.vue";
 import SearchList from "@/components/AdvanceSearch/SearchList.vue";
 
-
+import ToolCenter from '@/components/ToolCenter/ToolCenter.vue';
 const routes = [
     {
         path: '/',
@@ -114,6 +114,11 @@ const routes = [
                 path: '/searchList/:keywords',
                 name: "searchList",
                 component: SearchList
+            },
+            {
+                path: '/toolCenter',
+                name: 'toolCenter',
+                component: ToolCenter
             }
         ]
     },
