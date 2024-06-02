@@ -27,6 +27,7 @@ jobs:
   auto_deployment_frontend:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: self-hosted
+    needs: auto_deployment_start_backend
     steps:
       - uses: actions/checkout@v3
       - run: if (Test-Path -Path D:\SoftWareEngineer\frontend\vueproject){Remove-Item -Path D:\SoftWareEngineer\frontend\vueproject -Force -Recurse}
