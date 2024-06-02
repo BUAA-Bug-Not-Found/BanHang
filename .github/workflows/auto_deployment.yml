@@ -16,9 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: schtasks /End /TN BanHang
-      - uses: GuillaumeFalourd/wait-sleep-action@v1
-        with:
-          time: '5' # for 5 seconds
+      - run: ping -n 3 lyhtool.com
       - run: if (Test-Path -Path D:\SoftWareEngineer\backend\fastapi){Remove-Item -Path D:\SoftWareEngineer\backend\fastapi -Force -Recurse}
       - run: Copy-Item -Path .\backend\fastapi -Destination D:\SoftWareEngineer\backend -Force -Recurse
       - run: schtasks /Run /TN BanHang
