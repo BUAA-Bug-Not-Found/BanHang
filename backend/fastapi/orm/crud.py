@@ -521,7 +521,8 @@ def create_question_comment(db: Session, questionCommentCreat: schemas.QuestionC
                                      content=questionCommentCreat.content,
                                      images=[get_question_comment_image_by_id(db, imageid)
                                              for imageid in questionCommentCreat.questionCommentImageids],
-                                     reply_comment_id=questionCommentCreat.replyCommentId)
+                                     reply_comment_id=questionCommentCreat.replyCommentId
+                                     if questionCommentCreat.replyCommentId >= 0 else None)
     db.add(comment)
     db.commit()
     db.refresh(comment)
