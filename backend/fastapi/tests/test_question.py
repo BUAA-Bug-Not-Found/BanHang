@@ -1,6 +1,6 @@
 import time
+from typing import List
 
-import pytest
 from prepare import *
 # 一定写在前面
 
@@ -12,20 +12,34 @@ from tests.test_user import register_login_user
 
 client = TestClient(app)
 
+
+def add_tags(tagnames: List[str]):
+    i = 0
+    ret = True
+    for name in tagnames:
+        i += 1
+        res = client.post("/addQuestionTag", json={'name': name, 'id': i, 'color': "a", 'icon': 'b',
+                                                   'isAdmin': False})
+        ret = ret and (res.status_code == 200)
+    return ret
+
+
 def test_upload(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
     # 注册登录
-    register_login_user(client, mock_user_data)
+    register_login_user(client, mock_user_data, admin=True)
+    add_tags(mock_question_data['quesTags'])
+
     # 上传blog
-    res = client.post("/uploadQues", json = mock_question_data)
+    res = client.post("/uploadQues", json=mock_question_data)
     assert res.status_code == 200
     # 检查blog是否存在
-    blogs = client.get("/getQuestions",params = {"pageNo": 1,"pageSize": 100}).json()
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
     idlist = blogs["questions"][0]['tagIdList']
 
-    blogs = client.get('/getQuestionsByTagId', params = {"pageNo": 1,"pageSize": 100, 'tagId':idlist[0]}).json()
+    blogs = client.get('/getQuestionsByTagId', params={"pageNo": 1, "pageSize": 100, 'tagId': idlist[0]}).json()
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
@@ -33,7 +47,7 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     # 测试update问题
     mock_question_data["quesContent"]["content"] = "changed content"
     mock_question_data['quesId'] = blogs['questions'][0]['quesId']
-    res = client.post("/updateQues", json = mock_question_data)
+    res = client.post("/updateQues", json=mock_question_data)
     assert res.status_code == 200
 
     # 检查update后的问题
@@ -49,14 +63,14 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     # 检查用户权限
     register_login_user(client, mock_user_2)
     mock_question_data["quesContent"]["content"] = "changed content2"
-    res = client.post("/updateQues", json = mock_question_data)
+    res = client.post("/updateQues", json=mock_question_data)
     assert res.status_code != 200
 
     register_login_user(client, mock_user_data)
 
     mock_question_comment_data['quesId'] = blogs['questions'][0]['quesId']
     # 尝试comment
-    res = client.post("/answerQues", json = mock_question_comment_data)
+    res = client.post("/answerQues", json=mock_question_comment_data)
     assert res.status_code == 200
     ans = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
     assert ans["ifExist"] == True
@@ -68,7 +82,7 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert ans1['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
 
     # 尝试like ques
-    res = client.post("/setLikeQues", json = {'quesId': blog['quesId'], 'setType': 1})
+    res = client.post("/setLikeQues", json={'quesId': blog['quesId'], 'setType': 1})
     assert res.status_code == 200
     ans = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
     assert ans["ifExist"] == True
@@ -83,7 +97,7 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert ans["question"]['ifUserFocus'] == True
 
     # 尝试like comment
-    res = client.post("/setLikeAns", json = {'ansId': answerid, 'setType': 1})
+    res = client.post("/setLikeAns", json={'ansId': answerid, 'setType': 1})
     assert res.status_code == 200
     ans1 = client.get('/getAnsById', params={"ansId": answerid}).json()
     assert ans1["ifExist"] == True
@@ -93,14 +107,14 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     # update answers
     mock_question_comment_data['ansContent']['content'] = "changed content"
     mock_question_comment_data['ansId'] = answerid
-    res = client.post("/updateAns", json = mock_question_comment_data)
+    res = client.post("/updateAns", json=mock_question_comment_data)
     assert res.status_code == 200
     ans1 = client.get('/getAnsById', params={"ansId": answerid}).json()
     assert ans1["ifExist"] == True
     assert ans1['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
 
     # accept answers
-    res = client.post("/setAnsType", json = {'ansId': answerid, 'setType': 1})
+    res = client.post("/setAnsType", json={'ansId': answerid, 'setType': 1})
     assert res.status_code == 200
     ans1 = client.get('/getAnsById', params={"ansId": answerid}).json()
     assert ans1["ifExist"] == True
@@ -119,15 +133,17 @@ def test_upload(mock_question_data, mock_user_data, new_database, mock_question_
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
 
-    blogs = client.post("/searchQuesAPage", json={'searchContent':"new", 'pageno':1, 'pagesize':100,
-                                                  'nowSortMethod':'byTime'})
+    blogs = client.post("/searchQuesAPage", json={'searchContent': "new", 'pageno': 1, 'pagesize': 100,
+                                                  'nowSortMethod': 'byTime'})
     assert blogs.status_code == 200
     assert blogs.json()['quesSum'] == 1
     assert blogs.json()['questions'][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
 
+
 def test_delete_question_and_comment(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
     # 注册登录
-    register_login_user(client, mock_user_data)
+    register_login_user(client, mock_user_data, admin=True)
+    add_tags(mock_question_data['quesTags'])
     # 上传blog
     res = client.post("/uploadQues", json=mock_question_data)
     assert res.status_code == 200
@@ -138,7 +154,7 @@ def test_delete_question_and_comment(mock_question_data, mock_user_data, new_dat
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
     idlist = blogs["questions"][0]['tagIdList']
 
-    res = client.post("/delQuestion", json={"quesId":blogs['questions'][0]['quesId']})
+    res = client.post("/delQuestion", json={"quesId": blogs['questions'][0]['quesId']})
     blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
     assert len(blogs["questions"]) == 0
 
@@ -165,7 +181,8 @@ def test_delete_question_and_comment(mock_question_data, mock_user_data, new_dat
 
 def test_solved_question(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
     # 注册登录
-    register_login_user(client, mock_user_data)
+    register_login_user(client, mock_user_data, admin=True)
+    add_tags(mock_question_data['quesTags'])
     # 上传blog
     res = client.post("/uploadQues", json=mock_question_data)
     assert res.status_code == 200
@@ -179,34 +196,35 @@ def test_solved_question(mock_question_data, mock_user_data, new_database, mock_
     res = client.post('/solveQuestion', json={'quesId': blogs['questions'][0]['quesId']})
     assert res.status_code == 200
 
-    #检查是否解决
+    # 检查是否解决
     blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["quesState"] == 3
 
+
 def test_comment_to_comment(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
     # 注册登录
-    register_login_user(client, mock_user_data)
+    register_login_user(client, mock_user_data, admin=True)
+    add_tags(mock_question_data['quesTags'])
     # 上传blog
-    res = client.post("/uploadQues", json = mock_question_data)
+    res = client.post("/uploadQues", json=mock_question_data)
     assert res.status_code == 200
     # 检查blog是否存在
-    blogs = client.get("/getQuestions",params = {"pageNo": 1,"pageSize": 100}).json()
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
     idlist = blogs["questions"][0]['tagIdList']
 
-    blogs = client.get('/getQuestionsByTagId', params = {"pageNo": 1,"pageSize": 100, 'tagId':idlist[0]}).json()
+    blogs = client.get('/getQuestionsByTagId', params={"pageNo": 1, "pageSize": 100, 'tagId': idlist[0]}).json()
     assert len(blogs["questions"]) == 1
     assert blogs["questions"][0]["userName"] == mock_user_data['username']
     assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
     blog = blogs['questions'][0]
 
-
     mock_question_comment_data['quesId'] = blogs['questions'][0]['quesId']
     # 尝试comment
-    res = client.post("/answerQues", json = mock_question_comment_data)
+    res = client.post("/answerQues", json=mock_question_comment_data)
     assert res.status_code == 200
     ans = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
     assert ans["ifExist"] == True
@@ -257,3 +275,10 @@ def test_comment_to_comment(mock_question_data, mock_user_data, new_database, mo
     assert ans2["ifExist"] == True
     assert ans2['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
     assert ans2['answer']['replyAnsId'] == sub_ans_id1
+
+
+def test_create_question_tag_by_nonAdmin(mock_question_data, mock_user_data, new_database, mock_question_comment_data):
+    # 注册登录
+    register_login_user(client, mock_user_data, admin=False)
+    ret = add_tags(mock_question_data['quesTags'])
+    assert ret == False

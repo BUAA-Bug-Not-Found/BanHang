@@ -44,7 +44,8 @@ def get_search_user_sum_by_word(db: Session, word: str, offset: int, limit: int)
 # 引入 https://source.boringavatars.com 作为用户默认头像
 def create_user(db: Session, user: schemas.UserCreate):
     userAvatarURL = "https://source.boringavatars.com/beam/500/" + user.username + "?square"
-    db_user = models.User(username=user.username, password=user.password, email=user.email, userAvatarURL=userAvatarURL)
+    db_user = models.User(username=user.username, password=user.password, email=user.email, userAvatarURL=userAvatarURL,
+                          privilege=1 if os.getenv("BANHANG_TEST_ADMIN")=='True' else 0)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -384,11 +385,21 @@ def get_question_tag_by_name(db: Session, name: str):
     return db.query(models.QuestionTag).filter(models.QuestionTag.name == name).first()
 
 
-def create_question_tag(db: Session, name: str):
+def create_question_tag(db: Session, name: str, id: int = None, color:str = None, icon:str = None,
+                        is_admin:bool = False):
     name = name.strip()
     if tag := get_question_tag_by_name(db, name):
         return tag
-    tag = models.QuestionTag(name=name)
+    if id and (tag := get_question_tag_by_id(db, id)):
+        return tag
+    args = {'name': name, 'is_admin': is_admin}
+    if id:
+        args['id'] = id
+    if color:
+        args['color'] = color
+    if icon:
+        args['icon'] = icon
+    tag = models.QuestionTag(**args)
     db.add(tag)
     db.commit()
     db.refresh(tag)
@@ -588,7 +599,8 @@ def set_like_question_comment(db: Session, user_id: int, question_comment_id: in
             comment.liked_users.remove(user)
             db.commit()
 
-def set_focus_question(db: Session, user_id: int, question_id: int, is_focus: bool,background_tasks: BackgroundTasks):
+
+def set_focus_question(db: Session, user_id: int, question_id: int, is_focus: bool, background_tasks: BackgroundTasks):
     question = get_question_by_id(db, question_id)
     user = get_user_by_id(db, user_id)
     if is_focus:
@@ -649,6 +661,7 @@ def send_message_for_like_question_comment(comment_id: int, like_user: int):
     finally:
         db.close()
 
+
 def send_message_for_focus_question(question_id: int, like_user: int):
     print("back_send_message_for {} focus question {}".format(like_user, question_id))
     db = SessionLocal()
@@ -659,6 +672,7 @@ def send_message_for_focus_question(question_id: int, like_user: int):
                      "自动提示：【{}】 关注了您提出问题：“{}”".format(user.username, question.content))
     finally:
         db.close()
+
 
 def send_message_for_like_question(question_id: int, like_user: int):
     print("back_send_message_for {} like_question {}".format(like_user, question_id))
