@@ -23,16 +23,12 @@ export default {
             userLike.value = res.answer.ifUserLike
             likeSum.value = res.answer.likeSum
             isUser.value = UserStateStore().getUserId === ans.value.userId
-            if ('subAnsIdList' in res && Array.isArray(res.subAnsIdList)) {
-              subAnsIdList.value = res.subAnsIdList
-            } else {
-              subAnsIdList.value = []
-            }
+            subAnsIdList.value = res.answer.subAnsIdList
           }
       )
     }
 
-    const subAnsIdList = ref()
+    const subAnsIdList = ref([])
 
     init()
 
