@@ -6,7 +6,7 @@ import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import router from "@/router";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import SubAppAnsCard from "@/components/HelpCenter/SubAppAnsCard.vue";
+import SubAppAnsCard from "@/components/HelpCenter/AppSubAnsCard.vue";
 
 export default {
   name: "AppAnsCard",
