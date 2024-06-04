@@ -1,13 +1,11 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime,Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime, Table
 from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy.sql import func
 
 from orm.database import Base
 from typing import Optional, List
-
-
 
 user_user_stars = Table(
     'user_user_stars',
@@ -16,16 +14,17 @@ user_user_stars = Table(
     Column('user2', Integer, ForeignKey('users.id'))
 )
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(32), index=True, nullable=False)
     email = Column(String(128), nullable=False)
     password = Column(String(256), nullable=False)
-    privilege = Column(Integer, nullable = False, default=0)  # 0: 校外User， 1:校内认证User， 2:admin
+    privilege = Column(Integer, nullable=False, default=0)  # 0:校内认证User， 1+:admin
     userAvatarURL = Column(String(256), nullable=False,
                            default="https://banhang.oss-cn-beijing.aliyuncs.com/3bda01f4fce948d88ee72babced0a3c0.png")
-    sign = Column(String, nullable=False, default = "快来设置个性签名叭~~")
+    sign = Column(String, nullable=False, default="快来设置个性签名叭~~")
     create_at = Column(DateTime, server_default=func.now())
 
     blogs = relationship("Blog", back_populates="user")
@@ -37,7 +36,7 @@ class User(Base):
     liked_questions = relationship("Question", secondary="user_question_likes",
                                    back_populates="liked_users")
     focused_questions = relationship("Question", secondary="user_question_focuses",
-                                   back_populates="focused_users")
+                                     back_populates="focused_users")
     followed = relationship(
         "User",
         secondary=user_user_stars,
@@ -45,8 +44,6 @@ class User(Base):
         secondaryjoin=(user_user_stars.c.user2 == id),
         lazy="dynamic",
         backref=backref('followers', lazy='dynamic'))
-
-
 
 
 class CheckCode(Base):
@@ -102,7 +99,7 @@ class BlogComment(Base):
 
     comments: Mapped[List["BlogComment"]] = relationship(back_populates="reply_to_comment")
     reply_to_comment: Mapped[Optional["BlogComment"]] = relationship(back_populates="comments", remote_side=id)
-    
+
 
 class BlogTag(Base):
     __tablename__ = 'blog_tags'
@@ -112,10 +109,12 @@ class BlogTag(Base):
     color = Column(String, nullable=False, default='blue-darken-1')
     blogs = relationship("Blog", secondary="blog_blog_tags", back_populates="tags")
 
+
 class BlogBlogTag(Base):
     __tablename__ = 'blog_blog_tags'
     blog_id = Column(Integer, ForeignKey('blogs.id'), primary_key=True)
     blog_tag_id = Column(Integer, ForeignKey('blog_tags.id'), primary_key=True)
+
 
 class BlogUserAnonyInfo(Base):
     __tablename__ = 'blog_user_anony_info'
@@ -123,6 +122,7 @@ class BlogUserAnonyInfo(Base):
     blog_id = Column(Integer, ForeignKey('blogs.id'), primary_key=True)
     anony_name = Column(String, nullable=False)
     anony_avatar_url = Column(String, nullable=False)
+
 
 class Question(Base):
     __tablename__ = 'questions'
@@ -136,14 +136,13 @@ class Question(Base):
     solved = Column(Boolean, default=False)
     liked_user_count = Column(Integer, default=0, nullable=False)
 
-
     images = relationship("QuestionImage", back_populates="question")
     comments = relationship("QuestionComment", back_populates="question")
     user = relationship("User", back_populates="questions")
     liked_users = relationship("User", secondary="user_question_likes",
                                back_populates="liked_questions")
     focused_users = relationship("User", secondary="user_question_focuses",
-                               back_populates="focused_questions")
+                                 back_populates="focused_questions")
     tags = relationship("QuestionTag", secondary="question_question_tags", back_populates="questions")
 
 
@@ -156,6 +155,7 @@ class QuestionImage(Base):
     create_at = Column(DateTime, server_default=func.now())
 
     question = relationship("Question", back_populates="images")
+
 
 class QuestionComment(Base):
     __tablename__ = 'question_comments'
@@ -174,10 +174,11 @@ class QuestionComment(Base):
                                back_populates="liked_question_comments")
     images = relationship("QuestionCommentImage", back_populates="question_comment")
     reply_to_comment = relationship("QuestionComment",
-                                    foreign_keys = [reply_comment_id],
-                                    remote_side = [id],
+                                    foreign_keys=[reply_comment_id],
+                                    remote_side=[id],
                                     back_populates="comments")
     comments = relationship("QuestionComment", back_populates="reply_to_comment")
+
 
 class QuestionCommentImage(Base):
     __tablename__ = 'question_comment_images'
@@ -189,20 +190,24 @@ class QuestionCommentImage(Base):
 
     question_comment = relationship("QuestionComment", back_populates="images")
 
+
 class UserQuestionCommentLike(Base):
     __tablename__ = 'user_question_comment_likes'
     question_id = Column(Integer, ForeignKey('question_comments.id'), primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
 
 class UserQuestionLike(Base):
     __tablename__ = 'user_question_likes'
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
 
+
 class UserQuestionFocus(Base):
     __tablename__ = 'user_question_focuses'
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+
 
 class QuestionTag(Base):
     __tablename__ = 'question_tags'
@@ -211,22 +216,26 @@ class QuestionTag(Base):
     icon = Column(String, nullable=False, default='tagIcon')
     color = Column(String, nullable=False, default='blue-darken-1')
     questions = relationship("Question", secondary="question_question_tags", back_populates="tags")
+    is_admin = Column(Boolean, default=False, nullable=False)
+
 
 class QuestionQuestionTag(Base):
     __tablename__ = 'question_question_tags'
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     question_tag_id = Column(Integer, ForeignKey('question_tags.id'), primary_key=True)
 
+
 class Message(Base):
     __tablename__ = 'messages'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False) 
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     content = Column(String, nullable=False, default="")
     create_at = Column(DateTime, nullable=False, server_default=func.now())
 
     sender = relationship("User", foreign_keys=[sender_id])
     receiver = relationship("User", foreign_keys=[receiver_id])
+
 
 class Conversation(Base):
     __tablename__ = 'conversations'
@@ -240,6 +249,7 @@ class Conversation(Base):
     host_user = relationship("User", foreign_keys=[host_user_id])
     guest_user = relationship("User", foreign_keys=[guest_user_id])
     messages = relationship("ConversationMessage", back_populates="conversation")
+
 
 class ConversationMessage(Base):
     __tablename__ = 'conversation_messages'

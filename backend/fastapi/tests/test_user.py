@@ -9,7 +9,11 @@ from main import app
 client = TestClient(app)
 # 后文出现的该函数名会自动被pytest调用该函数并传入测试用例
 
-def register_login_user(client, mock_user_data):
+def register_login_user(client, mock_user_data, admin = False):
+    if admin:
+        os.environ["BANHANG_TEST_ADMIN"] = 'True'
+    else:
+        os.environ["BANHANG_TEST_ADMIN"] = 'False'
     os.environ["CHECKCODE"] = mock_user_data["checkCode"]
     client.post("/sendCheckCode", json={"email": mock_user_data["email"]})
     client.post("/registerUser", json=mock_user_data)
