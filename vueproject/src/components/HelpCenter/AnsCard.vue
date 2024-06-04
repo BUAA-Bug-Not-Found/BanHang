@@ -194,7 +194,6 @@ export default {
             <v-btn
                 :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"
                 @click="openSubAns = !openSubAns"
-                v-if="subAnsIdList.length !== 0"
                 color="blue-grey-lighten-2">
               <span v-if="openSubAns">收起评论</span>
               <span v-else-if="subAnsIdList.length !== 0">{{ subAnsIdList.length }}条评论</span>
