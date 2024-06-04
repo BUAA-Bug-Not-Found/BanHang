@@ -471,3 +471,22 @@ def get_vacant_classroom(db: Session = Depends(get_db)):
             res.append(added)
         ret[name]={'buildings': res}
     return ret
+
+class BoyaInfo(BaseModel):
+    state:str
+    name:str
+    type:str
+    position:str
+    teacher:str
+    school:str
+    start_time:str
+    end_time:str
+    select_start_time:str
+    select_end_time:str
+    unselect_end_time:str
+    selected_number:str
+    capacity_number:str
+
+@router.get('/getBoyaInfo', tags=['工具箱'], response_model=List[BoyaInfo])
+def get_boya_info(db: Session = Depends(get_db)):
+    return vacant_data['boya']
