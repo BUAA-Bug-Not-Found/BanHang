@@ -26,7 +26,7 @@ export default {
   components: {Plus, AppQuesCard, Editor, Toolbar, QuesCard},
   setup() {
     const page = ref(0)
-    const pageSize = ref(10)
+    const pageSize = ref(15)
     const quesSum = ref(4)
     const valueHtml = ref('')
     const editorRef = shallowRef()
