@@ -223,15 +223,18 @@ export default {
 
             </div>
             <v-row justify="end">
-              <v-btn style="margin-top: 10px;margin-bottom: 10px" prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
-                发送回复
+              <v-btn size="small" style="margin-top: 10px;margin-bottom: 15px" prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
+                发送
               </v-btn>
             </v-row>
-            <SubAnsCard v-for="(ansId, index) in subAnsIdList"
-                        :index="index" :ansId="ansId"
-                        :key="ansId + '-ans'"
-                        @delComment="delComment"
-            ></SubAnsCard>
+            <div style="width: 100%;">
+              <SubAnsCard v-for="(ansId, index) in subAnsIdList"
+                          :index="index" :ansId="ansId"
+                          :key="ansId + '-ans'"
+                          @delComment="delComment"
+              ></SubAnsCard>
+            </div>
+
           </div>
         </v-col>
       </v-row>

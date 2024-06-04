@@ -534,7 +534,7 @@ export default {
                   <v-btn color="blue-lighten-1" v-if="!ifFocus" @click="focusQuestion">关注问题</v-btn>
                   <v-btn color="grey-lighten-2" v-else @click="focusQuestion">取消关注</v-btn>
                   <v-btn v-if="!openAns" style="margin-left:15px" variant="outlined" color="blue-lighten-1"
-                         prepend-icon="mdi-pen" @click="openAns = true;openComment = false">写回答
+                         prepend-icon="mdi-pen" @click="openAns = true;openComment = false">{{ "&nbsp;" }}写回答{{ "&nbsp;&nbsp;" }}
                   </v-btn>
                   <v-btn v-if="openAns" style="margin-left:15px" variant="outlined"
                          prepend-icon="mdi-window-close" @click="openAns = false">取消回答

@@ -159,14 +159,56 @@ export default {
     ></v-divider>
     <v-card
         class="mx-auto"
-        width="w-75"
+        width="w-100"
         elevation="0"
     >
       <v-row>
-        <v-col cols="1" style="display: flex;justify-content: end;">
+<!--        <v-col cols="1" style="display: flex;justify-content: end;">-->
+<!--          <UserAvatar :userId="ans.userId"/>-->
+<!--        </v-col>-->
+<!--        <v-col cols="11">-->
+<!--          <div style="display: flex; justify-content: space-between;margin-top: 10px">-->
+<!--            <span style="font-size: 15px">{{ ans.userName }}-->
+<!--              <span v-if="ans.replyAnsId != -1">-->
+<!--                <v-icon>mdi-menu-right</v-icon> {{ans.replyAnsUserName}}-->
+<!--              </span>-->
+<!--            </span>-->
+<!--            <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>-->
+<!--          </div>-->
+<!--          <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>-->
+<!--          <div style="margin-bottom: 5px">-->
+<!--            <v-btn-->
+<!--                :prepend-icon=" !userLike ?-->
+<!--              'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"-->
+<!--                color="blue-grey-lighten-2"-->
+<!--                @click="setAnsLike"-->
+<!--            >-->
+<!--              {{ likeSum }}-->
+<!--            </v-btn>-->
+<!--            <v-btn-->
+<!--                :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"-->
+<!--                @click="openEditor = !openEditor"-->
+<!--                color="blue-grey-lighten-2">-->
+<!--            </v-btn>-->
+<!--            <v-btn v-if="isUser"-->
+<!--                   :icon="'mdi-delete-circle'" variant="text" size="small"-->
+<!--                   color="blue-grey-lighten-2"-->
+<!--                   @click="delDialog = !delDialog">-->
+<!--            </v-btn>-->
+<!--            &lt;!&ndash;            <v-btn v-if="isUser"&ndash;&gt;-->
+<!--            &lt;!&ndash;                   :icon="'mdi-file-edit'" variant="text" size="small"&ndash;&gt;-->
+<!--            &lt;!&ndash;                   color="blue-grey-lighten-2">&ndash;&gt;-->
+<!--            &lt;!&ndash;            </v-btn>&ndash;&gt;-->
+<!--          </div>-->
+<!--        </v-col>-->
+
+
+      </v-row>
+      <div style="display: flex;width: 100%;margin-top: 20px">
+        <div style="flex: 1; display: flex; justify-content: flex-end;margin-right: 10px">
           <UserAvatar :userId="ans.userId"/>
-        </v-col>
-        <v-col cols="11">
+        </div>
+        <div style="flex: 10;">
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
             <span style="font-size: 15px">{{ ans.userName }}
               <span v-if="ans.replyAnsId != -1">
@@ -195,35 +237,31 @@ export default {
                    color="blue-grey-lighten-2"
                    @click="delDialog = !delDialog">
             </v-btn>
-            <!--            <v-btn v-if="isUser"-->
-            <!--                   :icon="'mdi-file-edit'" variant="text" size="small"-->
-            <!--                   color="blue-grey-lighten-2">-->
-            <!--            </v-btn>-->
           </div>
-        </v-col>
-        <v-row v-if="openEditor">
-          <div style="width: 90%;transform: translateX(3%);border: 1px solid #ccc;margin: 10px">
-            <Toolbar
-                style="border-bottom: 1px solid #ccc"
-                :editor="editorRef"
-                :defaultConfig="toolbarConfig"
-                :mode="mode"
-            />
-            <Editor
-                style="height: 80px; overflow-y: hidden;"
-                v-model="commentHtml"
-                :defaultConfig="replyAnsConfig"
-                :mode="mode"
-                @onCreated="handleCreated"
-            />
-          </div>
-          <div style="display: flex;justify-content: end;width: 95%">
-            <v-btn size="small" style="margin-top: 10px;margin-bottom: 10px" prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
-              回复
-            </v-btn>
-          </div>
-          <div style="height: 80px"></div>
-        </v-row>
+        </div>
+      </div>
+      <v-row v-if="openEditor">
+        <div style="width: 90%;transform: translateX(3%);border: 1px solid #ccc;margin: 10px">
+          <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef"
+              :defaultConfig="toolbarConfig"
+              :mode="mode"
+          />
+          <Editor
+              style="height: 80px; overflow-y: hidden;"
+              v-model="commentHtml"
+              :defaultConfig="replyAnsConfig"
+              :mode="mode"
+              @onCreated="handleCreated"
+          />
+        </div>
+        <div style="display: flex;justify-content: end;width: 95%">
+          <v-btn size="small" style="margin-top: 10px;margin-bottom: 10px" prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
+            回复
+          </v-btn>
+        </div>
+        <div style="height: 80px"></div>
       </v-row>
     </v-card>
   </div>
