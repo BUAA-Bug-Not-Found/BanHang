@@ -170,7 +170,7 @@ export default {
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
             <span style="font-size: 15px">{{ ans.userName }}
               <span v-if="ans.replyAnsId != -1">
-                <v-icon>mdi-comment-arrow-right-outline</v-icon> {{ans.replyAnsUserName}}
+                <v-icon>mdi-menu-right</v-icon> {{ans.replyAnsUserName}}
               </span>
             </span>
             <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>

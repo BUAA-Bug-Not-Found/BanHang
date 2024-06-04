@@ -171,7 +171,7 @@ export default {
             <div style="font-size: 15px">
               <span style="font-size: 15px">{{ ans.userName }}
               <span v-if="ans.replyAnsId != -1">
-                <v-icon>mdi-comment-arrow-right-outline</v-icon> {{ ans.replyAnsUserName }}
+                <v-icon>mdi-menu-right</v-icon> {{ ans.replyAnsUserName }}
               </span>
             </span>
             </div>
