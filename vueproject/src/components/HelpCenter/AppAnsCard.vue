@@ -209,14 +209,14 @@ export default {
             </v-btn>
             <v-btn
                 :prepend-icon="'mdi-chevron-down'" variant="text" size="small"
-                v-if="!openSubAns"
+                v-if="!openSubAns && subAnsIdList.length > 0"
                 @click="openSubAns = !openSubAns"
                 color="blue-grey-lighten-2">
               展开评论
             </v-btn>
             <v-btn
                 :prepend-icon="'mdi-chevron-up'" variant="text" size="small"
-                v-else
+                v-if="openSubAns && subAnsIdList.length > 0"
                 @click="openSubAns = !openSubAns"
                 color="blue-grey-lighten-2">
               收起评论

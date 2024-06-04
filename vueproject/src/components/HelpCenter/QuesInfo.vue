@@ -617,6 +617,9 @@ export default {
               <span style="font-weight: bold;font-size: 20px">全部回答 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
+            <div v-if="question.ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
+              问题正在等待你的答复哦~
+            </div>
             <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
                      :ansId="ans" :index="index" @delAns="delAns"/>
             <div style="height: 100px"></div>
@@ -756,6 +759,9 @@ export default {
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部回答 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
+            </div>
+            <div v-if="question.ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
+              问题正在等待你的答复哦~
             </div>
             <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
               <AppAnsCard :ansId="ans" :index="index" @delAns="delAns"/>
