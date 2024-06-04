@@ -16,6 +16,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import requests
 import threading
+
 lock = threading.Lock()
 
 options = webdriver.ChromeOptions()  # 创建一个配置对象
@@ -96,12 +97,13 @@ def get_boya():
         result = resultList[-1]
         for key in xpath_map:
             try:
-                result[key] = browser.find_element(By.XPATH, root_path.format(i)+xpath_map[key]).text
+                result[key] = browser.find_element(By.XPATH, root_path.format(i) + xpath_map[key]).text
             except:
                 result[key] = ''
     return resultList
 
-@scheduler.scheduled_job('interval', minutes=5)
+
+@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
 async def update_vacant_classroom():
     global data
     print('updatting vacant classroom')
@@ -112,7 +114,8 @@ async def update_vacant_classroom():
         finally:
             lock.release()
 
-@scheduler.scheduled_job('interval', minutes=5)
+
+@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
 async def update_boya_info():
     global data
     print('updatting boya')
@@ -122,6 +125,7 @@ async def update_boya_info():
             data['boya'] = get_boya()
         finally:
             lock.release()
+
 
 if os.getenv("BANHANG_TEST") is None:
     thread = threading.Thread(target=lambda: asyncio.run(update_vacant_classroom()))
