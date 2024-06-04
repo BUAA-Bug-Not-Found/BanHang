@@ -173,6 +173,11 @@ class QuestionComment(Base):
     liked_users = relationship("User", secondary="user_question_comment_likes",
                                back_populates="liked_question_comments")
     images = relationship("QuestionCommentImage", back_populates="question_comment")
+    reply_to_comment = relationship("QuestionComment",
+                                    foreign_keys = [reply_comment_id],
+                                    remote_side = [id],
+                                    back_populates="comments")
+    comments = relationship("QuestionComment", back_populates="reply_to_comment")
 
 class QuestionCommentImage(Base):
     __tablename__ = 'question_comment_images'
