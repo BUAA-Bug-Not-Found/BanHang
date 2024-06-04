@@ -237,7 +237,7 @@ def test_comment_to_comment(mock_question_data, mock_user_data, new_database, mo
     assert ans1['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
     assert ans1['answer']['replyAnsId'] == answerid
 
-
+    time.sleep(1)
     # 尝试comment comment comment
     mock_question_comment_data['replyCommentId'] = sub_ans_id1
     mock_question_comment_data['ansContent']['content'] = "hahaha2"
@@ -251,7 +251,7 @@ def test_comment_to_comment(mock_question_data, mock_user_data, new_database, mo
     top_ans = client.get('/getAnsById', params={"ansId": top_ans}).json()
     assert top_ans['ifExist'] == True
     assert len(top_ans['answer']['subAnsIdList']) == 2
-    sub_ans_id2 = top_ans['answer']['subAnsIdList'][0]
+    sub_ans_id2 = top_ans['answer']['subAnsIdList'][1]
 
     ans2 = client.get('/getAnsById', params={"ansId": sub_ans_id2}).json()
     assert ans2["ifExist"] == True
