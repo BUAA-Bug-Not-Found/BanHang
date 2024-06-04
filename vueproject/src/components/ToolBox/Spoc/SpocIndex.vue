@@ -1,5 +1,11 @@
 <template>
-  <div>
+  <v-card v-if="!isApp" :class="{ 'pc-notice': !display.smAndDown.valueOf(), 'pe-notice': display.smAndDown.valueOf() }">
+    <h1>工具箱使用说明</h1>
+    <div>本工具箱致力于提供一系列工具，方便同学们日常学习生活</div>
+    <div>目前上线内容有Spoc作业提醒服务，由于浏览器环境限制，目前只能在**手机App**中使用，效果如下图所示。未来将上线更多工具。</div>
+    <img  src="@/assets/spocInst/example.jpg" style="width:100%"/>
+  </v-card>
+  <div v-else>
     <div style="display: flex; justify-content: space-between;padding-bottom: 5px;">
       <v-text-field v-model="inputCookie" label="修改Cookie" style="flex: 1;height: 32x;"></v-text-field>
       <v-btn @click="submitCookie" color="primary" style="height: 54px;">确定</v-btn>
@@ -46,6 +52,10 @@
 <script>
 /* eslint-disable */
 import TaskItem from "@/components/ToolBox/Spoc/TaskItem.vue"
+import { isApp } from "@/store";
+import { useDisplay } from 'vuetify'
+
+
 export default {
   name: "SpocIndex",
   components: {
@@ -58,6 +68,9 @@ export default {
       inputCookie:"",
       taskList: [],
       showInst: false,
+      isApp,
+      display:useDisplay(),
+
     };
   },
   mounted() {
@@ -115,4 +128,21 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.pc-notice {
+  margin: 0 auto; /* 设置左右外边距为auto */
+  width: 50%; /* 设置 div 的宽度 */
+  min-height: 100%; /* 设置 div 的高度 */
+  padding-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.pe-notice {
+  margin: 0 auto; /* 设置左右外边距为auto */
+  width: 100%; /* 设置 div 的宽度 */
+  min-height: 100%; /* 设置 div 的高度 */
+  padding-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+</style>

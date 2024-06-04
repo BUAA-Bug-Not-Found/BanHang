@@ -17,13 +17,14 @@ function getCurrentClassSlot() {
     [1000, 1045], [1050, 1095], [1140, 1185], [1190, 1235],
     [1250, 1295], [1300, 1345]
   ];
-
-  for (let i = 0; i < slotTimes.length; i++) {
-    if (time >= slotTimes[i][0] && time <= slotTimes[i][1]) {
-      return i + 1;
+  let i = 0;
+  for (; i < slotTimes.length; i++) {
+    if (time < slotTimes[i][0]) {
+      break
     }
   }
-  return -1;
+  console.log("现在上完了",i,"节课")
+  return Math.max(1, i);
 }
 
 
