@@ -28,6 +28,7 @@ import ResetPassword from "@/components/AccountManagement/ResetPassword.vue";
 import SearchList from "@/components/AdvanceSearch/SearchList.vue";
 import SpocIndex from "@/components/ToolBox/Spoc/SpocIndex.vue";
 import VacentIndex from "@/components/ToolBox/VacentClassroom/VacentIndex.vue";
+import BoyaIndex from "@/components/ToolBox/Boya/BoyaIndex.vue";
 
 import ToolCenter from '@/components/ToolCenter/ToolCenter.vue';
 const routes = [
@@ -125,6 +126,11 @@ const routes = [
                 path: '/vacentClassroom',
                 name: 'vacentClassroom',
                 component: VacentIndex
+            },
+            {
+                path: '/boya',
+                name: 'boya',
+                component: BoyaIndex
             },
         ]
     },
