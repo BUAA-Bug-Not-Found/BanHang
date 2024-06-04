@@ -652,12 +652,6 @@ export default {
       <div class="dials" v-if="dialShow">
         <!-- 点赞 -->
         <div style="margin-bottom: 10px">
-          <v-btn :icon="'mdi-minus'"
-                 color="grey-lighten-5"
-                 @click="dialShow = !dialShow"
-          />
-        </div>
-        <div style="margin-bottom: 10px">
           <v-btn :icon="!userLike ?
               'mdi-thumb-up-outline' : 'mdi-thumb-up'"
                  color="grey-lighten-5"
@@ -689,6 +683,12 @@ export default {
           <v-btn icon="mdi-chevron-up"
                  size="small"
                  @click="goTop"
+          />
+        </div>
+        <div style="margin-bottom: 45px">
+          <v-btn :icon="'mdi-minus'"
+                 color="grey-lighten-5"
+                 @click="dialShow = !dialShow"
           />
         </div>
       </div>
