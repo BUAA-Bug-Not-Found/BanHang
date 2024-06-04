@@ -26,7 +26,7 @@ export default {
             if ('subAnsIdList' in res && Array.isArray(res.subAnsIdList)) {
               subAnsIdList.value = res.subAnsIdList
             } else {
-              subAnsIdList.value = [1]
+              subAnsIdList.value = []
             }
           }
       )
