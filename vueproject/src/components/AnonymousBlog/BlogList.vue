@@ -38,6 +38,52 @@
     </v-navigation-drawer>
 
     <v-main style="min-height: 300px; height: 100%; overflow: auto" align="start">
+      <div style="position: fixed; top: 48px; width: 100%; z-index: 1000; background-color: white;">
+        <button
+            v-show="useDisplay().smAndDown.value"
+            @click="dropdown=!dropdown"
+            style="width: 96%; margin-left: 2%; margin-right: 2%; border: none; box-shadow: none; height: 8px;"
+        >
+          <!-- 根据 menu 状态切换图标 -->
+          <v-icon>{{ dropdown ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+        </button>
+
+        <div v-show="dropdown" style="margin-left: 2%; margin-right: 2%;">
+          <v-btn @click="goToNewBlog" class="w-100" color="blue" style="margin-bottom: 10px; margin-right: 2%">发帖
+            <v-icon
+                icon="mdi-send"
+                end
+            ></v-icon>
+          </v-btn>
+          <span style="margin-bottom: 10px">
+            <v-chip
+                icon="mdi-home-circle"
+                color="indigo-lighten-4"
+                text-color="white"
+                label
+                outlined
+                @click="swithConcernedTag(-1)"
+                style="margin-left: 1%; margin-bottom: 5px"
+            >
+              全部
+            </v-chip>
+
+            <v-chip
+                v-for="tag in tags"
+                :key="tag.tagId"
+                :color="tag.tagColor"
+                text-color="white"
+                label
+                outlined
+                @click="swithConcernedTag(tag.tagId)"
+                style="margin-left: 1%; margin-bottom: 5px"
+            >
+              {{ tag.tagName }}
+            </v-chip>
+          </span>
+        </div>
+      </div>
+
       <div class="blog-list">
         <BlogShow
             v-for="(post, index) in blogs"
@@ -57,14 +103,14 @@
         <button v-if="notEnd" @click="loadMore" class="load-more-button">加载更多</button>
       </div>
 
-      <div v-if="useDisplay().smAndDown.value" class="left-buttons">
-        <div>
-          <v-btn :icon="'mdi-plus'"
-                 color="light-blue-darken-1"
-                 size="small" @click="goToNewBlog"
-          />
-        </div>
-      </div>
+      <!--      <div v-if="useDisplay().smAndDown.value" class="left-buttons">-->
+      <!--        <div>-->
+      <!--          <v-btn :icon="'mdi-plus'"-->
+      <!--                 color="light-blue-darken-1"-->
+      <!--                 size="small" @click="goToNewBlog"-->
+      <!--          />-->
+      <!--        </div>-->
+      <!--      </div>-->
     </v-main>
   </v-layout>
 
@@ -95,7 +141,8 @@ export default {
       nowtag: -1,
       tags: [],
       isFetching: false, // 是否正在请求数据的标志位
-      notEnd: true
+      notEnd: true,
+      dropdown: false
     };
   },
 
@@ -152,7 +199,7 @@ export default {
             })));
             this.isFetching = false;
 
-            if(data.length < this.pagesize){
+            if (data.length < this.pagesize) {
               this.notEnd = false
             }
           }
@@ -168,7 +215,7 @@ export default {
       this.pageno = 1
       this.nowtag = changToTag
       this.blogs = []
-      this.notEnd =true
+      this.notEnd = true
       this.fetchBlogListAPage()
     },
 
@@ -187,7 +234,7 @@ export default {
 
 <style scoped>
 .blog-list {
-  margin-top: 10px;
+  margin-top: 25px;
   display: flex;
   flex-direction: column;
 }
