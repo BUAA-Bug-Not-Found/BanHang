@@ -11,7 +11,7 @@ import {
   formatDate,
   getQuestionsApi,
   getQuestionsByTagIdApi,
-  getTagsApi, replyComment, setFocusQues,
+  getTagsApi, setFocusQues,
   setLikeQuesApi, updateQuesApi,
   uploadAnsApi, uploadFileApi
 } from "@/components/HelpCenter/api";
@@ -176,8 +176,6 @@ export default {
 
     const editorRef2 = shallowRef()
 
-    const editorRef3 = shallowRef()
-
     const toolbarConfig1 = {
       excludeKeys: ['undo', 'redo', 'fontSize', 'fontFamily',
         'lineHeight', 'group-justify', 'group-video',
@@ -196,10 +194,6 @@ export default {
       placeholder: '请输入内容...'
     }
 
-    const replyAnsConfig = {
-      placeholder: '回复某人'
-    }
-
     onBeforeUnmount(() => {
       const editor1 = editorRef1.value
       if (editor1 == null) return
@@ -208,10 +202,6 @@ export default {
       const editor2 = editorRef2.value
       if (editor2 == null) return
       editor2.destroy()
-
-      const editor3 = editorRef3.value
-      if (editor3 == null) return
-      editor3.destroy()
     })
 
     const handleCreated1 = (editor) => {
@@ -220,10 +210,6 @@ export default {
 
     const handleCreated2 = (editor) => {
       editorRef2.value = editor // 记录 editor 实例，重要！
-    }
-
-    const handleCreated3 = (editor) => {
-      editorRef3.value = editor // 记录 editor 实例，重要！
     }
 
     const userLike = ref(false)
@@ -423,43 +409,6 @@ export default {
 
     const openComment = ref(false)
 
-    const commentHtml = ref('')
-
-    const commentUserName = ref('')
-
-    const toReplyComment = (params) => {
-      commentUserName.value = params.commentUserName
-      replyIndex.value = params.index
-      openComment.value = true
-      sheet3.value = true
-      openAns.value = false
-    }
-
-    const uploadComment = () => {
-      if (!userStateStore().isAuthentic) {
-        ElMessage.error("请先登录")
-        router.push('/loginPage')
-      } else {
-        if (String(commentHtml.value).replace(/<[^>]*>/g, "") === '') {
-          ElMessage.error("不能上传空白答案")
-        } else {
-          replyComment(replyIndex.value, commentHtml.value, imageList.value).then(
-              (res) => {
-                if (res.isSuccess === true) {
-                  ElMessage.success("回答已上传")
-                  commentHtml.value = ''
-                  imageList.value = []
-                  sheet2.value = false
-                  router.go(0)
-                } else {
-                  ElMessage.error("回答失败，请稍后再试")
-                }
-              }
-          )
-        }
-      }
-    }
-
     const ifFocus = ref(false)
 
     const focusQuestion = () => {
@@ -474,7 +423,6 @@ export default {
       )
     }
 
-    const sheet3 = ref(false)
 
     return {
       replyIndex,
@@ -486,7 +434,6 @@ export default {
       question,
       tags,
       goAnchor,
-      replyAnsConfig,
       mode: 'default',
       replyHtml,
       handleCreated1,
@@ -526,15 +473,8 @@ export default {
       avatarShow,
       openAns,
       openComment,
-      editorRef3,
-      handleCreated3,
-      commentHtml,
-      uploadComment,
-      toReplyComment,
-      commentUserName,
       focusQuestion,
       ifFocus,
-      sheet3
     };
   },
 };
@@ -649,10 +589,10 @@ export default {
             <div v-if="openAns">
               <div id="comment"
                    style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
-                <span style="font-weight: bold;font-size: 20px">评论 </span>
+                <span style="font-weight: bold;font-size: 20px">回答 </span>
                 <span>
                 <v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadAnswer">
-                  发送回复
+                  发送回答
                 </v-btn>
               </span>
               </div>
@@ -673,42 +613,11 @@ export default {
               </div>
             </div>
 
-            <div v-if="openComment">
-              <div
-                   style="width:85%;transform: translateX(3%);margin-top: 10px;display: flex; justify-content: space-between;">
-                <span style="font-weight: bold;font-size: 20px">回复 </span> {{commentUserName}}
-                <span>
-                  <v-btn prepend-icon="mdi-window-close" style="margin-right: 10px" variant="outlined" @click="openComment = false">
-                  取消回复
-                </v-btn>
-                <v-btn prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
-                  发送回复
-                </v-btn>
-              </span>
-              </div>
-              <div style="width: 85%;transform: translateX(2%);border: 1px solid #ccc;margin: 10px">
-                <Toolbar
-                    style="border-bottom: 1px solid #ccc"
-                    :editor="editorRef3"
-                    :defaultConfig="toolbarConfig1"
-                    :mode="mode"
-                />
-                <Editor
-                    style="height: 250px; overflow-y: hidden;"
-                    v-model="commentHtml"
-                    :defaultConfig="replyAnsConfig"
-                    :mode="mode"
-                    @onCreated="handleCreated3"
-                />
-              </div>
-            </div>
-
             <div style="transform: translateX(3%);margin-top: 10px">
-              <span style="font-weight: bold;font-size: 20px">全部评论 </span>
+              <span style="font-weight: bold;font-size: 20px">全部回答 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
             <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
-                     @replyAnswer="toReplyComment"
                      :ansId="ans" :index="index" @delAns="delAns"/>
             <div style="height: 100px"></div>
           </v-card>
@@ -845,11 +754,11 @@ export default {
           <div style="width: 100%;height: 10px;background-color: floralwhite"></div>
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="transform: translateX(3%);margin-top: 10px">
-              <span style="font-weight: bold;font-size: 20px">全部评论 </span>
+              <span style="font-weight: bold;font-size: 20px">全部回答 </span>
               <span style="color: gray">{{ question.ansIdList.length }}</span>
             </div>
             <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
-              <AppAnsCard :ansId="ans" :index="index" @delAns="delAns" @replyAnswer="toReplyComment"/>
+              <AppAnsCard :ansId="ans" :index="index" @delAns="delAns"/>
             </div>
           </v-card>
         </v-col>
@@ -1043,7 +952,7 @@ export default {
       <v-card-text>
         <v-row align="center" style="margin-bottom: 5px">
           <v-col cols="4" offset="4">
-            发布评论
+            发布回答
           </v-col>
           <v-col cols="4">
             <v-btn prepend-icon="mdi-message-reply-text"
@@ -1065,44 +974,6 @@ export default {
               :defaultConfig="editorConfig"
               :mode="mode"
               @onCreated="handleCreated1"
-          />
-        </div>
-      </v-card-text>
-    </v-card>
-  </v-bottom-sheet>
-  <v-bottom-sheet v-model="sheet3" v-if="display.smAndDown.value">
-    <v-card
-        class="text-center"
-        height="500"
-    >
-      <v-card-text>
-        <v-row align="center" style="margin-bottom: 5px">
-          <v-col cols="4" offset="4">
-            发布评论
-          </v-col>
-          <v-col cols="4">
-            <v-btn prepend-icon="mdi-message-reply-text"
-                   color="primary" @click="uploadComment">
-              回复
-            </v-btn>
-          </v-col>
-        </v-row>
-        <v-row style="margin: 10px">
-          <span style="font-weight: bold;margin-right: 8px">回复 </span> {{commentUserName}}
-        </v-row>
-        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0">
-          <Toolbar
-              style="border-bottom: 1px solid #ccc"
-              :editor="editorRef3"
-              :defaultConfig="toolbarConfig1"
-              :mode="mode"
-          />
-          <Editor
-              style="height: 250px; overflow-y: hidden;"
-              v-model="commentHtml"
-              :defaultConfig="replyAnsConfig"
-              :mode="mode"
-              @onCreated="handleCreated3"
           />
         </div>
       </v-card-text>
