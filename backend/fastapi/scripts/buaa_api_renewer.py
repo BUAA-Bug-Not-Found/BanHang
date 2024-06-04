@@ -101,7 +101,7 @@ def get_boya():
                 result[key] = ''
     return resultList
 
-@scheduler.scheduled_job('interval', minutes=5)
+@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
 async def update_vacant_classroom():
     global data
     print('updatting vacant classroom')
@@ -112,7 +112,7 @@ async def update_vacant_classroom():
         finally:
             lock.release()
 
-@scheduler.scheduled_job('interval', minutes=5)
+@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
 async def update_boya_info():
     global data
     print('updatting boya')
