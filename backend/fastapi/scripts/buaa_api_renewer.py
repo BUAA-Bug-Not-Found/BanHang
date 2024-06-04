@@ -24,7 +24,7 @@ options.add_argument("--disable-gpu")  # 禁用gpu
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
 options.add_argument(f'user-agent={user_agent}')
 options.add_argument("--window-size=1920,1050")
-if ENABLE and (os.getenv("BANHANG_DATABASE_PATH") is None):
+if ENABLE and (os.getenv("BANHANG_TEST") is None):
     service = Service(
         executable_path=os.getenv("BANHANG_CHROMEDRIVER_PATH")
         if os.getenv("BANHANG_CHROMEDRIVER_PATH")
@@ -123,7 +123,7 @@ async def update_boya_info():
         finally:
             lock.release()
 
-if os.getenv("BANHANG_DATABASE_PATH") is None:
+if os.getenv("BANHANG_TEST") is None:
     thread = threading.Thread(target=lambda: asyncio.run(update_vacant_classroom()))
     thread.start()
     thread = threading.Thread(target=lambda: asyncio.run(update_boya_info()))
