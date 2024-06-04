@@ -21,12 +21,13 @@ import InterestList from '@/components/PersonalCenter/InterestList.vue';
 import BlogList from "@/components/AnonymousBlog/BlogList.vue";
 import BlogView from "@/components/AnonymousBlog/BlogView.vue";
 import BlogNew from "@/components/AnonymousBlog/BlogNew.vue";
-import ToolBox from "@/components/ToolBox/ToolBox.vue";
 import QuesInfo from "@/components/HelpCenter/QuesInfo.vue";
 import MessageContainer from '@/components/Message/MessageContainer.vue';
 import {createRouter, createWebHashHistory} from 'vue-router';
 import ResetPassword from "@/components/AccountManagement/ResetPassword.vue";
 import SearchList from "@/components/AdvanceSearch/SearchList.vue";
+import SpocIndex from "@/components/ToolBox/Spoc/SpocIndex.vue";
+import VacentIndex from "@/components/ToolBox/VacentClassroom/VacentIndex.vue";
 
 import ToolCenter from '@/components/ToolCenter/ToolCenter.vue';
 const routes = [
@@ -81,11 +82,6 @@ const routes = [
                 component: QuesInfo
             },
             {
-                path: '/tool_box',
-                name: 'tool_box',
-                component: ToolBox
-            },
-            {
                 path: '/blogList/:tagId',
                 name: "blogList",
                 component: BlogList
@@ -118,8 +114,18 @@ const routes = [
             {
                 path: '/toolCenter',
                 name: 'toolCenter',
-                component: ToolCenter
-            }
+                component: ToolCenter,
+            },
+            {
+                path: '/spoc',
+                name: 'spoc',
+                component: SpocIndex
+            },
+            {
+                path: '/vacentClassroom',
+                name: 'vacentClassroom',
+                component: VacentIndex
+            },
         ]
     },
 
