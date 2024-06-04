@@ -4,6 +4,8 @@ import threading
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+ENABLE = True
+
 scheduler = AsyncIOScheduler()
 data = {"vacant_classroom": {'sh': {}, 'xyl': {}}, "valid_boya": {}}
 
@@ -17,13 +19,16 @@ import requests
 options = webdriver.ChromeOptions()  # 创建一个配置对象
 options.add_argument("--headless")  # 开启无界面模式
 options.add_argument("--disable-gpu")  # 禁用gpu
-
-service = Service(
-    executable_path=os.getenv("BANHANG_CHROMEDRIVER_PATH")
-    if os.getenv("BANHANG_CHROMEDRIVER_PATH")
-    else '.venv/Scripts/chromedriver.exe'
-)
-browser = webdriver.Chrome(service=service, options=options)
+if ENABLE:
+    service = Service(
+        executable_path=os.getenv("BANHANG_CHROMEDRIVER_PATH")
+        if os.getenv("BANHANG_CHROMEDRIVER_PATH")
+        else '.venv/Scripts/chromedriver.exe'
+    )
+    browser = webdriver.Chrome(service=service, options=options)
+else:
+    service = None
+    browser = None
 
 
 def check_and_login(browser):
@@ -61,7 +66,8 @@ def get_void_class():
 async def update_vacant_classroom():
     global data
     print('updatting vacant classroom')
-    data['vacant_classroom'] = get_void_class()
+    if ENABLE:
+        data['vacant_classroom'] = get_void_class()
 
 
 thread = threading.Thread(target=lambda: asyncio.run(update_vacant_classroom()))

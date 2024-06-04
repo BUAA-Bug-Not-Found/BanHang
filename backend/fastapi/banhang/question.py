@@ -445,6 +445,9 @@ def get_question_by_id(quesId: int, db: Session = Depends(get_db),
     question = crud.get_question_by_id(db, quesId)
     if not question:
         return {"ifExist": False, "question": None}
+    top_level_answers = [_ for _ in question.comments if not _.reply_comment_id]
+    top_level_answers.sort(key=lambda x: x.create_at)
+    top_level_answers = top_level_answers[::-1]
     question_response = QuestionResponse(
         userId=question.user_id,
         userName=crud.get_user_by_id(db, question.user_id).username,
@@ -455,9 +458,10 @@ def get_question_by_id(quesId: int, db: Session = Depends(get_db),
                                                                                 current_user['uid']).liked_questions,
         likeSum=len(question.liked_users),
         tagIdList=[tag.id for tag in question.tags],
-        ansIdList=[ans.id for ans in question.comments],
+        ansIdList=[ans.id for ans in top_level_answers],
         ifUserFocus=current_user is not None and question in crud.get_user_by_id(db,
                                                                                  current_user['uid']).focused_questions
+
     )
 
     return {"ifExist": True, "question": question_response}
@@ -473,6 +477,7 @@ class QuestionAnswerResponse(BaseModel):
     likeSum: int
     replyAnsId: int
     replyAnsUserName: str
+    subAnsIdList: List[int]
 
 
 class GetQuestionAnswerResponse(BaseModel):
@@ -486,6 +491,20 @@ def get_question_answer_by_id(ansId: int, db: Session = Depends(get_db),
     answer = crud.get_question_comment_by_id(db, ansId)
     if not answer:
         return {"ifExist": False, "answer": None}
+    leaf_anses = set([subans for subans in answer.comments])
+    more_update = True
+    while more_update:
+        more_update = False
+        added = []
+        for ans in leaf_anses:
+            for subans in ans.comments:
+                if subans not in leaf_anses:
+                    added.append(subans)
+                    more_update = True
+        for add in added:
+            leaf_anses.add(add)
+    leaf_anses = list(leaf_anses)
+    leaf_anses.sort(key=lambda x: x.create_at)
     question_answer_response = QuestionAnswerResponse(
         userId=answer.user_id,
         userName=crud.get_user_by_id(db, answer.user_id).username,
@@ -497,7 +516,8 @@ def get_question_answer_by_id(ansId: int, db: Session = Depends(get_db),
         likeSum=len(answer.liked_users),
         replyAnsId=answer.reply_comment_id if answer.reply_comment_id else -1,
         replyAnsUserName=(crud.get_question_comment_by_id(db, answer.reply_comment_id).user.username
-                          if (answer.reply_comment_id and (answer.reply_comment_id != -1)) else '')
+                          if (answer.reply_comment_id and (answer.reply_comment_id != -1)) else ''),
+        subAnsIdList=[subans.id for subans in leaf_anses]
     )
 
     return {"ifExist": True, "answer": question_answer_response}
