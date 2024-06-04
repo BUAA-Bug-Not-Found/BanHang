@@ -220,14 +220,40 @@ def test_comment_to_comment(mock_question_data, mock_user_data, new_database, mo
     # 尝试comment comment
     mock_question_comment_data['replyCommentId'] = answerid
     mock_question_comment_data['ansContent']['content'] = "hahaha"
-
     res = client.post('/replyComment', json=mock_question_comment_data)
     assert res.status_code == 200
-    ans = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
-    assert ans["ifExist"] == True
-    assert len(ans['question']['ansIdList']) == 2
-    answerid1 = ans['question']['ansIdList'][1]
-    ans1 = client.get('/getAnsById', params={"ansId": answerid1}).json()
+
+    ques = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
+    assert ques["ifExist"] == True
+    assert len(ques['question']['ansIdList']) == 1
+    top_ans = ques['question']['ansIdList'][0]
+    top_ans = client.get('/getAnsById', params={"ansId": top_ans}).json()
+    assert top_ans['ifExist'] == True
+    assert len(top_ans['answer']['subAnsIdList']) == 1
+    sub_ans_id1 = top_ans['answer']['subAnsIdList'][0]
+
+    ans1 = client.get('/getAnsById', params={"ansId": sub_ans_id1}).json()
     assert ans1["ifExist"] == True
     assert ans1['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
     assert ans1['answer']['replyAnsId'] == answerid
+
+    time.sleep(1)
+    # 尝试comment comment comment
+    mock_question_comment_data['replyCommentId'] = sub_ans_id1
+    mock_question_comment_data['ansContent']['content'] = "hahaha2"
+    res = client.post('/replyComment', json=mock_question_comment_data)
+    assert res.status_code == 200
+
+    ques = client.get("/getQuesById", params={"quesId": blog["quesId"]}).json()
+    assert ques["ifExist"] == True
+    assert len(ques['question']['ansIdList']) == 1
+    top_ans = ques['question']['ansIdList'][0]
+    top_ans = client.get('/getAnsById', params={"ansId": top_ans}).json()
+    assert top_ans['ifExist'] == True
+    assert len(top_ans['answer']['subAnsIdList']) == 2
+    sub_ans_id2 = top_ans['answer']['subAnsIdList'][1]
+
+    ans2 = client.get('/getAnsById', params={"ansId": sub_ans_id2}).json()
+    assert ans2["ifExist"] == True
+    assert ans2['answer']['ansContent'] == mock_question_comment_data['ansContent']['content']
+    assert ans2['answer']['replyAnsId'] == sub_ans_id1

@@ -4,16 +4,15 @@ import {delAnswerAPI, formatDate, getAnsById, replyComment, setAnsLikeAPI} from 
 import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
-import router from "@/router";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import SubAppAnsCard from "@/components/HelpCenter/SubAppAnsCard.vue";
+import router from "@/router";
 
 export default {
-  name: "AppAnsCard",
+  name: "SubAnsCard",
   methods: {formatDate},
-  components: {SubAppAnsCard, Editor, Toolbar, UserAvatar},
+  components: {Editor, Toolbar, UserAvatar},
   props: ["ansId", "index"],
-  emits: ["delAns"],
+  emits: ["delComment", "editComment", "replyComment"],
   setup(props, context) {
 
     const init = () => {
@@ -23,12 +22,9 @@ export default {
             userLike.value = res.answer.ifUserLike
             likeSum.value = res.answer.likeSum
             isUser.value = UserStateStore().getUserId === ans.value.userId
-            subAnsIdList.value = res.answer.subAnsIdList
           }
       )
     }
-
-    const subAnsIdList = ref([])
 
     init()
 
@@ -68,7 +64,7 @@ export default {
     const delAnswer = () => {
       delAnswerAPI(props.ansId).then(
           (res) => {
-            if (res.isSuccess === true) {
+            if(res.isSuccess === true) {
               ElMessage.success("删除成功")
               context.emit("delAns", {index: props.index})
               delDialog.value = false
@@ -78,8 +74,6 @@ export default {
           }
       )
     }
-
-    const sheet = ref(false)
 
     const replyAnsConfig = {
       placeholder: '回复'
@@ -133,11 +127,7 @@ export default {
 
     const commentHtml = ref('')
 
-    const openSubAns = ref(false)
-
-    const delComment = (params) => {
-      subAnsIdList.value.splice(params.index, 1)
-    }
+    const openEditor = ref(false)
 
     return {
       ans,
@@ -148,17 +138,14 @@ export default {
       delDialog,
       isUser,
       delAnswer,
-      sheet,
-      commentHtml,
-      handleCreated,
+      openEditor,
       uploadComment,
-      toolbarConfig,
       editorRef,
+      toolbarConfig,
       replyAnsConfig,
+      commentHtml,
       mode: 'default',
-      openSubAns,
-      subAnsIdList,
-      delComment
+      handleCreated
     };
   },
 };
@@ -176,15 +163,17 @@ export default {
         elevation="0"
     >
       <v-row>
-        <v-col cols="1" style="margin-left: 10px;margin-right: 10px">
+        <v-col cols="1" style="display: flex;justify-content: end;">
           <UserAvatar :userId="ans.userId"/>
         </v-col>
-        <v-col cols="10">
-          <div style="margin-top: 10px">
-            <div style="font-size: 15px">
-              <span style="font-size: 15px">{{ ans.userName }}</span>
-            </div>
-            <div style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</div>
+        <v-col cols="11">
+          <div style="display: flex; justify-content: space-between;margin-top: 10px">
+            <span style="font-size: 15px">{{ ans.userName }}
+              <span v-if="ans.replyAnsId != -1">
+                <v-icon>mdi-menu-right</v-icon> {{ans.replyAnsUserName}}
+              </span>
+            </span>
+            <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>
           </div>
           <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
           <div style="margin-bottom: 5px">
@@ -198,24 +187,8 @@ export default {
             </v-btn>
             <v-btn
                 :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"
-                @click="sheet = !sheet"
+                @click="openEditor = !openEditor"
                 color="blue-grey-lighten-2">
-              <span v-if="subAnsIdList.length !== 0">{{ subAnsIdList.length }}条评论</span>
-              <span v-else>快来评论吧~</span>
-            </v-btn>
-            <v-btn
-                :prepend-icon="'mdi-chevron-down'" variant="text" size="small"
-                v-if="!openSubAns && subAnsIdList.length > 0"
-                @click="openSubAns = !openSubAns"
-                color="blue-grey-lighten-2">
-              展开评论
-            </v-btn>
-            <v-btn
-                :prepend-icon="'mdi-chevron-up'" variant="text" size="small"
-                v-if="openSubAns && subAnsIdList.length > 0"
-                @click="openSubAns = !openSubAns"
-                color="blue-grey-lighten-2">
-              收起评论
             </v-btn>
             <v-btn v-if="isUser"
                    :icon="'mdi-delete-circle'" variant="text" size="small"
@@ -223,61 +196,37 @@ export default {
                    @click="delDialog = !delDialog">
             </v-btn>
             <!--            <v-btn v-if="isUser"-->
-            <!--                :icon="'mdi-file-edit'" variant="text" size="small"-->
-            <!--                color="blue-grey-lighten-2">-->
+            <!--                   :icon="'mdi-file-edit'" variant="text" size="small"-->
+            <!--                   color="blue-grey-lighten-2">-->
             <!--            </v-btn>-->
           </div>
-          <v-row v-if="openSubAns">
-            <SubAppAnsCard v-for="(ansId, index) in subAnsIdList"
-                           :index="index" :ansId="ansId"
-                           :key="ansId + '-ans'"
-                           @delComment="delComment"
-            ></SubAppAnsCard>
-          </v-row>
         </v-col>
-      </v-row>
-
-    </v-card>
-    <v-divider
-        color="light-blue-darken-3"
-        style="margin-top: 5px;margin-bottom: 5px"
-    ></v-divider>
-  </div>
-  <v-bottom-sheet v-model="sheet">
-    <v-card
-        class="text-center"
-        height="500"
-    >
-      <v-card-text>
-        <v-row align="center" style="margin-bottom: 5px">
-          <v-col cols="4" offset="4">
-            发布评论
-          </v-col>
-          <v-col cols="4">
-            <v-btn prepend-icon="mdi-message-reply-text"
-                   color="primary" @click="uploadComment">
+        <v-row v-if="openEditor">
+          <div style="width: 90%;transform: translateX(3%);border: 1px solid #ccc;margin: 10px">
+            <Toolbar
+                style="border-bottom: 1px solid #ccc"
+                :editor="editorRef"
+                :defaultConfig="toolbarConfig"
+                :mode="mode"
+            />
+            <Editor
+                style="height: 80px; overflow-y: hidden;"
+                v-model="commentHtml"
+                :defaultConfig="replyAnsConfig"
+                :mode="mode"
+                @onCreated="handleCreated"
+            />
+          </div>
+          <div style="display: flex;justify-content: end;width: 95%">
+            <v-btn size="small" style="margin-top: 10px;margin-bottom: 10px" prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
               回复
             </v-btn>
-          </v-col>
+          </div>
+          <div style="height: 80px"></div>
         </v-row>
-        <div style="border: 1px solid #ccc;overflow-y: scroll;margin: 0">
-          <Toolbar
-              style="border-bottom: 1px solid #ccc"
-              :editor="editorRef"
-              :defaultConfig="toolbarConfig"
-              :mode="mode"
-          />
-          <Editor
-              style="height: 250px; overflow-y: hidden;"
-              v-model="commentHtml"
-              :defaultConfig="replyAnsConfig"
-              :mode="mode"
-              @onCreated="handleCreated"
-          />
-        </div>
-      </v-card-text>
+      </v-row>
     </v-card>
-  </v-bottom-sheet>
+  </div>
   <v-dialog
       v-model="delDialog"
       width="auto"
@@ -286,8 +235,8 @@ export default {
         max-width="400"
         min-width="200"
         prepend-icon="mdi-delete-clock"
-        text="你的回答将会被删除，确认嘛？"
-        title="删除回答"
+        text="你的评论将会被删除，确认嘛？"
+        title="删除评论"
     >
       <template v-slot:actions>
         <v-btn

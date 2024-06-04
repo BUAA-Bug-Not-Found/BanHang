@@ -6,12 +6,11 @@ import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import router from "@/router";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import SubAppAnsCard from "@/components/HelpCenter/SubAppAnsCard.vue";
 
 export default {
-  name: "AppAnsCard",
+  name: "SubAppAnsCard",
   methods: {formatDate},
-  components: {SubAppAnsCard, Editor, Toolbar, UserAvatar},
+  components: {Editor, Toolbar, UserAvatar},
   props: ["ansId", "index"],
   emits: ["delAns"],
   setup(props, context) {
@@ -23,12 +22,9 @@ export default {
             userLike.value = res.answer.ifUserLike
             likeSum.value = res.answer.likeSum
             isUser.value = UserStateStore().getUserId === ans.value.userId
-            subAnsIdList.value = res.answer.subAnsIdList
           }
       )
     }
-
-    const subAnsIdList = ref([])
 
     init()
 
@@ -133,12 +129,6 @@ export default {
 
     const commentHtml = ref('')
 
-    const openSubAns = ref(false)
-
-    const delComment = (params) => {
-      subAnsIdList.value.splice(params.index, 1)
-    }
-
     return {
       ans,
       ansIdRef,
@@ -155,34 +145,35 @@ export default {
       toolbarConfig,
       editorRef,
       replyAnsConfig,
-      mode: 'default',
-      openSubAns,
-      subAnsIdList,
-      delComment
+      mode: 'default'
     };
   },
 };
 </script>
 
 <template>
-  <div v-if="ans !== null">
+  <div v-if="ans !== null" style="width: 100%">
     <v-divider
         color="light-blue-darken-3"
         style="margin-top: 5px;margin-bottom: 5px"
     ></v-divider>
     <v-card
         class="mx-auto"
-        width="w-75"
+        width="w-100"
         elevation="0"
     >
       <v-row>
-        <v-col cols="1" style="margin-left: 10px;margin-right: 10px">
+        <v-col cols="1" style="margin-right: 10px">
           <UserAvatar :userId="ans.userId"/>
         </v-col>
         <v-col cols="10">
           <div style="margin-top: 10px">
             <div style="font-size: 15px">
-              <span style="font-size: 15px">{{ ans.userName }}</span>
+              <span style="font-size: 15px">{{ ans.userName }}
+              <span v-if="ans.replyAnsId != -1">
+                <v-icon>mdi-menu-right</v-icon> {{ ans.replyAnsUserName }}
+              </span>
+            </span>
             </div>
             <div style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</div>
           </div>
@@ -200,22 +191,6 @@ export default {
                 :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"
                 @click="sheet = !sheet"
                 color="blue-grey-lighten-2">
-              <span v-if="subAnsIdList.length !== 0">{{ subAnsIdList.length }}条评论</span>
-              <span v-else>快来评论吧~</span>
-            </v-btn>
-            <v-btn
-                :prepend-icon="'mdi-chevron-down'" variant="text" size="small"
-                v-if="!openSubAns && subAnsIdList.length > 0"
-                @click="openSubAns = !openSubAns"
-                color="blue-grey-lighten-2">
-              展开评论
-            </v-btn>
-            <v-btn
-                :prepend-icon="'mdi-chevron-up'" variant="text" size="small"
-                v-if="openSubAns && subAnsIdList.length > 0"
-                @click="openSubAns = !openSubAns"
-                color="blue-grey-lighten-2">
-              收起评论
             </v-btn>
             <v-btn v-if="isUser"
                    :icon="'mdi-delete-circle'" variant="text" size="small"
@@ -227,21 +202,9 @@ export default {
             <!--                color="blue-grey-lighten-2">-->
             <!--            </v-btn>-->
           </div>
-          <v-row v-if="openSubAns">
-            <SubAppAnsCard v-for="(ansId, index) in subAnsIdList"
-                           :index="index" :ansId="ansId"
-                           :key="ansId + '-ans'"
-                           @delComment="delComment"
-            ></SubAppAnsCard>
-          </v-row>
         </v-col>
       </v-row>
-
     </v-card>
-    <v-divider
-        color="light-blue-darken-3"
-        style="margin-top: 5px;margin-bottom: 5px"
-    ></v-divider>
   </div>
   <v-bottom-sheet v-model="sheet">
     <v-card
