@@ -45,7 +45,7 @@ def get_search_user_sum_by_word(db: Session, word: str, offset: int, limit: int)
 def create_user(db: Session, user: schemas.UserCreate):
     userAvatarURL = "https://source.boringavatars.com/beam/500/" + user.username + "?square"
     db_user = models.User(username=user.username, password=user.password, email=user.email, userAvatarURL=userAvatarURL,
-                          privilege=1 if os.getenv("BANHANG_TEST_ADMIN")=='True' else 0)
+                          privilege=1 if os.getenv("BANHANG_TEST_ADMIN") == 'True' else 0)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -385,8 +385,8 @@ def get_question_tag_by_name(db: Session, name: str):
     return db.query(models.QuestionTag).filter(models.QuestionTag.name == name).first()
 
 
-def create_question_tag(db: Session, name: str, id: int = None, color:str = None, icon:str = None,
-                        is_admin:bool = False):
+def create_question_tag(db: Session, name: str, id: int = None, color: str = None, icon: str = None,
+                        is_admin: bool = False):
     name = name.strip()
     if tag := get_question_tag_by_name(db, name):
         return tag
@@ -613,6 +613,27 @@ def set_focus_question(db: Session, user_id: int, question_id: int, is_focus: bo
         if user in question.focused_users:
             question.focused_users.remove(user)
             db.commit()
+
+
+def report_question(db: Session, quesid: int, uid: int, reason: str):
+    issue = models.ReportedIssue(question_id=quesid, user_id=uid, reason=reason, is_question=True)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def report_question_comment(db: Session, ques_id: int, comment_id: int, uid: int, reason: str):
+    issue = models.ReportedIssue(question_id=ques_id, comment_id=comment_id, user_id=uid, reason=reason,
+                                 is_question=False)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def get_report_issues(db: Session):
+    return db.query(models.ReportedIssue).all()
 
 
 def get_conversation(db: Session, host_user_id: int, guest_user_id: int):

@@ -27,6 +27,8 @@ class User(Base):
     sign = Column(String, nullable=False, default="快来设置个性签名叭~~")
     create_at = Column(DateTime, server_default=func.now())
 
+    activate_time = Column(DateTime, nullable=True, server_default=func.now())
+
     blogs = relationship("Blog", back_populates="user")
     blog_comments = relationship("BlogComment", back_populates="user")
     questions = relationship("Question", back_populates="user")
@@ -145,6 +147,8 @@ class Question(Base):
                                  back_populates="focused_questions")
     tags = relationship("QuestionTag", secondary="question_question_tags", back_populates="questions")
 
+    reported_issues = relationship("ReportedIssue", back_populates="question")
+
 
 class QuestionImage(Base):
     __tablename__ = 'question_images'
@@ -178,6 +182,7 @@ class QuestionComment(Base):
                                     remote_side=[id],
                                     back_populates="comments")
     comments = relationship("QuestionComment", back_populates="reply_to_comment")
+    reported_issues = relationship("ReportedIssue", back_populates="comment")
 
 
 class QuestionCommentImage(Base):
@@ -223,6 +228,22 @@ class QuestionQuestionTag(Base):
     __tablename__ = 'question_question_tags'
     question_id = Column(Integer, ForeignKey('questions.id'), primary_key=True)
     question_tag_id = Column(Integer, ForeignKey('question_tags.id'), primary_key=True)
+
+
+class ReportedIssue(Base):
+    __tablename__ = 'reported_issue'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    question_id = Column(Integer, ForeignKey('questions.id'))
+    comment_id = Column(Integer, ForeignKey('question_comments.id'), nullable=True)
+
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+    reason = Column(String, nullable=False)
+    is_question = Column(Boolean, default=True, nullable=False)
+    create_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    question = relationship("Question", back_populates="reported_issues")
+    comment = relationship("QuestionComment", back_populates="reported_issues")
 
 
 class Message(Base):
