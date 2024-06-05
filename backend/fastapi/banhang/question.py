@@ -8,7 +8,7 @@ import orm.crud as crud
 from pydantic import BaseModel
 from tools.check_user import check_user, authorize
 from typing import List, Optional, Union
-from banhang.user import successResponse, excResponse
+from banhang.user import successResponse, excResponse, check_user_is_shutup
 from banhang.BanHangException import UniException
 
 router = APIRouter()
@@ -199,6 +199,8 @@ def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
     """
     if not current_user:
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
+    if check_user_is_shutup(current_user['uid'], db):
+        raise UniException(key='isSuccess', value=False, others={"description": "用户被禁言"})
     tagid = question.quesTags
     check_question_tag_to_id(tagid, db, crud.get_user_by_id(db, current_user['uid']))
     created_ques = crud.create_question(db, schemas.QuestionCreate(content=question.quesContent.content,
@@ -252,6 +254,8 @@ def update_question(question: UpdateQuestion, db: Session = Depends(get_db),
         raise UniException(key="isSuccess", value=False, others={"description": "不存在该id的问题"})
     if user.privilege == 0 and current_user['uid'] != ques.user_id:
         raise UniException(key="isSuccess", value=False, others={"description": "用户无权更新该问题"})
+    if check_user_is_shutup(current_user['uid'], db):
+        raise UniException(key='isSuccess', value=False, others={"description": "用户被禁言"})
 
     check_question_tag_to_id(question.quesTags, db, crud.get_user_by_id(db, current_user['uid']))
     check_question_image_to_id(question.quesContent.imageList, db, question.quesId)
@@ -299,6 +303,8 @@ def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Ses
                     current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
+    if check_user_is_shutup(current_user['uid'], db):
+        raise UniException(key='isSuccess', value=False, others={"description": "用户被禁言"})
     if not crud.get_question_by_id(db, ans.quesId):
         raise UniException(key="isSuccess", value=False, others={"description": "问题id不存在"})
     comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(

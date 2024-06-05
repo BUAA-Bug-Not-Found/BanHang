@@ -8,7 +8,7 @@ from orm import models, schemas
 from sqlalchemy import or_, and_, desc, func, case, distinct, exists
 
 from orm.database import SessionLocal
-from orm.models import Message, Conversation, ConversationMessage, User
+from orm.models import Message, Conversation, ConversationMessage, User, ReportedIssue
 
 
 def get_user_by_id(db: Session, user_id: int) -> models.User:
@@ -102,6 +102,15 @@ def set_username_by_id(db: Session, id: int, username: str):
     return user
 
 
+def shut_up_user(db: Session, uid: int, day: int, hour: int, minute: int):
+    activate_date = datetime.datetime.now() + datetime.timedelta(days=day, hours=hour, minutes=minute)
+    user = get_user_by_id(db, uid)
+    user.activate_time = activate_date
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 def set_star_state_by_user_id(db: Session, id1: int, id2: int, is_followed: bool):
     user1 = get_user_by_id(db, id1)
     user2 = get_user_by_id(db, id2)
@@ -161,7 +170,7 @@ def get_user_anony_info_by_blog_id(db: Session, blog_id: int, user_id: int, crea
     return anony_info
 
 
-def get_blog_by_blog_id(db: Session, blog_id: int):
+def get_blog_by_blog_id(db: Session, blog_id: int) -> models.Blog:
     return (db.query(models.Blog)
             .filter(models.Blog.id == blog_id).first())
 
@@ -207,6 +216,10 @@ def get_blog_images_by_blog_id(db: Session, blog_id: int):
 
 def get_blog_comments_by_blog_id(db: Session, blog_id: int):
     return db.query(models.BlogComment).filter(models.BlogComment.blog_id == blog_id).all()
+
+
+def get_blog_comment_by_id(db: Session, blog_comment_id: int):
+    return db.query(models.BlogComment).filter(models.commitComment.id == blog_comment_id).first()
 
 
 def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, is_anonymous: bool,
@@ -624,15 +637,42 @@ def report_question(db: Session, quesid: int, uid: int, reason: str):
 
 
 def report_question_comment(db: Session, ques_id: int, comment_id: int, uid: int, reason: str):
-    issue = models.ReportedIssue(question_id=ques_id, comment_id=comment_id, user_id=uid, reason=reason,
-                                 is_question=False)
+    issue = models.ReportedIssue(question_id=ques_id, question_comment_id=comment_id, user_id=uid, reason=reason,
+                                 is_question=True, is_comment=True)
     db.add(issue)
     db.commit()
     db.refresh(issue)
     return issue
 
 
-def get_report_issues(db: Session):
+def report_blog(db: Session, blogid: int, uid: int, reason: str):
+    issue = models.ReportedIssue(blog_id=blogid, user_id=uid, reason=reason, is_blog=True)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def report_blog_comment(db: Session, blog_id: int, comment_id: int, uid: int, reason: str):
+    issue = models.ReportedIssue(blog_id=blog_id, blog_comment_id=comment_id, user_id=uid, reason=reason,
+                                 is_blog=True, is_comment=True)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def get_issue_by_id(db: Session, issue_id: int):
+    return db.query(models.ReportedIssue).filter(models.ReportedIssue.id == issue_id).first()
+
+
+def delete_issue(db: Session, issue_id: int) -> bool:
+    issue = get_issue_by_id(db, issue_id)
+    db.delete(issue)
+    db.commit()
+
+
+def get_report_issues(db: Session) -> list[Type[ReportedIssue]]:
     return db.query(models.ReportedIssue).all()
 
 
