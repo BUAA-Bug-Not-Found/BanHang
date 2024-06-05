@@ -72,6 +72,8 @@ class Blog(Base):
     comments = relationship("BlogComment", back_populates="blog")
     tags = relationship("BlogTag", secondary="blog_blog_tags", back_populates="blogs")
 
+    reported_issues = relationship("ReportedIssue", back_populates="blog")
+
 
 class BlogImage(Base):
     __tablename__ = 'blog_images'
@@ -101,6 +103,8 @@ class BlogComment(Base):
 
     comments: Mapped[List["BlogComment"]] = relationship(back_populates="reply_to_comment")
     reply_to_comment: Mapped[Optional["BlogComment"]] = relationship(back_populates="comments", remote_side=id)
+
+    reported_issues = relationship("ReportedIssue", back_populates="blog_comment")
 
 
 class BlogTag(Base):
@@ -182,7 +186,7 @@ class QuestionComment(Base):
                                     remote_side=[id],
                                     back_populates="comments")
     comments = relationship("QuestionComment", back_populates="reply_to_comment")
-    reported_issues = relationship("ReportedIssue", back_populates="comment")
+    reported_issues = relationship("ReportedIssue", back_populates="question_comment")
 
 
 class QuestionCommentImage(Base):
@@ -233,17 +237,23 @@ class QuestionQuestionTag(Base):
 class ReportedIssue(Base):
     __tablename__ = 'reported_issue'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    question_id = Column(Integer, ForeignKey('questions.id'))
-    comment_id = Column(Integer, ForeignKey('question_comments.id'), nullable=True)
+    question_id = Column(Integer, ForeignKey('questions.id'), nullable=True)
+    question_comment_id = Column(Integer, ForeignKey('question_comments.id'), nullable=True)
+    blog_id = Column(Integer, ForeignKey('blogs.id'), nullable=True)
+    blog_comment_id = Column(Integer, ForeignKey('blog_comments.id'), nullable=True)
 
     user_id = Column(Integer, ForeignKey('users.id'))
 
     reason = Column(String, nullable=False)
-    is_question = Column(Boolean, default=True, nullable=False)
+    is_question = Column(Boolean, default=False, nullable=False)
+    is_blog = Column(Boolean, default=False, nullable=False)
+    is_comment = Column(Boolean, default=False, nullable=False)
     create_at = Column(DateTime, nullable=False, server_default=func.now())
 
     question = relationship("Question", back_populates="reported_issues")
-    comment = relationship("QuestionComment", back_populates="reported_issues")
+    question_comment = relationship("QuestionComment", back_populates="reported_issues")
+    blog = relationship("Blog", back_populates="reported_issues")
+    blog_comment = relationship("BlogComment", back_populates="reported_issues")
 
 
 class Message(Base):
