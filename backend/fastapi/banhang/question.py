@@ -170,7 +170,7 @@ def check_question_tag_to_id(tags: Union[List[str], List[int]], db, user):
             all_tag_instances = [crud.get_question_tag_by_name(db, tname) for tname in tags]
         tags.clear()
         for tag in all_tag_instances:
-            if tag.is_admin and user.privilege <1:
+            if tag.is_admin and user.privilege < 1:
                 raise UniException(key="isSuccess", value=False,
                                    others={"description": "使用了权限限制tag：{}，非管理员请勿使用".format(tag.name)})
             tags.append(tag.id)
@@ -220,6 +220,7 @@ class AddQuestionTagRequest(BaseModel):
     color: str
     icon: str
     isAdmin: bool
+
 
 @router.post('/addQuestionTag', tags=["Question"], response_model=successResponse,
              responses={400: {"model": excResponse}})
@@ -678,4 +679,53 @@ def solve_question(req: QuestionIdRequest, db: Session = Depends(get_db),
         raise UniException(key="isSuccess", value=False,
                            others={"description": "用户无权限"})
     crud.set_question_solved(db, req.quesId)
+    return successResponse()
+
+
+class ReportQuestionRequest(BaseModel):
+    quesId: int
+    reportReason: str
+
+
+@router.post('/reportQues', tags=['Question'], response_model=successResponse)
+def report_question(req: ReportQuestionRequest, db: Session = Depends(get_db),
+                    current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "用户未登录，请先登录。"})
+    question = crud.get_question_by_id(db, req.quesId)
+    if not question:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "questionId不存在，请检查。"})
+    try:
+        crud.report_question(db, req.quesId, current_user['uid'], req.reportReason)
+    except:
+        raise UniException(key="isSuccess", value=False, others={"description": "内部错误"})
+    return successResponse()
+
+
+class ReportQuestionAnswerRequest(BaseModel):
+    quesId: int
+    ansId: int
+    reportReason: str
+
+
+@router.post('/reportAnswer', tags=['Question'], response_model=successResponse)
+def report_question(req: ReportQuestionAnswerRequest, db: Session = Depends(get_db),
+                    current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "用户未登录，请先登录。"})
+    comment = crud.get_question_comment_by_id(db, req.ansId)
+    if not comment:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "ansId不存在，请检查。"})
+    question = crud.get_question_by_id(db, req.quesId)
+    if not question:
+        raise UniException(key="isSuccess", value=False,
+                           others={"description": "questionId不存在，请检查。"})
+    try:
+        crud.report_question_comment(db, req.quesId, req.ansId, current_user['uid'], req.reportReason)
+    except:
+        raise UniException(key="isSuccess", value=False, others={"description": "内部错误"})
     return successResponse()

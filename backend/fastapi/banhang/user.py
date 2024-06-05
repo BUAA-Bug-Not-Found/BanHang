@@ -413,6 +413,7 @@ class OtherUserInfoResponse(BaseModel):
     nickname: str
     sign: str
     url: str
+    isManager: bool
 
 
 @router.get("/getOtherInfosById", tags=['用户中心'], response_model=OtherUserInfoResponse,
@@ -421,7 +422,8 @@ def get_other_info_by_id(id: int, db: Session = Depends(get_db)):
     user = crud.get_user_by_id(db, id)
     if not user:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    return {"nickname": user.username, "sign": user.sign, 'url': user.userAvatarURL if user.userAvatarURL else ""}
+    return {"nickname": user.username, "sign": user.sign, 'url': user.userAvatarURL if user.userAvatarURL else "",
+            'isManager': user.privilege > 0}
 
 
 @router.get("/getInfoByUserId", tags=['用户中心'], response_model=UserInfoResponse, deprecated=True,  # todo deprecated
@@ -469,24 +471,40 @@ def get_vacant_classroom(db: Session = Depends(get_db)):
                                                      'vacant_time': [int(x) for x in rec['kxsds'].strip().split(',')
                                                                      if x.strip() != '']})
             res.append(added)
-        ret[name]={'buildings': res}
+        ret[name] = {'buildings': res}
     return ret
 
+
 class BoyaInfo(BaseModel):
-    state:str
-    name:str
-    type:str
-    position:str
-    teacher:str
-    school:str
-    start_time:str
-    end_time:str
-    select_start_time:str
-    select_end_time:str
-    unselect_end_time:str
-    selected_number:str
-    capacity_number:str
+    state: str
+    name: str
+    type: str
+    position: str
+    teacher: str
+    school: str
+    start_time: str
+    end_time: str
+    select_start_time: str
+    select_end_time: str
+    unselect_end_time: str
+    selected_number: str
+    capacity_number: str
+
 
 @router.get('/getBoyaInfo', tags=['工具箱'], response_model=List[BoyaInfo])
 def get_boya_info(db: Session = Depends(get_db)):
     return vacant_data['boya']
+
+
+class CountRespnse(BaseModel):
+    count: int
+
+
+@router.get('/getComplainAmount', tags=['举报'], response_model=CountRespnse)
+def get_complain_amount(db: Session = Depends(get_db), current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key="isSuccess", value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    if user.privilege == 0:
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "您不是管理员"})
+    return {"count": len(crud.get_report_issues(db))}
