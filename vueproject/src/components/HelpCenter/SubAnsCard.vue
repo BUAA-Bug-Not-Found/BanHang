@@ -1,6 +1,13 @@
 <script>
 import {onBeforeUnmount, ref, shallowRef} from "vue";
-import {delAnswerAPI, formatDate, getAnsById, replyComment, setAnsLikeAPI} from "@/components/HelpCenter/api";
+import {
+  delAnswerAPI,
+  formatDate,
+  getAnsById,
+  replyComment,
+  reportAnswerAPI,
+  setAnsLikeAPI
+} from "@/components/HelpCenter/api";
 import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
@@ -9,9 +16,9 @@ import router from "@/router";
 
 export default {
   name: "SubAnsCard",
-  methods: {formatDate},
+  methods: {userStateStore, formatDate},
   components: {Editor, Toolbar, UserAvatar},
-  props: ["ansId", "index"],
+  props: ["quesId", "ansId", "index"],
   emits: ["delComment", "editComment", "replyComment"],
   setup(props, context) {
 
@@ -102,7 +109,7 @@ export default {
     const imageList = ref([])
 
     const uploadComment = () => {
-      if (!userStateStore().isAuthentic) {
+      if (!userStateStore().email) {
         ElMessage.error("请先登录")
         router.push('/loginPage')
       } else {
@@ -129,6 +136,37 @@ export default {
 
     const openEditor = ref(false)
 
+    const reportDialOpen = ref(false)
+
+    const reportReason = ref('')
+
+    const reportAnswer = () => {
+      reportAnswerAPI(props.quesId, props.ansId, reportReason.value).then(
+          (res) => {
+            if(res.isSuccess) {
+              ElMessage.success("举报成功，请等待管理员审核举报结果")
+              reportDialOpen.value = false
+            } else {
+              ElMessage.error("举报失败，请稍后再试")
+            }
+          }
+      )
+    }
+
+    const userName = ref('')
+
+    const getUserName = (nickName) => {
+      userName.value = nickName
+    }
+
+    const truncate = (content) => {
+      const strippedContent = String(content).replace(/<[^>]*>/g, "")
+      if (strippedContent.length > 20) {
+        return `${strippedContent.slice(0, 20)}...`;
+      }
+      return strippedContent;
+    };
+
     return {
       ans,
       ansIdRef,
@@ -145,7 +183,13 @@ export default {
       replyAnsConfig,
       commentHtml,
       mode: 'default',
-      handleCreated
+      handleCreated,
+      reportDialOpen,
+      reportAnswer,
+      userName,
+      getUserName,
+      reportReason,
+      truncate
     };
   },
 };
@@ -206,7 +250,7 @@ export default {
       </v-row>
       <div style="display: flex;width: 100%;margin-top: 20px">
         <div style="flex: 1; display: flex; justify-content: flex-end;margin-right: 10px">
-          <UserAvatar :userId="ans.userId"/>
+          <UserAvatar :userId="ans.userId" @returnUserName="getUserName"/>
         </div>
         <div style="flex: 10;">
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
@@ -236,6 +280,12 @@ export default {
                    :icon="'mdi-delete-circle'" variant="text" size="small"
                    color="blue-grey-lighten-2"
                    @click="delDialog = !delDialog">
+            </v-btn>
+            <v-btn v-if="userStateStore().email"
+                   :prepend-icon="'mdi-shield-alert'" variant="text" size="small"
+                   color="red-darken-2"
+                   @click="reportDialOpen = !reportDialOpen">
+              举报
             </v-btn>
           </div>
         </div>
@@ -292,6 +342,57 @@ export default {
         ></v-btn>
       </template>
     </v-card>
+  </v-dialog>
+  <v-dialog v-model="reportDialOpen" max-width="500">
+    <template v-slot:default="{ isActive }">
+      <v-card rounded="lg">
+        <v-card-title class="d-flex justify-space-between align-center">
+          <div class="ps-2" style="color: darkred;align-content: center;font-size: 25px">
+            <v-icon :size="35" style="margin-right: 5px">mdi-shield-alert</v-icon>举报
+          </div>
+          <v-btn
+              icon="mdi-close"
+              variant="text"
+              @click="isActive.value = false"
+          ></v-btn>
+        </v-card-title>
+
+        <v-divider class="mb-4"></v-divider>
+
+        <v-card-text>
+          <div class="mb-2">您正在检举用户{{userName}}的回答</div>
+          <div class="mb-2" style="color: grey">{{ truncate(ans.ansContent) }}</div>
+          <div class="mb-2">举报原因 (optional)</div>
+
+          <v-textarea
+              :counter="300"
+              class="mb-2"
+              rows="2"
+              variant="outlined"
+              persistent-counter
+              v-model="reportReason"
+          ></v-textarea>
+        </v-card-text>
+        <v-divider class="mt-2"></v-divider>
+        <v-card-actions class="my-2 d-flex justify-end">
+          <v-btn
+              class="text-none"
+              rounded="xl"
+              text="Cancel"
+              @click="isActive.value = false"
+          ></v-btn>
+
+          <v-btn
+              class="text-none"
+              color="primary"
+              rounded="xl"
+              text="Send"
+              variant="flat"
+              @click="reportAnswer"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
   </v-dialog>
 </template>
 
