@@ -2,7 +2,8 @@
   <v-card class="blog-new">
     <input v-model="title" placeholder="标题(不超过50个字符)" class="title-input" maxlength="50">
     <!-- 文字编辑区域 -->
-    <el-input v-model="content" rows="15" type="textarea" placeholder="帖子内容(不超过10000个字符)" style="margin-bottom: 5px" maxlength="10000"></el-input>
+    <el-input v-model="content" rows="15" type="textarea" placeholder="帖子内容(不超过10000个字符)"
+              style="margin-bottom: 5px" maxlength="10000"></el-input>
 
     <!-- 图片上传区域 -->
     <div class="file-upload-container">
@@ -10,6 +11,10 @@
         上传图片
       </label>
       <input id="fileInput" type="file" @change="handleFileUpload" accept="image/*" multiple class="image-upload-input">
+    </div>
+
+    <div v-if="isUploading" class="loading-indicator">
+      图片上传中...
     </div>
 
     <div class="image-preview">
@@ -74,16 +79,17 @@ export default {
       ifAnonymous: true,  // 是否匿名
       tagList: [], //标签名列表
       tagNamesArray: [],
-      tags: []
+      tags: [],
+      isUploading: false,
     };
   },
   created() {
     getTags().then(tags => {
-        console.log("Tags:", tags); // 检查getTags()返回的标签列表
-        this.tags = tags;
-        this.tagNamesArray = tags.map(tag => tag.tagName);
+      console.log("Tags:", tags); // 检查getTags()返回的标签列表
+      this.tags = tags;
+      this.tagNamesArray = tags.map(tag => tag.tagName);
     }).catch(error => {
-        console.error("Failed to fetch tags:", error);
+      console.error("Failed to fetch tags:", error);
     });
   },
   methods: {
@@ -95,6 +101,11 @@ export default {
         showTip("图片上限为 15 张，请适当减少您的图片数量~", false)
         return;
       }
+
+      this.isUploading = true;
+
+      const uploadPromises = [];
+
       // 遍历上传的图片文件，生成预览并存入图片预览数组
       for (let i = 0; i < files.length; i++) {
         const fileReader = new FileReader();
@@ -102,28 +113,35 @@ export default {
           this.imagePreviews.push(e.target.result);
         };
         fileReader.readAsDataURL(files[i]);
-        let form = new FormData
-        form.append("file", files[i])
 
-        // todo this.images
-        axios({
+        let form = new FormData();
+        form.append("file", files[i]);
+
+        // 上传图片
+        const uploadPromise = axios({
           method: "post",
           url: "https://banhang.lyhtool.com:8000/uploadfile/",
           data: form,
           headers: {'Content-Type': 'multipart/form-data'}
         }).then((res) => {
-          const data = res.data
+          const data = res.data;
           if (data.response == 'success') {
-            console.log(data.fileUrl)
-            this.images.push(data.fileUrl)
+            console.log(data.fileUrl);
+            this.images.push(data.fileUrl);
           } else {
-            showTip("图片上传失败, 请重新尝试!", false)
+            showTip("图片上传失败, 请重新尝试!", false);
           }
         }).catch(() => {
-          showTip("图片上传失败, 请重新尝试!", false)
-        })
+          showTip("图片上传失败, 请重新尝试!", false);
+        });
 
+        uploadPromises.push(uploadPromise);
       }
+
+      // 所有图片上传完成后，隐藏加载提示
+      Promise.all(uploadPromises).finally(() => {
+        this.isUploading = false;
+      });
     },
     // 移除已上传的图片
     removeImage(index) {
@@ -147,7 +165,12 @@ export default {
     submitBlog() {
       // 弹出确认框，让用户确认是否提交
       // console.log(this.tagList)
-      if(this.title.trim().length===0 || this.content.trim().length===0) {
+      if (this.isUploading) {
+        showTip('图片正在上传中，请稍后再试~')
+        return
+      }
+
+      if (this.title.trim().length === 0 || this.content.trim().length === 0) {
         showTip('标题和内容不能为空，请返回修改~')
         return
       }
@@ -248,6 +271,19 @@ export default {
 /* 自定义上传按钮悬停样式 */
 .custom-file-upload:hover {
   background-color: #0048b3;
+}
+
+/* 上传中状态样式 */
+.custom-file-upload.is-loading {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* 加载提示样式 */
+.loading-indicator {
+  color: #0291ff;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
 .image-preview {
