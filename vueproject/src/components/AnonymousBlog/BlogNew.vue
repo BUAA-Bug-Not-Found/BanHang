@@ -71,7 +71,7 @@ export default {
       content: "", // 帖子内容
       images: [], // 上传的图片文件
       imagePreviews: [], // 图片预览数组，用于回显上传的图片
-      ifAnonymous: false,  // 是否匿名
+      ifAnonymous: true,  // 是否匿名
       tagList: [], //标签名列表
       tagNamesArray: [],
       tags: []

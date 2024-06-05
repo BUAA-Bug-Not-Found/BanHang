@@ -144,7 +144,7 @@ export default {
       isOpen: false,
       isInputVisible: false,
       replyContent: "",
-      isAnonymous: false,
+      isAnonymous: true,
       bottomSheet: false
     };
   },

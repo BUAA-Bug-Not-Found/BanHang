@@ -85,7 +85,7 @@ const routes = [
             {
                 path: '/blogList/:tagId',
                 name: "blogList",
-                component: BlogList
+                component: BlogList,
             },
             {
                 path: '/blogView/:id',
