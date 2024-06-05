@@ -86,7 +86,7 @@ export default {
                 //    toolRouteName: ""
                 //},
                 {
-                    toolName: "空教室查询(魔改版)",
+                    toolName: "自习教室查询",
                     toolDesc: "横扫苦苦寻找的烦恼！",
                     toolLogo: "https://banhang.oss.chlience.com/14/avatar/3e902d793655453d9289e676cc9842dd.png",
                     toolRouteName: "vacentClassroom"

@@ -24,7 +24,7 @@ function getCurrentClassSlot() {
     }
   }
   console.log("现在上完了",i,"节课")
-  return Math.max(1, i);
+  return Math.max(1, i + 1);
 }
 
 
