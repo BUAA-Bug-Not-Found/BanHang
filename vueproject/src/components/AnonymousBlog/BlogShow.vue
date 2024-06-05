@@ -90,7 +90,7 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item density="compact" v-if="this.isCurUser">
+              <v-list-item density="compact" v-if="this.isCurUser || userStateStore().isManager">
                 <div style="color: red; font-size: 16px" @click="delDialog = !delDialog">
                   删除
                 </div>
@@ -105,11 +105,11 @@
         </v-col>
       </v-row>
 
-      <div style="margin-left: 2%; margin-bottom: 3px; font-size: 12px; color: gray" @click="goToBlogCardView">
+      <div style="margin-left: 5%; margin-bottom: 3px; font-size: 12px; color: gray" @click="goToBlogCardView">
         {{ truncatedContent }}
       </div>
 
-      <div style="margin-left: 2%; margin-bottom: 5px">
+      <div style="margin-left: 5%; margin-bottom: 5px">
         <span style="margin-bottom: 10px">
           <v-chip
               v-for="(tag, index) in this.tagList"
@@ -168,7 +168,7 @@
 import {deleteBlogByBlogId, goToOtherUser} from "@/components/AnonymousBlog/api";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
-import UserStateStore from "@/store"
+import UserStateStore, {userStateStore} from "@/store"
 import {ElMessage} from "element-plus";
 
 export default {
@@ -243,6 +243,7 @@ export default {
   },
 
   methods: {
+    userStateStore,
     useDisplay,
     goToOtherUser,
     goToBlogCardView() {
