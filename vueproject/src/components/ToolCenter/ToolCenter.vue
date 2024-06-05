@@ -77,14 +77,14 @@ export default {
                     toolName: "博雅课程提醒",
                     toolDesc: "让您设置个性化博雅提醒~",
                     toolLogo: "https://banhang.oss.chlience.com/14/avatar/9d35aaa0948f49f08cf69d675c5acce1.png",
-                    toolRouteName: ""
+                    toolRouteName: "boya"
                 },
-                {
-                    toolName: "通识课宝典",
-                    toolDesc: "为您的选课质量保驾护航",
-                    toolLogo: "https://banhang.oss.chlience.com/14/avatar/eb8fe133911442848e4c169e94ef3c2d.png",
-                    toolRouteName: ""
-                },
+                //{
+                //    toolName: "通识课宝典",
+                //    toolDesc: "为您的选课质量保驾护航",
+                //    toolLogo: "https://banhang.oss.chlience.com/14/avatar/eb8fe133911442848e4c169e94ef3c2d.png",
+                //    toolRouteName: ""
+                //},
                 {
                     toolName: "空教室查询(魔改版)",
                     toolDesc: "横扫苦苦寻找的烦恼！",
