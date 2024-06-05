@@ -326,3 +326,18 @@ export function reportAnswerAPI(quesId, ansId, reportReason) {
         return response.data
     })
 }
+
+export function isShutUpByUserIdAPI(userId) {
+    return axios.request(
+        {
+            url: '/isShutUpByUserId',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                id: userId,
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
+}
