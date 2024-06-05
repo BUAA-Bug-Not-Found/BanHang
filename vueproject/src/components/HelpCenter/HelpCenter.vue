@@ -368,7 +368,7 @@ export default {
     <v-row justify="center" style="margin-top: 10px">
       <v-col cols="2" style="margin-right: 10px">
         <v-list density="compact"
-                :style="'position: fixed;top: 80px;width:200px;text-align:left'"
+                :style="'position: fixed;top: 80px;width:200px;text-align:left;max-height:500px;overflow-y:auto'"
           >
           <v-btn @click="toUploadQues" color="blue-darken-1" class="w-100" :style="'margin-bottom: 15px'">
             发起问题
@@ -619,4 +619,5 @@ export default {
   height: 100%;
   text-align: center;
 }
+
 </style>
