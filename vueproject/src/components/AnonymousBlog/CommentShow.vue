@@ -145,7 +145,11 @@
 
 <script>
 import ReplyList from "@/components/AnonymousBlog/ReplyList.vue";
-import {goToOtherUser, submitComplainForBlog, uploadComment} from "@/components/AnonymousBlog/api";
+import {
+  goToOtherUser,
+  submitComplainForBlogComment,
+  uploadComment
+} from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import UserStateStore from "@/store";
@@ -289,10 +293,10 @@ export default {
       const confirmSubmit = window.confirm("确定提交举报？我们承诺不向对方提供您的任何信息，但保留追究滥用举报行为的权力⚠");
       if (confirmSubmit) {
         let json_set = {
-          "blogId": this.blogId,
+          "blogId": this.commentId,
           "cause": this.complainCause
         }
-        submitComplainForBlog(json_set).then(
+        submitComplainForBlogComment(json_set).then(
             (res) => {
               if (res.response == "success") {
                 ElMessage({
