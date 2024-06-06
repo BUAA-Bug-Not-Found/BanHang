@@ -410,4 +410,4 @@ def test_shutup_user(mock_question_data, mock_user_data, mock_question_comment_d
 
     # 检查非管理员能否查看禁言状态
     ret = client.post('/isShutUpByUserId', json={'id': uid1})
-    assert ret.status_code == 400
+    assert ret.status_code == 200
