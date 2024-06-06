@@ -1,7 +1,7 @@
 <script>
 import {useDisplay} from 'vuetify'
-import {useRouter} from 'vue-router'
-import {ref} from "vue";
+import {useRoute, useRouter} from 'vue-router'
+import {ref, watch} from "vue";
 import userStateStore from '@/store';
 import {$bus} from '@/store';
 import {isApp, version} from '@/store';
@@ -11,7 +11,6 @@ import axios from 'axios';
 export default {
   name: 'HomeIndex',
   setup() {
-    console.log('indexSetUp')
     const store = userStateStore()
     const display = useDisplay()
     const isLogin = ref(store.isAuthentic);
@@ -27,6 +26,25 @@ export default {
     const goto = (route) => {
       router.push(route)
     }
+
+    const route = useRoute();
+
+    watch(
+        () => route.name,
+        (newName) => {
+          if(newName === 'blogList' || newName === 'blogView') {
+            nowPage.value = 'blog';
+          } else if(newName === 'Helpcenter' || newName === 'QuesInfo') {
+            nowPage.value = 'ques';
+          } else if(newName === 'toolCenter' || newName === 'spoc' || newName === 'vacentClassroom'
+          || newName === 'boya') {
+            nowPage.value = 'tool'
+          } else if(newName === 'personalCenter' || newName === 'editPersonalInfo'){
+            nowPage.value = 'user'
+          }
+        },
+        { immediate: true } // 立即执行回调以初始化nowPage
+    );
 
     const getUnreadMessageNum = () => {
       if (isLogin.value) {
