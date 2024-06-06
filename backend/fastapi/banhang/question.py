@@ -562,6 +562,7 @@ class TagResponse(BaseModel):
     tagName: str
     tagIcon: str
     tagColor: str
+    isAdmin: bool
 
 
 class GetTagsResponse(BaseModel):
@@ -573,7 +574,8 @@ def get_tags(db: Session = Depends(get_db)):
     return {'tags': [{'tagId': tag.id,
                       'tagName': tag.name,
                       'tagIcon': tag.icon,
-                      'tagColor': tag.color} for tag in crud.get_question_tag_all(db)
+                      'tagColor': tag.color,
+                      'isAdmin': tag.is_admin} for tag in crud.get_question_tag_all(db)
                      ]}
 
 
