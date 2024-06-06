@@ -277,23 +277,24 @@ export default {
   <v-bottom-navigation
       color="primary"
       active
+      v-model="nowPage"
       v-if="display.smAndDown.value"
   >
-    <v-btn @click="goto('/HelpCenter/0')">
+    <v-btn value="ques" @click="goto('/HelpCenter/0')">
       <v-icon>mdi-help-box</v-icon>
       互助中心
     </v-btn>
 
-    <v-btn @click="goto('/blogList/-1')">
+    <v-btn value="blog" @click="goto('/blogList/-1')">
       <v-icon>mdi-account-cowboy-hat-outline</v-icon>
       匿名空间
     </v-btn>
 
-    <v-btn @click="goto('/toolCenter')">
+    <v-btn value="tool" @click="goto('/toolCenter')">
       <v-icon>mdi-toolbox</v-icon>
       工具箱
     </v-btn>
-    <v-btn @click="gotoLoginOrPersonalIndex()">
+    <v-btn value="user" @click="gotoLoginOrPersonalIndex()">
       <v-icon>mdi-account</v-icon>
       用户中心
     </v-btn>
