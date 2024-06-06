@@ -16,31 +16,13 @@
                         <v-text-field v-model="email" label="邮箱" style="width: 100%"></v-text-field>
                         <div style="display: flex;">
                             <v-text-field v-model="checkCode" label="验证码" style="width: 60%; margin-right: 16px;"></v-text-field>
-                            <v-btn color="primary" type="submit" @click.prevent="sendCheckCode" style="height: 56px;">发送验证码</v-btn>
+                            <!-- <v-btn v-if="!timeGo" :class="{'time-count': timeGo, 'wait-click': !timeGo}" type="submit" @click.prevent="sendCheckCode" style="height: 56px;">发送验证码</v-btn> -->
+                            <v-btn v-if="!timeGo" class='wait-click' type="submit" @click.prevent="sendCheckCode" style="height: 56px;">发送验证码</v-btn>
+                            <v-btn v-else class="time-count" type="submit" style="height: 56px;">{{ sec }} s</v-btn>
+                            <!-- <v-btn class="wait-click" type="submit" @click.prevent="sendCheckCode" style="height: 56px;">发送验证码</v-btn> -->
                         </div>
                         <v-btn color="#42a300" block type="submit" @click.prevent="resetPassword1" v-bind="props">重置密码</v-btn>
 
-
-                        <!-- <v-row>
-                            <v-col cols="12">
-                                <v-text-field v-model="password1" label="新密码" type="password" style="width: 100%"></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field v-model="password2" label="确认密码" type="password" style="width: 100%"></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field v-model="email" label="邮箱" style="width: 100%; padding-bottom: 0px;"></v-text-field>
-                            </v-col>
-                            <v-col cols="9">
-                                <v-text-field v-model="checkCode" label="验证码" style="width: 100%; margin-bottom: 0px;"></v-text-field>
-                            </v-col>
-                            <v-col cols="3">
-                                <v-btn color="primary" block type="submit" @click.prevent="sendCheckCode" v-bind="props" class="mt-0">发送验证码</v-btn>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-btn color="#42a300" block type="submit" @click.prevent="resetPassword1" v-bind="props">重置密码</v-btn>
-                            </v-col>
-                        </v-row> -->
                     </v-card-text>
             </v-card>
     </v-container>
@@ -55,10 +37,23 @@ export default {
             password1: "",
             password2: "",
             email: "",
-            checkCode: ""
+            checkCode: "",
+            timeGo: false,
+            sec: 60
         };
     },
     methods: {
+        countDown() {
+            if (this.sec > 0) {
+                this.$nextTick(() => {
+                    setTimeout(this.countDown, 1000);
+                })
+                this.sec = this.sec - 1
+            } else {
+                this.sec = 60
+                this.timeGo = false
+            }
+        },
         sendCheckCode() {
             const buaaEmailPattern = /^[a-zA-Z0-9_-]+@(?:buaa\.edu\.cn)$/
             if (!this.email) {
@@ -69,6 +64,9 @@ export default {
                 trySendCheckCode(this.email).then((res) => {
                     if (res.isSuccess) {
                         showTip("发送成功 !", true)
+                        this.sec = 60
+                        this.timeGo = true
+                        this.countDown()
                     } else {
                         showTip("发送失败 !", false)
                     }
@@ -115,6 +113,16 @@ export default {
 .v-input__details {
     /* height: 0px; */
     display: none;
+}
+
+.time-count {
+    background-color: #778899;
+    color: #ffffff;
+}
+
+.wait-click {
+    background-color: #2a73c5;
+    color: #ffffff;
 }
 
 </style>

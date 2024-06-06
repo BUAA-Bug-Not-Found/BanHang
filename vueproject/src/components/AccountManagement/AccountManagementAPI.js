@@ -62,12 +62,15 @@ export function tryResetPassword(_email, _password, _checkCode) {
 
 export function getInfoByUserId(_id) {
     return axios.request({
-        url: "/getInfoByUserId",
+        url: "/getOtherInfosById",
         method: "get",
         params: { // 对于get类型的接口, 这里的变量值要用params
-            "userId": _id
+            "id": _id
         }
     }).then((reply) => {
+        console.log("getOtherInfo")
+        console.log(reply.data)
+        console.log("getOtherInfo")
         return reply.data
     }).catch(() => {
         return false
@@ -151,10 +154,14 @@ export function isSignFormatOk(sign) {
     return sign.length <= 30 && sign.length >= 1
 }
 
-export function checkLogin() {
+export function checkLogin(checkManager=false) {
     if (!userStateStore().email) {
           showTip("请首先登录", false)
           router.replace({path: "/loginPage"})
+    } else if (checkManager) {
+        if (!userStateStore().isManager) {
+            showTip("您不是管理员！", false)
+            router.replace({path: "/personalCenter"})
+        }
     }
 }
-

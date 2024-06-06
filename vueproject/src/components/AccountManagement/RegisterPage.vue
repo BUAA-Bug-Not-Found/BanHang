@@ -9,7 +9,9 @@
                         <v-text-field v-model="email" label="邮箱" style="width: 100%"></v-text-field>
                         <div style="display: flex;">
                             <v-text-field v-model="checkCode" label="验证码" style="width: 60%; margin-right: 16px;"></v-text-field>
-                            <v-btn color="primary" @click.prevent="sendCheckCode" v-bind="props" style="height: 56px;">发送验证码</v-btn> <br/>
+                            <!-- <v-btn color="primary" @click.prevent="sendCheckCode" v-bind="props" style="height: 56px;">发送验证码</v-btn> <br/> -->
+                            <v-btn v-if="!timeGo" class='wait-click' type="submit" @click.prevent="sendCheckCode" style="height: 56px;">发送验证码</v-btn>
+                            <v-btn v-else class="time-count" type="submit" style="height: 56px;">{{ sec }} s</v-btn>
                         </div>
                         <v-btn color="#42a300" block type="submit" @click.prevent="register" v-bind="props">注册</v-btn>
                 </v-card-text>
@@ -29,12 +31,25 @@ export default {
             password1: "",
             password2: "",
             email: "",
-            checkCode: ""
+            checkCode: "",
+            timeGo: false,
+            sec: 60
         };
         // show: false
     },
     
     methods: {
+        countDown() {
+            if (this.sec > 0) {
+                this.$nextTick(() => {
+                    setTimeout(this.countDown, 1000);
+                })
+                this.sec = this.sec - 1
+            } else {
+                this.sec = 60
+                this.timeGo = false
+            }
+        },
         sendCheckCode() {
             // 调用后端函数, 向this.email发送验证码
             // 将验证码记录到const checkCode中
@@ -47,6 +62,9 @@ export default {
                 trySendCheckCode(this.email).then((res) => {
                     if (res.isSuccess) {
                         showTip("发送成功", true)     
+                        this.sec = 60
+                        this.timeGo = true
+                        this.countDown()
                     } else {
                         showTip("发送失败", false)
                     }
@@ -93,7 +111,18 @@ export default {
 </script>
 
 <style scoped>
-    .v-text-field {
-        width: 400px;
-    }
+.v-text-field {
+    width: 400px;
+}
+
+
+.time-count {
+    background-color: #778899;
+    color: #ffffff;
+}
+
+.wait-click {
+    background-color: #2a73c5;
+    color: #ffffff;
+}
 </style>

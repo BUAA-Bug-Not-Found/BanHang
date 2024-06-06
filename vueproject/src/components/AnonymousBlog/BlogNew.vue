@@ -171,7 +171,7 @@ export default {
       }
 
       if (this.title.trim().length === 0 || this.content.trim().length === 0) {
-        showTip('标题和内容不能为空，请返回修改~')
+        showTip('标题和内容不能为空，请返回修改~', false)
         return
       }
 

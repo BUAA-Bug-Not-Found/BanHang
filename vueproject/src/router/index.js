@@ -29,6 +29,7 @@ import SearchList from "@/components/AdvanceSearch/SearchList.vue";
 import SpocIndex from "@/components/ToolBox/Spoc/SpocIndex.vue";
 import VacentIndex from "@/components/ToolBox/VacentClassroom/VacentIndex.vue";
 import BoyaIndex from "@/components/ToolBox/Boya/BoyaIndex.vue";
+import ComplainInfos from "@/components/PersonalCenter/ComplainInfos.vue";
 
 import ToolCenter from '@/components/ToolCenter/ToolCenter.vue';
 const routes = [
@@ -132,6 +133,11 @@ const routes = [
                 name: 'boya',
                 component: BoyaIndex
             },
+            {
+                path: '/complainInfos',
+                name: 'complainInfos',
+                component: ComplainInfos
+            }
         ]
     },
 
