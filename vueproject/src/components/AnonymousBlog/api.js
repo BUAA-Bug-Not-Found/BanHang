@@ -145,3 +145,21 @@ export async function getTags() {
         throw error;
     }
 }
+
+export function submitComplainForBlog(complainData) {
+    return axios.post('/submitComplainForBlog', complainData,
+        {
+            headers: {'Content-Type': 'application/json'},
+        }).then(response => {
+        return response.data
+    })
+}
+
+export function submitComplainForBlogComment(complainData) {
+    return axios.post('/submitComplainForBlogComment', complainData,
+        {
+            headers: {'Content-Type': 'application/json'},
+        }).then(response => {
+        return response.data
+    })
+}
