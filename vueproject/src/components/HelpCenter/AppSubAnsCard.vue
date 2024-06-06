@@ -3,7 +3,7 @@ import {onBeforeUnmount, ref, shallowRef} from "vue";
 import {
   delAnswerAPI,
   formatDate,
-  getAnsById,
+  getAnsById, isShutUpByUserIdAPI,
   replyComment,
   reportAnswerAPI,
   setAnsLikeAPI
@@ -118,15 +118,23 @@ export default {
         if (String(commentHtml.value).replace(/<[^>]*>/g, "") === '') {
           ElMessage.error("不能上传空白答案")
         } else {
-          replyComment(props.ansId, commentHtml.value, imageList.value).then(
+          isShutUpByUserIdAPI(userStateStore().user_id).then(
               (res) => {
-                if (res.isSuccess === true) {
-                  ElMessage.success("回答已上传")
-                  commentHtml.value = ''
-                  imageList.value = []
-                  router.go(0)
+                if (res.isShutUp) {
+                  ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
                 } else {
-                  ElMessage.error("回答失败，请稍后再试")
+                  replyComment(props.ansId, commentHtml.value, imageList.value).then(
+                      (res) => {
+                        if (res.isSuccess === true) {
+                          ElMessage.success("回答已上传")
+                          commentHtml.value = ''
+                          imageList.value = []
+                          router.go(0)
+                        } else {
+                          ElMessage.error("回答失败，请稍后再试")
+                        }
+                      }
+                  )
                 }
               }
           )
@@ -143,7 +151,7 @@ export default {
     const reportAnswer = () => {
       reportAnswerAPI(props.quesId, props.ansId, reportReason.value).then(
           (res) => {
-            if(res.isSuccess) {
+            if (res.isSuccess) {
               ElMessage.success("举报成功，请等待管理员审核举报结果")
               reportDialOpen.value = false
             } else {
@@ -236,7 +244,7 @@ export default {
                 @click="sheet = !sheet"
                 color="blue-grey-lighten-2">
             </v-btn>
-            <v-btn v-if="isUser"
+            <v-btn v-if="isUser || userStateStore().isManager"
                    :icon="'mdi-delete-circle'" variant="text" size="small"
                    color="blue-grey-lighten-2"
                    @click="delDialog = !delDialog">
@@ -324,7 +332,8 @@ export default {
       <v-card rounded="lg">
         <v-card-title class="d-flex justify-space-between align-center">
           <div class="ps-2" style="color: darkred;align-content: center;font-size: 25px">
-            <v-icon :size="35" style="margin-right: 5px">mdi-shield-alert</v-icon>举报
+            <v-icon :size="35" style="margin-right: 5px">mdi-shield-alert</v-icon>
+            举报
           </div>
           <v-btn
               icon="mdi-close"
@@ -336,7 +345,7 @@ export default {
         <v-divider class="mb-4"></v-divider>
 
         <v-card-text>
-          <div class="mb-2">您正在检举用户{{userName}}的回答</div>
+          <div class="mb-2">您正在检举用户{{ userName }}的回答</div>
           <div class="mb-2" style="color: grey">{{ truncate(ans.ansContent) }}</div>
           <div class="mb-2">举报原因 (optional)</div>
 

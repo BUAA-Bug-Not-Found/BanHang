@@ -3,7 +3,7 @@ import {onBeforeUnmount, ref, shallowRef} from "vue";
 import {
   delAnswerAPI,
   formatDate,
-  getAnsById,
+  getAnsById, isShutUpByUserIdAPI,
   replyComment,
   reportAnswerAPI,
   setAnsLikeAPI
@@ -126,18 +126,26 @@ export default {
         if (String(commentHtml.value).replace(/<[^>]*>/g, "") === '') {
           ElMessage.error("不能上传空白答案")
         } else {
-          replyComment(props.ansId, commentHtml.value, imageList.value).then(
+          isShutUpByUserIdAPI(userStateStore().user_id).then(
               (res) => {
-                if (res.isSuccess === true) {
-                  ElMessage.success("回答已上传")
-                  commentHtml.value = ''
-                  imageList.value = []
-                  router.go(0)
-                } else {
-                  ElMessage.error("回答失败，请稍后再试")
-                }
-              }
-          )
+            if(res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              replyComment(props.ansId, commentHtml.value, imageList.value).then(
+                  (res) => {
+                    if (res.isSuccess === true) {
+                      ElMessage.success("回答已上传")
+                      commentHtml.value = ''
+                      imageList.value = []
+                      router.go(0)
+                    } else {
+                      ElMessage.error("回答失败，请稍后再试")
+                    }
+                  }
+              )
+            }
+          })
+
         }
       }
     }
@@ -245,7 +253,7 @@ export default {
                    @click="reportDialOpen = !reportDialOpen">
               举报
             </v-btn>
-            <v-btn v-if="isUser"
+            <v-btn v-if="isUser || userStateStore().isManager"
                    :icon="'mdi-delete-circle'" variant="text" size="small"
                    color="blue-grey-lighten-2"
                    @click="delDialog = !delDialog">

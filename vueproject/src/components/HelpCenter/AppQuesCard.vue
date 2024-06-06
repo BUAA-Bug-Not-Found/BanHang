@@ -179,7 +179,7 @@ export default {
               </v-btn>
             </template>
             <v-list>
-              <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
+              <v-list-item density="compact" v-if="isUser || userStateStore().isManager" @click="delDialog = !delDialog">
                 <v-icon size="22" color="red-darken-1">mdi-delete-clock</v-icon> 删除
               </v-list-item>
               <v-list-item density="compact" v-if="isUser" color="primary" @click="editQues">

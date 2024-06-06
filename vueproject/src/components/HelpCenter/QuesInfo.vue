@@ -11,7 +11,7 @@ import {
   formatDate,
   getQuestionsApi,
   getQuestionsByTagIdApi,
-  getTagsApi, reportQuesAPI, setFocusQues,
+  getTagsApi, isShutUpByUserIdAPI, reportQuesAPI, setFocusQues,
   setLikeQuesApi, updateQuesApi,
   uploadAnsApi, uploadFileApi
 } from "@/components/HelpCenter/api";
@@ -220,16 +220,24 @@ export default {
         if (String(replyHtml.value).replace(/<[^>]*>/g, "") === '') {
           ElMessage.error("不能上传空白答案")
         } else {
-          uploadAnsApi(qid.value, replyHtml.value, imageList.value).then(
+          isShutUpByUserIdAPI(userStateStore().user_id).then(
               (res) => {
-                if (res.isSuccess === true) {
-                  ElMessage.success("回答已上传")
-                  replyHtml.value = ''
-                  imageList.value = []
-                  sheet2.value = false
-                  router.go(0)
+                if (res.isShutUp) {
+                  ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
                 } else {
-                  ElMessage.error("回答失败，请稍后再试")
+                  uploadAnsApi(qid.value, replyHtml.value, imageList.value).then(
+                      (res) => {
+                        if (res.isSuccess === true) {
+                          ElMessage.success("回答已上传")
+                          replyHtml.value = ''
+                          imageList.value = []
+                          sheet2.value = false
+                          router.go(0)
+                        } else {
+                          ElMessage.error("回答失败，请稍后再试")
+                        }
+                      }
+                  )
                 }
               }
           )
@@ -390,7 +398,7 @@ export default {
     const dialShow = ref(false)
 
     const goTop = () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     const menuClick = ref(false);
@@ -422,7 +430,7 @@ export default {
     const reportQues = () => {
       reportQuesAPI(qid.value, reportReason.value).then(
           (res) => {
-            if(res.isSuccess) {
+            if (res.isSuccess) {
               ElMessage.success("举报成功，请等待管理员审核举报结果")
               reportDialOpen.value = false
             } else {
@@ -561,7 +569,9 @@ export default {
                   <v-btn color="blue-lighten-1" v-if="!ifFocus" @click="focusQuestion">关注问题</v-btn>
                   <v-btn color="grey-lighten-2" v-else @click="focusQuestion">取消关注</v-btn>
                   <v-btn v-if="!openAns" style="margin-left:15px" variant="outlined" color="blue-lighten-1"
-                         prepend-icon="mdi-pen" @click="openAns = true;openComment = false">{{ "&nbsp;" }}写回答{{ "&nbsp;&nbsp;" }}
+                         prepend-icon="mdi-pen" @click="openAns = true;openComment = false">{{
+                      "&nbsp;"
+                    }}写回答{{ "&nbsp;&nbsp;" }}
                   </v-btn>
                   <v-btn v-if="openAns" style="margin-left:15px" variant="outlined"
                          prepend-icon="mdi-window-close" @click="openAns = false">取消回答
@@ -591,7 +601,8 @@ export default {
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item density="compact" v-if="isUser" @click="delDialog = !delDialog">
+                      <v-list-item density="compact" v-if="isUser || userStateStore().isManager"
+                                   @click="delDialog = !delDialog">
                         <v-icon size="22" color="red-darken-1">mdi-delete-clock</v-icon>
                         删除
                       </v-list-item>
@@ -773,18 +784,20 @@ export default {
             </div>
             <v-row style="margin-left: 10px;height:60px;font-size:12px;color: grey">
               <v-col cols="4">
-                <span style="margin-right: 4px;color: black">{{ likeSum }}</span> 点赞  ·
+                <span style="margin-right: 4px;color: black">{{ likeSum }}</span> 点赞 ·
                 <span style="margin-right: 4px;margin-left: 3px;color: black">{{ question.ansIdList.length }}</span> 回复
               </v-col>
               <v-col offset="4">
                 <v-btn :prepend-icon="'mdi-focus-field'"
                        color="blue-lighten-1" v-if="!ifFocus"
                        size="small"
-                       @click="focusQuestion" variant="outlined" >关注问题</v-btn>
+                       @click="focusQuestion" variant="outlined">关注问题
+                </v-btn>
                 <v-btn :prepend-icon="'mdi-focus-field'"
                        color="grey-lighten-2" v-else
                        size="small"
-                       @click="focusQuestion" variant="outlined" >取消关注</v-btn>
+                       @click="focusQuestion" variant="outlined">取消关注
+                </v-btn>
               </v-col>
             </v-row>
           </v-card>
@@ -895,7 +908,7 @@ export default {
       </v-card-text>
     </v-card>
   </v-bottom-sheet>
-  <v-bottom-sheet v-model="sheet1" v-else >
+  <v-bottom-sheet v-model="sheet1" v-else>
     <v-card
         class="text-center"
         height="800"
@@ -1052,7 +1065,8 @@ export default {
       <v-card rounded="lg">
         <v-card-title class="d-flex justify-space-between align-center">
           <div class="ps-2" style="color: darkred;align-content: center;font-size: 25px">
-            <v-icon :size="35" style="margin-right: 5px">mdi-shield-alert</v-icon>举报
+            <v-icon :size="35" style="margin-right: 5px">mdi-shield-alert</v-icon>
+            举报
           </div>
           <v-btn
               icon="mdi-close"
@@ -1064,7 +1078,7 @@ export default {
         <v-divider class="mb-4"></v-divider>
 
         <v-card-text>
-          <div class="mb-2">您正在检举用户{{userName}}的问题</div>
+          <div class="mb-2">您正在检举用户{{ userName }}的问题</div>
           <div class="mb-2" style="color: grey">{{ truncate(question.quesContent.content) }}</div>
           <div class="mb-2">举报原因 (optional)</div>
 
