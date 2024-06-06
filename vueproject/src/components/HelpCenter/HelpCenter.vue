@@ -95,6 +95,8 @@ export default {
       }
     }
 
+    const canAddTags = ref([])
+
     const init = () => {
       let router = useRouter()
       lastIndex.value = router.currentRoute.value.params.tagId
@@ -109,6 +111,9 @@ export default {
             })
             for (let i = 0; i < tags.value.length; i++) {
               tagNamesArray.value.push(tags.value[i].tagName)
+              if(!tags.value[i].isAdmin || userStateStore().isManager) {
+                canAddTags.value.push(tags.value[i].tagName)
+              }
             }
             getMore()
           }
@@ -360,7 +365,8 @@ export default {
       disTags,
       showPic,
       delPic,
-      dropDown
+      dropDown,
+      canAddTags
     }
   }
 }
@@ -506,7 +512,7 @@ export default {
         <div style="margin-top: 15px">
           <v-select
               v-model="selectTags"
-              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray.slice(1, tagNamesArray.length)"
+              :items="canAddTags.length  === 0 ? [] : canAddTags.slice(1, canAddTags.length)"
               multiple
               label="添加标签"
               density="default"
