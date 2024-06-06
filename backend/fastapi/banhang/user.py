@@ -541,10 +541,9 @@ def shut_up_user(req: CheckIsShutUpRequest, db: Session = Depends(get_db),
                  current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
         raise EXC.UniException(key='isSuccess', value=False)
-    user = crud.get_user_by_id(db, current_user['uid'])
-    if user.privilege == 0:
-        raise EXC.UniException(key='isSuccess', value=False, others={"description": "您不是管理员，无法禁言用户"})
     target_user = crud.get_user_by_id(db, req.id)
+    if not target_user:
+        raise EXC.UniException(key='isSuccess', value=False, others={'description': '目标用户id不存在'})
     return IsShutUpResponse(isShutUp=target_user.activate_time > datetime.now())
 
 
