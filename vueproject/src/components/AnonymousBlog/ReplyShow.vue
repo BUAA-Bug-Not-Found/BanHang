@@ -1,60 +1,92 @@
 <template>
-  <div class="comment-card">
-    <div class="user-info">
-      <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
-        <UserAvatar :userId="this.userId"></UserAvatar>
-      </div>
-      <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
-        <v-avatar style="margin-top:8px">
-          <v-img :src="this.userAvatarUrl"></v-img>
-        </v-avatar>
-      </div>
-      <div class="user-details">
-        <div v-if="topCommentId === replyToCommentId">
-          <span class="user-name">{{ userName }}</span>
+  <v-hover v-slot="{ isHovering}">
+    <div class="comment-card">
+      <div class="user-info">
+        <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
+          <UserAvatar :userId="this.userId"></UserAvatar>
         </div>
-        <div v-else>
-          <span class="user-name">{{ userName }}</span> → <span class="reply-to-user-name">{{
-            replyToCommentName
-          }}</span>
+        <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
+          <v-avatar style="margin-top:8px">
+            <v-img :src="this.userAvatarUrl"></v-img>
+          </v-avatar>
         </div>
-        <span class="time">{{ formatDate(time) }}</span>
+        <div class="user-details">
+          <div v-if="topCommentId === replyToCommentId">
+            <span class="user-name">{{ userName }}</span>
+          </div>
+          <div v-else>
+            <span class="user-name">{{ userName }}</span> → <span class="reply-to-user-name">{{
+              replyToCommentName
+            }}</span>
+          </div>
+          <span class="time">{{ formatDate(time) }}</span>
+        </div>
       </div>
-    </div>
-    <div v-if="!useDisplay().smAndDown.value">
-      <div class="content" @click="showInput">
-        {{ content }}
-      </div>
-    </div>
-    <div v-else>
-      <div class="content" @click="showBottomSheet">
-        {{ content }}
-      </div>
-    </div>
 
-    <div v-show="isInputVisible" class="reply-input">
-      <v-textarea
-          v-model="replyContent"
-          placeholder="请输入回复内容"
-          outlined
-          rows="3"
-          class="reply-textarea"
-      ></v-textarea>
-      <div class="anonymous-and-sendbutton">
-        <v-checkbox
-            v-model="isAnonymous"
-            label="匿名发送"
-            class="anonymous-checkbox"
-            color="primary"
-        ></v-checkbox>
-        <v-btn @click.stop="sendReply" color="primary" class="send-button">
-          发送
-          <v-icon end>mdi-checkbox-marked-circle</v-icon>
-        </v-btn>
-      </div>
-    </div>
+      <v-row>
+        <v-col :cols="useDisplay().smAndDown.value ? 10:10">
+          <div v-if="!useDisplay().smAndDown.value">
+            <div class="content" @click="showInput">
+              {{ content }}
+            </div>
+          </div>
+          <div v-else>
+            <div class="content" @click="showBottomSheet">
+              {{ content }}
+            </div>
+          </div>
+        </v-col>
+        <v-col cols="2" style="text-align: right; justify-content: end; margin-top: 3px">
+          <v-menu v-show="isHovering || this.menuCLick" :location="'bottom'">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                  size="28px"
+                  v-bind="props"
+                  variant="text"
+                  @click="this.menuCLick = !this.menuCLick"
+                  class="rounded-circle"
+              >
+                <template v-slot:prepend>
+                  <v-icon size="15">mdi-dots-vertical</v-icon>
+                </template>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item density="compact">
+                <div style="color: black; font-size: 16px" @click="showComplainWindow">
+                  举报
+                </div>
+              </v-list-item>
+            </v-list>
+          </v-menu>
 
-  </div>
+        </v-col>
+      </v-row>
+
+      <div v-show="isInputVisible" class="reply-input">
+        <v-textarea
+            v-model="replyContent"
+            placeholder="请输入回复内容"
+            outlined
+            rows="3"
+            class="reply-textarea"
+        ></v-textarea>
+        <div class="anonymous-and-sendbutton">
+          <v-checkbox
+              v-model="isAnonymous"
+              label="匿名发送"
+              class="anonymous-checkbox"
+              color="primary"
+          ></v-checkbox>
+          <v-btn @click.stop="sendReply" color="primary" class="send-button">
+            发送
+            <v-icon end>mdi-checkbox-marked-circle</v-icon>
+          </v-btn>
+        </div>
+      </div>
+
+    </div>
+  </v-hover>
 
   <v-bottom-sheet
       v-model="bottomSheet"
@@ -83,6 +115,26 @@
     </div>
   </v-bottom-sheet>
 
+  <v-bottom-sheet
+      v-model="showComplainWin"
+      class="transparent-bottom-sheet">
+    <div class="comment-input">
+      <v-textarea
+          v-model="complainCause"
+          placeholder="输入您的举报理由"
+          outlined
+          rows="3"
+          class="comment-textarea white-background"
+      ></v-textarea>
+      <div class="button-container">
+        <v-btn @click="sendComplainMes()" color="red" class="submit-button">
+          提交举报
+          <v-icon end>mdi-alert-circle</v-icon>
+        </v-btn>
+      </div>
+    </div>
+  </v-bottom-sheet>
+
 </template>
 
 <script>
@@ -90,7 +142,7 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
-import {uploadComment} from "@/components/AnonymousBlog/api";
+import {submitComplainForBlog, uploadComment} from "@/components/AnonymousBlog/api";
 
 export default {
   name: "ReplyShow",
@@ -145,7 +197,10 @@ export default {
       isInputVisible: false,
       replyContent: "",
       isAnonymous: true,
-      bottomSheet: false
+      bottomSheet: false,
+      menuCLick: false,
+      showComplainWin: false,
+      complainCause: ""
     };
   },
 
@@ -214,7 +269,49 @@ export default {
       this.replyContent = "";
       this.isAnonymous = false;
       this.isInputVisible = false;
-    }
+    },
+
+    showComplainWindow() {
+      if (!UserStateStore().email) {
+        ElMessage.error("请先登录")
+        return
+      }
+      this.showComplainWin = !this.showComplainWin
+    },
+
+    sendComplainMes() {
+      if (this.complainCause.length === 0) {
+        ElMessage.error("举报原因不能为空！")
+        return
+      }
+
+      const confirmSubmit = window.confirm("确定提交举报？我们承诺不向对方提供您的任何信息，但保留追究滥用举报行为的权力⚠");
+      if (confirmSubmit) {
+        let json_set = {
+          "blogId": this.blogId,
+          "cause": this.complainCause
+        }
+        submitComplainForBlog(json_set).then(
+            (res) => {
+              if (res.response == "success") {
+                ElMessage({
+                  message: '举报成功！感谢您为论坛环境做出的贡献。',
+                  showClose: true,
+                  type: 'success',
+                })
+                this.complainCause = ""
+                this.showComplainWin = false
+              } else {
+                ElMessage({
+                  message: '举报失败，请修改内容或稍后再试...',
+                  showClose: true,
+                  type: 'error',
+                })
+              }
+            }
+        )
+      }
+    },
   }
 }
 </script>
@@ -311,7 +408,27 @@ export default {
   background-color: transparent !important;
 }
 
+.comment-input {
+  margin-left: 1%;
+  margin-right: 1%;
+  margin-bottom: 15px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1; /* 确保在其他内容之上 */
+}
+
 .white-background {
   background-color: white;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-button {
+  height: 28px;
 }
 </style>
