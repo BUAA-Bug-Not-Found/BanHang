@@ -142,7 +142,7 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
 import UserStateStore from "@/store";
 import {ElMessage} from "element-plus";
-import {submitComplainForBlog, uploadComment} from "@/components/AnonymousBlog/api";
+import {submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
 
 export default {
   name: "ReplyShow",
@@ -288,10 +288,10 @@ export default {
       const confirmSubmit = window.confirm("确定提交举报？我们承诺不向对方提供您的任何信息，但保留追究滥用举报行为的权力⚠");
       if (confirmSubmit) {
         let json_set = {
-          "blogId": this.blogId,
+          "blogId": this.commentId,
           "cause": this.complainCause
         }
-        submitComplainForBlog(json_set).then(
+        submitComplainForBlogComment(json_set).then(
             (res) => {
               if (res.response == "success") {
                 ElMessage({
