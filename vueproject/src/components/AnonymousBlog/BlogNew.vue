@@ -148,7 +148,7 @@ export default {
       // 弹出确认框，让用户确认是否提交
       // console.log(this.tagList)
       if(this.title.trim().length===0 || this.content.trim().length===0) {
-        showTip('标题和内容不能为空，请返回修改~')
+        showTip('标题和内容不能为空，请返回修改~', false)
         return
       }
 

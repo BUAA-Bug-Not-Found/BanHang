@@ -8,28 +8,15 @@
                 <v-card style="padding-top:10px; padding-bottom:10px; margin-left: 10px; margin-right: 10px;" @click="clickLocalHeadImage">
                     <v-text style="margin-left: 12px;">从本地选择头像</v-text>
                 </v-card>
-
                 <v-card v-if="false" style="padding-top:10px; padding-bottom:10px; margin-left: 10px; margin-right: 10px; margin-top: 10px;" @click="clickCameraHeadImage">
                     <v-text style="margin-left: 12px;">拍照上传头像</v-text>
                 </v-card>
-
-                <!-- <v-card style="padding-top:10px; padding-bottom:10px; margin-left: 10px; margin-right: 10px; margin-top: 10px;">
-                    <v-text style="margin-left: 12px;">从相册选择头像</v-text>
-                </v-card> -->
             </div>
             <div style="text-align: center; margin-top: 30px;">
                 <v-btn color="blue darken-1" @click="showDialog = false" style="margin-bottom: 10px; max-width: 50%;">取消</v-btn>
             </div>
-            <!-- <v-card-text>
-                确定要退出登录吗？
-            </v-card-text> 
-            <v-card-actions>
-                <v-btn color="error" @click="clickQuitLogin">确认</v-btn>
-                <v-btn color="blue darken-1" @click="showDialog = false">取消</v-btn>
-            </v-card-actions> -->
             </v-card>
         </v-dialog>
-
 
         <v-card> 
         <v-toolbar density="compact" style="background-color:aliceblue;">
@@ -62,7 +49,7 @@
                 </v-card>
             </v-card-text>
         </div>
-
+        
         <v-btn style="vertical-align: center; background-color: azure; margin-top: 25px; margin-bottom: 60px;" @click="save">
             <span>保存</span>
             <v-icon style="color: #4caf50;">mdi-checkbox-marked-circle</v-icon>
