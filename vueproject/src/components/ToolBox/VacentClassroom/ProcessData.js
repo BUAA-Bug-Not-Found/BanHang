@@ -12,19 +12,18 @@ function getCurrentClassSlot() {
   const time = hours * 60 + minutes;
 
   const slotTimes = [
-    [480, 525], [530, 575], [590, 635], [640, 685],
+    [0, 525], [530, 575], [590, 635], [640, 685],
     [690, 765], [840, 885], [890, 935], [950, 995],
     [1000, 1045], [1050, 1095], [1140, 1185], [1190, 1235],
-    [1250, 1295], [1300, 1345]
+    [1250, 1295], [1300, 1440]
   ];
-  let i = 0;
-  for (; i < slotTimes.length; i++) {
-    if (time < slotTimes[i][0]) {
-      break
+  for (let i = slotTimes.length - 1; i >= 0; i--) {
+    if (time > slotTimes[i][1]) {
+      console.log("现在要上第",i+2,"节课")
+      return i+2
     }
   }
-  console.log("现在上完了",i,"节课")
-  return Math.max(1, i);
+  return 1;
 }
 
 

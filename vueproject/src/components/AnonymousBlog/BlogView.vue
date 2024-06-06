@@ -188,7 +188,7 @@ export default {
       comments: [],
       showCommentInput: false,
       newComment: '',
-      commentAnonymous: false,
+      commentAnonymous: true,
       bottomSheet: false
     };
   },
