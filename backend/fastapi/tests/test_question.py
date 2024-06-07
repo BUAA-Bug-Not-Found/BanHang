@@ -176,7 +176,7 @@ def test_delete_question_and_comment(mock_question_data, mock_user_data, new_dat
     res = client.post("/delAnswer", json={"ansId": answerid})
     ans = client.get("/getQuesById", params={"quesId": blogs['questions'][0]["quesId"]}).json()
     assert ans["ifExist"] == True
-    assert len(ans['question']['ansIdList']) == 0
+    assert len(ans['question']['ansIdList']) == 1 # 删除并不真正删除，修改内容为已删除。
 
 
 def test_solved_question(mock_question_data, mock_user_data, new_database, mock_question_comment_data):

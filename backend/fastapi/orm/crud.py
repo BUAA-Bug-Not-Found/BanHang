@@ -510,7 +510,7 @@ def create_question_comment_image(db: Session, image: schemas.QuestionCommentIma
 
 def delete_question_comment_by_id(db: Session, id: int):
     comment = get_question_comment_by_id(db, id)
-    db.delete(comment)
+    comment.content = '【此回答已删除】'
     db.commit()
 
 
