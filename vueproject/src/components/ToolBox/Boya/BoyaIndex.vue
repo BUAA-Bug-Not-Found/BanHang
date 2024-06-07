@@ -1,4 +1,17 @@
 <template>
+  <v-dialog v-model="showDialog" max-width="500">
+    <v-card>
+      <v-card-title>日程创建</v-card-title>
+      <v-card-text>
+        <p>是否为博雅 "{{ curClass.name }}" 添加选课日程？</p>
+        <p>使用手机日历打开下载文件来添加日程</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="showDialog = false">关闭</v-btn>
+        <v-btn @click="showDialog = false; downloadICSFile()">添加</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <!--手机-->
   <div v-if="display.smAndDown.value">
     <div class="header">
@@ -7,10 +20,20 @@
         :prepend-icon="item.clicked ? 'mdi-checkbox-marked-circle' : ''">
         {{ item.name }}
       </v-chip>
+      <div v-if="isLogin">
+        <p>我的委托：{{ myEntrust.campus.length == 0 || myEntrust.type.length == 0 ? '暂无委托' : ""}}</p>
+        <div v-if="myEntrust.campus.length != 0 && myEntrust.type.length != 0">
+          <p> 校区：{{ myEntrust.campus.join('、') }} </p>
+          <p> 类型：{{ myEntrust.type.join('、') }} </p>
+        </div>
+        <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">添加委托</v-btn>
+        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">取消委托</v-btn>
+        <p style="  font-size: 14px;color: grey;">当添加委托之后，如果有满足特定要求的博雅出现，会为您的北航邮箱发送邮件</p>
+      </div>
     </div>
 
     <v-card v-for="(item, index) in getClassList()" :key="index"
-      style="border-radius: 0px;margin-bottom: 1px;padding:0 20px 10px 20px;" variant="flat">
+      style="border-radius: 0px;margin-bottom: 1px;padding:0 20px 10px 20px;" variant="flat" @click="handleBoyaClicked(item)">
       <div style="height: 1px;  background-color: lightgrey; margin-bottom: 10px"></div>
       <div class="card-header">
         <div class="type">{{ item.type.slice(5) }}</div>
@@ -41,8 +64,19 @@
         :prepend-icon="item.clicked ? 'mdi-checkbox-marked-circle' : ''">
         {{ item.name }}
       </v-chip>
+      <div v-if="isLogin">
+        <p>我的委托：{{ myEntrust.campus.length == 0 || myEntrust.type.length == 0 ? '暂无委托' : ""}}</p>
+        <div v-if="myEntrust.campus.length != 0 && myEntrust.type.length != 0">
+          <p> 校区：{{ myEntrust.campus.join('、') }} </p>
+          <p> 类型：{{ myEntrust.type.join('、') }} </p>
+        </div>
+        <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">添加委托</v-btn>
+        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;" color="primary">删除委托</v-btn>
+        <p style="  font-size: 14px;color: grey;">当添加委托之后，如果有满足特定要求的博雅出现，会为您的北航邮箱发送邮件</p>
+      </div>
     </v-card>
-    <v-card v-for="(item, index) in getClassList()" :key="index" style="margin-top: 10px;padding:10px 20px 10px 20px;">
+    <v-card v-for="(item, index) in getClassList()" :key="index" style="margin-top: 10px;padding:10px 20px 10px 20px;"
+      @click="handleBoyaClicked(item)">
       <div class="card-header">
         <div class="type">{{ item.type.slice(5) }}</div>
         <div class="name">{{ item.name }}</div>
@@ -60,9 +94,6 @@
           <div>人数: {{ item.selected_number }}/{{ item.capacity_number }}</div>
           <div>选课时间: {{ item.select_start_time.slice(7) }} - {{ item.select_end_time.slice(7) }}</div>
           <div>上课时间: {{ item.start_time.slice(5) }} - {{ item.end_time.slice(5) }}</div>
-          <div @click="downloadICSFile(item.name, item.select_start_time.slice(7))">
-            创建日程（使用手机日历打开下载文件）
-          </div>
         </div>
       </div>
     </v-card>
@@ -75,20 +106,18 @@ import axios from 'axios';
 import { ref } from "vue";
 import { useDisplay } from 'vuetify'
 import { isApp } from '@/store';
+import userStateStore from '@/store';
+import { showTip } from '@/components/AccountManagement/AccountManagementAPI';
 
 /* eslint-disable */
 export default {
   name: "BoyaIndex",
   setup() {
     const data = ref([]);
-
-    const fetchData = () => {
-      axios.get('/getBoyaInfo').then(res => {
-        data.value = res.data
-      }).catch(error => {
-        console.error(error)
-      })
-    }
+    const showDialog = ref(false);
+    const curClass = ref({});
+    const isLogin = userStateStore().isAuthentic
+    const myEntrust = ref({campus:[], type:[]})
     const chipList = ref(isApp && localStorage.getItem('boyaChips') ? JSON.parse(localStorage.getItem('boyaChips')) : [
       {
         name: '学院路',
@@ -119,15 +148,77 @@ export default {
         clicked: true
       },
     ])
+    const display = useDisplay()
+
+    const handleBoyaClicked = (item) => {
+      showDialog.value = true
+      curClass.value = item
+    }
+    const fetchData = () => {
+      axios.get('/getBoyaInfo').then(res => {
+        data.value = res.data
+      }).catch(error => {
+        console.error(error)
+      })
+      axios.post('/getBoyaEntrust', {}).then(res => {
+        console.log(res.data)
+        console.log(myEntrust.value)
+        myEntrust.value = res.data
+      }).catch(error => {
+        console.error(error)
+      })
+    }
     const handleChipClicked = (item) => {
       item.clicked = !item.clicked
       if (isApp) {
         localStorage.setItem('boyaChips', JSON.stringify(chipList.value))
       }
     }
+    const submitEntrust = () => {
+      let requestData = {
+        campus:[], 
+        type:[]
+      }
+      if (chipList.value[0].clicked) {
+        requestData.campus.push('学院路')
+      }
+      if (chipList.value[1].clicked) {
+        requestData.campus.push('沙河')
+      }
+      for (let i = 2; i <= 6; i++) {
+        if (chipList.value[i].clicked) {
+          requestData.type.push(chipList.value[i].name)
+        }
+      }
+      if (requestData.campus.length == 0) {
+        showTip('请选择至少一个校区', false);
+        return;
+      }
+      if (requestData.type.length == 0) {
+        showTip('请选择至少一个类别', false);
+        return;
+      }
+      axios.post('/createBoyaEntrust', requestData).then(res => {
+        myEntrust.value = requestData;
+        showTip('成功创建委托', true);
+      }).catch(error => {
+        console.error(error)
+      })
+    }
+    const cancelEntrust = () => {
+      if (myEntrust.value.campus.length == 0 || myEntrust.value.type.length == 0) {
+        showTip('当前没有委托', false);
+        return;
+      }
+      axios.post('/deleteBoyaEntrust').then(res => {
+        myEntrust.value = {campus:[], type:[]}
+        showTip('委托已取消', true);
+      }).catch(error => {
+        console.error(error)
+      })
+    }
 
     fetchData()
-    const display = useDisplay()
 
     const getClassList = () => {
       const ret = data.value.filter(cls => {
@@ -153,7 +244,14 @@ export default {
       display,
       chipList,
       handleChipClicked,
-      getClassList
+      getClassList,
+      handleBoyaClicked,
+      submitEntrust,
+      cancelEntrust,
+      showDialog,
+      curClass, 
+      isLogin,
+      myEntrust,
     }
   },
   methods: {
@@ -178,8 +276,12 @@ export default {
       };
 
     },
-    downloadICSFile(name, time) {
+    downloadICSFile() {
       // Parse the provided time string and calculate start and end times
+      console.log(this.curClass)
+      let name = this.curClass.name
+      let time = '20' + this.curClass.select_start_time.slice(7)
+      console.log(time)
       const endTime = new Date(time.replace(/-/g, '/')); // Replace '-' with '/' for compatibility
       const startTime = new Date(endTime.getTime() - 10 * 60 * 1000); // Subtract 10 minutes
 
