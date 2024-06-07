@@ -204,14 +204,18 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
         return {"response": "success"}
     
 
+class CommentId(BaseModel):
+    commentId: int
+
+
 @router.post("/blog/deleteCommentByCommentId", tags=["Blog"])
 @check_user
-def delete_blog_comment_by_blog_comment_id(blog_id: BlogId,
+def delete_blog_comment_by_blog_comment_id(comment_id: CommentId,
                            uid: int,
                            db: Session = Depends(get_db)):
     if uid == None:
         return {"response": "error", "description": "Please login first"}
-    db_blog_comment = crud.get_blog_comment_by_id(db, blog_id.blogId)
+    db_blog_comment = crud.get_blog_comment_by_id(db, comment_id.commentId)
     if db_blog_comment == None:
         return {"response": "error", "description": "No corresponding blog comment ID exists"}
     if db_blog_comment.user_id != uid and crud.get_user_by_id(db, uid).privilege == 0:
