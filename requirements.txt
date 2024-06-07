@@ -16,3 +16,4 @@ fastapi-debug-toolbar
 APScheduler
 selenium
 beautifulsoup4
+alibabacloud_green20220302==2.2.5
