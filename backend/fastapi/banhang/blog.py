@@ -121,7 +121,7 @@ def delete_blog_by_blog_id(blog_id: BlogId,
     db_blog = crud.get_blog_by_blog_id(db, blog_id.blogId)
     if db_blog == None:
         return {"response": "error", "description": "No corresponding blog ID exists"}
-    if db_blog.user_id != uid:
+    if db_blog.user_id != uid and crud.get_user_by_id(db, uid).privilege == 0:
         return {"response": "error", "description": "Permission denied"}
     if db_blog.status == "deleted":
         return {"response": "error", "description": "Blog has been deleted"}
@@ -154,7 +154,10 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
             comment['userName'] = db_user.username
             comment['userAvatarUrl'] = db_user.userAvatarURL
         comment['commentId'] = db_comment.id
-        comment['commentContent'] = db_comment.content
+        if db_comment.status == 'normal':
+            comment['commentContent'] = db_comment.content
+        else:
+            comment['commentContent'] = '该评论已删除'
         comment['time'] = db_comment.create_at
         comment['replyToCommentId'] = db_comment.reply_to_comment_id
         comments.append(schemas.BlogCommentShow(**comment))
@@ -192,7 +195,6 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
     else:
         host_user_id = 50
         if blog_comment.replyToCommentId == None:
-
             guest_user_id = db_blog.user_id
             content = f"您的帖子「{db_blog.title}」有了新回复：{blog_comment.commentContent}"
         else:
@@ -200,6 +202,26 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
             content = f"您在帖子「{db_blog.title}」的评论有了新回复：{blog_comment.commentContent}"
         crud.send_message(db, host_user_id, guest_user_id, content)
         return {"response": "success"}
+    
+
+@router.post("/blog/deleteBlogCommentByBlogCommentId", tags=["Blog"])
+@check_user
+def delete_blog_comment_by_blog_comment_id(blog_id: BlogId,
+                           uid: int,
+                           db: Session = Depends(get_db)):
+    if uid == None:
+        return {"response": "error", "description": "Please login first"}
+    db_blog_comment = crud.get_blog_comment_by_id(db, blog_id.blogId)
+    if db_blog_comment == None:
+        return {"response": "error", "description": "No corresponding blog comment ID exists"}
+    if db_blog_comment.user_id != uid and crud.get_user_by_id(db, uid).privilege == 0:
+        return {"response": "error", "description": "Permission denied"}
+    if db_blog_comment.status == "deleted":
+        return {"response": "error", "description": "Blog comment has been deleted"}
+    db_blog_comment.status = "deleted"
+    db.add(db_blog_comment)
+    db.commit()
+    return {"response": "success"}
 
 
 @router.post("/search/searchBlogAPage", tags=["Blog"], response_model=List[schemas.BlogShow])
