@@ -6,6 +6,8 @@ import orm.crud as crud
 from pydantic import BaseModel, field_validator
 from tools.check_user import check_user
 from typing import List
+from bs4 import BeautifulSoup
+from tools.review import review_text
 from banhang.user import check_user_is_shutup
 
 
@@ -90,6 +92,12 @@ def create_blog(blog: schemas.BlogBase,
     for tag_id in blog.tagList:
         if crud.get_blog_tag_by_id(db, tag_id) == None:
             return {"response": f"No corresponding tag ID ({tag_id}) exists"}
+	html = blog.title + blog.content
+	soup = BeautifulSoup(html)
+	review_result = review_text(soup.get_text())
+	if len(review_result.data.label) != 0:
+		return {"response":"error",
+		  "description": review_result.data.label}
     db_blog = crud.create_blog(db,
                                user_id=uid,
                                title=blog.title,
@@ -167,6 +175,12 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
         return {"response": "error", "description": "No corresponding blog ID exists"}
     if db_blog.status == "deleted":
         return {"response": "error", "description": "Blog has been deleted"}
+	html = blog_comment.commentContent
+	soup = BeautifulSoup(html)
+	review_result = review_text(soup.get_text())
+	if len(review_result.data.label) != 0:
+		return {"response":"error",
+		  "description": review_result.data.label}
     db_blog_comment = crud.create_blog_comment(db,
                                                user_id=uid,
                                                blog_id=blog_comment.blogId,
