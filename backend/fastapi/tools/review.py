@@ -17,7 +17,7 @@ if not in_pytest():
         access_key_id=os.environ['REVIEW_ACCESS_KEY_ID'],
         access_key_secret=os.environ['REVIEW_ACCESS_KEY_SECRET']
     )
-    config.endpoint = f'green	-cip.cn-beijing.aliyuncs.com'
+    config.endpoint = f'green-cip.cn-beijing.aliyuncs.com'
 
 
 def review_text(content: str, service: str = "comment_detection_pro"):
