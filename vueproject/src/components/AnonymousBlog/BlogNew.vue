@@ -202,7 +202,7 @@ export default {
                 this.$router.push({name: 'blogList', params: {tagId: -1}})
               } else {
                 ElMessage({
-                  message: res.discription,
+                  message: '内容违规：' + res.description,
                   showClose: true,
                   type: 'error',
                 })
