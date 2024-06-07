@@ -11,8 +11,8 @@ from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_green20220302 import models as green_20220302_models
 from alibabacloud_tea_util import models as util_models
 from alibabacloud_tea_util.client import Client as UtilClient
-
-if not in_pytest():
+ENABLE = True
+if ENABLE and (not in_pytest()):
     config = open_api_models.Config(
         access_key_id=os.environ['REVIEW_ACCESS_KEY_ID'],
         access_key_secret=os.environ['REVIEW_ACCESS_KEY_SECRET']
@@ -21,7 +21,7 @@ if not in_pytest():
 
 
 def review_text(content: str, service: str = "comment_detection_pro"):
-    if in_pytest():
+    if (not ENABLE) or in_pytest():
         return []
     client = Green20220302Client(config)
     text_moderation_plus_request = green_20220302_models.TextModerationPlusRequest(
