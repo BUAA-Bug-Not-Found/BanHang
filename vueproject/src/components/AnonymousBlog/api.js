@@ -106,6 +106,19 @@ export function deleteBlogByBlogId(blogId) {
     })
 }
 
+export function deleteCommentByCommentId(commentId) {
+    return axios.request({
+        url: '/blog/deleteCommentByCommentId',
+        method: "post",
+        headers: {'Content-Type': 'application/json'},
+        data: JSON.stringify({
+            commentId: commentId
+        })
+    }).then(response => {
+        return response.data
+    })
+}
+
 export function getALlBlogTags() {
     return axios.request({
         url: '/blog/getAllBlogTags',
@@ -144,4 +157,22 @@ export async function getTags() {
         console.error("Failed to get tags:", error);
         throw error;
     }
+}
+
+export function submitComplainForBlog(complainData) {
+    return axios.post('/submitComplainForBlog', complainData,
+        {
+            headers: {'Content-Type': 'application/json'},
+        }).then(response => {
+        return response.data
+    })
+}
+
+export function submitComplainForBlogComment(complainData) {
+    return axios.post('/submitComplainForBlogComment', complainData,
+        {
+            headers: {'Content-Type': 'application/json'},
+        }).then(response => {
+        return response.data
+    })
 }

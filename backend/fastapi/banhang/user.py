@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from sqlalchemy.sql.functions import user
 
-from banhang import blog
 from orm import crud, schemas
 from orm.database import get_db
 
@@ -413,6 +412,7 @@ class OtherUserInfoResponse(BaseModel):
     nickname: str
     sign: str
     url: str
+    isManager: bool
 
 
 @router.get("/getOtherInfosById", tags=['用户中心'], response_model=OtherUserInfoResponse,
@@ -421,7 +421,8 @@ def get_other_info_by_id(id: int, db: Session = Depends(get_db)):
     user = crud.get_user_by_id(db, id)
     if not user:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户不存在"})
-    return {"nickname": user.username, "sign": user.sign, 'url': user.userAvatarURL if user.userAvatarURL else ""}
+    return {"nickname": user.username, "sign": user.sign, 'url': user.userAvatarURL if user.userAvatarURL else "",
+            'isManager': user.privilege > 0}
 
 
 @router.get("/getInfoByUserId", tags=['用户中心'], response_model=UserInfoResponse, deprecated=True,  # todo deprecated
@@ -469,24 +470,207 @@ def get_vacant_classroom(db: Session = Depends(get_db)):
                                                      'vacant_time': [int(x) for x in rec['kxsds'].strip().split(',')
                                                                      if x.strip() != '']})
             res.append(added)
-        ret[name]={'buildings': res}
+        ret[name] = {'buildings': res}
     return ret
 
+
 class BoyaInfo(BaseModel):
-    state:str
-    name:str
-    type:str
-    position:str
-    teacher:str
-    school:str
-    start_time:str
-    end_time:str
-    select_start_time:str
-    select_end_time:str
-    unselect_end_time:str
-    selected_number:str
-    capacity_number:str
+    state: str
+    name: str
+    type: str
+    position: str
+    teacher: str
+    school: str
+    start_time: str
+    end_time: str
+    select_start_time: str
+    select_end_time: str
+    unselect_end_time: str
+    selected_number: str
+    capacity_number: str
+
 
 @router.get('/getBoyaInfo', tags=['工具箱'], response_model=List[BoyaInfo])
 def get_boya_info(db: Session = Depends(get_db)):
     return vacant_data['boya']
+
+
+class CountRespnse(BaseModel):
+    count: int
+
+
+@router.get('/getComplainAmount', tags=['举报'], response_model=CountRespnse)
+def get_complain_amount(db: Session = Depends(get_db), current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key="isSuccess", value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    if user.privilege == 0:
+        raise EXC.UniException(key="isSuccess", value=False, others={"description": "您不是管理员"})
+    return {"count": len(crud.get_report_issues(db))}
+
+
+class ShutUpUserRequest(BaseModel):
+    id: int
+    day: int
+    hour: int
+    min: int
+
+
+@router.post('/shutUpUser', response_model=successResponse, tags=['举报'])
+def shut_up_user(req: ShutUpUserRequest, db: Session = Depends(get_db),
+                 current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    if user.privilege == 0:
+        raise EXC.UniException(key='isSuccess', value=False, others={"description": "您不是管理员，无法禁言用户"})
+    target_user = crud.shut_up_user(db, req.id, req.day, req.hour, req.min)
+    return successResponse()
+
+
+class IsShutUpResponse(BaseModel):
+    isShutUp: bool
+
+
+class CheckIsShutUpRequest(BaseModel):
+    id: int
+
+
+@router.post('/isShutUpByUserId', response_model=IsShutUpResponse, tags=['举报'])
+def shut_up_user(req: CheckIsShutUpRequest, db: Session = Depends(get_db),
+                 current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    target_user = crud.get_user_by_id(db, req.id)
+    if not target_user:
+        raise EXC.UniException(key='isSuccess', value=False, others={'description': '目标用户id不存在'})
+    return IsShutUpResponse(isShutUp=target_user.activate_time > datetime.now())
+
+
+def check_user_is_shutup(uid: int, db: Session) -> bool:
+    return crud.get_user_by_id(db, uid).activate_time > datetime.now()
+
+
+class ReportIssueItem(BaseModel):
+    complainId: int
+    blogTitle: str
+    blogId: int
+    blogContent: str
+    commentId: int
+    comment: str
+    blogAuthorId: int
+    commentAuthorId: int
+    cause: str
+    time: datetime
+    isComment: bool
+    isAno: bool
+
+
+@router.get('/getComplainList', response_model=List[ReportIssueItem], tags=['举报'])
+def getComplainList(db: Session = Depends(get_db), current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    if user.privilege == 0:
+        raise EXC.UniException(key='isSuccess', value=False, others={"description": "您不是管理员"})
+    issues = crud.get_report_issues(db)
+    ret = []
+    for issue in issues:
+        comment_id = 0
+        comment_content = ''
+        comment_author_id = 0
+        if issue.is_blog:
+            blog = issue.blog
+            title = blog.title
+            blog_content = blog.content
+            blog_id = blog.id
+            blog_author_id = blog.user_id
+            if issue.is_comment:
+                comment = issue.blog_comment
+                comment_id = comment.id
+                comment_content = comment.content
+                comment_author_id = comment.user_id
+        elif issue.is_question:
+            question = crud.get_question_by_id(db, issue.question_id)
+            title = question.content
+            blog_content = question.content
+            blog_id = question.id
+            blog_author_id = question.user_id
+            if issue.is_comment:
+                comment = issue.question_comment
+                comment_id = comment.id
+                comment_content = comment.content
+                comment_author_id = comment.user_id
+        else:
+            continue
+
+        ret.append(ReportIssueItem(
+            complainId=issue.id,
+            blogTitle=title,
+            blogContent=blog_content,
+            blogId=blog_id,
+            commentId=comment_id,
+            comment=comment_content,
+            blogAuthorId=blog_author_id,
+            commentAuthorId=comment_author_id,
+            cause=issue.reason,
+            time=issue.create_at,
+            isComment=issue.is_comment,
+            isAno=issue.is_blog
+        ))
+    return ret
+
+
+class DeleteComplainItemRequest(BaseModel):
+    id: int
+
+
+@router.post('/deleteComplainItem', response_model=successResponse, tags=['举报'])
+def delete_complain_item(req: DeleteComplainItemRequest, db: Session = Depends(get_db),
+                         current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    if user.privilege == 0:
+        raise EXC.UniException(key='isSuccess', value=False, others={"description": "您不是管理员"})
+    if not crud.get_issue_by_id(db, req.id):
+        raise EXC.UniException(key='isSuccess', value=False, others={"description": "该issueid不存在"})
+    crud.delete_issue(db, req.id)
+    return successResponse()
+
+
+class ComplainForBlogRequest(BaseModel):
+    blogId: int
+    cause: str
+
+
+@router.post('/submitComplainForBlog', tags=['举报'])
+def submit_complain_for_blog(req: ComplainForBlogRequest, db: Session = Depends(get_db),
+                             current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    blog = crud.get_blog_by_blog_id(db, req.blogId)
+    if not blog:
+        raise EXC.UniException(key='isSuccess', value=False, others={"description": "blog 不存在"})
+    crud.report_blog(db, blog.id, user.id, req.cause)
+    return {'response': 'success'}
+
+
+class ComplainForBlogCommentRequest(BaseModel):
+    blogId: int
+    commentId: int
+    cause: str
+
+
+@router.post('/submitComplainForBlogComment', tags=['举报'])
+def submit_complain_for_blog(req: ComplainForBlogCommentRequest, db: Session = Depends(get_db),
+                             current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    comment = crud.get_blog_comment_by_id(db, req.blogId)
+    if not comment:
+        raise EXC.UniException(key='isSuccess', value=False, others={"description": "blog comment 不存在"})
+    crud.report_blog_comment(db, comment.blog_id, comment.id, user.id, req.cause)
+    return {'response': 'success'}

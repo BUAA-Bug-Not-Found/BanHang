@@ -293,3 +293,51 @@ export function setFocusQues(quesId, ifFocus) {
         return response.data
     })
 }
+
+export function reportQuesAPI(quesId, reportReason) {
+    return axios.request(
+        {
+            url: '/reportQues',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                quesId: quesId,
+                reportReason: reportReason
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function reportAnswerAPI(quesId, ansId, reportReason) {
+    return axios.request(
+        {
+            url: '/reportAnswer',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                quesId: quesId,
+                ansId: ansId,
+                reportReason: reportReason
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function isShutUpByUserIdAPI(userId) {
+    return axios.request(
+        {
+            url: '/isShutUpByUserId',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                id: userId,
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
+}

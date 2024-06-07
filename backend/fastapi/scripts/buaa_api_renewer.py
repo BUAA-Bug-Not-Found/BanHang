@@ -2,11 +2,11 @@ import asyncio
 import os
 import threading
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 ENABLE = True
 
-scheduler = AsyncIOScheduler()
+scheduler = BackgroundScheduler()
 data = {"vacant_classroom": {'sh': {}, 'xyl': {}}, "boya": []}
 
 import json
@@ -103,8 +103,8 @@ def get_boya():
     return resultList
 
 
-@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
-async def update_vacant_classroom():
+@scheduler.scheduled_job('interval', minutes=1, misfire_grace_time=60)
+def update_vacant_classroom():
     global data
     print('updatting vacant classroom')
     if ENABLE:
@@ -115,8 +115,8 @@ async def update_vacant_classroom():
             lock.release()
 
 
-@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
-async def update_boya_info():
+@scheduler.scheduled_job('interval', minutes=1, misfire_grace_time=60)
+def update_boya_info():
     global data
     print('updatting boya')
     if ENABLE:
@@ -128,7 +128,7 @@ async def update_boya_info():
 
 
 if os.getenv("BANHANG_TEST") is None:
-    thread = threading.Thread(target=lambda: asyncio.run(update_vacant_classroom()))
+    thread = threading.Thread(target=lambda: update_vacant_classroom())
     thread.start()
-    thread = threading.Thread(target=lambda: asyncio.run(update_boya_info()))
+    thread = threading.Thread(target=lambda: update_boya_info())
     thread.start()
