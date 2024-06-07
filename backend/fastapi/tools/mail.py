@@ -76,6 +76,12 @@ class MailSender:
         yag_server.send(to=addr, subject='伴航平台验证码', contents='欢迎使用伴航，您的验证码是：{}'.format(checkcode))
 
     @staticmethod
+    def send_text_by_buaa_mail(addr: str, title:str, text: str):
+        yag_server = yagmail.SMTP(user='20375061@buaa.edu.cn', password=os.environ['BUAA_MAIL_SEC'],
+                                  host='smtp.buaa.edu.cn')
+        yag_server.send(to=addr, subject=title, contents=text)
+
+    @staticmethod
     async def send_async(
         args: List[str],
     ) -> None:

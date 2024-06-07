@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from typing import List, Type, Dict
 
@@ -809,3 +810,25 @@ def send_message(db: Session, host_user_id: int, guest_user_id: int, content: st
     except Exception as e:
         db.rollback()
         return False
+
+
+def get_boya_entrust_by_uid(db: Session, uid: int):
+    return db.query(models.BoyaEntrust).filter(models.BoyaEntrust.user_id == uid).first()
+
+
+def delete_boya_entrust_by_uid(db: Session, uid: int):
+    db.delete(get_boya_entrust_by_uid(db, uid))
+    db.commit()
+
+
+def create_boya_entrust(db: Session, uid: int, campus: List[str], type: List[str]):
+    if cur_entrust:=get_boya_entrust_by_uid(db, uid):
+        db.delete(cur_entrust)
+        db.commit()
+    entrust = models.BoyaEntrust(user_id = uid, campus = json.dumps(campus), type = json.dumps(type))
+    db.add(entrust)
+    db.commit()
+
+
+def get_all_boya_entrusts(db: Session):
+    return db.query(models.BoyaEntrust).all()

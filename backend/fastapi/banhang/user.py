@@ -674,3 +674,40 @@ def submit_complain_for_blog(req: ComplainForBlogCommentRequest, db: Session = D
         raise EXC.UniException(key='isSuccess', value=False, others={"description": "blog comment 不存在"})
     crud.report_blog_comment(db, comment.blog_id, comment.id, user.id, req.cause)
     return {'response': 'success'}
+
+
+class CreateBoyaEntrust(BaseModel):
+    campus: List[str]
+    type: List[str]
+
+
+@router.post('/createBoyaEntrust', tags=['工具箱'], response_model=successResponse)
+def create_boya_entrust(req: CreateBoyaEntrust, db: Session = Depends(get_db),
+                        current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    crud.create_boya_entrust(db, current_user['uid'], req.campus, req.type)
+    return successResponse()
+
+
+@router.post('/deleteBoyaEntrust', tags=['工具箱'], response_model=successResponse)
+def delete_boya_entrust(db: Session = Depends(get_db),
+                        current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    crud.delete_boya_entrust_by_uid(db, current_user['uid'])
+    return successResponse()
+
+
+class BoyaEntrustResponse(BaseModel):
+    campus: List[str]
+    type: List[str]
+
+
+@router.post('/getBoyaEntrust', response_model=BoyaEntrustResponse)
+def get_boya_entrust(db: Session = Depends(get_db),
+                     current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    boya = crud.get_boya_entrust_by_uid(db, current_user['uid'])
+    return {'campus': boya.campus, 'type': boya.type}
