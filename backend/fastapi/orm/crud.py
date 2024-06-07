@@ -10,6 +10,7 @@ from sqlalchemy import or_, and_, desc, func, case, distinct, exists
 from orm.database import SessionLocal
 from orm.models import Message, Conversation, ConversationMessage, User, ReportedIssue
 
+import bs4 as beautifulsoup
 
 def get_user_by_id(db: Session, user_id: int) -> models.User:
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -681,6 +682,11 @@ def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
 
 
+def pretty_html(html: str):
+    bs = beautifulsoup.BeautifulSoup(html, 'html.parser')
+    return bs.text
+
+
 def send_message_for_question_answer(comment_id: int):
     print("back_send_message_for_answer: {}".format(comment_id))
     db = SessionLocal()
@@ -692,19 +698,19 @@ def send_message_for_question_answer(comment_id: int):
         if target_comment:
             send_message(db, 34, target_comment.user_id,
                          "自动提示：【{}】 回复了您的问题回答: {}".format(comment.user.username,
-                                                                       target_comment.content))
+                                                                       pretty_html(target_comment.content)))
         else:
             target_user_id = comment.question.user_id
             target_question = comment.question
             send_message(db, 34, target_user_id,
-                         "自动提示：【{}】 回答了您提出的“{}”问题： {}".format(comment.user.username,
-                                                                           target_question.content,
-                                                                           comment.content))
+                         "自动提示：【{}】 回答了您提出的「{}」问题： {}".format(comment.user.username,
+                                                                           pretty_html(target_question.content),
+                                                                           pretty_html(comment.content)))
             for user in target_question.focused_users:
                 send_message(db, 34, user.id,
                              "自动提示：【{}】 回答了您关注的问题「{}」： {}".format(comment.user.username,
-                                                                               target_question.content,
-                                                                               comment.content))
+                                                                               pretty_html(target_question.content),
+                                                                               pretty_html(comment.content)))
 
     finally:
         db.close()
@@ -717,8 +723,8 @@ def send_message_for_like_question_comment(comment_id: int, like_user: int):
         comment = get_question_comment_by_id(db, comment_id)
         user = get_user_by_id(db, like_user)
         send_message(db, 34, comment.user_id,
-                     "自动提示：【{}】 点赞了您在 “{}” 问题下的回答：“{}”".format(
-                         user.username, comment.question.content, comment.content))
+                     "自动提示：【{}】 点赞了您在 「{}」 问题下的回答：“{}”".format(
+                         user.username, pretty_html(comment.question.content), pretty_html(comment.content)))
     finally:
         db.close()
 
@@ -730,7 +736,7 @@ def send_message_for_focus_question(question_id: int, like_user: int):
         question = get_question_by_id(db, question_id)
         user = get_user_by_id(db, like_user)
         send_message(db, 34, question.user_id,
-                     "自动提示：【{}】 关注了您提出问题：“{}”".format(user.username, question.content))
+                     "自动提示：【{}】 关注了您提出问题：「{}」".format(user.username, pretty_html(question.content)))
     finally:
         db.close()
 
@@ -742,7 +748,7 @@ def send_message_for_like_question(question_id: int, like_user: int):
         question = get_question_by_id(db, question_id)
         user = get_user_by_id(db, like_user)
         send_message(db, 34, question.user_id,
-                     "自动提示：【{}】 点赞了您提出问题：“{}”".format(user.username, question.content))
+                     "自动提示：【{}】 点赞了您提出问题：「{}」".format(user.username, pretty_html(question.content)))
     finally:
         db.close()
 
