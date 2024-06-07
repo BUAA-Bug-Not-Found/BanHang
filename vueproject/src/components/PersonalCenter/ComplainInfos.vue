@@ -135,6 +135,7 @@ import { checkLogin } from '../AccountManagement/AccountManagementAPI';
 import { delAnswerAPI, delQuestionAPI } from '../HelpCenter/api';
 import { deleteComplainItem, getComplainList, shutUpUser } from './PersonalCenterAPI';
 import { deleteBlogByBlogId } from '../AnonymousBlog/api';
+// import
 
 export default {
     components: { },
@@ -261,6 +262,8 @@ export default {
         clickDeleteComment(commentId, isAno) {
             if (isAno) {
                 // TODO 删除匿名评论
+                // 。。
+                
             } else {
                 delAnswerAPI(commentId).then((res) => {
                     if (res.isSuccess)
