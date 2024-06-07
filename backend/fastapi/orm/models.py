@@ -290,3 +290,13 @@ class ConversationMessage(Base):
 
     message = relationship("Message", foreign_keys=[message_id])
     conversation = relationship("Conversation", back_populates="messages", foreign_keys=[conversation_id])
+
+
+class BoyaEntrust(Base):
+    __tablename__ = 'boya_entrusts'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    campus = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+
+
+

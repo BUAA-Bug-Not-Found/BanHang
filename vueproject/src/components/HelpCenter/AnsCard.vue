@@ -139,7 +139,7 @@ export default {
                       imageList.value = []
                       router.go(0)
                     } else {
-                      ElMessage.error("回答失败，请稍后再试")
+                      ElMessage.error(res.description)
                     }
                   }
               )
@@ -157,6 +157,9 @@ export default {
     const reportReason = ref('')
 
     const reportAnswer = () => {
+      console.log(props.quesId)
+      console.log(props.ansId)
+      console.log(reportReason.value)
       reportAnswerAPI(props.quesId, props.ansId, reportReason.value).then(
           (res) => {
             if(res.isSuccess) {

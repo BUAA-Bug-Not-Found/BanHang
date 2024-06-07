@@ -10,6 +10,8 @@ from tools.check_user import check_user, authorize
 from typing import List, Optional, Union
 from banhang.user import successResponse, excResponse, check_user_is_shutup
 from banhang.BanHangException import UniException
+from bs4 import BeautifulSoup
+from tools.review import review_text
 
 router = APIRouter()
 
@@ -201,6 +203,12 @@ def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
         raise UniException(key="isSuccess", value=False, others={"description": "用户未登录"})
     if check_user_is_shutup(current_user['uid'], db):
         raise UniException(key='isSuccess', value=False, others={"description": "用户被禁言"})
+    html = question.quesContent.content
+    soup = BeautifulSoup(html, "html.parser")
+    review_result = review_text(soup.get_text())
+    if len(review_result) != 0:
+        raise UniException(key="isSuccess", value=False, others={"description": ",".join(review_result)})
+
     tagid = question.quesTags
     check_question_tag_to_id(tagid, db, crud.get_user_by_id(db, current_user['uid']))
     created_ques = crud.create_question(db, schemas.QuestionCreate(content=question.quesContent.content,
@@ -256,6 +264,11 @@ def update_question(question: UpdateQuestion, db: Session = Depends(get_db),
         raise UniException(key="isSuccess", value=False, others={"description": "用户无权更新该问题"})
     if check_user_is_shutup(current_user['uid'], db):
         raise UniException(key='isSuccess', value=False, others={"description": "用户被禁言"})
+    html = question.quesContent.content
+    soup = BeautifulSoup(html, "html.parser")
+    review_result = review_text(soup.get_text())
+    if len(review_result) != 0:
+        raise UniException(key="isSuccess", value=False, others={"description": ",".join(review_result)})
 
     check_question_tag_to_id(question.quesTags, db, crud.get_user_by_id(db, current_user['uid']))
     check_question_image_to_id(question.quesContent.imageList, db, question.quesId)
@@ -337,6 +350,12 @@ def reply_comment(ans_req: ReplyAnswerRequest, background_tasks: BackgroundTasks
     if not target_comment:
         raise UniException(key="isSuccess", value=False, others={"description": "回答id不存在"})
     # target_question = target_comment.question
+    html = ans_req.ansContent.content
+    soup = BeautifulSoup(html, "html.parser")
+    review_result = review_text(soup.get_text())
+    if len(review_result) != 0:
+        raise UniException(key="isSuccess", value=False, others={"description": ",".join(review_result)})
+    
     comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(
         content=ans_req.ansContent.content,
         userId=current_user['uid'],
@@ -366,6 +385,11 @@ def update_answer(update_ans: UpdateAnswer, db: Session = Depends(get_db),
     if crud.get_question_comment_by_id(db, update_ans.ansId).user_id != current_user['uid'] and \
             crud.get_user_by_id(db, current_user['uid']).privilege == 0:
         raise UniException(key="isSuccess", value=False, others={"description": "该用户无权限更改该回答"})
+    html = update_ans.ansContent.content
+    soup = BeautifulSoup(html, "html.parser")
+    review_result = review_text(soup.get_text())
+    if len(review_result) != 0:
+        raise UniException(key="isSuccess", value=False, others={"description": ",".join(review_result)})
     check_question_comment_image_to_id(update_ans.ansContent.imageList, db, update_ans.ansId)
     comment = crud.update_question_comment(db, update_ans.ansId, schemas.QuestionCommentCreat(
         content=update_ans.ansContent.content,

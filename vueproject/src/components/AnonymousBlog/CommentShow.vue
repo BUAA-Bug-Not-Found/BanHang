@@ -279,7 +279,7 @@ export default {
                 location.reload()
               } else {
                 ElMessage({
-                  message: res.discription,
+                  message: "内容违规：" + res.description,
                   showClose: true,
                   type: 'error',
                 })
@@ -310,7 +310,8 @@ export default {
       const confirmSubmit = window.confirm("确定提交举报？我们承诺不向对方提供您的任何信息，但保留追究滥用举报行为的权力⚠");
       if (confirmSubmit) {
         let json_set = {
-          "blogId": this.commentId,
+          "blogId": this.blogId,
+          "commentId": this.commentId,
           "cause": this.complainCause
         }
         submitComplainForBlogComment(json_set).then(

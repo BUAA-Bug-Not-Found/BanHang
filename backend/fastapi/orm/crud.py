@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from typing import List, Type, Dict
 
@@ -220,7 +221,7 @@ def get_blog_comments_by_blog_id(db: Session, blog_id: int):
 
 
 def get_blog_comment_by_id(db: Session, blog_comment_id: int):
-    return db.query(models.BlogComment).filter(models.commitComment.id == blog_comment_id).first()
+    return db.query(models.BlogComment).filter(models.BlogComment.id == blog_comment_id).first()
 
 
 def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, is_anonymous: bool,
@@ -509,7 +510,7 @@ def create_question_comment_image(db: Session, image: schemas.QuestionCommentIma
 
 def delete_question_comment_by_id(db: Session, id: int):
     comment = get_question_comment_by_id(db, id)
-    db.delete(comment)
+    comment.content = '【此回答已删除】'
     db.commit()
 
 
@@ -809,3 +810,25 @@ def send_message(db: Session, host_user_id: int, guest_user_id: int, content: st
     except Exception as e:
         db.rollback()
         return False
+
+
+def get_boya_entrust_by_uid(db: Session, uid: int):
+    return db.query(models.BoyaEntrust).filter(models.BoyaEntrust.user_id == uid).first()
+
+
+def delete_boya_entrust_by_uid(db: Session, uid: int):
+    db.delete(get_boya_entrust_by_uid(db, uid))
+    db.commit()
+
+
+def create_boya_entrust(db: Session, uid: int, campus: List[str], type: List[str]):
+    if cur_entrust:=get_boya_entrust_by_uid(db, uid):
+        db.delete(cur_entrust)
+        db.commit()
+    entrust = models.BoyaEntrust(user_id = uid, campus = json.dumps(campus), type = json.dumps(type))
+    db.add(entrust)
+    db.commit()
+
+
+def get_all_boya_entrusts(db: Session):
+    return db.query(models.BoyaEntrust).all()

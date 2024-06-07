@@ -234,7 +234,7 @@ export default {
                           sheet2.value = false
                           router.go(0)
                         } else {
-                          ElMessage.error("回答失败，请稍后再试")
+                          ElMessage.error(res.description)
                         }
                       }
                   )
@@ -356,7 +356,7 @@ export default {
                 editTagList.value = []
                 sheet1.value = !sheet1.value
               } else {
-                ElMessage.error("上传修改失败，请稍后再试")
+                ElMessage.error(res.description)
               }
             }
         )
@@ -661,7 +661,7 @@ export default {
               问题正在等待你的答复哦~
             </div>
             <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
-                     :quesId="question.quesId"
+                     :quesId="qid"
                      :ansId="ans" :index="index" @delAns="delAns"/>
             <div style="height: 100px"></div>
           </v-card>
@@ -811,7 +811,7 @@ export default {
               问题正在等待你的答复哦~
             </div>
             <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
-              <AppAnsCard :quesId="question.quesId" :ansId="ans" :index="index" @delAns="delAns"/>
+              <AppAnsCard :quesId="qid" :ansId="ans" :index="index" @delAns="delAns"/>
             </div>
           </v-card>
         </v-col>
