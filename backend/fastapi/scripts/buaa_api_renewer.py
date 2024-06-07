@@ -125,14 +125,16 @@ def update_boya_info():
     if ENABLE:
         lock.acquire()
         try:
-            ori_name = [b['name'] for b in data['boya']]
+            _ORI_NAME = [b['name'] for b in data['boya']]
             data['boya'] = get_boya()
 
             db_func = get_db()
-            db = db_func.next()
+            db = next(db_func)
             entrusts = crud.get_all_boya_entrusts(db)
             for by in data['boya']:
-                if by['name'] in ori_name:
+                if len(_ORI_NAME) == 0:
+                    break
+                if by['name'] in _ORI_NAME:
                     continue
                 for entrust in entrusts:
                     pass1 = False
