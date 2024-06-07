@@ -204,7 +204,7 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
         return {"response": "success"}
     
 
-@router.post("/blog/deleteBlogCommentByBlogCommentId", tags=["Blog"])
+@router.post("/blog/deleteCommentByCommentId", tags=["Blog"])
 @check_user
 def delete_blog_comment_by_blog_comment_id(blog_id: BlogId,
                            uid: int,
