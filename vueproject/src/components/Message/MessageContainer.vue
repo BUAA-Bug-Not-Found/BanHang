@@ -1,11 +1,14 @@
 <template>
   <v-card :class="{ 'pc-container': !display.smAndDown.valueOf(), 'pe-container': display.smAndDown.valueOf() }">
     <div v-if="!isLogin">
-      <div>您还没有登录</div>
+      <div class="show-exception">您还没有登录</div>
     </div>
     <div v-else-if="this.curUserId == 0"
       :class="{ 'contact-container-pc': !display.smAndDown.valueOf(), 'contact-container-pe': display.smAndDown.valueOf() }">
-      <div v-if="this.contactList.length == 0">
+      <div class="show-exception" v-if="!dataLoaded">
+        加载数据中。。。
+      </div>
+      <div class="show-exception" v-else-if="this.contactList.length == 0">
         您还没有联系人
       </div>
       <contactCard v-else v-for="(item, index) in contactList" :key="index" :user_name="item.userName"
@@ -110,6 +113,7 @@ export default {
       display: useDisplay(),
       init: false,
       isLogin: store.isAuthentic,
+      dataLoaded: false
     };
   },
   mounted() {
@@ -200,6 +204,7 @@ export default {
                 this.scrollToBottom()
                 this.init = true
               }
+              this.dataLoaded = true
             })
             .catch(error => {
               console.error(error);
@@ -208,6 +213,7 @@ export default {
           axios.post('/getReletedUser', {})
             .then(response => {
               this.contactList = response.data
+              this.dataLoaded = true
             })
             .catch(error => {
               console.error(error);
@@ -445,5 +451,9 @@ export default {
   height: 100%;
   max-height: 100%;
   background-color: rgb(238, 238, 238);
+}
+
+.show-exception {
+  margin-top: 5%
 }
 </style>
