@@ -56,7 +56,7 @@
                   </el-form>
                 </v-col>
               </v-row>
-              <v-color-picker hide-canvas hide-inputs></v-color-picker>
+              <v-color-picker v-model="badgeColor" hide-inputs style="margin: 10px;margin-left: 5px;"></v-color-picker>
               <div class="mb-2" >
                 徽章名：<el-input v-model="badgeName" style="width: 240px" maxlength="4"
                                  placeholder="请输入徽章名" show-word-limit/>
@@ -68,8 +68,7 @@
                   rows="1"
                   variant="outlined"
                   persistent-counter
-                  v-model="badgeDescription"
-              ></v-textarea>
+                  v-model="badgeDescription"/>
             </v-card-text>
             <v-divider class="mt-2"></v-divider>
             <v-card-actions class="my-2 d-flex justify-end">
@@ -278,7 +277,7 @@
         ],
         badgeDescription: '',
         badgeName: '',
-        badgeColor: '',
+        badgeColor: 'ffffff',
       };
     },
     methods: {
