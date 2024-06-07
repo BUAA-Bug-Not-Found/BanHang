@@ -209,9 +209,10 @@ export default {
     </div>
     <template v-slot:append>
       <v-btn @click="goto('/message')" v-if="isLogin  && unreadMessageNum != 0">
-        <v-badge :content="unreadMessageNum" color="rgb(200, 25, 25)">
+        <v-badge v-if="unreadMessageNum != '...'" :content="unreadMessageNum" color="rgb(200, 25, 25)">
           <v-icon>mdi-email-outline</v-icon>
         </v-badge>
+        <v-icon v-else>mdi-email-outline</v-icon>
       </v-btn>
       <v-btn @click="goto('/message')" v-else>
         <v-icon>mdi-email-outline</v-icon>
@@ -262,9 +263,10 @@ export default {
         </template>
       </v-tooltip>
       <v-btn @click="goto('/message')" v-if="isLogin && unreadMessageNum != 0">
-        <v-badge :content="unreadMessageNum" color="rgb(200, 25, 25)">
+        <v-badge v-if="unreadMessageNum != '...'" :content="unreadMessageNum" color="rgb(200, 25, 25)">
           <v-icon>mdi-email-outline</v-icon>
         </v-badge>
+        <v-icon v-else>mdi-email-outline</v-icon>
       </v-btn>
       <v-btn @click="goto('/message')" v-else>
         <v-icon>mdi-email-outline</v-icon>
