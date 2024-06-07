@@ -318,7 +318,7 @@ export default {
                         router.go(0)
                       } else {
                         ElMessage({
-                          message: res.discription,
+                          message: "内容违规：" + res.description,
                           showClose: true,
                           type: 'error',
                         })
