@@ -61,6 +61,10 @@ def check_user(view_func):
         except:
             pass
         if not payload:
+            if 'uid' in view_func.__code__.co_varnames:
+                kwargs['uid'] = None
+            if 'username' in view_func.__code__.co_varnames:
+                kwargs['username'] = None
             return view_func(*args, **kwargs)
         if 'uid' in view_func.__code__.co_varnames:
             kwargs['uid'] = payload.get('uid')
