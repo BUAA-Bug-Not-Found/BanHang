@@ -114,6 +114,8 @@ def update_vacant_classroom():
         lock.acquire()
         try:
             data['vacant_classroom'] = get_void_class()
+        except:
+            data['vacant_classroom'] = {'sh': {}, 'xyl': {}}
         finally:
             lock.release()
 
