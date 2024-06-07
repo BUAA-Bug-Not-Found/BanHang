@@ -134,8 +134,7 @@ import router from '@/router';
 import { checkLogin } from '../AccountManagement/AccountManagementAPI';
 import { delAnswerAPI, delQuestionAPI } from '../HelpCenter/api';
 import { deleteComplainItem, getComplainList, shutUpUser } from './PersonalCenterAPI';
-import { deleteBlogByBlogId } from '../AnonymousBlog/api';
-// import
+import { deleteBlogByBlogId, deleteCommentByCommentId } from '../AnonymousBlog/api';
 
 export default {
     components: { },
@@ -261,9 +260,14 @@ export default {
         },
         clickDeleteComment(commentId, isAno) {
             if (isAno) {
-                // TODO 删除匿名评论
-                // 。。
-                
+                deleteCommentByCommentId(commentId).then((res) => {
+                    if (res.response == 'success')
+                        showTip("删除回复成功！", true)
+                    else 
+                        showTip("出现异常，删除失败！", false)
+                }).catch(() => {
+                    showTip("出现异常，删除失败！", false)
+                })
             } else {
                 delAnswerAPI(commentId).then((res) => {
                     if (res.isSuccess)
@@ -271,7 +275,7 @@ export default {
                     else 
                         showTip("出现异常，删除失败!", false)
                 }).catch(() => {
-                    showTip("删除失败!", false)
+                    showTip("出现异常，删除失败!", false)
                 })
             }
         },

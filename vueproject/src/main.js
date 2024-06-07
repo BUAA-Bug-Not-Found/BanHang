@@ -14,9 +14,23 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
+
 router.beforeEach((to, from, next) => {
+  // console.log("????????")
+  // if (userStateStore().email) {
+  //   // 登录一下
+  //   tryLogin(this.email, userStateStore().hashPassword).then((res) => {
+  //     if (res.isSuccess) {
+  //       showTip("欢迎回来！", true);
+  //     } else
+  //       showTip("出现异常，请尝试刷新！", false)
+  //   }).catch(() => {
+  //     showTip("出现异常，请尝试刷新！", false)
+  //   })
+  // }
     // 如果当前路由为'/'，则跳转到'/blogList'路由
     if (to.path === '/') {
+        
         next('/blogList/-1');
     } else {
         next();
@@ -65,6 +79,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
+// import userStateStore from './store';
+// import { showTip, tryLogin } from './components/AccountManagement/AccountManagementAPI';
 
 app.use(VueViewer, {
     defaultOptions: {

@@ -77,7 +77,7 @@ export default {
                         // })
                         getInfoByUserId(res.id).then((ret) => {
                             const st = userStateStore();
-                            st.login_store_info(ret, this.email, res.id);
+                            st.login_store_info(ret, this.email, res.id, hashPassword(this.password));
                             showTip("登录成功 !", true)
                             this.$router.push({name: 'blogList', params: {tagId: -1}})
                         })
