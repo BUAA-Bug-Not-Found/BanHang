@@ -233,3 +233,30 @@ export function getComplainList() {
     })
 }
 
+export function getCurrentLevelById(_id) {
+    return axios.request({
+        url: "getCurrentLevelById",
+        method: "get",
+        params: {
+            "id": _id
+        }
+    }).then((r) => {
+        return r.data.exp
+    }).catch(() => {
+        return false
+    })
+}
+
+export function getCurrentExpById(_id) {
+    return axios.request({
+        url: "getCurrentExpById",
+        method: "get",
+        params: {
+            "id": _id
+        }
+    }).then((r) => {
+        return r.data.level
+    }).catch(() => {
+        return false
+    })
+}

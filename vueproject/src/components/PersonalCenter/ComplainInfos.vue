@@ -83,7 +83,7 @@
                     </div>
                     
                     <div style="text-align: right; margin-top: 10px; margin-bottom: 5px;">
-                        <v-text class="time" style="color: grey; margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
+                        <v-text class="time" style="color: grey; margin-right: 5px;">举报时间： {{ this.formatDateTime(content.time) }}</v-text>
                     </div>
                     <div style="margin-bottom: 10px; text-align: left;">
                         <v-btn style="vertical-align: center; background-color: #f6f6f6;" @click.stop="clickDeleteComplain(index)">
@@ -281,6 +281,7 @@ export default {
         },
         clickDeleteBlog(blogId, isAno) {
             if (isAno) {
+                console.log("准备删除匿名贴！！")
                 deleteBlogByBlogId(blogId).then((r) => {
                     if (r.response == 'success')
                         showTip('删除成功！', true)

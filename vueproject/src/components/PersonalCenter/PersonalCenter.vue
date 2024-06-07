@@ -97,11 +97,11 @@
             <!-- div好像是行内的 -->
             <div style="text-align: center;">
               <v-toolbar density="compact" style="background-color:aliceblue;">
-                <v-btn v-if="this.isManager" style="vertical-align: center; background-color: #f6f6f6;" @click="clickComplain">
-                  <div>
-                    <span>举报待处理 </span>
-                    <span style="color:red"> {{ complainAmount }}</span>
-                    <span> 项</span>
+                <v-btn v-if="this.isManager" style="height: 28px; padding-left: 6px; padding-right: 6px; vertical-align: center; background-color: #2a9af3;" @click="clickComplain">
+                  <div style="display: flex;">
+                    <span style="color:white; font-size: 12px;">举报待处理 </span>
+                    <span style="font-weight: bold; color:aquamarine; font-size: 14px;"> {{ complainAmount }}</span>
+                    <span style="color:white; font-size: 12px;"> 项</span>
                   </div>
                 </v-btn>
                 <v-spacer></v-spacer>
@@ -131,14 +131,35 @@
             </div>
             
             <div style="text-align: center;">
-              <v-avatar color="surface-variant"
-             style="margin-top: 15px;margin-left: 10px"
-              size="80"
-              :image="headUrl">
-            </v-avatar>
+              <v-menu rounded> 
+                <template v-slot:activator="{ props }">
+                  <v-avatar v-bind="props" color="surface-variant"
+                    style="margin-top: 15px;margin-left: 10px; cursor: pointer;"
+                    size="80"
+                    :image="headUrl">
+                  </v-avatar>
+                </template>
+
+                <!-- <v-card style="width: 330px;"> -->
+                <v-card style="width: auto;">
+                  <v-card-text>
+                    <div style="display: flex; align-items: center;">
+                      <span style="font-weight: bold; color:red;">Lv.{{ level }}</span>
+                      <v-progress-linear style="margin-left: 10px; margin-right: 10px;" :model-value="100.0 * (currentExperience / (currentExperience + experienceNeeded))" color="success" height="5"></v-progress-linear>
+                      <span style="font-weight: bold; color:grey;">Lv.{{ level + 1 }}</span>
+                    </div>
+                    <span style="font-size: 13px; color: grey; margin-top: 10px;">您已经获得{{ currentExperience }}经验, 距离下一级还需{{ experienceNeeded }}经验</span>
+                  </v-card-text>
+                </v-card>
+              </v-menu>
+
             </div>
             <div style="margin-top: 10px;">
-              <span class="nickname">{{ nickname }}</span>
+              <div style="display: flex; align-items: center; text-align: center; justify-content: center;">
+                <span class="nickname"> {{ nickname }}</span>
+                <span style="padding-left: 3px; padding-right: 3px; border-radius: 3px; margin-left: 5px; background-color:bisque; font-weight:bold; color:#2a9af3; font-size: 12px;">Lv.{{ level }}</span>
+              </div>
+              
             </div>
             <div style="margin-bottom: 10px; font-size: 10px; text-align: center;">
               <span class="signature">{{ sign }}</span>
@@ -198,7 +219,7 @@
   <script>
   import router from '@/router';
   import userStateStore from '../../store';
-  import {getComplainAmount, getHelpBlogs, getWaterBlogs} from "./PersonalCenterAPI";
+  import {getComplainAmount, getCurrentExpById, getCurrentLevelById, getHelpBlogs, getWaterBlogs} from "./PersonalCenterAPI";
   import { showTip } from '../AccountManagement/AccountManagementAPI';
   import {api as viewerApi} from "v-viewer";
   import {ElMessage} from "element-plus";
@@ -210,8 +231,6 @@
     created() {
       // 这里放置需要延迟执行的代码
       this.headUrl = userStateStore().headImage;
-      // console.log("头像！！")
-      // console.log(this.headUrl)
         this.nickname = userStateStore().nickname;
         this.email = userStateStore().email;
         this.sign = userStateStore().sign;
@@ -232,6 +251,21 @@
         getWaterBlogs(userStateStore().user_id).then((res) => {
           this.waterBlogs = res
         })
+
+        Promise.all([
+          getCurrentLevelById(userStateStore().user_id),
+          getCurrentExpById(userStateStore().user_id)  
+        ]).then(rets => {
+          if (rets[0] === false) this.level = 0
+          else this.level = rets[0]
+          if (rets[1] === false) this.currentExperience = 0
+          else this.currentExperience = rets[1]
+          let exps = [0, 100, 500, 1500, 3000, 6000, 10500, 18000, 30000, 54000, 54000] // 经验阈值
+          this.experienceNeeded = exps[this.level + 1] - this.currentExperience
+        }).catch(() => {
+          showTip("出现异常！", false)
+        })
+        
         // 加载待处理举报信息条数
         if (this.isManager) {
           getComplainAmount().then((res) => {
@@ -251,6 +285,10 @@
         nickname: "",
         email: "",
         sign: "",
+        level: 4, // 当前等级
+        currentExperience: 8685, // 当前经验值
+        experienceNeeded: 2115, // 升级所需的经验值
+        // expPercent: ,
         isManager: false,
         complainAmount: "", // 待处理的举报信息数量, 显示
         showDialog: false,
