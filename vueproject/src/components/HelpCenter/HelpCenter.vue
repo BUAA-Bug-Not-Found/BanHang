@@ -182,7 +182,7 @@ export default {
                 ElMessage.success('问题发布成功');
                 router.go(0)
               } else {
-                ElMessage.error('发布失败，请重新尝试');
+                ElMessage.error(res.description);
               }
             }
         )
@@ -283,7 +283,7 @@ export default {
                 sheet.value = !sheet.value
                 calTags(editQuesIndex.value)
               } else {
-                ElMessage.error("上传修改失败，请稍后再试")
+                ElMessage.error(res.description)
               }
             }
         )

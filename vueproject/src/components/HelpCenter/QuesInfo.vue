@@ -234,7 +234,7 @@ export default {
                           sheet2.value = false
                           router.go(0)
                         } else {
-                          ElMessage.error("回答失败，请稍后再试")
+                          ElMessage.error(res.description)
                         }
                       }
                   )
@@ -356,7 +356,7 @@ export default {
                 editTagList.value = []
                 sheet1.value = !sheet1.value
               } else {
-                ElMessage.error("上传修改失败，请稍后再试")
+                ElMessage.error(res.description)
               }
             }
         )

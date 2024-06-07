@@ -131,7 +131,7 @@ export default {
                           imageList.value = []
                           router.go(0)
                         } else {
-                          ElMessage.error("回答失败，请稍后再试")
+                          ElMessage.error(res.description)
                         }
                       }
                   )
