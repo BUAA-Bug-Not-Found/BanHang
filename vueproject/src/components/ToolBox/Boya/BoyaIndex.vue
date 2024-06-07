@@ -27,7 +27,7 @@
           <p> 类型：{{ myEntrust.type.join('、') }} </p>
         </div>
         <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">添加委托</v-btn>
-        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">取消委托</v-btn>
+        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;" color="primary">取消委托</v-btn>
         <p style="  font-size: 14px;color: grey;">当添加委托之后，如果有满足特定要求的博雅出现，会为您的北航邮箱发送邮件</p>
       </div>
     </div>
@@ -71,7 +71,7 @@
           <p> 类型：{{ myEntrust.type.join('、') }} </p>
         </div>
         <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">添加委托</v-btn>
-        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;" color="primary">删除委托</v-btn>
+        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;" color="primary">取消委托</v-btn>
         <p style="  font-size: 14px;color: grey;">当添加委托之后，如果有满足特定要求的博雅出现，会为您的北航邮箱发送邮件</p>
       </div>
     </v-card>
@@ -161,8 +161,6 @@ export default {
         console.error(error)
       })
       axios.post('/getBoyaEntrust', {}).then(res => {
-        console.log(res.data)
-        console.log(myEntrust.value)
         myEntrust.value = res.data
       }).catch(error => {
         console.error(error)
@@ -228,7 +226,6 @@ export default {
         if (!chipList.value[1].clicked && cls.position.includes('沙河')) {
           return false;
         }
-        //console.log(chipList.value)
         let deleted = false
         chipList.value.forEach(e => {
           if (!e.clicked && cls.type.slice(5) == e.name) {
@@ -278,13 +275,15 @@ export default {
     },
     downloadICSFile() {
       // Parse the provided time string and calculate start and end times
-      console.log(this.curClass)
       let name = this.curClass.name
       let time = '20' + this.curClass.select_start_time.slice(7)
       console.log(time)
       const endTime = new Date(time.replace(/-/g, '/')); // Replace '-' with '/' for compatibility
       const startTime = new Date(endTime.getTime() - 10 * 60 * 1000); // Subtract 10 minutes
-
+      if (startTime < new Date()) {
+        showTip('该课程已经开始选课', false)
+        return;
+      }
       // Format the dates to the required format for .ics file
       const formatDate = (date) => {
         return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';

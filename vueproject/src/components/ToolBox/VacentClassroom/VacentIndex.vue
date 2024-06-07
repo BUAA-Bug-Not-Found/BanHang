@@ -48,6 +48,7 @@ import axios from 'axios';
 import { processVacantClassrooms } from './ProcessData.js'
 import { ref } from "vue";
 import { useDisplay } from 'vuetify'
+import { isApp } from '@/store/index.js';
 
 /* eslint-disable */
 export default {
@@ -55,15 +56,27 @@ export default {
   setup() {
     const data = ref(null);
     const compus = ref('');
-    const compusList = ref(['学院路', '沙河'])
+    const compusList = ['学院路', '沙河']
     const buildings = ref('');
     const buildingList = ref([])
     const classroomList = ref(null);
-
+    const persistenceName = 'vacentClassroom'
 
     const fetchData = () => {
       axios.get('/getVacantClassroom').then(res => {
         data.value = processVacantClassrooms(res.data)
+        if (isApp && localStorage.getItem(persistenceName) != undefined) {
+          let previousData = JSON.parse(localStorage.getItem(persistenceName))
+          compus.value = previousData.compus
+          buildings.value = previousData.buildings
+          if (compus.value != '') {
+            buildingList.value = data.value[compus.value]['buildings'].map(x => x.name)
+            buildingList.value.push('返回')
+          }
+          if (buildings != '') {
+            classroomList.value = data.value[compus.value]['buildings'].filter(x => x.name == buildings.value)[0]['vacantClassroomInfo']
+          }
+        }
         console.log(data.value)
       }).catch(error => {
         console.error(error)
@@ -83,6 +96,12 @@ export default {
           buildings.value = label
           classroomList.value = data.value[compus.value]['buildings'].filter(x => x.name == buildings.value)[0]['vacantClassroomInfo']
         }
+      }
+      if (isApp) {
+        localStorage.setItem(persistenceName, JSON.stringify({
+          compus: compus.value,
+          buildings: buildings.value,
+        }))
       }
     }
 
