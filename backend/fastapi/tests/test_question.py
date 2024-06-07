@@ -282,3 +282,132 @@ def test_create_question_tag_by_nonAdmin(mock_question_data, mock_user_data, new
     register_login_user(client, mock_user_data, admin=False)
     ret = add_tags(mock_question_data['quesTags'])
     assert ret == False
+
+
+def test_report_question(mock_question_data, mock_user_data, new_database):
+    register_login_user(client, mock_user_data, admin=True)
+    uid1 = client.get("check_login_state").json()['uid']
+    ret = add_tags(mock_question_data['quesTags'])
+    assert ret == True
+
+    # 上传一个question并检查存在性
+    res = client.post("/uploadQues", json=mock_question_data)
+    assert res.status_code == 200
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+    quesid = blogs["questions"][0]['quesId']
+
+    mock_user_2 = mock_user_data.copy()
+    mock_user_2['email'] = "test2@buaa.edu.cn"
+    register_login_user(client, mock_user_2, admin=False)
+    # 举报
+
+    ret = client.post('/reportQues', json={'quesId': quesid, 'reportReason': "这个问题有问题"})
+    assert ret.status_code == 200
+    # 非管理员获取举报数据
+    ret1 = client.get('/getComplainAmount')
+    assert ret1.status_code == 400
+    # 管理员获取举报数据
+    register_login_user(client, mock_user_data, admin=True)
+    ret1 = client.get('/getComplainAmount')
+    assert ret1.status_code == 200
+    assert ret1.json()['count'] == 1
+
+    issues = client.get("/getComplainList").json()
+    assert len(issues) == 1
+    issue = issues[0]
+    assert issue['isAno'] == False
+    assert issue['isComment'] == False
+    assert issue['blogContent'] == mock_question_data['quesContent']['content']
+    assert issue['blogAuthorId'] == uid1
+    assert issue['cause'] == '这个问题有问题'
+
+
+def test_report_question_comment(mock_question_data, mock_user_data, mock_question_comment_data, new_database):
+    register_login_user(client, mock_user_data, admin=True)
+    uid1 = client.get("check_login_state").json()['uid']
+    ret = add_tags(mock_question_data['quesTags'])
+    assert ret == True
+
+    # 上传一个question并检查存在性
+    res = client.post("/uploadQues", json=mock_question_data)
+    assert res.status_code == 200
+    blogs = client.get("/getQuestions", params={"pageNo": 1, "pageSize": 100}).json()
+    assert len(blogs["questions"]) == 1
+    assert blogs["questions"][0]["userName"] == mock_user_data['username']
+    assert blogs["questions"][0]['quesContent']['content'] == mock_question_data["quesContent"]['content']
+    quesid = blogs["questions"][0]['quesId']
+
+    mock_question_comment_data['quesId'] = quesid
+    # 尝试comment
+    res = client.post("/answerQues", json=mock_question_comment_data)
+    assert res.status_code == 200
+    ans = client.get("/getQuesById", params={"quesId": quesid}).json()
+    assert ans["ifExist"] == True
+    assert len(ans['question']['ansIdList']) == 1
+    answerid = ans['question']['ansIdList'][0]
+
+    mock_user_2 = mock_user_data.copy()
+    mock_user_2['email'] = "test2@buaa.edu.cn"
+    register_login_user(client, mock_user_2, admin=False)
+    # 举报
+    ret = client.post('/reportAnswer', json={'quesId': quesid, 'ansId': answerid, 'reportReason': "这个问题有问题"})
+    assert ret.status_code == 200
+    # 非管理员获取举报数据
+    ret1 = client.get('/getComplainAmount')
+    assert ret1.status_code == 400
+    # 管理员获取举报数据
+    register_login_user(client, mock_user_data, admin=True)
+    ret1 = client.get('/getComplainAmount')
+    assert ret1.status_code == 200
+    assert ret1.json()['count'] == 1
+
+    issues = client.get("/getComplainList").json()
+    assert len(issues) == 1
+    issue = issues[0]
+    assert issue['isAno'] == False
+    assert issue['isComment'] == True
+    assert issue['blogContent'] == mock_question_data['quesContent']['content']
+    assert issue['comment'] == mock_question_comment_data['ansContent']['content']
+    assert issue['blogAuthorId'] == uid1
+    assert issue['commentAuthorId'] == uid1
+    assert issue['cause'] == '这个问题有问题'
+    issue_id = issue['complainId']
+
+    # 尝试删除该issue
+    ret = client.post('/deleteComplainItem', json={'id': issue_id})
+    assert ret.status_code == 200
+    ret1 = client.get('/getComplainAmount')
+    assert ret1.status_code == 200
+    assert ret1.json()['count'] == 0
+
+
+def test_shutup_user(mock_question_data, mock_user_data, mock_question_comment_data, new_database):
+    register_login_user(client, mock_user_data, admin=False)
+    uid1 = client.get("check_login_state").json()['uid']
+
+    mock_user_2 = mock_user_data.copy()
+    mock_user_2['email'] = "test2@buaa.edu.cn"
+    register_login_user(client, mock_user_2, admin=True)
+    uid2 = client.get("check_login_state").json()['uid']
+    ret = add_tags(mock_question_data['quesTags'])
+    assert ret == True
+
+    # 禁言用户1
+    ret = client.post('/shutUpUser', json={'id': uid1, 'day': 1, 'hour': 1, 'min': 1})
+    assert ret.status_code == 200
+    # 检查用户1是否被禁言
+    ret = client.post('/isShutUpByUserId', json={'id': uid1})
+    assert ret.status_code == 200
+    assert ret.json()['isShutUp'] == True
+
+    # 检查用户1是否能够发表言论
+    register_login_user(client, mock_user_data, admin=False)
+    res = client.post("/uploadQues", json=mock_question_data)
+    assert res.status_code == 400
+
+    # 检查非管理员能否查看禁言状态
+    ret = client.post('/isShutUpByUserId', json={'id': uid1})
+    assert ret.status_code == 200

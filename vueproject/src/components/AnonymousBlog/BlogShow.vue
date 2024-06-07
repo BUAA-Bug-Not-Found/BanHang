@@ -90,13 +90,13 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item density="compact" v-if="this.isCurUser">
+              <v-list-item density="compact" v-if="this.isCurUser || userStateStore().isManager">
                 <div style="color: red; font-size: 16px" @click="delDialog = !delDialog">
                   删除
                 </div>
               </v-list-item>
               <v-list-item density="compact">
-                <div style="color: black; font-size: 16px" @click="sendReportMes">
+                <div style="color: black; font-size: 16px" @click="showComplainWindow">
                   举报
                 </div>
               </v-list-item>
@@ -105,11 +105,11 @@
         </v-col>
       </v-row>
 
-      <div style="margin-left: 2%; margin-bottom: 3px; font-size: 12px; color: gray" @click="goToBlogCardView">
+      <div style="margin-left: 5%; margin-bottom: 3px; font-size: 12px; color: gray" @click="goToBlogCardView">
         {{ truncatedContent }}
       </div>
 
-      <div style="margin-left: 2%; margin-bottom: 5px">
+      <div style="margin-left: 5%; margin-bottom: 5px">
         <span style="margin-bottom: 10px">
           <v-chip
               v-for="(tag, index) in this.tagList"
@@ -162,13 +162,33 @@
 
   </v-dialog>
 
+  <v-bottom-sheet
+      v-model="showComplainWin"
+      class="transparent-bottom-sheet">
+    <div class="comment-input">
+      <v-textarea
+          v-model="complainCause"
+          placeholder="输入您的举报理由"
+          outlined
+          rows="3"
+          class="comment-textarea white-background"
+      ></v-textarea>
+      <div class="button-container">
+        <v-btn @click="sendComplainMes()" color="red" class="submit-button">
+          提交举报
+          <v-icon end>mdi-alert-circle</v-icon>
+        </v-btn>
+      </div>
+    </div>
+  </v-bottom-sheet>
+
 </template>
 
 <script>
-import {deleteBlogByBlogId, goToOtherUser} from "@/components/AnonymousBlog/api";
+import {deleteBlogByBlogId, goToOtherUser, submitComplainForBlog} from "@/components/AnonymousBlog/api";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
-import UserStateStore from "@/store"
+import UserStateStore, {userStateStore} from "@/store"
 import {ElMessage} from "element-plus";
 
 export default {
@@ -223,6 +243,8 @@ export default {
       menuCLick: false,
       delDialog: false,
       isCurUser: false,
+      showComplainWin: false,
+      complainCause: "",
       randomColor: this.getRandomColor()
     }
   },
@@ -243,6 +265,7 @@ export default {
   },
 
   methods: {
+    userStateStore,
     useDisplay,
     goToOtherUser,
     goToBlogCardView() {
@@ -287,15 +310,45 @@ export default {
       )
     },
 
-    sendReportMes() {
-      ElMessage({
-        message: '感谢您对平台风气的关心和维护，举报自动处理功能尚在开发中...',
-        showClose: true
-      })
-      ElMessage({
-        message: '当前您可以直接联系开发人员进行举报和删帖，再次感谢！',
-        showClose: true
-      })
+    showComplainWindow() {
+      if (!UserStateStore().email) {
+        ElMessage.error("请先登录")
+        return
+      }
+      this.showComplainWin = !this.showComplainWin
+    },
+
+    sendComplainMes() {
+      if (this.complainCause.length === 0) {
+        ElMessage.error("举报原因不能为空！")
+        return
+      }
+      const confirmSubmit = window.confirm("确定提交举报？我们承诺不向对方提供您的任何信息，但保留追究滥用举报行为的权力⚠");
+      if (confirmSubmit) {
+        let json_set = {
+          "blogId": this.blogId,
+          "cause": this.complainCause
+        }
+        submitComplainForBlog(json_set).then(
+            (res) => {
+              if (res.response == "success") {
+                ElMessage({
+                  message: '举报成功！感谢您为论坛环境做出的贡献。',
+                  showClose: true,
+                  type: 'success',
+                })
+                this.complainCause = ""
+                this.showComplainWin = false
+              } else {
+                ElMessage({
+                  message: '举报失败，请修改内容或稍后再试...',
+                  showClose: true,
+                  type: 'error',
+                })
+              }
+            }
+        )
+      }
     },
 
     getRandomColor() {
@@ -374,6 +427,38 @@ export default {
 .content {
   word-wrap: break-word;
   text-align: left;
+}
+
+.comment-input {
+  margin-left: 1%;
+  margin-right: 1%;
+  margin-bottom: 15px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1; /* 确保在其他内容之上 */
+}
+
+.comment-textarea {
+  margin-bottom: 1px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-button {
+  height: 28px;
+}
+
+.transparent-bottom-sheet {
+  background-color: transparent !important;
+}
+
+.white-background {
+  background-color: white;
 }
 
 </style>

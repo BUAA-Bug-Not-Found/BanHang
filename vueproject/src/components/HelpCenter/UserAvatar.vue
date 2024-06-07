@@ -39,8 +39,9 @@ import router from "@/router";
 
 export default {
   name: "UserAvatar",
+  emits: ['returnUserName'],
   props: ["userId", "size"],
-  setup(props) {
+  setup(props, context) {
     const nickname = ref('')
 
     const sign = ref('')
@@ -65,9 +66,11 @@ export default {
             nickname.value = res.nickname
             url.value = res.url
             sign.value = res.sign
+            context.emit('returnUserName', nickname.value)
           }
       )
     }
+
     init()
 
     return {

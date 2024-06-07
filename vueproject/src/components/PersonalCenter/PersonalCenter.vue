@@ -18,6 +18,13 @@
             <!-- div好像是行内的 -->
             <div style="text-align: center;">
               <v-toolbar density="compact" style="background-color:aliceblue;">
+                <v-btn v-if="this.isManager" style="vertical-align: center; background-color: #f6f6f6;" @click="clickComplain">
+                  <div>
+                    <span>举报待处理 </span>
+                    <span style="color:red"> {{ complainAmount }}</span>
+                    <span> 项</span>
+                  </div>
+                </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn icon @click="clickMyInterest">
                   <v-icon color="red">mdi-heart</v-icon>
@@ -83,9 +90,7 @@
             <v-window-item value="two">
               <v-list>
                 <v-list-item v-for="(content, index) in helpBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
-                  <!-- <span>span-> {{ truncate(content.blogTitle) }}</span> -->
                   <div style="text-align: left;">{{ truncate(content.blogTitle) }}</div>
-                  <!-- <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div> -->
                   <div style="text-align: right; margin-top: 10px;">
                     <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
                   </div>
@@ -103,16 +108,19 @@
   <script>
   import router from '@/router';
   import userStateStore from '../../store';
-  import {getHelpBlogs, getWaterBlogs} from "./PersonalCenterAPI";
+  import {getComplainAmount, getHelpBlogs, getWaterBlogs} from "./PersonalCenterAPI";
   import { showTip } from '../AccountManagement/AccountManagementAPI';
   
   export default {
     created() {
       // 这里放置需要延迟执行的代码
       this.headUrl = userStateStore().headImage;
+      // console.log("头像！！")
+      // console.log(this.headUrl)
         this.nickname = userStateStore().nickname;
         this.email = userStateStore().email;
         this.sign = userStateStore().sign;
+        this.isManager = userStateStore().isManager;
         if (!this.email) {
           showTip("请首先登录", false)
           router.replace({path: "loginPage"})
@@ -121,12 +129,33 @@
           this.sign = "快介绍一下自己吧~"
         }
         // 加载一下匿名贴和互助贴
+        // console.log("user_id => ")
+        // console.log(userStateStore().user_id)
+        // console.log("user_id => ")
+
         getHelpBlogs(userStateStore().user_id).then((res) => {
           this.helpBlogs = res
+          // console.log("res => ")
+          // console.log(res)
         })
+
+        // console.log("helpBlogs => ")
+        // console.log(this.helpBlogs)
+        // console.log("helpBlogs => ")
         getWaterBlogs(userStateStore().user_id).then((res) => {
           this.waterBlogs = res
         })
+        // 加载待处理举报信息条数
+        if (this.isManager) {
+          getComplainAmount().then((res) => {
+            if (res.count == 0)
+              this.complainAmount = "" // 0条的话就不显示了
+            else if (res.count <= 99)
+              this.complainAmount = res.count;
+            else 
+              this.complainAmount = "99+"
+          })
+        }
     },
     data() {
       return {
@@ -135,15 +164,15 @@
         nickname: "",
         email: "",
         sign: "",
+        isManager: false,
+        complainAmount: "", // 待处理的举报信息数量, 显示
         showDialog: false,
         posts: [
           { content: "这是第一条动态" },
         ],
         helpBlogs: [
-          // 
         ],
         waterBlogs: [
-          // 
         ],
         images: [
           'https://via.placeholder.com/150',
@@ -190,10 +219,13 @@
       },
       clickWaterItem(_blogId) {
         router.push({name: 'blogView', params: {id: _blogId}});
-        // router.push('/blogView/' + _blogId);
       },
       clickHelpItem(_blogId) {
         router.push('/QuesInfo/' + _blogId + "/0");
+      },
+      clickComplain() {
+        // 直接跳转到举报信息页面而不需要传参
+        router.push("/complainInfos");
       }
     },
   };

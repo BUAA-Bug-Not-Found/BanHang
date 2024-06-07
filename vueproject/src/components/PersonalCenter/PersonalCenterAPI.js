@@ -92,7 +92,6 @@ export function getHelpBlogs(_id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
     })
 }
 
@@ -111,7 +110,6 @@ export function getWaterBlogs(_id) {
 }
 
 export function getStars(_id) {
-    // 
     return axios.request({
         url: "/getStarsById",
         method: "get",
@@ -154,3 +152,75 @@ export function getOtherInfos(_id) {
         return false
     })
 }
+
+// 以下几条有关举报
+export function getComplainAmount() {
+    return axios.request({
+        url: "/getComplainAmount",
+        method: "get",
+        params: {
+        }
+    }).then((reply) => {
+        return reply.data // 返回一个整数
+    }).catch(() => {
+        return false
+    })
+}
+
+export function isShutUpByUserId(_id) {
+    return axios.request({
+        url: "/isShutUpByUserId",
+        method: "post",
+        data: {
+            id: _id
+        }
+    }).then((r) => {
+        return r.data.isShutUp;
+    }).catch(() => {
+
+    })
+}
+
+export function shutUpUser(_id, _d, _h, _m) {
+    return axios.request({
+        url: "/shutUpUser",
+        method: "post",
+        data: {
+            id: _id,
+            day: _d,
+            hour: _h,
+            min: _m
+        }
+    }).then((r) => {
+        return r.data.isSuccess
+    }).catch(() => {
+
+    })
+}
+
+export function deleteComplainItem(_id) {
+    return axios.request({
+        url: '/deleteComplainItem',
+        method: "post",
+        data: {
+            id: _id
+        }
+    }).then((r) => {
+        return r.data
+    })
+}
+
+export function getComplainList() {
+    // 本函数直接返回js列表
+    return axios.request({
+        url: "/getComplainList",
+        method: "get",
+        params: {
+        }
+    }).then((r) => {
+        return r.data
+    }).catch(() => {
+        return false
+    })
+}
+

@@ -1,11 +1,46 @@
 <template>
   <v-container>
+    <v-dialog v-model="showShutUpDialog" style="max-width: 400px;">
+        <v-card>
+            <v-card-title class="headline" style="text-align: center;">禁言时间</v-card-title>
+            <v-divider></v-divider>
+            <div style="margin-top: 20px; padding-left: 10px; padding-right: 10px;">
+                <v-autocomplete
+                    v-model="selectedDays"
+                    :items="days"
+                    label="选择天数"
+                    outlined
+                ></v-autocomplete>
+                <v-autocomplete
+                    v-model="selectedHours"
+                    :items="hours"
+                    label="选择小时数"
+                    outlined
+                ></v-autocomplete>
+                <v-autocomplete
+                    v-model="selectedMinutes"
+                    :items="minutes"
+                    label="选择分钟数"
+                    outlined
+                ></v-autocomplete>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <v-btn color="blue darken-1" @click="clickCertainShutUp" style="margin-bottom: 10px; max-width: 50%;">确定</v-btn>
+                <v-btn color="blue darken-1" @click="showShutUpDialog = false" style="margin-left: 7px; margin-bottom: 10px; max-width: 50%;">取消</v-btn>
+            </div>
+        </v-card>
+      </v-dialog>
+
+
     <div>
       <v-card style="margin-bottom: 20px; height: auto;">
           <!-- div好像是行内的 -->
           <div style="text-align: center;">
             <v-toolbar density="compact" style="background-color:aliceblue;">
               <v-spacer></v-spacer>
+              <v-btn v-if="isManager" icon @click="clickTryShutUp">
+                <v-icon color="red">mdi-close-circle</v-icon>
+              </v-btn>
               <v-btn icon @click="clickChat">
                 <v-icon color="blue">mdi-chat</v-icon>
               </v-btn>
@@ -47,9 +82,6 @@
             <v-list>
               <v-list-item v-for="(content, index) in otherBlogs.slice().reverse()" :key="index" @click="clickHelpItem(content.blogId)" style="cursor: pointer;">
                 <div style="text-align: left;">{{ truncate(content.blogTitle) }}</div>
-                
-                <!-- <div style="margin-top: 10px" v-dompurify-html="content.blogTitle"></div> -->
-
                 <!-- 帖子的发表时间, 评论数量, 点赞数 -->
                 <div style="text-align: right; margin-top: 10px;">
                   <v-text class="time" style=" margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
@@ -74,6 +106,8 @@ import {queryStar, setStarState} from '@/components/PersonalCenter/PersonalCente
 import userStateStore from '../../store';
 import { showTip } from '../AccountManagement/AccountManagementAPI';
 import { getHelpBlogs, getOtherInfos } from './PersonalCenterAPI';
+import { shutUpUser } from '@/components/PersonalCenter/PersonalCenterAPI';
+
 export default {
   created() {
     if (!userStateStore().email) {
@@ -90,14 +124,9 @@ export default {
           this.infos = _infos
         }
       })
-
-      // getUserInfos(this.otherEmail).then((_infos) => {
-      //   if (_infos === false) {
-      //     showTip("应用出错!", false)
-      //   } else {
-      //     this.infos = _infos
-      //   }
-      // })
+      console.log("isManager=> ")
+      console.log(userStateStore().isManager)
+      this.isManager = userStateStore().isManager
       // 拉取该用户的互助贴
       getHelpBlogs(this.otherId).then((_helpBlogs) => {
         this.otherBlogs = _helpBlogs;
@@ -117,6 +146,14 @@ export default {
         "nickname": "",
         "sign": "",
       },
+      isManager: false,
+      showShutUpDialog: false,
+      days: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29], // 0, 1, 2, 3, 4, 5,6,7,8,9,10,11,12
+      hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+      minutes: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59],
+      selectedDays: 0,
+      selectedHours: 0,
+      selectedMinutes: 0,
       otherBlogs: [],
       otherEmail: '', 
       otherId: '',
@@ -129,6 +166,28 @@ export default {
   },
   methods: {
     // 可以添加其他方法
+    clickCertainShutUp() {
+      if (this.selectedDays == 0 && this.selectedHours == 0 && this.selectedMinutes == 0) {
+          showTip("禁言时长不能为0！", false)
+          this.showShutUpDialog = false
+      } else {
+          this.showShutUpDialog = false
+          // 开始调后端
+          shutUpUser(this.otherId,
+          this.selectedDays,
+          this.selectedHours,
+          this.selectedMinutes).then((r) => {
+              if (r === true)
+                  showTip("禁言成功！", true)
+              else 
+                  showTip("出现异常，禁言失败！", false)
+          }).catch(() => { showTip("出现异常，禁言失败！", false) })
+      }
+    },
+    clickTryShutUp() {
+        // 弹出弹窗
+        this.showShutUpDialog = true
+    },
     clickHeart() {
       const s = userStateStore()
       if (s.user_id === this.otherId) {

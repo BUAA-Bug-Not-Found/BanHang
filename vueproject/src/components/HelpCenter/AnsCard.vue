@@ -1,6 +1,13 @@
 <script>
 import {onBeforeUnmount, ref, shallowRef} from "vue";
-import {delAnswerAPI, formatDate, getAnsById, replyComment, setAnsLikeAPI} from "@/components/HelpCenter/api";
+import {
+  delAnswerAPI,
+  formatDate,
+  getAnsById, isShutUpByUserIdAPI,
+  replyComment,
+  reportAnswerAPI,
+  setAnsLikeAPI
+} from "@/components/HelpCenter/api";
 import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
@@ -10,9 +17,9 @@ import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 
 export default {
   name: "AnsCard",
-  methods: {formatDate},
+  methods: {userStateStore, formatDate},
   components: {Toolbar, Editor, SubAnsCard, UserAvatar},
-  props: ["ansId", "index"],
+  props: ["quesId", "ansId", "index"],
   emits: ["delAns", "editAns"],
   setup(props, context) {
 
@@ -112,30 +119,69 @@ export default {
     const imageList = ref([])
 
     const uploadComment = () => {
-      if (!userStateStore().isAuthentic) {
+      if (!userStateStore().email) {
         ElMessage.error("请先登录")
         router.push('/loginPage')
       } else {
         if (String(commentHtml.value).replace(/<[^>]*>/g, "") === '') {
           ElMessage.error("不能上传空白答案")
         } else {
-          replyComment(props.ansId, commentHtml.value, imageList.value).then(
+          isShutUpByUserIdAPI(userStateStore().user_id).then(
               (res) => {
-                if (res.isSuccess === true) {
-                  ElMessage.success("回答已上传")
-                  commentHtml.value = ''
-                  imageList.value = []
-                  router.go(0)
-                } else {
-                  ElMessage.error("回答失败，请稍后再试")
-                }
-              }
-          )
+            if(res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              replyComment(props.ansId, commentHtml.value, imageList.value).then(
+                  (res) => {
+                    if (res.isSuccess === true) {
+                      ElMessage.success("回答已上传")
+                      commentHtml.value = ''
+                      imageList.value = []
+                      router.go(0)
+                    } else {
+                      ElMessage.error("回答失败，请稍后再试")
+                    }
+                  }
+              )
+            }
+          })
+
         }
       }
     }
 
     const commentHtml = ref('')
+
+    const reportDialOpen = ref(false)
+
+    const reportReason = ref('')
+
+    const reportAnswer = () => {
+      reportAnswerAPI(props.quesId, props.ansId, reportReason.value).then(
+          (res) => {
+            if(res.isSuccess) {
+              ElMessage.success("举报成功，请等待管理员审核举报结果")
+              reportDialOpen.value = false
+            } else {
+              ElMessage.error("举报失败，请稍后再试")
+            }
+          }
+      )
+    }
+
+    const userName = ref('')
+
+    const getUserName = (nickName) => {
+      userName.value = nickName
+    }
+
+    const truncate = (content) => {
+      const strippedContent = String(content).replace(/<[^>]*>/g, "")
+      if (strippedContent.length > 20) {
+        return `${strippedContent.slice(0, 20)}...`;
+      }
+      return strippedContent;
+    };
 
     return {
       ans,
@@ -155,7 +201,13 @@ export default {
       mode: 'default',
       toolbarConfig,
       uploadComment,
-      commentHtml
+      commentHtml,
+      reportDialOpen,
+      reportAnswer,
+      userName,
+      getUserName,
+      reportReason,
+      truncate
     };
   },
 };
@@ -170,7 +222,7 @@ export default {
     >
       <v-row>
         <v-col cols="1" style="display: flex;margin-left: 10px;justify-content: end;">
-          <UserAvatar :userId="ans.userId"/>
+          <UserAvatar :userId="ans.userId" @returnUserName="getUserName"/>
         </v-col>
         <v-col cols="10">
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
@@ -195,7 +247,13 @@ export default {
               <span v-else-if="subAnsIdList.length !== 0">{{ subAnsIdList.length }}条评论</span>
               <span v-else>快来评论吧~</span>
             </v-btn>
-            <v-btn v-if="isUser"
+            <v-btn v-if="userStateStore().email"
+                   :prepend-icon="'mdi-shield-alert'" variant="text" size="small"
+                   color="red-darken-2"
+                   @click="reportDialOpen = !reportDialOpen">
+              举报
+            </v-btn>
+            <v-btn v-if="isUser || userStateStore().isManager"
                    :icon="'mdi-delete-circle'" variant="text" size="small"
                    color="blue-grey-lighten-2"
                    @click="delDialog = !delDialog">
@@ -220,7 +278,6 @@ export default {
                   :mode="mode"
                   @onCreated="handleCreated"
               />
-
             </div>
             <v-row justify="end">
               <v-btn size="small" style="margin-top: 10px;margin-bottom: 15px" prepend-icon="mdi-message-reply-text" color="primary" @click="uploadComment">
@@ -231,10 +288,10 @@ export default {
               <SubAnsCard v-for="(ansId, index) in subAnsIdList"
                           :index="index" :ansId="ansId"
                           :key="ansId + '-ans'"
+                          :quesId="quesId"
                           @delComment="delComment"
               ></SubAnsCard>
             </div>
-
           </div>
         </v-col>
       </v-row>
@@ -271,6 +328,57 @@ export default {
         ></v-btn>
       </template>
     </v-card>
+  </v-dialog>
+  <v-dialog v-model="reportDialOpen" max-width="500">
+    <template v-slot:default="{ isActive }">
+      <v-card rounded="lg">
+        <v-card-title class="d-flex justify-space-between align-center">
+          <div class="ps-2" style="color: darkred;align-content: center;font-size: 25px">
+            <v-icon :size="35" style="margin-right: 5px">mdi-shield-alert</v-icon>举报
+          </div>
+          <v-btn
+              icon="mdi-close"
+              variant="text"
+              @click="isActive.value = false"
+          ></v-btn>
+        </v-card-title>
+
+        <v-divider class="mb-4"></v-divider>
+
+        <v-card-text>
+          <div class="mb-2">您正在检举用户{{userName}}的回答</div>
+          <div class="mb-2" style="color: grey">{{ truncate(ans.ansContent) }}</div>
+          <div class="mb-2">举报原因 (optional)</div>
+
+          <v-textarea
+              :counter="300"
+              class="mb-2"
+              rows="2"
+              variant="outlined"
+              persistent-counter
+              v-model="reportReason"
+          ></v-textarea>
+        </v-card-text>
+        <v-divider class="mt-2"></v-divider>
+        <v-card-actions class="my-2 d-flex justify-end">
+          <v-btn
+              class="text-none"
+              rounded="xl"
+              text="Cancel"
+              @click="isActive.value = false"
+          ></v-btn>
+
+          <v-btn
+              class="text-none"
+              color="primary"
+              rounded="xl"
+              text="Send"
+              variant="flat"
+              @click="reportAnswer"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
   </v-dialog>
 </template>
 

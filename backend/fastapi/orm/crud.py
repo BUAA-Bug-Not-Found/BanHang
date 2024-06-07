@@ -8,8 +8,9 @@ from orm import models, schemas
 from sqlalchemy import or_, and_, desc, func, case, distinct, exists
 
 from orm.database import SessionLocal
-from orm.models import Message, Conversation, ConversationMessage, User
+from orm.models import Message, Conversation, ConversationMessage, User, ReportedIssue
 
+import bs4 as beautifulsoup
 
 def get_user_by_id(db: Session, user_id: int) -> models.User:
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -45,7 +46,7 @@ def get_search_user_sum_by_word(db: Session, word: str, offset: int, limit: int)
 def create_user(db: Session, user: schemas.UserCreate):
     userAvatarURL = "https://source.boringavatars.com/beam/500/" + user.username + "?square"
     db_user = models.User(username=user.username, password=user.password, email=user.email, userAvatarURL=userAvatarURL,
-                          privilege=1 if os.getenv("BANHANG_TEST_ADMIN")=='True' else 0)
+                          privilege=1 if os.getenv("BANHANG_TEST_ADMIN") == 'True' else 0)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -97,6 +98,15 @@ def set_sign_by_id(db: Session, id: int, sign: str):
 def set_username_by_id(db: Session, id: int, username: str):
     user = get_user_by_id(db, id)
     user.username = username
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def shut_up_user(db: Session, uid: int, day: int, hour: int, minute: int):
+    activate_date = datetime.datetime.now() + datetime.timedelta(days=day, hours=hour, minutes=minute)
+    user = get_user_by_id(db, uid)
+    user.activate_time = activate_date
     db.commit()
     db.refresh(user)
     return user
@@ -161,7 +171,7 @@ def get_user_anony_info_by_blog_id(db: Session, blog_id: int, user_id: int, crea
     return anony_info
 
 
-def get_blog_by_blog_id(db: Session, blog_id: int):
+def get_blog_by_blog_id(db: Session, blog_id: int) -> models.Blog:
     return (db.query(models.Blog)
             .filter(models.Blog.id == blog_id).first())
 
@@ -207,6 +217,10 @@ def get_blog_images_by_blog_id(db: Session, blog_id: int):
 
 def get_blog_comments_by_blog_id(db: Session, blog_id: int):
     return db.query(models.BlogComment).filter(models.BlogComment.blog_id == blog_id).all()
+
+
+def get_blog_comment_by_id(db: Session, blog_comment_id: int):
+    return db.query(models.BlogComment).filter(models.commitComment.id == blog_comment_id).first()
 
 
 def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, is_anonymous: bool,
@@ -385,8 +399,8 @@ def get_question_tag_by_name(db: Session, name: str):
     return db.query(models.QuestionTag).filter(models.QuestionTag.name == name).first()
 
 
-def create_question_tag(db: Session, name: str, id: int = None, color:str = None, icon:str = None,
-                        is_admin:bool = False):
+def create_question_tag(db: Session, name: str, id: int = None, color: str = None, icon: str = None,
+                        is_admin: bool = False):
     name = name.strip()
     if tag := get_question_tag_by_name(db, name):
         return tag
@@ -615,9 +629,62 @@ def set_focus_question(db: Session, user_id: int, question_id: int, is_focus: bo
             db.commit()
 
 
+def report_question(db: Session, quesid: int, uid: int, reason: str):
+    issue = models.ReportedIssue(question_id=quesid, user_id=uid, reason=reason, is_question=True)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def report_question_comment(db: Session, ques_id: int, comment_id: int, uid: int, reason: str):
+    issue = models.ReportedIssue(question_id=ques_id, question_comment_id=comment_id, user_id=uid, reason=reason,
+                                 is_question=True, is_comment=True)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def report_blog(db: Session, blogid: int, uid: int, reason: str):
+    issue = models.ReportedIssue(blog_id=blogid, user_id=uid, reason=reason, is_blog=True)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def report_blog_comment(db: Session, blog_id: int, comment_id: int, uid: int, reason: str):
+    issue = models.ReportedIssue(blog_id=blog_id, blog_comment_id=comment_id, user_id=uid, reason=reason,
+                                 is_blog=True, is_comment=True)
+    db.add(issue)
+    db.commit()
+    db.refresh(issue)
+    return issue
+
+
+def get_issue_by_id(db: Session, issue_id: int):
+    return db.query(models.ReportedIssue).filter(models.ReportedIssue.id == issue_id).first()
+
+
+def delete_issue(db: Session, issue_id: int) -> bool:
+    issue = get_issue_by_id(db, issue_id)
+    db.delete(issue)
+    db.commit()
+
+
+def get_report_issues(db: Session) -> list[Type[ReportedIssue]]:
+    return db.query(models.ReportedIssue).all()
+
+
 def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
     return db.query(Conversation).filter(
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
+
+
+def pretty_html(html: str):
+    bs = beautifulsoup.BeautifulSoup(html, 'html.parser')
+    return bs.text
 
 
 def send_message_for_question_answer(comment_id: int):
@@ -631,19 +698,19 @@ def send_message_for_question_answer(comment_id: int):
         if target_comment:
             send_message(db, 34, target_comment.user_id,
                          "自动提示：【{}】 回复了您的问题回答: {}".format(comment.user.username,
-                                                                       target_comment.content))
+                                                                       pretty_html(target_comment.content)))
         else:
             target_user_id = comment.question.user_id
             target_question = comment.question
             send_message(db, 34, target_user_id,
-                         "自动提示：【{}】 回答了您提出的“{}”问题： {}".format(comment.user.username,
-                                                                           target_question.content,
-                                                                           comment.content))
+                         "自动提示：【{}】 回答了您提出的「{}」问题： {}".format(comment.user.username,
+                                                                           pretty_html(target_question.content),
+                                                                           pretty_html(comment.content)))
             for user in target_question.focused_users:
                 send_message(db, 34, user.id,
                              "自动提示：【{}】 回答了您关注的问题「{}」： {}".format(comment.user.username,
-                                                                               target_question.content,
-                                                                               comment.content))
+                                                                               pretty_html(target_question.content),
+                                                                               pretty_html(comment.content)))
 
     finally:
         db.close()
@@ -656,8 +723,8 @@ def send_message_for_like_question_comment(comment_id: int, like_user: int):
         comment = get_question_comment_by_id(db, comment_id)
         user = get_user_by_id(db, like_user)
         send_message(db, 34, comment.user_id,
-                     "自动提示：【{}】 点赞了您在 “{}” 问题下的回答：“{}”".format(
-                         user.username, comment.question.content, comment.content))
+                     "自动提示：【{}】 点赞了您在 「{}」 问题下的回答：“{}”".format(
+                         user.username, pretty_html(comment.question.content), pretty_html(comment.content)))
     finally:
         db.close()
 
@@ -669,7 +736,7 @@ def send_message_for_focus_question(question_id: int, like_user: int):
         question = get_question_by_id(db, question_id)
         user = get_user_by_id(db, like_user)
         send_message(db, 34, question.user_id,
-                     "自动提示：【{}】 关注了您提出问题：“{}”".format(user.username, question.content))
+                     "自动提示：【{}】 关注了您提出问题：「{}」".format(user.username, pretty_html(question.content)))
     finally:
         db.close()
 
@@ -681,7 +748,7 @@ def send_message_for_like_question(question_id: int, like_user: int):
         question = get_question_by_id(db, question_id)
         user = get_user_by_id(db, like_user)
         send_message(db, 34, question.user_id,
-                     "自动提示：【{}】 点赞了您提出问题：“{}”".format(user.username, question.content))
+                     "自动提示：【{}】 点赞了您提出问题：「{}」".format(user.username, pretty_html(question.content)))
     finally:
         db.close()
 

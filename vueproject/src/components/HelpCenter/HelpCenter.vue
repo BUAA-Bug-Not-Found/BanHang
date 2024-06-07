@@ -63,7 +63,7 @@ export default {
     const lockMore = ref(false)
 
     const getMore = () => {
-      if(lockMore.value === false) {
+      if (lockMore.value === false) {
         lockMore.value = true
         page.value = page.value + 1
         if (lastIndex.value != 0) {
@@ -95,6 +95,8 @@ export default {
       }
     }
 
+    const canAddTags = ref([])
+
     const init = () => {
       let router = useRouter()
       lastIndex.value = router.currentRoute.value.params.tagId
@@ -109,6 +111,9 @@ export default {
             })
             for (let i = 0; i < tags.value.length; i++) {
               tagNamesArray.value.push(tags.value[i].tagName)
+              if(!tags.value[i].isAdmin || userStateStore().isManager) {
+                canAddTags.value.push(tags.value[i].tagName)
+              }
             }
             getMore()
           }
@@ -187,16 +192,16 @@ export default {
     const display = useDisplay()
 
     const findTagColor = (tagName) => {
-      for(let i = 0;i < tags.value.length;i++) {
-        if(tags.value[i].tagName === tagName) {
+      for (let i = 0; i < tags.value.length; i++) {
+        if (tags.value[i].tagName === tagName) {
           return tags.value[i].tagColor
         }
       }
     }
 
     const findTagIcon = (tagName) => {
-      for(let i = 0;i < tags.value.length;i++) {
-        if(tags.value[i].tagName === tagName) {
+      for (let i = 0; i < tags.value.length; i++) {
+        if (tags.value[i].tagName === tagName) {
           return tags.value[i].tagIcon
         }
       }
@@ -315,6 +320,8 @@ export default {
       imageList.value.splice(index, 1)
     }
 
+    const dropDown = ref(false)
+
     return {
       editorConfig,
       mode: 'default',
@@ -357,7 +364,9 @@ export default {
       updateQuestion,
       disTags,
       showPic,
-      delPic
+      delPic,
+      dropDown,
+      canAddTags
     }
   }
 }
@@ -368,8 +377,8 @@ export default {
     <v-row justify="center" style="margin-top: 10px">
       <v-col cols="2" style="margin-right: 10px">
         <v-list density="compact"
-                :style="'position: fixed;top: 80px;width:200px;text-align:left'"
-          >
+                :style="'position: fixed;top: 80px;width:200px;text-align:left;max-height:500px;overflow-y:auto'"
+        >
           <v-btn @click="toUploadQues" color="blue-darken-1" class="w-100" :style="'margin-bottom: 15px'">
             发起问题
           </v-btn>
@@ -396,7 +405,8 @@ export default {
                   @editQues="toEditQues"
                   :disTags="disTags[index]"
                   :question="questions[index]"/>
-        <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" :style="'margin-top: 5px'" @click="getMore">
+        <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" :style="'margin-top: 5px'"
+               @click="getMore">
           加载更多
         </v-btn>
       </v-col>
@@ -414,18 +424,50 @@ export default {
       </div>
       <!-- 评论 -->
     </div>
-      <AppQuesCard :style="'margin-bottom: 5px'" v-for="(ques, index) in questions" :key="ques.quesId"
-                   :index="index"
-                   :disTags="disTags[index]"
-                   @delQues="delQuestion"
-                   :question="questions[index]"
-      />
-      <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" :style="'margin-top: 5px'" @click="getMore">
-        加载更多
-      </v-btn>
-      <div style="height: 200px;"></div>
+    <div style="position: fixed; top: 48px; width: 100%; z-index: 1000; background-color: white;">
+      <button
+          @click="dropDown = !dropDown"
+          style="width: 96%; margin-left: 2%; margin-right: 2%; border: none; box-shadow: none; height: 8px;"
+      >
+        <v-icon>{{ dropDown ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+      </button>
+
+      <div v-show="dropDown" style="margin-left: 2%; margin-right: 2%;">
+        <v-btn @click="toUploadQues" class="w-100" color="blue" style="margin-bottom: 10px; margin-right: 2%">发起问题
+          <v-icon
+              icon="mdi-send"
+              end
+          ></v-icon>
+        </v-btn>
+        <span style="margin-bottom: 10px">
+            <v-chip
+                icon="mdi-home-circle"
+                v-for="(item, i) in tags"
+                :color="item.tagColor"
+                :key="i"
+                label
+                outlined
+                @click="shiftIndex(i)"
+                style="margin-left: 1%; margin-bottom: 5px"
+            >
+              {{item.tagName}}
+            </v-chip>
+          </span>
+      </div>
+    </div>
+    <div style="height: 30px"></div>
+    <AppQuesCard :style="'margin-bottom: 5px'" v-for="(ques, index) in questions" :key="ques.quesId"
+                 :index="index"
+                 :disTags="disTags[index]"
+                 @delQues="delQuestion"
+                 :question="questions[index]"
+    />
+    <v-btn v-if="questions.length < quesSum" color="light-blue-darken-1" :style="'margin-top: 5px'" @click="getMore">
+      加载更多
+    </v-btn>
+    <div style="height: 200px;"></div>
   </div>
-  <v-bottom-sheet v-model="sheet" inset>
+  <v-bottom-sheet v-model="sheet">
     <v-card
         class="text-center"
         height="800"
@@ -470,7 +512,7 @@ export default {
         <div style="margin-top: 15px">
           <v-select
               v-model="selectTags"
-              :items="tagNamesArray.length  === 0 ? [] : tagNamesArray.slice(1, tagNamesArray.length)"
+              :items="canAddTags.length  === 0 ? [] : canAddTags.slice(1, canAddTags.length)"
               multiple
               label="添加标签"
               density="default"
@@ -487,7 +529,8 @@ export default {
           <v-col v-for="(image, index) in imageList" :key="image" :cols="display.smAndDown.value? 4 : 3">
             <div class="avatar-wrapper">
               <div class="right-top">
-                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1" icon="mdi-close"></v-btn>
+                <v-btn @click="delPic(index)" density="compact" size="small" color="red-lighten-1"
+                       icon="mdi-close"></v-btn>
               </div>
               <el-image
                   class="avatar"
@@ -619,4 +662,5 @@ export default {
   height: 100%;
   text-align: center;
 }
+
 </style>
