@@ -17,17 +17,21 @@ config = open_api_models.Config(
 )
 config.endpoint = f'green-cip.cn-beijing.aliyuncs.com'
 
-def review_text(content: str, service: str = "comment_detection"):
+def review_text(content: str, service: str = "comment_detection_pro"):
 	client = Green20220302Client(config)
-	text_moderation_request = green_20220302_models.TextModerationPlusRequest(
+	text_moderation_plus_request = green_20220302_models.TextModerationPlusRequest(
 		service=service,
 		service_parameters=json.dumps({"content": content}, ensure_ascii=False)
 	)
 	runtime = util_models.RuntimeOptions()
 	try:
-		return client.text_moderation_with_options(text_moderation_request, runtime)
+		labels = []
+		result = client.text_moderation_plus_with_options(text_moderation_plus_request, runtime)
+		for res in result.body.data.result:
+			if (res.label == "nonLabel"):
+				continue
+			if res.confidence == None or res.confidence >= 60:
+				labels.append(res.label)
+		return labels
 	except Exception as error:
-		print(error.message)
-		print(error.data.get("Recommend"))
-		UtilClient.assert_as_string(error.message)
-
+		return ["review_error"]
