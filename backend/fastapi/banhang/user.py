@@ -711,4 +711,6 @@ def get_boya_entrust(db: Session = Depends(get_db),
     if not current_user:
         raise EXC.UniException(key='isSuccess', value=False)
     boya = crud.get_boya_entrust_by_uid(db, current_user['uid'])
+    if not boya:
+        return {'campus': [], 'type': []}
     return {'campus': json.loads(boya.campus), 'type': json.loads(boya.type)}
