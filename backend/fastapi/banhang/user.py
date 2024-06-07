@@ -18,6 +18,7 @@ from tools.check_user import generate_jwt_token, authorize, check_user
 from tools.mail import MailSender, is_valid_email
 import banhang.BanHangException as EXC
 import random
+from tools.review import review_text
 
 router = APIRouter()
 
@@ -111,6 +112,10 @@ def register(req: registerRequest, db: Session = Depends(get_db)):
     if not checkNickname(req.username):
         raise EXC.UniException(key="isSuccess", value=False,
                                others={"description": "用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
+    review_result = review_text(req.username)
+    if len(review_result) != 0:
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户名不符合要求：" + ",".join(review_result)})
     crud.create_user(db, schemas.UserCreate(username=req.username, password=update_password_to_hash(req.password),
                                             email=req.email))
     return {"isSuccess": True}
@@ -195,6 +200,10 @@ def set_sign_by_id(req: SetSignRequestNew, current_user: Optional[dict] = Depend
     current_user_instance = crud.get_user_by_id(db, current_user['uid'])
     if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户无权限"})
+    review_result = review_text(req.sign)
+    if len(review_result) != 0:
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "签名不符合要求：" + ",".join(review_result)})
     user = crud.set_sign_by_id(db, req.id, req.sign)
     return successResponse()
 
@@ -217,6 +226,10 @@ def set_nickname_by_id(req: SetNicknameRequestNew, current_user: Optional[dict] 
     if not checkNickname(req.nickname):
         raise EXC.UniException(key="isSuccess", value=False,
                                others={"description": "用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
+    review_result = review_text(req.nickname)
+    if len(review_result) != 0:
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户名不符合要求：" + ",".join(review_result)})
     user = crud.set_username_by_id(db, req.id, req.nickname)
     return successResponse()
 
