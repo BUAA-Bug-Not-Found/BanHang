@@ -167,7 +167,7 @@ export function getComplainAmount() {
     })
 }
 
-export function isShutUpByUserId1(_id) {
+export function isShutUpByUserId(_id) {
     return axios.request({
         url: "/isShutUpByUserId",
         method: "post",
@@ -184,11 +184,11 @@ export function isShutUpByUserId1(_id) {
     })
 }
 
-export function isShutUpByUserId(_id) {
-    isShutUpByUserId1(_id).then((r) => {
-        return r
-    })
-}
+// export function isShutUpByUserId(_id) {
+//     isShutUpByUserId1(_id).then((r) => {
+//         return r
+//     })
+// }
 
 export function shutUpUser(_id, _d, _h, _m) {
     return axios.request({
