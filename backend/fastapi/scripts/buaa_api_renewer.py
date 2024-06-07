@@ -1,6 +1,9 @@
 import asyncio
 import os
 import threading
+from orm.database import get_db
+from orm import crud
+from tools.mail import MailSender
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -103,7 +106,7 @@ def get_boya():
     return resultList
 
 
-@scheduler.scheduled_job('interval', minutes=1, misfire_grace_time=60)
+@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
 def update_vacant_classroom():
     global data
     print('updatting vacant classroom')
@@ -115,14 +118,46 @@ def update_vacant_classroom():
             lock.release()
 
 
-@scheduler.scheduled_job('interval', minutes=1, misfire_grace_time=60)
+@scheduler.scheduled_job('interval', minutes=5, misfire_grace_time=60)
 def update_boya_info():
     global data
     print('updatting boya')
     if ENABLE:
         lock.acquire()
         try:
+            ori_name = [b['name'] for b in data['boya']]
             data['boya'] = get_boya()
+
+            db_func = get_db()
+            db = db_func.next()
+            entrusts = crud.get_all_boya_entrusts(db)
+            for by in data['boya']:
+                if by['name'] in ori_name:
+                    continue
+                for entrust in entrusts:
+                    pass1 = False
+                    target_pos = ''
+                    for pos in json.loads(entrust.campus):
+                        if pos in by['position']:
+                            pass1 = True
+                            target_pos = by['position']
+                            break
+                    if not pass1:
+                        continue
+                    pass2 = False
+                    target_type = ''
+                    for type in json.loads(entrust.type):
+                        if type in by['type']:
+                            pass2 = True
+                            target_type = type
+                            break
+                    if pass2:
+                        crud.delete_boya_entrust_by_uid(db, entrust.user_id)
+                        MailSender.send_text_by_buaa_mail(crud.get_user_by_id(db, entrust.user_id).email,
+                                                          "博雅提醒",
+                                                          f"您预约的博雅已上线，{target_type}类型，博雅名称：{by['name']}，"
+                                                          f"博雅地点：{target_pos}，时间：{by['start_time']}")
+            del db_func
         finally:
             lock.release()
 
