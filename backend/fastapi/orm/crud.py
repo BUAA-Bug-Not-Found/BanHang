@@ -221,7 +221,7 @@ def get_blog_comments_by_blog_id(db: Session, blog_id: int):
 
 
 def get_blog_comment_by_id(db: Session, blog_comment_id: int):
-    return db.query(models.BlogComment).filter(models.commitComment.id == blog_comment_id).first()
+    return db.query(models.BlogComment).filter(models.BlogComment.id == blog_comment_id).first()
 
 
 def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, is_anonymous: bool,
