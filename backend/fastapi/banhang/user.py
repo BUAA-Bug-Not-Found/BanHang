@@ -683,7 +683,7 @@ def submit_complain_for_blog(req: ComplainForBlogCommentRequest, db: Session = D
     if not current_user:
         raise EXC.UniException(key='isSuccess', value=False)
     user = crud.get_user_by_id(db, current_user['uid'])
-    comment = crud.get_blog_comment_by_id(db, req.blogId)
+    comment = crud.get_blog_comment_by_id(db, req.commentId)
     if not comment:
         raise EXC.UniException(key='isSuccess', value=False, others={"description": "blog comment 不存在"})
     crud.report_blog_comment(db, comment.blog_id, comment.id, user.id, req.cause)
