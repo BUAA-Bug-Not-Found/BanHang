@@ -60,7 +60,7 @@
     <!-- 评论按钮 -->
 
     <div v-if="!useDisplay().smAndDown.value">
-      <div v-if="!showCommentInput" >
+      <div v-if="!showCommentInput">
         <v-btn @click="toggleCommentInput" class="ma-2" color="blue" style="width: 96%">添加评论
           <v-icon
               icon="mdi-message-text"
@@ -70,7 +70,7 @@
       </div>
     </div>
     <div v-else>
-      <div >
+      <div>
         <v-btn @click="showBottomSheet" class="ma-2" color="blue" style="width: 96%">添加评论
           <v-icon
               icon="mdi-message-text"
@@ -80,7 +80,7 @@
       </div>
     </div>
 
-    <div v-if="showCommentInput" >
+    <div v-if="showCommentInput">
       <v-btn @click="toggleCommentInput" class="ma-2" color="red" style="width: 96%">取消评论
         <v-icon
             icon="mdi-cancel"
@@ -154,10 +154,11 @@ import {getBlogByBlogId, getCommentsByBlogId, goToOtherUser, uploadComment} from
 import {ElMessage} from "element-plus";
 import {useRouter} from "vue-router";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
-import UserStateStore from "@/store";
+import UserStateStore, {userStateStore} from "@/store";
 import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
 import router from "@/router";
+import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
 
 
 export default {
@@ -253,7 +254,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.showCommentInput = !this.showCommentInput;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.showCommentInput = !this.showCommentInput;
+            }
+          }
+      )
     },
     closeCommentInput() {
       this.showCommentInput = !this.showCommentInput;
@@ -264,7 +273,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.bottomSheet = !this.bottomSheet;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.bottomSheet = !this.bottomSheet;
+            }
+          }
+      )
     },
     addComment(replyToId) {
       const state = UserStateStore()
@@ -272,41 +289,49 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      // todo 提交评论的逻辑，读取评论和用户信息，存入数据库，同步加入 comments 列表
-      if (this.newComment.trim().length !== 0) {
-        // let form = new FormData
-        // form.append('blogId', this.blogId)
-        // form.append('commentContent', this.newComment)
-        // form.append('ifAnonymous', this.commentAnonymous)
-        // form.append('replyToCommentId', replyToId)
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              if (this.newComment.trim().length !== 0) {
+                // let form = new FormData
+                // form.append('blogId', this.blogId)
+                // form.append('commentContent', this.newComment)
+                // form.append('ifAnonymous', this.commentAnonymous)
+                // form.append('replyToCommentId', replyToId)
 
-        let json_set = {
-          'blogId': this.blogId,
-          'commentContent': this.newComment,
-          'ifAnonymous': this.commentAnonymous,
-          'replyToCommentId': replyToId
-        }
-        uploadComment(json_set).then(
-            (res) => {
-              if (res.response == "success") {
-                ElMessage({
-                  message: '评论成功',
-                  showClose: true,
-                  type: 'success',
-                })
-                router.go(0)
-              } else {
-                ElMessage({
-                  message: '评论失败，请修改内容或稍后再试',
-                  showClose: true,
-                  type: 'error',
-                })
+                let json_set = {
+                  'blogId': this.blogId,
+                  'commentContent': this.newComment,
+                  'ifAnonymous': this.commentAnonymous,
+                  'replyToCommentId': replyToId
+                }
+                uploadComment(json_set).then(
+                    (res) => {
+                      if (res.response == "success") {
+                        ElMessage({
+                          message: '评论成功',
+                          showClose: true,
+                          type: 'success',
+                        })
+                        router.go(0)
+                      } else {
+                        ElMessage({
+                          message: res.discription,
+                          showClose: true,
+                          type: 'error',
+                        })
+                      }
+                    }
+                )
               }
+              this.newComment = '';
+              this.showCommentInput = false;
             }
-        )
-      }
-      this.newComment = '';
-      this.showCommentInput = false;
+          }
+      )
+
     },
     gotoBlogList(tagId) {
       this.$router.push({name: 'blogList', params: {tagId: tagId}})

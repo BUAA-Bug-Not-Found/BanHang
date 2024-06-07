@@ -152,8 +152,9 @@ import {
 } from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
-import UserStateStore from "@/store";
+import UserStateStore, {userStateStore} from "@/store";
 import {useDisplay} from "vuetify";
+import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
 
 export default {
   name: "CommentShow",
@@ -231,7 +232,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.isInputVisible = !this.isInputVisible;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.isInputVisible = !this.isInputVisible;
+            }
+          }
+      )
     },
     showBottomSheet() {
       const state = UserStateStore()
@@ -239,7 +248,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.bottomSheet = !this.bottomSheet;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.bottomSheet = !this.bottomSheet;
+            }
+          }
+      )
     },
     sendReply() {
       // 将回复内容和是否匿名发送提交给后端或其他逻辑处理
@@ -262,7 +279,7 @@ export default {
                 location.reload()
               } else {
                 ElMessage({
-                  message: '评论失败，请修改内容或稍后再试',
+                  message: res.discription,
                   showClose: true,
                   type: 'error',
                 })

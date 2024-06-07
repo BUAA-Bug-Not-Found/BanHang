@@ -140,9 +140,10 @@
 <script>
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
-import UserStateStore from "@/store";
+import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
 import {submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
+import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
 
 export default {
   name: "ReplyShow",
@@ -223,7 +224,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.isInputVisible = !this.isInputVisible;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.isInputVisible = !this.isInputVisible;
+            }
+          }
+      )
     },
 
     showBottomSheet() {
@@ -232,7 +241,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.bottomSheet = !this.bottomSheet;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.bottomSheet = !this.bottomSheet;
+            }
+          }
+      )
     },
 
     sendReply() {
@@ -256,7 +273,7 @@ export default {
                 location.reload()
               } else {
                 ElMessage({
-                  message: '评论失败，请修改内容或稍后再试',
+                  message: res.discription,
                   showClose: true,
                   type: 'error',
                 })

@@ -202,7 +202,7 @@ export default {
                 this.$router.push({name: 'blogList', params: {tagId: -1}})
               } else {
                 ElMessage({
-                  message: '发帖失败，请修改内容或稍后再试',
+                  message: res.discription,
                   showClose: true,
                   type: 'error',
                 })
