@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from datetime import datetime
@@ -704,10 +705,10 @@ class BoyaEntrustResponse(BaseModel):
     type: List[str]
 
 
-@router.post('/getBoyaEntrust', response_model=BoyaEntrustResponse)
+@router.post('/getBoyaEntrust', response_model=BoyaEntrustResponse, tags=['工具箱'])
 def get_boya_entrust(db: Session = Depends(get_db),
                      current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
         raise EXC.UniException(key='isSuccess', value=False)
     boya = crud.get_boya_entrust_by_uid(db, current_user['uid'])
-    return {'campus': boya.campus, 'type': boya.type}
+    return {'campus': json.loads(boya.campus), 'type': json.loads(boya.type)}
