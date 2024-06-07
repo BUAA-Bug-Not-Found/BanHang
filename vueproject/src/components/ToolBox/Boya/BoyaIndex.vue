@@ -7,8 +7,11 @@
         <p>使用手机日历打开下载文件来添加日程</p>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="showDialog = false">关闭</v-btn>
-        <v-btn @click="showDialog = false; downloadICSFile()">添加</v-btn>
+        <div style="text-align: right;width: 100%;padding-right: 10px">
+          <v-btn @click="showDialog = false" variant="tonal">关闭</v-btn>
+          <v-btn @click="downloadICSFile();showDialog=false" variant="tonal" color="primary">添加</v-btn>
+
+        </div>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -288,11 +291,10 @@ export default {
       const formatDate = (date) => {
         return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
       };
-
       const icsContent = `
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Your Organization//Your App//EN
+PRODID:-//BanhangTeam//Banhang//EN
 BEGIN:VEVENT
 UID:${new Date().toISOString()}
 DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
@@ -303,11 +305,13 @@ DESCRIPTION:博雅选课提醒
 LOCATION:Sample Location
 END:VEVENT
 END:VCALENDAR
-      `.trim();
+`.trim();
 
-      const blob = new Blob([icsContent], { type: 'text/calendar' });
-      const url = URL.createObjectURL(blob);
-
+// URL编码ICS内容，确保换行符和非ASCII字符都被正确处理
+const encodedIcsContent = encodeURIComponent(icsContent);
+const fileName = encodeURIComponent('日程设置:' + name + '.ics');
+const url = `https://banhang.lyhtool.com:8000/genfile?filename=${fileName}&content=${encodedIcsContent}`;
+console.log(url)
       // Create a temporary link element
       const a = document.createElement('a');
       a.href = url;
@@ -321,9 +325,6 @@ END:VCALENDAR
 
       // Remove the link after downloading
       document.body.removeChild(a);
-
-      // Revoke the object URL
-      URL.revokeObjectURL(url);
     }
   },
 }
