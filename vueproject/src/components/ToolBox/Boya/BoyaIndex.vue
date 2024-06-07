@@ -3,8 +3,8 @@
   <div v-if="display.smAndDown.value">
     <div class="header">
       高级搜索：
-      <v-chip v-for="(item, index) in chipList" :key="index"
-        @click="handleChipClicked(item)" class="chip" :prepend-icon="item.clicked ? 'mdi-checkbox-marked-circle' : ''">
+      <v-chip v-for="(item, index) in chipList" :key="index" @click="handleChipClicked(item)" class="chip"
+        :prepend-icon="item.clicked ? 'mdi-checkbox-marked-circle' : ''">
         {{ item.name }}
       </v-chip>
     </div>
@@ -37,8 +37,8 @@
   <v-container v-else style="width: 70%; margin-top: 10px;">
     <v-card style="text-align: left;padding: 25px">
       高级搜索：
-      <v-chip v-for="(item, index) in chipList" :key="index"
-        @click="handleChipClicked(item)" class="chip" :prepend-icon="item.clicked ? 'mdi-checkbox-marked-circle' : ''">
+      <v-chip v-for="(item, index) in chipList" :key="index" @click="handleChipClicked(item)" class="chip"
+        :prepend-icon="item.clicked ? 'mdi-checkbox-marked-circle' : ''">
         {{ item.name }}
       </v-chip>
     </v-card>
@@ -60,6 +60,9 @@
           <div>人数: {{ item.selected_number }}/{{ item.capacity_number }}</div>
           <div>选课时间: {{ item.select_start_time.slice(7) }} - {{ item.select_end_time.slice(7) }}</div>
           <div>上课时间: {{ item.start_time.slice(5) }} - {{ item.end_time.slice(5) }}</div>
+          <div @click="downloadICSFile(item.name, item.select_start_time.slice(7))">
+            创建日程（使用手机日历打开下载文件）
+          </div>
         </div>
       </div>
     </v-card>
@@ -82,43 +85,40 @@ export default {
     const fetchData = () => {
       axios.get('/getBoyaInfo').then(res => {
         data.value = res.data
-        console.log(data.value)
       }).catch(error => {
         console.error(error)
       })
     }
-
-    const chipList = ref(isApp && localStorage.getItem('boyaChips') ? JSON.parse(localStorage.getItem('boysChips')) : [
+    const chipList = ref(isApp && localStorage.getItem('boyaChips') ? JSON.parse(localStorage.getItem('boyaChips')) : [
       {
-        name:'学院路',
-        clicked:true,
+        name: '学院路',
+        clicked: true,
       },
       {
-        name:'沙河',
-        clicked:true
+        name: '沙河',
+        clicked: true
       },
       {
-        name:'劳动教育',
-        clicked:true
+        name: '劳动教育',
+        clicked: true
       },
       {
-        name:'美育',
-        clicked:true
+        name: '美育',
+        clicked: true
       },
       {
-        name:'德育',
-        clicked:true
+        name: '德育',
+        clicked: true
       },
       {
-        name:'安全健康',
-        clicked:true
+        name: '安全健康',
+        clicked: true
       },
       {
-        name:'其他方面',
-        clicked:true
+        name: '其他方面',
+        clicked: true
       },
     ])
-
     const handleChipClicked = (item) => {
       item.clicked = !item.clicked
       if (isApp) {
@@ -130,7 +130,7 @@ export default {
     const display = useDisplay()
 
     const getClassList = () => {
-      const ret =  data.value.filter(cls => {
+      const ret = data.value.filter(cls => {
         if (!chipList.value[0].clicked && cls.position.includes('学院路')) {
           return false;
         }
@@ -146,7 +146,7 @@ export default {
         })
         return !deleted;
       })
-      console.log(ret)
+      //console.log(ret)
       return ret;
     }
     return {
@@ -177,6 +177,52 @@ export default {
         backgroundColor: backgroundColor,
       };
 
+    },
+    downloadICSFile(name, time) {
+      // Parse the provided time string and calculate start and end times
+      const endTime = new Date(time.replace(/-/g, '/')); // Replace '-' with '/' for compatibility
+      const startTime = new Date(endTime.getTime() - 10 * 60 * 1000); // Subtract 10 minutes
+
+      // Format the dates to the required format for .ics file
+      const formatDate = (date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      };
+
+      const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Your Organization//Your App//EN
+BEGIN:VEVENT
+UID:${new Date().toISOString()}
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTSTART:${formatDate(startTime)}
+DTEND:${formatDate(endTime)}
+SUMMARY:${name}
+DESCRIPTION:博雅选课提醒
+LOCATION:Sample Location
+END:VEVENT
+END:VCALENDAR
+      `.trim();
+
+      const blob = new Blob([icsContent], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'event.ics';
+
+      // Append link to the body
+      document.body.appendChild(a);
+
+      // Trigger the download by simulating a click
+      a.click();
+
+      // Remove the link after downloading
+      document.body.removeChild(a);
+
+      // Revoke the object URL
+      URL.revokeObjectURL(url);
     }
   },
 }
@@ -204,7 +250,9 @@ export default {
   flex: 1;
 }
 
-.right-column {}
+.right-column {
+  max-width: 50%;
+}
 
 .card-header {
   display: flex;
