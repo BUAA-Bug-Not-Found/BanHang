@@ -145,7 +145,7 @@ def gen_file(filename: str, content: str):
     if not os.path.exists('./tmp'):
         os.mkdir('./tmp')
     try:
-        with open(f'./tmp/{filename}', 'w') as f:
+        with open(f'./tmp/{filename}', 'w', encoding='utf-8') as f:
             f.write(content)
         return FileResponse(
             f'./tmp/{filename}',
