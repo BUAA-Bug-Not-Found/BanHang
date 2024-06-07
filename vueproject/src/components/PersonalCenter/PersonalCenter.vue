@@ -129,19 +129,11 @@
           this.sign = "快介绍一下自己吧~"
         }
         // 加载一下匿名贴和互助贴
-        // console.log("user_id => ")
-        // console.log(userStateStore().user_id)
-        // console.log("user_id => ")
 
         getHelpBlogs(userStateStore().user_id).then((res) => {
           this.helpBlogs = res
-          // console.log("res => ")
-          // console.log(res)
         })
 
-        // console.log("helpBlogs => ")
-        // console.log(this.helpBlogs)
-        // console.log("helpBlogs => ")
         getWaterBlogs(userStateStore().user_id).then((res) => {
           this.waterBlogs = res
         })

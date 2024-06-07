@@ -175,11 +175,20 @@ export function isShutUpByUserId(_id) {
             id: _id
         }
     }).then((r) => {
+        console.log("r.data")
+        console.log(r.data)
+        console.log(r.data.isShutUp)
         return r.data.isShutUp;
     }).catch(() => {
 
     })
 }
+
+// export function isShutUpByUserId(_id) {
+//     isShutUpByUserId1(_id).then((r) => {
+//         return r
+//     })
+// }
 
 export function shutUpUser(_id, _d, _h, _m) {
     return axios.request({

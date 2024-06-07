@@ -19,6 +19,7 @@ export const userStateStore = defineStore("user", {
                     isManager: perviousData['isManager'],
                     nickname: perviousData['nickname'],
                     headImage: perviousData['headImage'],
+                    hashPassword: perviousData['hashPassword'],
                     sign: perviousData['sign']
                 }
             }
@@ -29,6 +30,7 @@ export const userStateStore = defineStore("user", {
             register_date: "default",
             isAuthentic: false,
             email: "",
+            hashPassword: "",
             nickname: "",
             headImage: "",
             sign: ""
@@ -57,12 +59,13 @@ export const userStateStore = defineStore("user", {
     },
 
     actions: {
-        async login_store_info(accountInfo, _email, _id) {
+        async login_store_info(accountInfo, _email, _id, hashPassword) {
             this.email = _email;
             this.headImage = accountInfo.url;
             this.nickname = accountInfo.nickname;
             this.sign = accountInfo.sign;
             this.isManager = accountInfo.isManager;
+            this.hashPassword = hashPassword
             this.user_id = _id;
             this.user_name = this.nickname;
             this.isAuthentic = true;
@@ -77,6 +80,7 @@ export const userStateStore = defineStore("user", {
                 register_date: this.register_date,
                 isAuthentic: this.isAuthentic,
                 email: this.email,
+                hashPassword: this.hashPassword,
                 isManager: this.isManager,
                 nickname: this.nickname,
                 headImage: this.headImage,
@@ -99,6 +103,7 @@ export const userStateStore = defineStore("user", {
             this.sign = ""
             this.user_id = 1
             this.isManager = false
+            this.hashPassword = ''
             localStorage.clear()
             $bus.emit("updateIndexData", {
                 isLogin: false,
@@ -114,6 +119,7 @@ export const userStateStore = defineStore("user", {
                     register_date: this.register_date,
                     isAuthentic: this.isAuthentic,
                     email: this.email,
+                    hashPassword: this.hashPassword,
                     isManager: this.isManager,
                     nickname: _nickname,
                     headImage: _url,
