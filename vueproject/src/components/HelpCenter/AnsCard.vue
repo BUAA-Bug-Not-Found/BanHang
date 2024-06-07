@@ -157,6 +157,9 @@ export default {
     const reportReason = ref('')
 
     const reportAnswer = () => {
+      console.log(props.quesId)
+      console.log(props.ansId)
+      console.log(reportReason.value)
       reportAnswerAPI(props.quesId, props.ansId, reportReason.value).then(
           (res) => {
             if(res.isSuccess) {

@@ -13,6 +13,86 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog v-model="badgeDialog" max-width="500px">
+        <template v-slot:default="{ isActive }">
+          <v-card rounded="lg">
+            <v-card-title class="d-flex justify-space-between align-center">
+              <div class="ps-2" style="color: deepskyblue;align-content: center;font-size: 20px">
+                <v-icon :size="30" style="margin-right: 5px">mdi-square-rounded-badge-outline</v-icon>获取徽章
+              </div>
+              <v-btn
+                  icon="mdi-close"
+                  variant="text"
+                  @click="isActive.value = false"
+              ></v-btn>
+            </v-card-title>
+
+            <v-divider class="mb-4"></v-divider>
+
+            <v-card-text>
+              <div class="mb-2">您可以创建自己的自定义勋章</div>
+              <v-row>
+                <v-col :cols="6">
+                  <el-form :style="'width: 100%'">
+                    <el-upload
+                        class="avatar-uploader"
+                        action="#"
+                        :show-file-list="false"
+                        :auto-upload="false"
+                        :on-change="handleChange"
+                        accept=".jpg,.png"
+                    >
+                      <el-icon v-if="badgeImage === ''" class="avatar-uploader-icon">
+                        <Plus/>
+                      </el-icon>
+                      <el-image
+                          v-else
+                          class="avatar"
+                          :src="badgeImage"
+                          :fit="'cover'"
+                          @click="showPic(badgeImage)"
+                      />
+                    </el-upload>
+                  </el-form>
+                </v-col>
+              </v-row>
+              <v-color-picker hide-canvas hide-inputs></v-color-picker>
+              <div class="mb-2" >
+                徽章名：<el-input v-model="badgeName" style="width: 240px" maxlength="4"
+                                 placeholder="请输入徽章名" show-word-limit/>
+              </div>
+              <div class="mb-2">徽章描述</div>
+              <v-textarea
+                  :counter="10"
+                  class="mb-2"
+                  rows="1"
+                  variant="outlined"
+                  persistent-counter
+                  v-model="badgeDescription"
+              ></v-textarea>
+            </v-card-text>
+            <v-divider class="mt-2"></v-divider>
+            <v-card-actions class="my-2 d-flex justify-end">
+              <v-btn
+                  class="text-none"
+                  rounded="xl"
+                  text="取消"
+                  @click="isActive.value = false"
+              ></v-btn>
+
+              <v-btn
+                  class="text-none"
+                  color="primary"
+                  rounded="xl"
+                  text="创建"
+                  variant="flat"
+                  @click="uploadBadge"
+              ></v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+      </v-dialog>
+
       <div>
         <v-card style="margin-bottom: 20px; height: auto;">
             <!-- div好像是行内的 -->
@@ -26,6 +106,17 @@
                   </div>
                 </v-btn>
                 <v-spacer></v-spacer>
+                <v-btn
+                    :color="'success'"
+                    :prepend-icon="'mdi-square-rounded-badge-outline'"
+                    :text="'获取徽章'"
+                    @click="badgeDialog=true"
+                    class="text-none"
+                    size="small"
+                    variant="flat"
+                    flat
+                ></v-btn>
+
                 <v-btn icon @click="clickMyInterest">
                   <v-icon color="red">mdi-heart</v-icon>
                 </v-btn>
@@ -110,8 +201,13 @@
   import userStateStore from '../../store';
   import {getComplainAmount, getHelpBlogs, getWaterBlogs} from "./PersonalCenterAPI";
   import { showTip } from '../AccountManagement/AccountManagementAPI';
+  import {api as viewerApi} from "v-viewer";
+  import {ElMessage} from "element-plus";
+  import {uploadFileApi} from "@/components/HelpCenter/api";
+  import {Plus} from "@element-plus/icons-vue";
   
   export default {
+    components: {Plus},
     created() {
       // 这里放置需要延迟执行的代码
       this.headUrl = userStateStore().headImage;
@@ -167,6 +263,8 @@
         isManager: false,
         complainAmount: "", // 待处理的举报信息数量, 显示
         showDialog: false,
+        badgeDialog: false,
+        badgeImage: "",
         posts: [
           { content: "这是第一条动态" },
         ],
@@ -177,7 +275,10 @@
         images: [
           'https://via.placeholder.com/150',
           // 添加更多图片链接...
-        ]
+        ],
+        badgeDescription: '',
+        badgeName: '',
+        badgeColor: '',
       };
     },
     methods: {
@@ -187,6 +288,21 @@
       },
       clickMyInterest() {
         router.push({path: "/interestList"})
+      },
+      handleChange (file) {
+        if (file.raw.type !== "image/jpeg" && file.raw.type !== "image/png") {
+          ElMessage.error('Avatar picture must be JPG format!');
+          return false;
+        }
+        uploadFileApi(file.raw).then((res) => {
+          if (res.response === 'success') {
+            ElMessage.success("Avatar picture upload succeeded!")
+            this.badgeImage = res.fileUrl
+          } else {
+            ElMessage.error('Avatar picture upload failed!');
+          }
+        })
+        return true;
       },
       clickQuitLogin() {
         // 注销登录信息
@@ -223,9 +339,15 @@
       clickHelpItem(_blogId) {
         router.push('/QuesInfo/' + _blogId + "/0");
       },
+      showPic(image) {
+        viewerApi({images: [image]})
+      },
       clickComplain() {
         // 直接跳转到举报信息页面而不需要传参
         router.push("/complainInfos");
+      },
+      uploadBadge() {
+        console.log("...")
       }
     },
   };
@@ -253,5 +375,58 @@
 
 .greyHeart {
   color: grey;
+}
+
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  cursor: pointer;
+  position: relative;
+
+  overflow: hidden;
+  height: 0;
+  padding: 0;
+  padding-bottom: 100%;
+  width: 100%;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding: 0;
+  padding-bottom: 100%;
+}
+
+.right-top {
+  position: absolute; /* 使用绝对定位 */
+  top: -5%;
+  right: -5%;
+  z-index: 88888;
+}
+
+.avatar {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+
+  overflow: hidden;
+}
+
+.el-icon.avatar-uploader-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28px;
+  color: #8c939d;
+  width: 100%;
+  height: 100%;
+  text-align: center;
 }
 </style>
