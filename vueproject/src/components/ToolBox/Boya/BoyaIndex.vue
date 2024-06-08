@@ -9,7 +9,7 @@
       <v-card-actions>
         <div style="text-align: right;width: 100%;padding-right: 10px">
           <v-btn @click="showDialog = false" variant="tonal">关闭</v-btn>
-          <v-btn @click="downloadICSFile();showDialog=false" variant="tonal" color="primary">添加</v-btn>
+          <v-btn @click="downloadICSFile(); showDialog = false" variant="tonal" color="primary">添加</v-btn>
 
         </div>
       </v-card-actions>
@@ -24,19 +24,26 @@
         {{ item.name }}
       </v-chip>
       <div v-if="isLogin">
-        <p>我的委托：{{ myEntrust.campus.length == 0 || myEntrust.type.length == 0 ? '暂无委托' : ""}}</p>
+        <p>我的委托：{{ myEntrust.campus.length == 0 || myEntrust.type.length == 0 ? '暂无委托' : "" }}</p>
         <div v-if="myEntrust.campus.length != 0 && myEntrust.type.length != 0">
           <p> 校区：{{ myEntrust.campus.join('、') }} </p>
           <p> 类型：{{ myEntrust.type.join('、') }} </p>
         </div>
-        <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">添加委托</v-btn>
-        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;" color="primary">取消委托</v-btn>
+        <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;"
+          color="primary">添加委托</v-btn>
+        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;"
+          color="primary">取消委托</v-btn>
         <p style="  font-size: 14px;color: grey;">当添加委托之后，如果有满足特定要求的博雅出现，会为您的北航邮箱发送邮件</p>
+      </div>
+
+      <div v-if="!dataLoaded" class="show-exception" style='text-align: center'>
+        加载数据中。。。
       </div>
     </div>
 
     <v-card v-for="(item, index) in getClassList()" :key="index"
-      style="border-radius: 0px;margin-bottom: 1px;padding:0 20px 10px 20px;" variant="flat" @click="handleBoyaClicked(item)">
+      style="border-radius: 0px;margin-bottom: 1px;padding:0 20px 10px 20px;" variant="flat"
+      @click="handleBoyaClicked(item)">
       <div style="height: 1px;  background-color: lightgrey; margin-bottom: 10px"></div>
       <div class="card-header">
         <div class="type">{{ item.type.slice(5) }}</div>
@@ -68,14 +75,19 @@
         {{ item.name }}
       </v-chip>
       <div v-if="isLogin">
-        <p>我的委托：{{ myEntrust.campus.length == 0 || myEntrust.type.length == 0 ? '暂无委托' : ""}}</p>
+        <p>我的委托：{{ myEntrust.campus.length == 0 || myEntrust.type.length == 0 ? '暂无委托' : "" }}</p>
         <div v-if="myEntrust.campus.length != 0 && myEntrust.type.length != 0">
           <p> 校区：{{ myEntrust.campus.join('、') }} </p>
           <p> 类型：{{ myEntrust.type.join('、') }} </p>
         </div>
-        <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;" color="primary">添加委托</v-btn>
-        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;" color="primary">取消委托</v-btn>
+        <v-btn @click="submitEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;"
+          color="primary">添加委托</v-btn>
+        <v-btn @click="cancelEntrust" variant="tonal" style="margin-top: 5px;margin-bottom: 5px;margin-left: 5px;"
+          color="primary">取消委托</v-btn>
         <p style="  font-size: 14px;color: grey;">当添加委托之后，如果有满足特定要求的博雅出现，会为您的北航邮箱发送邮件</p>
+      </div>
+      <div v-if="!dataLoaded" class="show-exception" style='text-align: center'>
+        加载数据中。。。
       </div>
     </v-card>
     <v-card v-for="(item, index) in getClassList()" :key="index" style="margin-top: 10px;padding:10px 20px 10px 20px;"
@@ -120,7 +132,8 @@ export default {
     const showDialog = ref(false);
     const curClass = ref({});
     const isLogin = userStateStore().isAuthentic
-    const myEntrust = ref({campus:[], type:[]})
+    const myEntrust = ref({ campus: [], type: [] })
+    const dataLoaded = ref(false)
     const chipList = ref(isApp && localStorage.getItem('boyaChips') ? JSON.parse(localStorage.getItem('boyaChips')) : [
       {
         name: '学院路',
@@ -160,6 +173,7 @@ export default {
     const fetchData = () => {
       axios.get('/getBoyaInfo').then(res => {
         data.value = res.data
+        dataLoaded.value = true
       }).catch(error => {
         console.error(error)
       })
@@ -177,8 +191,8 @@ export default {
     }
     const submitEntrust = () => {
       let requestData = {
-        campus:[], 
-        type:[]
+        campus: [],
+        type: []
       }
       if (chipList.value[0].clicked) {
         requestData.campus.push('学院路')
@@ -212,7 +226,7 @@ export default {
         return;
       }
       axios.post('/deleteBoyaEntrust').then(res => {
-        myEntrust.value = {campus:[], type:[]}
+        myEntrust.value = { campus: [], type: [] }
         showTip('委托已取消', true);
       }).catch(error => {
         console.error(error)
@@ -243,13 +257,14 @@ export default {
     return {
       display,
       chipList,
+      dataLoaded,
       handleChipClicked,
       getClassList,
       handleBoyaClicked,
       submitEntrust,
       cancelEntrust,
       showDialog,
-      curClass, 
+      curClass,
       isLogin,
       myEntrust,
     }
@@ -307,11 +322,11 @@ END:VEVENT
 END:VCALENDAR
 `.trim();
 
-// URL编码ICS内容，确保换行符和非ASCII字符都被正确处理
-const encodedIcsContent = encodeURIComponent(icsContent);
-const fileName = encodeURIComponent('日程设置:' + name + '.ics');
-const url = `https://banhang.lyhtool.com:8000/genfile?filename=${fileName}&content=${encodedIcsContent}`;
-console.log(url)
+      // URL编码ICS内容，确保换行符和非ASCII字符都被正确处理
+      const encodedIcsContent = encodeURIComponent(icsContent);
+      const fileName = encodeURIComponent('日程设置:' + name + '.ics');
+      const url = `https://banhang.lyhtool.com:8000/genfile?filename=${fileName}&content=${encodedIcsContent}`;
+      console.log(url)
       // Create a temporary link element
       const a = document.createElement('a');
       a.href = url;
@@ -411,5 +426,9 @@ console.log(url)
 
 .chip {
   margin: 5px
+}
+
+.show-exception {
+  margin-top: 15px
 }
 </style>
