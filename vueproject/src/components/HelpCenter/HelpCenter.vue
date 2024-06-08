@@ -100,6 +100,8 @@ export default {
     const init = () => {
       let router = useRouter()
       lastIndex.value = router.currentRoute.value.params.tagId
+      console.log("lastValue => ")
+      console.log(lastIndex.value)
       getTagsApi().then(
           (data) => {
             tags.value = data.tags
