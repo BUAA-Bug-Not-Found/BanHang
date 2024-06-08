@@ -99,9 +99,9 @@
               <v-toolbar density="compact" style="background-color:aliceblue;">
                 <v-btn v-if="this.isManager" style="height: 28px; padding-left: 6px; padding-right: 6px; vertical-align: center; background-color: #2a9af3;" @click="clickComplain">
                   <div style="display: flex;">
-                    <span style="color:white; font-size: 12px;">举报待处理 </span>
-                    <span style="font-weight: bold; color:aquamarine; font-size: 14px;"> {{ complainAmount }}</span>
-                    <span style="color:white; font-size: 12px;"> 项</span>
+                    <span style="color:white; font-size: 12px;">待处理 </span>
+                    <span v-if="complainAmount !== '0'" style="font-weight: bold; color:aquamarine; font-size: 14px;"> {{ complainAmount }}</span>
+                    <span v-if="complainAmount !== '0'" style="color:white; font-size: 12px;"> 项</span>
                   </div>
                 </v-btn>
                 <v-spacer></v-spacer>
@@ -270,7 +270,7 @@
         if (this.isManager) {
           getComplainAmount().then((res) => {
             if (res.count == 0)
-              this.complainAmount = "" // 0条的话就不显示了
+              this.complainAmount = "0" // 0条的话就不显示了
             else if (res.count <= 99)
               this.complainAmount = res.count;
             else 

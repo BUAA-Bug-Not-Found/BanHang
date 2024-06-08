@@ -72,9 +72,7 @@ import { showTip, tryLogin } from './components/AccountManagement/AccountManagem
 if (userStateStore().email) {
   // 登录一下
   tryLogin(userStateStore().email, userStateStore().hashPassword).then((res) => {
-    if (res.isSuccess) {
-      showTip("欢迎回来！", true);
-    } else
+    if (!res.isSuccess)
       showTip("出现异常，请尝试刷新！", false)
   }).catch(() => {
     showTip("出现异常，请尝试刷新！", false)
