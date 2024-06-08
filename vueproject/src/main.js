@@ -72,10 +72,11 @@ import { showTip, tryLogin } from './components/AccountManagement/AccountManagem
 if (userStateStore().email) {
   // 登录一下
   tryLogin(userStateStore().email, userStateStore().hashPassword).then((res) => {
-    if (!res.isSuccess)
+    if (!res.isSuccess) {
       userStateStore().resetUserInfo()
       router.replace({path: "/loginPage"})
       showTip("出现异常，请尝试重新登录！", false)
+    }
   }).catch(() => {
     userStateStore().resetUserInfo()
     router.replace({path: "/loginPage"})
