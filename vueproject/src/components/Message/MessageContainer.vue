@@ -236,6 +236,7 @@ export default {
       this.curUserName = user_name
       this.curAvatar = avatar
       this.init = false
+      this.messages = []
       this.updateData()
       setTimeout(() => {
         $bus.emit('updateUnreadData')
@@ -263,6 +264,7 @@ export default {
       }
     },
     scrollToBottom() {
+      //console.log("scroll")
       var container = this.$refs.container;
       if (container) {
         this.$nextTick(() => {
@@ -303,8 +305,8 @@ export default {
     },
     imgLoaded() {
       this.imgNum--
-      this.scrollToBottom()
       if (this.imgNum == 0 && !this.init) {
+        this.scrollToBottom()
         this.init = true
       }
     }
