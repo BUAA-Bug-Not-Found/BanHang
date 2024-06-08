@@ -58,7 +58,11 @@
             </v-avatar>
           </div>
           <div style="margin-top: 10px;">
-            <span class="nickname">{{ infos.nickname }}</span>
+            <!-- <span class="nickname">{{ infos.nickname }}</span> -->
+            <div style="display: flex; align-items: center; text-align: center; justify-content: center;">
+              <span class="nickname"> {{ infos.nickname }}</span>
+              <span style="padding-left: 3px; padding-right: 3px; border-radius: 3px; margin-left: 5px; background-color:bisque; font-weight:bold; color:#2a9af3; font-size: 12px;">Lv.{{ level }}</span>
+            </div>
           </div>
           <div style="margin-bottom: 10px; font-size: 10px; text-align: center;">
             <span class="signature">{{ infos.sign }}</span>
@@ -102,7 +106,7 @@
 
 <script>
 import router from '@/router';
-import {queryStar, setStarState} from '@/components/PersonalCenter/PersonalCenterAPI';
+import {getCurrentLevelById, queryStar, setStarState} from '@/components/PersonalCenter/PersonalCenterAPI';
 import userStateStore from '../../store';
 import { showTip } from '../AccountManagement/AccountManagementAPI';
 import { getHelpBlogs, getOtherInfos } from './PersonalCenterAPI';
@@ -124,8 +128,12 @@ export default {
           this.infos = _infos
         }
       })
-      console.log("isManager=> ")
-      console.log(userStateStore().isManager)
+      getCurrentLevelById(this.otherId).then((r) => {
+        if (r == false) this.level = 0
+        else this.level = r
+      }).catch(() => {
+        showTip("出现异常！", false)
+      })
       this.isManager = userStateStore().isManager
       // 拉取该用户的互助贴
       getHelpBlogs(this.otherId).then((_helpBlogs) => {
@@ -141,6 +149,7 @@ export default {
   data() {
     return {
       tab: 'one', // 这里指定一个默认值, 上面点了才会有效果
+      level: 0,
       infos: {
         "headUrl": "",
         "nickname": "",
