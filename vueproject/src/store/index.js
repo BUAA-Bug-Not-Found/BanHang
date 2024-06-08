@@ -87,19 +87,13 @@ export const userStateStore = defineStore("user", {
                 sign: this.sign
             }))
         },
-        // async logout() {
-        //     this.isAuthentic = false
-        //     $bus.emit("updateIndexData", {
-        //         isLogin: false,
-        //         user_name: '未登录',
-        //         avatar: "src/assets/images/default-avatar.png",
-        //     })
-        //     localStorage.clear()
-        // },
         async resetUserInfo() {
             this.email = ""
             this.headImage = ""
             this.nickname = ""
+            this.user_name = ""
+            this.register_date = ""
+            this.isAuthentic = false
             this.sign = ""
             this.user_id = 1
             this.isManager = false

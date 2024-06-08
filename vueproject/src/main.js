@@ -73,9 +73,13 @@ if (userStateStore().email) {
   // 登录一下
   tryLogin(userStateStore().email, userStateStore().hashPassword).then((res) => {
     if (!res.isSuccess)
-      showTip("出现异常，请尝试刷新！", false)
+      userStateStore().resetUserInfo()
+      router.replace({path: "/loginPage"})
+      showTip("出现异常，请尝试重新登录！", false)
   }).catch(() => {
-    showTip("出现异常，请尝试刷新！", false)
+    userStateStore().resetUserInfo()
+    router.replace({path: "/loginPage"})
+    showTip("出现异常，请尝试重新登录！", false)
   })
 }
 
