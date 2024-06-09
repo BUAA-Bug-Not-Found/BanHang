@@ -66,7 +66,7 @@ def buy_badge(badge_id: int, current_user: Optional[dict] = Depends(authorize), 
     if crud.buy_badge(db, db_user, db_badge):
         return {"response": "success"}
     else:
-        return {"response": "error"}
+        return {"response": "error", "description": ""}
 
 @router.post("/uploadBadge")
 def upload_badge(badge: BadgeBase, current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
@@ -80,4 +80,4 @@ def upload_badge(badge: BadgeBase, current_user: Optional[dict] = Depends(author
     if db_badge != None:
         return {"response": "success"}
     else:
-        return {"response": "error"}
+        return {"response": "error", "description": ""}
