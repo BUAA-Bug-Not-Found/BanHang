@@ -15,7 +15,7 @@ def test_badge(mock_user_data, mock_badge_data, new_database):
     # uid1 = client.get("check_login_state").json()['uid']
     res = client.post("/uploadBadge", json=mock_badge_data)
     assert res.status_code == 200
-    badges = client.post("/getBadges").json()
+    badges = client.post("/getBadges").json()['badges']
     assert len(badges) == 1
     assert badges[0]['badgeName'] == mock_badge_data['badgeName']
     assert badges[0]['badgeDesc'] == mock_badge_data['badgeDesc']
