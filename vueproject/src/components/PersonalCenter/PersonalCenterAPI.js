@@ -277,3 +277,36 @@ export function uploadBadgeAPI(badgeName, badgeDescription, file, color, cost) {
         return response.data
     })
 }
+
+export function getBadgesByUserId(userId, isOnlyShow) {
+    return axios.request({
+        url: "getBadgesByUserId",
+        method: "get",
+        params: {
+            "userId": userId,
+            "isOnlyShow": isOnlyShow
+        }
+    }).then((r) => {
+        if (r.data.response == 'success')
+            return r.data.badges // 表示成功
+        else 
+            return false
+    }).catch(() => {
+        return false
+    })
+}
+
+export function setBadgeShowState(userId, badgeId, state) {
+    return axios({
+        url: '/setBadgeShowState',
+        method: "post",
+        data: {
+            "userId": userId,
+            "badgeId": badgeId,
+            "state": state
+        }
+    }).then(r => {
+        if (r.data.response == 'success') return true
+        else return false
+    }).catch(() => { return false })
+}
