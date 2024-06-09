@@ -320,6 +320,12 @@ def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Ses
         raise UniException(key='isSuccess', value=False, others={"description": "用户被禁言"})
     if not crud.get_question_by_id(db, ans.quesId):
         raise UniException(key="isSuccess", value=False, others={"description": "问题id不存在"})
+    html = ans.ansContent.content
+    soup = BeautifulSoup(html, "html.parser")
+    review_result = review_text(soup.get_text())
+    if len(review_result) != 0:
+        raise UniException(key="isSuccess", value=False, others={"description": ",".join(review_result)})
+    
     comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(
         content=ans.ansContent.content,
         userId=current_user['uid'],
