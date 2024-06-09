@@ -128,15 +128,14 @@ export default {
                   replyComment(props.ansId, commentHtml.value, imageList.value).then(
                       (res) => {
                         if (res.isSuccess === true) {
-                          ElMessage.success("回答已上传")
+                          if(res.getPoints === true) {
+                            ElMessage.success("回答已上传，经验+2")
+                          } else {
+                            ElMessage.success("回答已上传")
+                          }
                           commentHtml.value = ''
                           imageList.value = []
                           subAnsIdList.value.push(res.ansId)
-                          console.log(res.ansId)
-                          console.log(res.ansId)
-                          console.log(res.ansId)
-                          console.log(res.ansId)
-                          console.log(res.ansId)
                         } else {
                           ElMessage.error(res.description)
                         }

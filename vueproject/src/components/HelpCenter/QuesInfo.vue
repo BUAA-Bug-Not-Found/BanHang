@@ -230,7 +230,11 @@ export default {
                   uploadAnsApi(qid.value, replyHtml.value, imageList.value).then(
                       (res) => {
                         if (res.isSuccess === true) {
-                          ElMessage.success("回答已上传")
+                          if(res.getPoints === true) {
+                            ElMessage.success("回答已上传，经验+4")
+                          } else {
+                            ElMessage.success("回答已上传")
+                          }
                           replyHtml.value = ''
                           imageList.value = []
                           sheet2.value = false
