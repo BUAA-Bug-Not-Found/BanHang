@@ -21,8 +21,8 @@ class BadgeBase(BaseModel):
 
 class BadgeShow(BadgeBase):
     badgeId: int
-    createrId: int
-    cost: int
+    badgeCreaterId: int
+    badgeCost: int
 
 def get_badge_from_db_badge(db_badge):
     badge = {}
