@@ -13,6 +13,7 @@
         :reply-to-comment-id="comment.replyToCommentId"
         :reply-to-comment-name="getReplyToCommentName(comment.replyToCommentId)"
         :top-comment-id="this.topCommentId"
+        @reply-list-show-new-comment="replyListHandleNewComment"
     />
   </div>
 </template>
@@ -37,6 +38,10 @@ export default {
     getReplyToCommentName(replyToCommentId) {
       const replyToComment = this.comments.find(comment => comment.commentId === replyToCommentId);
       return replyToComment ? replyToComment.userName : '';
+    },
+
+    replyListHandleNewComment(comment) {
+      this.$emit('comment-show-new-comment', comment);
     }
   }
 }

@@ -116,7 +116,7 @@
   </v-card>
 
   <!-- 评论列表 -->
-  <CommentList :comments="comments"/>
+  <CommentList :comments="comments" @new-comment="handleNewComment"/>
 
 
   <v-bottom-sheet
@@ -311,7 +311,7 @@ export default {
                     (res) => {
                       if (res.response == "success") {
                         ElMessage({
-                          message: '评论成功',
+                          message: '评论成功 ' + res.description,
                           showClose: true,
                           type: 'success',
                         })
@@ -333,6 +333,12 @@ export default {
       )
 
     },
+
+    handleNewComment(comment) {
+      // 将新评论添加到评论列表
+      this.comments.push(comment);
+    },
+
     gotoBlogList(tagId) {
       this.$router.push({name: 'blogList', params: {tagId: tagId}})
     }

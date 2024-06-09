@@ -195,7 +195,7 @@ export default {
             (res) => {
               if (res.response == "success") {
                 ElMessage({
-                  message: '帖子发布成功',
+                  message: '帖子发布成功 | ' + res.description,
                   showClose: true,
                   type: 'success',
                 })

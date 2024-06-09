@@ -50,6 +50,10 @@
                 <div style="color: black; font-size: 16px" @click="showComplainWindow">
                   举报
                 </div>
+                <div v-if="userStateStore().isManager || this.isCurUser"
+                     style="color: red; font-size: 16px" @click="delComment">
+                  删除
+                </div>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -87,7 +91,8 @@
       </div>
 
       <div v-show="isOpen && replies.length > 0">
-        <ReplyList :comments="replies" :top-comment-id="this.commentId"/>
+        <ReplyList :comments="replies" :top-comment-id="this.commentId"
+                   @comment-show-new-comment="commentShowHandleNewComment"/>
       </div>
 
     </v-card>
@@ -146,6 +151,7 @@
 <script>
 import ReplyList from "@/components/AnonymousBlog/ReplyList.vue";
 import {
+  deleteCommentByCommentId,
   goToOtherUser,
   submitComplainForBlogComment,
   uploadComment
@@ -210,7 +216,12 @@ export default {
     };
   },
 
+  created() {
+    this.isCurUser = UserStateStore().getUserId === this.userId
+  },
+
   methods: {
+    userStateStore,
     useDisplay,
     goToOtherUser,
     formatDate(time) {
@@ -272,7 +283,7 @@ export default {
             (res) => {
               if (res.response == "success") {
                 ElMessage({
-                  message: '评论成功',
+                  message: '评论成功 ' + res.description,
                   showClose: true,
                   type: 'success',
                 })
@@ -336,6 +347,31 @@ export default {
       }
     },
 
+    delComment() {
+      deleteCommentByCommentId(this.commentId).then(
+          (res) => {
+            if (res.response == "success") {
+              ElMessage({
+                message: '删除成功',
+                showClose: true,
+                type: 'success',
+              })
+              // this.$router.push({name: 'blogList', params: {tagId: -1}})
+              location.reload()
+            } else {
+              ElMessage({
+                message: '删除失败，请先登录或稍后再试',
+                showClose: true,
+                type: 'error',
+              })
+            }
+          }
+      )
+    },
+
+    commentShowHandleNewComment(comment) {
+      this.$emit('comment-list-new-comment', comment);
+    }
 
   }
 
