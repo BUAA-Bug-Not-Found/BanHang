@@ -278,13 +278,13 @@ export function uploadBadgeAPI(badgeName, badgeDescription, file, color, cost) {
     })
 }
 
-export function getBadgesByUserId(userId, isOnlyShow) {
+// export function getBadgesByUserId(userId, isOnlyShow) {
+export function getBadgesByUserId(userId) {
     return axios.request({
         url: "getBadgesByUserId",
-        method: "get",
-        params: {
+        method: "post",
+        data: {
             "userId": userId,
-            "isOnlyShow": isOnlyShow
         }
     }).then((r) => {
         if (r.data.response == 'success')

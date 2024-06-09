@@ -13,6 +13,30 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog v-model="isShowBadgeDesc" max-width="300px">
+        <v-card style="padding-bottom:12px;">
+          <v-card-title class="d-flex justify-space-between align-center" style="padding-bottom:0px; padding-top:0px;">
+            <span style="color: #2a9af3;font-size: 15px">
+              徽章描述
+            </span>
+            <v-btn
+                icon="mdi-close"
+                variant="text"
+                @click="isShowBadgeDesc = false"
+            ></v-btn>
+          </v-card-title>
+          
+          <v-divider></v-divider>
+          <span style="margin-left:14px; color:grey; margin-top:8px;">
+            {{ curDesc }}
+          </span>
+          <!-- <v-card-actions>
+            <v-btn color="error" @click="clickQuitLogin">确认</v-btn>
+            <v-btn color="blue darken-1" @click="showDialog = false">取消</v-btn>
+          </v-card-actions> -->
+        </v-card>
+      </v-dialog>
+
       <v-dialog v-model="badgeDialog" max-width="500px">
         <template v-slot:default="{ isActive }">
           <v-card rounded="lg">
@@ -188,6 +212,35 @@
             <div style="margin-bottom: 10px; font-size: 10px; text-align: center;">
               <span class="signature">{{ sign }}</span>
             </div>
+
+            <v-container v-if="badges" style="display:flex; justify-content:center;">
+              <v-slide-group show-arrows>
+                <v-slide-item
+                  v-for="(content, index) in badges"
+                  :key="index"
+                  :style="'padding:4px;'"
+                >
+                  <v-card outlined @click="clickBadge(index)" style="cursor:pointer">
+                    <div style="align-items: center; display: flex; flex-direction: column; margin:10px;">
+                        <v-avatar color="surface-variant"
+                          style="margin-top: 5px; margin-bottom: 10px;"
+                          size="70"
+                          :image="content.badgeUrl">
+                        </v-avatar>
+                        <v-chip
+                          :style="{ color: content.badgeColor, fontSize:'10px', height: '20px', paddingTop: '2px', paddingLeft: '6px', paddingRight: '6px', verticalAlign: 'middle' }"
+                          label>
+                          {{ content.badgeName }}
+                        </v-chip>
+
+                        <!-- <div style="display:flex; align-items:center;">
+                          <span style="font-size:12px; color:grey;">{{ content.badgeDesc }}</span>
+                        </div> -->
+                    </div>
+                  </v-card>
+                </v-slide-item>
+              </v-slide-group>
+            </v-container>
         </v-card>
       </div>
       <!-- 个人动态区域 -->
@@ -199,7 +252,7 @@
         >
           <v-tab value="one">匿名贴</v-tab>
           <v-tab value="two">互助贴</v-tab>
-          <v-tab value="three">我的徽章</v-tab>
+          <!-- <v-tab value="three">我的徽章</v-tab> -->
         </v-tabs>
         
         <v-card-text>
@@ -235,9 +288,9 @@
               </v-list>
             </v-window-item>
             <!-- 该window展示徽章的详细信息 -->
-            <v-window-item value="three">
+            <!-- <v-window-item value="three">
               <v-list>
-                <v-list-item v-for="(content, index) in badges" :key="index" @click="clickSelectBadge">
+                <v-list-item v-for="(content, index) in badges" :key="index">
                   <div style="align-items: center; display: flex; flex-direction: column;">
                     <v-chip
                       class="ma-2"
@@ -251,19 +304,14 @@
                       size="100"
                       :image="content.badgeUrl">
                     </v-avatar>
-                    <!-- <div class="ps-2" style="color: deepskyblue;align-content: center;font-size: 20px"> -->
-                    
-                    <!-- </div> -->
                     <div style="display:flex; align-items:center;">
-                      <v-icon v-if="content.isShow" color="green" :size="20" style="cursor:pointer;" @click="setBadgeState(index, false)">mdi-check</v-icon>
-                      <v-icon v-else color="grey" :size="20" style="cursor:pointer;" @click="setBadgeState(index, true)">mdi-check</v-icon>
                       <span style="font-size:12px; color:grey;">{{ content.badgeDesc }}</span>
                     </div>
                 </div>
                   <v-divider style="margin-top: 10px;"></v-divider>
                 </v-list-item>
               </v-list>
-            </v-window-item>
+            </v-window-item> -->
           </v-window>
         </v-card-text>
 
@@ -281,8 +329,7 @@
     getCurrentLevelById,
     getHelpBlogs,
     getWaterBlogs,
-    uploadBadgeAPI,
-    setBadgeShowState
+    uploadBadgeAPI
   } from "./PersonalCenterAPI";
   import { showTip } from '../AccountManagement/AccountManagementAPI';
   import {api as viewerApi} from "v-viewer";
@@ -315,7 +362,8 @@
           this.waterBlogs = res
         })
 
-        getBadgesByUserId(userStateStore().user_id, false).then((res) => {
+        // getBadgesByUserId(userStateStore().user_id, false).then((res) => {
+        getBadgesByUserId(userStateStore().user_id).then((res) => {
           if (res == true) // 出现错误那就是空数组就可以了
             this.badges = res
         })
@@ -363,6 +411,8 @@
         badgeDialog: false,
         badgeImage: "",
         badgeSrc: "",
+        isShowBadgeDesc: false,
+        curDesc: "",
         posts: [
           { content: "这是第一条动态" },
         ],
@@ -372,10 +422,66 @@
           // {
           //   "badgeUrl": "https://via.placeholder.com/150",
           //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下1111",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下2222",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下33333",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
           //   "badgeDesc": "测试一下",
           //   "badgeColor": "#123456",
           //   "isShow": false
-          // }
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
+          // {
+          //   "badgeUrl": "https://via.placeholder.com/150",
+          //   "badgeName": "最强王者",
+          //   "badgeDesc": "测试一下",
+          //   "badgeColor": "#123456",
+          //   "isShow": false
+          // },
         ],
         images: [
           'https://via.placeholder.com/150',
@@ -388,6 +494,10 @@
       };
     },
     methods: {
+      clickBadge(index) {
+        this.curDesc = this.badges[index].badgeDesc
+        this.isShowBadgeDesc = true
+      },
       // 可以添加其他方法
       clickUpdateInfo() {
         router.push({path: '/editPersonalInfo', ps: {id: '123'}})
@@ -465,13 +575,13 @@
         // 直接跳转到举报信息页面而不需要传参
         router.push("/complainInfos");
       },
-      setBadgeState(index, state) {
-        setBadgeShowState(userStateStore().user_id, this.badges[index].badgeId, state).then((r) => {
-          if (r != false) {
-            this.badges[index].isShow = state
-          } else showTip("设置失败", false)
-        })
-      }
+      // setBadgeState(index, state) {
+      //   setBadgeShowState(userStateStore().user_id, this.badges[index].badgeId, state).then((r) => {
+      //     if (r != false) {
+      //       this.badges[index].isShow = state
+      //     } else showTip("设置失败", false)
+      //   })
+      // }
     },
   };
   </script>
