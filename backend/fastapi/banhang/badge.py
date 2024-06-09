@@ -31,8 +31,8 @@ def get_badge_from_db_badge(db_badge):
     badge['badgeColor'] = db_badge.background_color
     badge['badgeUrl'] = db_badge.icon_url
     badge['badgeId'] = db_badge.id
-    badge['createrId'] = db_badge.creater_id
-    badge['cost'] = db_badge.cost
+    badge['badgeCreaterId'] = db_badge.creater_id
+    badge['badgeCost'] = db_badge.cost
     return badge
 
 @router.post("/getBadges", response_model=List[BadgeShow])
@@ -41,7 +41,7 @@ def get_all_badges(db: Session = Depends(get_db)):
     db_badges = crud.get_badges(db)
     for db_badge in db_badges:
         badges.append(BadgeShow(**get_badge_from_db_badge(db_badge)))
-    return badges
+    return {"response": "success", "badges": badges}
 
 @router.post("/getBadgesByUserId", response_model=List[BadgeShow])
 def get_badges_by_user_id(user_id: int, db: Session = Depends(get_db)):
@@ -51,7 +51,7 @@ def get_badges_by_user_id(user_id: int, db: Session = Depends(get_db)):
     badges = []
     for db_badge in db_user.badges:
         badges.append(BadgeShow(**get_badge_from_db_badge(db_badge)))
-    return badges
+    return {"response": "success", "badges": badges}
 
 @router.post("/bugBadge")
 def buy_badge(badge_id: int, current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
