@@ -260,3 +260,20 @@ export function getCurrentExpById(_id) {
         return false
     })
 }
+
+export function uploadBadgeAPI(badgeName, badgeDescription, file, color, cost) {
+    let form = new FormData
+    form.append("name", badgeName)
+    form.append("description", badgeDescription)
+    form.append("file", file)
+    form.append("color", color)
+    form.append("cost", cost)
+    return axios({
+        method: "post",
+        url: "https://banhang.lyhtool.com:8000/uploadBadge",
+        data: form,
+        headers: {'Content-Type': 'multipart/form-data'}
+    }).then(response => {
+        return response.data
+    })
+}

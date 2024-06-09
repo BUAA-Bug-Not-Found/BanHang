@@ -30,9 +30,20 @@
             <v-divider class="mb-4"></v-divider>
 
             <v-card-text>
-              <div class="mb-2">您可以创建自己的自定义勋章</div>
+              <div class="mb-2"
+                   style="width: 100%;display: flex;font-weight: bold;
+                   font-size: 18px;color: var(--el-color-primary);margin-bottom: 3px"
+              >
+                您可以创建自己的自定义勋章
+              </div>
+              <div class="mb-2"
+                   style="width: 100%;display: flex;font-weight: bold;
+                   font-size: 18px;margin-bottom: 3px"
+              >
+                预览效果：
+              </div>
               <v-row>
-                <v-col :cols="6">
+                <v-col :cols="4" :offset="4">
                   <el-form :style="'width: 100%'">
                     <el-upload
                         class="avatar-uploader"
@@ -42,21 +53,34 @@
                         :on-change="handleChange"
                         accept=".jpg,.png"
                     >
-                      <el-icon v-if="badgeImage === ''" class="avatar-uploader-icon">
+                      <el-icon v-if="badgeSrc === ''" class="avatar-uploader-icon">
                         <Plus/>
                       </el-icon>
                       <el-image
                           v-else
                           class="avatar"
-                          :src="badgeImage"
+                          :src="badgeSrc"
                           :fit="'cover'"
-                          @click="showPic(badgeImage)"
                       />
                     </el-upload>
                   </el-form>
                 </v-col>
               </v-row>
-              <v-color-picker v-model="badgeColor" hide-inputs style="margin: 10px;margin-left: 5px;"></v-color-picker>
+              <div style="width: 100%;display: flex;justify-content: center;">
+                <v-tooltip :text="badgeDescription">
+                  <template v-slot:activator="{ props }">
+                    <v-chip
+                        class="ma-2"
+                        :style="{ color: badgeColor }"
+                        v-bind="props"
+                        label
+                    >
+                      {{badgeName}}
+                    </v-chip>
+                  </template>
+                </v-tooltip>
+              </div>
+              <v-color-picker v-model="badgeColor" hide-inputs hide-canvas style="margin: 10px;margin-left: 5px;"></v-color-picker>
               <div class="mb-2" >
                 徽章名：<el-input v-model="badgeName" style="width: 240px" maxlength="4"
                                  placeholder="请输入徽章名" show-word-limit/>
@@ -219,11 +243,17 @@
   <script>
   import router from '@/router';
   import userStateStore from '../../store';
-  import {getComplainAmount, getCurrentExpById, getCurrentLevelById, getHelpBlogs, getWaterBlogs} from "./PersonalCenterAPI";
+  import {
+    getComplainAmount,
+    getCurrentExpById,
+    getCurrentLevelById,
+    getHelpBlogs,
+    getWaterBlogs,
+    uploadBadgeAPI
+  } from "./PersonalCenterAPI";
   import { showTip } from '../AccountManagement/AccountManagementAPI';
   import {api as viewerApi} from "v-viewer";
   import {ElMessage} from "element-plus";
-  import {uploadFileApi} from "@/components/HelpCenter/api";
   import {Plus} from "@element-plus/icons-vue";
   
   export default {
@@ -294,6 +324,7 @@
         showDialog: false,
         badgeDialog: false,
         badgeImage: "",
+        badgeSrc: "",
         posts: [
           { content: "这是第一条动态" },
         ],
@@ -307,7 +338,8 @@
         ],
         badgeDescription: '',
         badgeName: '',
-        badgeColor: 'ffffff',
+        badgeColor: '#ff4500',
+        badgeCost: 1000,
       };
     },
     methods: {
@@ -323,15 +355,28 @@
           ElMessage.error('Avatar picture must be JPG format!');
           return false;
         }
-        uploadFileApi(file.raw).then((res) => {
-          if (res.response === 'success') {
-            ElMessage.success("Avatar picture upload succeeded!")
-            this.badgeImage = res.fileUrl
-          } else {
-            ElMessage.error('Avatar picture upload failed!');
-          }
-        })
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.badgeSrc = e.target.result;
+        };
+        this.badgeImage = file.raw
+        reader.readAsDataURL(file.raw);
         return true;
+      },
+      uploadBadge() {
+        uploadBadgeAPI(this.badgeName, this.badgeDescription,
+            this.badgeImage, this.badgeColor, this.badgeCost).then(
+            (res) => {
+              const data = res.data
+              if (data.response == 'success') {
+                ElMessage.success("徽章创建成功")
+                this.badgeDialog = false
+              } else {
+                // 图片上传失败给一个弹窗
+                ElMessage.success("徽章创建失败，请稍后再试")
+              }
+            }
+        )
       },
       clickQuitLogin() {
         // 注销登录信息
@@ -375,9 +420,6 @@
         // 直接跳转到举报信息页面而不需要传参
         router.push("/complainInfos");
       },
-      uploadBadge() {
-        console.log("...")
-      }
     },
   };
   </script>
@@ -405,9 +447,12 @@
 .greyHeart {
   color: grey;
 }
+</style>
 
+<style>
 .avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
+  border: 1px dashed grey;
+  border-radius: 50% !important;
   cursor: pointer;
   position: relative;
 
@@ -420,12 +465,14 @@
 }
 
 .avatar-uploader .el-upload:hover {
+  border-radius: 50% !important;
   border-color: var(--el-color-primary);
 }
 
 .avatar-wrapper {
   position: relative;
   width: 100%;
+  border-radius: 50% !important;
   height: 0;
   padding: 0;
   padding-bottom: 100%;
@@ -442,6 +489,7 @@
   position: absolute !important;
   top: 0;
   left: 0;
+  border-radius: 50% !important;
   cursor: pointer;
 
   overflow: hidden;
