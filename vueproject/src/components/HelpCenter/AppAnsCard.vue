@@ -299,7 +299,7 @@ export default {
                            :key="ansId + '-ans'"
                            :quesId="quesId"
                            @uploadSubAns="receiveSubAnsCard"
-                           @delComment="delComment"
+                           @delAns="delComment"
             ></SubAppAnsCard>
           </v-row>
         </v-col>

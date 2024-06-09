@@ -73,7 +73,7 @@ export default {
           (res) => {
             if (res.isSuccess === true) {
               ElMessage.success("删除成功")
-              context.emit("delAns", {index: props.index})
+              context.emit("delComment", {index: props.index})
               delDialog.value = false
             } else {
               ElMessage.error("删除失败，请稍后再试")
