@@ -82,17 +82,12 @@
               </div>
               <v-color-picker v-model="badgeColor" hide-inputs hide-canvas style="margin: 10px;margin-left: 5px;"></v-color-picker>
               <div class="mb-2" >
-                徽章名：<el-input v-model="badgeName" style="width: 240px" maxlength="4"
+                徽章名：<el-input v-model="badgeName" style="width: 150px" maxlength="4"
                                  placeholder="请输入徽章名" show-word-limit/>
               </div>
-              <div class="mb-2">徽章描述</div>
-              <v-textarea
-                  :counter="10"
-                  class="mb-2"
-                  rows="1"
-                  variant="outlined"
-                  persistent-counter
-                  v-model="badgeDescription"/>
+              <div class="mb-2">徽章描述：<el-input v-model="badgeDescription" style="width: 250px" maxlength="10"
+                                                   placeholder="请输入徽章介绍" show-word-limit/></div>
+
             </v-card-text>
             <v-divider class="mt-2"></v-divider>
             <v-card-actions class="my-2 d-flex justify-end">

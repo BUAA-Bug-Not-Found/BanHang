@@ -19,7 +19,7 @@ export default {
   methods: {userStateStore, formatDate},
   components: {Editor, Toolbar, UserAvatar},
   props: ["quesId", "ansId", "index"],
-  emits: ["delComment", "editComment", "replyComment"],
+  emits: ["delComment", "editComment", "replyComment", "uploadSubAnsCard"],
   setup(props, context) {
 
     const init = () => {
@@ -127,7 +127,7 @@ export default {
                           ElMessage.success("回答已上传")
                           commentHtml.value = ''
                           imageList.value = []
-                          router.go(0)
+                          context.emit("uploadSubAnsCard", res.ansId)
                         } else {
                           ElMessage.error(res.description)
                         }
