@@ -56,6 +56,10 @@
                 <div style="color: black; font-size: 16px" @click="showComplainWindow">
                   举报
                 </div>
+                <div v-if="userStateStore().isManager || this.isCurUser"
+                     style="color: red; font-size: 16px" @click="delComment">
+                  删除
+                </div>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -142,7 +146,7 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
 import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
-import {submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
+import {deleteCommentByCommentId, submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
 import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
 
 export default {
@@ -201,11 +205,17 @@ export default {
       bottomSheet: false,
       menuCLick: false,
       showComplainWin: false,
-      complainCause: ""
+      complainCause: "",
+      isCurUser: false
     };
   },
 
+  created() {
+    this.isCurUser = UserStateStore().getUserId === this.userId
+  },
+
   methods: {
+    userStateStore,
     useDisplay,
     formatDate(time) {
       let date = new Date(Date.parse(time))
@@ -266,7 +276,7 @@ export default {
             (res) => {
               if (res.response == "success") {
                 ElMessage({
-                  message: '评论成功',
+                  message: '评论成功 ' + res.description,
                   showClose: true,
                   type: 'success',
                 })
@@ -330,6 +340,32 @@ export default {
         )
       }
     },
+
+    delComment() {
+      deleteCommentByCommentId(this.commentId).then(
+          (res) => {
+            if (res.response == "success") {
+              ElMessage({
+                message: '删除成功',
+                showClose: true,
+                type: 'success',
+              })
+              // this.$router.push({name: 'blogList', params: {tagId: -1}})
+              location.reload()
+            } else {
+              ElMessage({
+                message: '删除失败，请先登录或稍后再试',
+                showClose: true,
+                type: 'error',
+              })
+            }
+          }
+      )
+    },
+
+    replyShowHandleNewComment(comment) {
+      this.$emit('reply-list-show-new-comment', comment);
+    }
   }
 }
 </script>
