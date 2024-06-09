@@ -55,6 +55,7 @@ export function uploadFileApi(file) {
         data: form,
         headers: {'Content-Type': 'multipart/form-data'}
     }).then(response => {
+        console.log(response.data)
         return response.data
     })
 }

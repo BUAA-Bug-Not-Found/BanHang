@@ -20,7 +20,8 @@ export const userStateStore = defineStore("user", {
                     nickname: perviousData['nickname'],
                     headImage: perviousData['headImage'],
                     hashPassword: perviousData['hashPassword'],
-                    sign: perviousData['sign']
+                    sign: perviousData['sign'],
+                    coins: perviousData['coins']
                 }
             }
         // }
@@ -33,7 +34,8 @@ export const userStateStore = defineStore("user", {
             hashPassword: "",
             nickname: "",
             headImage: "",
-            sign: ""
+            sign: "",
+            coins: 0
         }
     },
 
@@ -84,7 +86,24 @@ export const userStateStore = defineStore("user", {
                 isManager: this.isManager,
                 nickname: this.nickname,
                 headImage: this.headImage,
-                sign: this.sign
+                sign: this.sign,
+                coins: 0
+            }))
+        },
+        async coins_info(coins) {
+            this.coins = coins
+            localStorage.setItem("userInfo", JSON.stringify({
+                user_id: this.user_id,
+                user_name: this.user_name,
+                register_date: this.register_date,
+                isAuthentic: this.isAuthentic,
+                email: this.email,
+                hashPassword: this.hashPassword,
+                isManager: this.isManager,
+                nickname: this.nickname,
+                headImage: this.headImage,
+                sign: this.sign,
+                coins: this.coins
             }))
         },
         async resetUserInfo() {
@@ -98,6 +117,7 @@ export const userStateStore = defineStore("user", {
             this.user_id = 1
             this.isManager = false
             this.hashPassword = ''
+            this.coins = 0
             localStorage.clear()
             $bus.emit("updateIndexData", {
                 isLogin: false,
@@ -117,9 +137,26 @@ export const userStateStore = defineStore("user", {
                     isManager: this.isManager,
                     nickname: _nickname,
                     headImage: _url,
-                    sign: _sign
+                    sign: _sign,
+                    coins: this.coins
                 }))
             // }
+        },
+        async updateCoins(coins) {
+            this.coins = coins
+            localStorage.setItem("userInfo", JSON.stringify({
+                user_id: this.user_id,
+                user_name: this.user_name,
+                register_date: this.register_date,
+                isAuthentic: this.isAuthentic,
+                email: this.email,
+                hashPassword: this.hashPassword,
+                isManager: this.isManager,
+                nickname: this.nickname,
+                headImage: this.headImage,
+                sign: this.sign,
+                coins: coins
+            }))
         }
     }
 })

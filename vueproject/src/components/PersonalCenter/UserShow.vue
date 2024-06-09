@@ -48,7 +48,6 @@ export default {
             required: true
         }
     },
-
     methods: {
         clickHeadImage() {
             // 跳转到otherCenter

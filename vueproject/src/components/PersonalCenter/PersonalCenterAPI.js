@@ -263,18 +263,29 @@ export function getCurrentExpById(_id) {
 
 export function uploadBadgeAPI(badgeName, badgeDescription, file, color, cost) {
     let form = new FormData
-    form.append("name", badgeName)
-    form.append("description", badgeDescription)
     form.append("file", file)
-    form.append("color", color)
-    form.append("cost", cost)
     return axios({
         method: "post",
-        url: "https://banhang.lyhtool.com:8000/uploadBadge",
+        url: "/uploadBadgeImage",
         data: form,
         headers: {'Content-Type': 'multipart/form-data'}
-    }).then(response => {
-        return response.data
+    }).then(response1 => {
+        return axios.request(
+            {
+                url: '/uploadBadge',
+                method: 'post',
+                headers: {'Content-Type': 'application/json'},
+                data: JSON.stringify({
+                    badgeName: badgeName,
+                    badgeDesc: badgeDescription,
+                    badgeUrl: response1.data.fileUrl,
+                    badgeColor: color,
+                    badgeCost: cost,
+                })
+            }
+        ).then(response2 => {
+            return response2.data
+        })
     })
 }
 
@@ -309,4 +320,34 @@ export function setBadgeShowState(userId, badgeId, state) {
         if (r.data.response == 'success') return true
         else return false
     }).catch(() => { return false })
+}
+
+export function getBadges() {
+    return axios.request(
+        {
+            url: '/getBadges',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function uploadBuyBadge(userId, badgeId) {
+    return axios.request(
+        {
+            url: '/buyBadge',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                userId: userId,
+                badgeId: badgeId
+            })
+        }
+    ).then(response => {
+        return response.data
+    })
 }
