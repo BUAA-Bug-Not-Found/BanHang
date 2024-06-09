@@ -137,7 +137,7 @@ export default {
                       ElMessage.success("回答已上传")
                       commentHtml.value = ''
                       imageList.value = []
-                      router.go(0)
+                      subAnsIdList.value.push(res.ansId)
                     } else {
                       ElMessage.error(res.description)
                     }
@@ -186,6 +186,10 @@ export default {
       return strippedContent;
     };
 
+    const receiveSubAnsCard = (index) => {
+      subAnsIdList.value.push(index)
+    }
+
     return {
       ans,
       ansIdRef,
@@ -210,7 +214,8 @@ export default {
       userName,
       getUserName,
       reportReason,
-      truncate
+      truncate,
+      receiveSubAnsCard
     };
   },
 };
@@ -292,6 +297,7 @@ export default {
                           :index="index" :ansId="ansId"
                           :key="ansId + '-ans'"
                           :quesId="quesId"
+                          @uploadSubAnsCard="receiveSubAnsCard"
                           @delComment="delComment"
               ></SubAnsCard>
             </div>

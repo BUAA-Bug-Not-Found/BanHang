@@ -232,7 +232,7 @@ export default {
                           replyHtml.value = ''
                           imageList.value = []
                           sheet2.value = false
-                          router.go(0)
+                          question.value.ansIdList.push(res.ansId)
                         } else {
                           ElMessage.error(res.description)
                         }
