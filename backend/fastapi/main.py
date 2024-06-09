@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from banhang.BanHangException import UniException
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()  # 如果需要开启开发者工具栏，请在其中传入debug=True。 注意提交到dev前一定要改回False或删去debug参数
+app = FastAPI(debug=False)  # 如果需要开启开发者工具栏，请在其中传入debug=True。 注意提交到dev前一定要改回False或删去debug参数
 
 
 @app.exception_handler(UniException)

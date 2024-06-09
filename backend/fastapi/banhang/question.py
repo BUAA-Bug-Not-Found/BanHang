@@ -357,7 +357,7 @@ class ReplyAnswerResponse(successResponse):
     ansId: int
 
 
-@router.post("/replyComment", tags=["Question"], response_model=successResponse)
+@router.post("/replyComment", tags=["Question"], response_model=ReplyAnswerResponse)
 def reply_comment(ans_req: ReplyAnswerRequest, background_tasks: BackgroundTasks,
                   db: Session = Depends(get_db), current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
