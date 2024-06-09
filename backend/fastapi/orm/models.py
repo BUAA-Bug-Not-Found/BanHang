@@ -25,6 +25,7 @@ class User(Base):
     userAvatarURL = Column(String(256), nullable=False,
                            default="https://banhang.oss-cn-beijing.aliyuncs.com/3bda01f4fce948d88ee72babced0a3c0.png")
     sign = Column(String, nullable=False, default="快来设置个性签名叭~~")
+    coin = Column(Integer, nullable=False, default=0)
     create_at = Column(DateTime, server_default=func.now())
 
     activate_time = Column(DateTime, nullable=True, server_default=func.now())
@@ -46,6 +47,7 @@ class User(Base):
         secondaryjoin=(user_user_stars.c.user2 == id),
         lazy="dynamic",
         backref=backref('followers', lazy='dynamic'))
+    badges = relationship("UserBadge", back_populates="users")
 
 
 class CheckCode(Base):
@@ -299,4 +301,26 @@ class BoyaEntrust(Base):
     type = Column(String, nullable=False)
 
 
+class Badge(Base):
+    __tablename__ = 'badges'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    creater_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    short_name = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
+    background_color = Column(String, nullable=False)
+    icon_url = Column(String, nullable=False)
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
+    cost = Column(Integer, nullable=False, default=0)
 
+    creater = relationship("User", foreign_keys=[creater_id])
+    users = relationship("UserBadge", back_populates="badges")
+
+
+class UserBadge(Base):
+    __tablename__ = 'user_badges'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    badge_id = Column(Integer, ForeignKey('badges.id'), primary_key=True)
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
+
+    users = relationship("User", foreign_keys=[user_id], back_populates="badges")
+    badges = relationship("Badge", foreign_keys=[badge_id], back_populates="users")

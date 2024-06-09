@@ -2,7 +2,7 @@ import uvicorn
 from debug_toolbar.middleware import DebugToolbarMiddleware
 from fastapi import FastAPI
 
-from banhang import user, blog, question, file, message
+from banhang import user, blog, question, file, message, badge
 
 from scripts import recreate_db, buaa_api_renewer
 
@@ -28,6 +28,7 @@ app.include_router(blog.router)
 app.include_router(question.router)
 app.include_router(file.router)
 app.include_router(message.router)
+app.include_router(badge.router)
 
 app.add_middleware(
     CORSMiddleware,
