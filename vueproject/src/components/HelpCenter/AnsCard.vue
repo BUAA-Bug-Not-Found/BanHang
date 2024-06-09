@@ -77,6 +77,9 @@ export default {
           (res) => {
             if (res.isSuccess === true) {
               ElMessage.success("删除成功")
+              console.log(props.index)
+              console.log(props.index)
+              console.log(props.index)
               context.emit("delAns", {index: props.index})
               delDialog.value = false
             } else {

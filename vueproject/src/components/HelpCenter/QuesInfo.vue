@@ -87,13 +87,14 @@ export default {
 
     const refresh = (index) => {
       qid.value = index
-      question.value.ansIdList = []
+      ansIdList.value = []
       avatarShow.value = false
       getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            ansIdList.value = res.question.ansIdList
             recommendQues.value = []
             avatarShow.value = true
             ifFocus.value = res.question.ifUserFocus
@@ -126,6 +127,7 @@ export default {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            ansIdList.value = res.question.ansIdList
             avatarShow.value = true
             ifFocus.value = res.question.ifUserFocus
             recommendQues.value = []
@@ -232,7 +234,7 @@ export default {
                           replyHtml.value = ''
                           imageList.value = []
                           sheet2.value = false
-                          question.value.ansIdList.push(res.ansId)
+                          ansIdList.value.push(res.ansId)
                         } else {
                           ElMessage.error(res.description)
                         }
@@ -248,6 +250,8 @@ export default {
     const delPic = (index) => {
       editImgList.value.splice(index, 1)
     }
+
+    const ansIdList = ref([])
 
     const setLikeQues = () => {
       const state = UserStateStore()
@@ -288,7 +292,11 @@ export default {
     const isUser = ref(false);
 
     const delAns = (index) => {
-      question.value.ansIdList.splice(index, 1)
+      //ansIdList.value = ansIdList.value.filter(ans => ans != index.index);
+      var temp = ansIdList.value
+      ansIdList.value = []
+      temp.splice(index.index, 1)
+      ansIdList.value = temp
     }
 
     const editHtml = ref("")
@@ -509,7 +517,8 @@ export default {
       reportQues,
       getUserName,
       userName,
-      reportReason
+      reportReason,
+      ansIdList
     };
   },
 };
@@ -584,7 +593,7 @@ export default {
                   </v-btn>
                   <v-btn variant="text" prepend-icon="mdi-message-reply-text"
                          @click="openAns = true;openComment = false" color="blue-grey-lighten-2">
-                    {{ question.ansIdList.length }} 条回答
+                    {{ ansIdList.length }} 条回答
                   </v-btn>
                   <v-menu v-show="menuClick" :location="'bottom'">
                     <template v-slot:activator="{ props }">
@@ -655,12 +664,12 @@ export default {
 
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部回答 </span>
-              <span style="color: gray">{{ question.ansIdList.length }}</span>
+              <span style="color: gray">{{ ansIdList.length }}</span>
             </div>
-            <div v-if="question.ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
+            <div v-if="ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
               问题正在等待你的答复哦~
             </div>
-            <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
+            <AnsCard v-for="(ans,index) in ansIdList" :key="'ans1-' + ans"
                      :quesId="qid"
                      :ansId="ans" :index="index" @delAns="delAns"/>
             <div style="height: 100px"></div>
@@ -785,7 +794,7 @@ export default {
             <v-row style="margin-left: 10px;height:60px;font-size:12px;color: grey">
               <v-col cols="4">
                 <span style="margin-right: 4px;color: black">{{ likeSum }}</span> 点赞 ·
-                <span style="margin-right: 4px;margin-left: 3px;color: black">{{ question.ansIdList.length }}</span> 回复
+                <span style="margin-right: 4px;margin-left: 3px;color: black">{{ ansIdList.length }}</span> 回复
               </v-col>
               <v-col offset="4">
                 <v-btn :prepend-icon="'mdi-focus-field'"
@@ -805,12 +814,12 @@ export default {
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部回答 </span>
-              <span style="color: gray">{{ question.ansIdList.length }}</span>
+              <span style="color: gray">{{ ansIdList.length }}</span>
             </div>
-            <div v-if="question.ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
+            <div v-if="ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
               问题正在等待你的答复哦~
             </div>
-            <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
+            <div v-for="(ans,index) in ansIdList" :key="'ans2-' + ans">
               <AppAnsCard :quesId="qid" :ansId="ans" :index="index" @delAns="delAns"/>
             </div>
           </v-card>
