@@ -119,6 +119,38 @@ def resize_image(image_path, output_path, size=(500, 500)):
         img_resized.save(output_path)
 
 
+@router.post("/uploadBadgeImage/", tags=['File'])
+async def upload_badge_image(file: UploadFile, current_user: Optional[dict] = Depends(authorize)):
+    if current_user == None:
+        return {"response": "error"}
+    auth = oss2.Auth(oss_config.ACCESS_KEY_ID, oss_config.ACCESS_KEY_SECRET)
+    if oss_config.CNAME:
+        bucket = oss2.Bucket(auth, oss_config.CNAME, oss_config.BUCKET_NAME, is_cname=True)
+    else:
+        bucket = oss2.Bucket(auth, oss_config.ENDPOINT, oss_config.BUCKET_NAME)
+    file_content = await file.read()
+    root, extension = os.path.splitext(file.filename)
+    local_file_path = uuid.uuid4().hex + extension
+    local_resized_file_path = uuid.uuid4().hex + extension
+    oss_file_path = str("/badge/" + uuid.uuid4().hex + extension)
+    with open(local_file_path, "wb") as f:
+        f.write(file_content)
+    try:
+        resize_image(local_file_path, local_resized_file_path, size=(200, 200))
+        os.remove(local_file_path)
+    except Exception as e:
+        os.remove(local_file_path)
+        return {"response": "error", "description": str(e)}
+    result = bucket.put_object_from_file(key=oss_file_path, filename=local_resized_file_path)
+    os.remove(local_resized_file_path)
+    if result.status == 200:
+        return {"response": "success",
+                "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (
+                            oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + oss_file_path}
+    else:
+        return {"response": "error"}
+
+
 @router.post("/getAppLastVersion/", tags=['File'])
 def get_app_last_version():
     auth = oss2.Auth(oss_config.ACCESS_KEY_ID, oss_config.ACCESS_KEY_SECRET)
