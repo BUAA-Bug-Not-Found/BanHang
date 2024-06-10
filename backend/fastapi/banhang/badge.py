@@ -69,7 +69,7 @@ def buy_badge(badge_id: BadgeId, current_user: Optional[dict] = Depends(authoriz
     if crud.get_user_badge_by_id(db, current_user['uid'], badge_id.badgeId) != None:
         return {"response": "error", "description": "You already have this badge"}
     db_user = crud.get_user_by_id(db, current_user['uid'])
-    if db_user.coin < db_badge.cost:
+    if db_user.privilege == 0 and db_user.coin < db_badge.cost:
         return {"response": "error", "description": "You didn't have enough coin."}
     if crud.buy_badge(db, db_user, db_badge):
         return {"response": "success"}
