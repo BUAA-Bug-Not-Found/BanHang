@@ -145,7 +145,7 @@
                       <v-btn prepend-icon="mdi-star-four-points-circle-outline" size="small" color="primary"
                              @click="buyBadge(badge)">
                         <span v-if="badge.badgeCost != 0">
-                          {{badge.badgeCost}}
+                          {{ badge.badgeCost }}
                         </span>
                         <span v-else>
                           免费获取
@@ -328,7 +328,7 @@
           <v-slide-group show-arrows>
             <v-slide-item
                 v-for="(content, index) in badges"
-                :key="content.badgId"
+                :key="content.badgeId"
                 :style="'padding:4px;'"
             >
               <v-card outlined @click="clickBadge(index)" style="cursor:pointer">
@@ -488,10 +488,13 @@ export default {
     })
 
     // getBadgesByUserId(userStateStore().user_id, false).then((res) => {
-    getBadgesByUserId(userStateStore().user_id).then((res) => {
-      if (res == true) // 出现错误那就是空数组就可以了
-        this.badges = res
-    })
+    getBadgesByUserId(userStateStore().user_id).then(
+        (res) => {
+          if (res) {// 出现错误那就是空数组就可以了
+            this.badges = res
+          }
+        }
+    )
 
     Promise.all([
       getCurrentLevelById(userStateStore().user_id),
