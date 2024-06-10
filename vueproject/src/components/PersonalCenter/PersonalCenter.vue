@@ -228,7 +228,6 @@
                   <v-btn
                       class="text-none"
                       color="primary"
-                      rounded="xl"
                       :prepend-icon="'mdi-star-four-points-circle-outline'"
                       text="1000 创建"
                       variant="flat"
