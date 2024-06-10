@@ -5,14 +5,15 @@
       <div v-if="userId !== -1" class="avatar-with-username">
         <UserAvatar :userId="userId"></UserAvatar>
         <span class="username">{{ userName }}</span>
-        <span>
+        <div
+            style="margin-left: 5px; margin-bottom: 10px; margin-top: 30px; display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
           <v-chip v-for="badge in badgeList" size="small"
                   :key="badge.badgeId" :color="badge.badgeColor"
                   :class="`cursor-pointer`"
-                  style="margin-left: 1%; margin-bottom: 5px;">
+                  style="margin-left: 10px; margin-bottom: 5px;">
             {{ badge.badgeName }}
           </v-chip>
-        </span>
+        </div>
       </div>
       <div v-else class="avatar-with-username">
         <v-avatar>
@@ -367,6 +368,7 @@ export default {
 <style scoped>
 .avatar-with-username {
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
 

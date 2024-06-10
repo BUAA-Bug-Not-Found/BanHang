@@ -4,14 +4,6 @@
       <div class="user-info">
         <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
           <UserAvatar :userId="this.userId"></UserAvatar>
-          <span>
-            <v-chip v-for="badge in badgeList" size="xsmall"
-                    :key="badge.badgeId" :color="badge.badgeColor"
-                    :class="`cursor-pointer`"
-                    style="margin-left: 1%; margin-bottom: 5px;">
-            {{ badge.badgeName }}
-            </v-chip>
-          </span>
         </div>
         <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
           <v-avatar style="margin-top:8px">
@@ -20,12 +12,34 @@
         </div>
         <div class="user-details">
           <div v-if="topCommentId === replyToCommentId">
-            <span class="user-name">{{ userName }}</span>
+            <span class="username-and-badge">
+              <span class="user-name">{{ userName }}</span>
+              <div v-show="this.userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-left: 10px; margin-bottom: 5px;">
+                        {{ badge.badgeName }}
+                </v-chip>
+              </div>
+            </span>
           </div>
           <div v-else>
-            <span class="user-name">{{ userName }}</span> → <span class="reply-to-user-name">{{
-              replyToCommentName
-            }}</span>
+            <span class="username-and-badge">
+              <span class="user-name">{{ userName }}</span>
+              <div v-show="this.userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-left: 10px; margin-bottom: 5px;">
+                      {{ badge.badgeName }}
+                </v-chip>
+              </div>
+              →
+            <span class="reply-to-user-name">{{
+                replyToCommentName
+              }}</span>
+            </span>
           </div>
           <span class="time">{{ formatDate(time) }}</span>
         </div>
@@ -417,7 +431,13 @@ export default {
 .user-details {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   margin-left: 3px;
+}
+
+.username-and-badge {
+  display: flex;
+  flex-direction: row;
 }
 
 .user-name {
@@ -429,6 +449,7 @@ export default {
 .reply-to-user-name {
   font-size: 12px;
   font-weight: bold;
+  margin-left: 6px;
   color: #00b0ff; /* 可根据需要更改颜色 */
 }
 
