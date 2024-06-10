@@ -340,3 +340,24 @@ export function uploadBuyBadge(userId, badgeId) {
         return response.data
     })
 }
+
+
+export function delUserBadge(badgeId) {
+    return axios.request(
+        {
+            url: '/refundBadge',
+            method: 'post',
+            data: {
+                badgeId: badgeId
+            }
+        }
+    ).then(r => {
+        console.log("RRRRRRRRRRRRRR=>")
+        console.log(r.data)
+        console.log(r.data.response)
+        if (r.data.response == 'success') return true
+        else return false
+    }).catch(() => {
+        return false
+    })
+}
