@@ -887,3 +887,11 @@ def create_badge(db : Session, creater_id: int,
 
 def get_user_badge_by_id(db: Session, user_id: int, badge_id: int):
     return db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).scalar()
+
+
+def refund_user_badge_by_id(db: Session, user_id: int, badge_id: int):
+    affected = db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).delete()
+    if affected != 0:
+        return True
+    else:
+        return False
