@@ -229,7 +229,8 @@
                       class="text-none"
                       color="primary"
                       rounded="xl"
-                      text="创建"
+                      :prepend-icon="'mdi-square-rounded-badge-outline'"
+                      text="1000 创建"
                       variant="flat"
                       @click="uploadBadge"
                   ></v-btn>
