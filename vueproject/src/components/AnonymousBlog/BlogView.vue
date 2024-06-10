@@ -5,6 +5,14 @@
       <div v-if="userId !== -1" class="avatar-with-username">
         <UserAvatar :userId="userId"></UserAvatar>
         <span class="username">{{ userName }}</span>
+        <span>
+          <v-chip v-for="badge in badgeList" size="small"
+                  :key="badge.badgeId" :color="badge.badgeColor"
+                  :class="`cursor-pointer`"
+                  style="margin-left: 1%; margin-bottom: 5px;">
+            {{ badge.badgeName }}
+          </v-chip>
+        </span>
       </div>
       <div v-else class="avatar-with-username">
         <v-avatar>
@@ -159,6 +167,7 @@ import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
 import router from "@/router";
 import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 
 export default {
@@ -190,7 +199,8 @@ export default {
       showCommentInput: false,
       newComment: '',
       commentAnonymous: true,
-      bottomSheet: false
+      bottomSheet: false,
+      badgeList: []
     };
   },
 
@@ -227,6 +237,7 @@ export default {
             this.time = data.time
             this.tagList = data.tagList
             this.userId = data.userId
+            this.fetchBadgeInfo()
           }
       )
     },
@@ -245,6 +256,13 @@ export default {
               time: comment.time,
               replyToCommentId: comment.replyToCommentId,
             }))
+          }
+      )
+    },
+    fetchBadgeInfo() {
+      getBadgesByUserId(this.userId).then(
+          (data) => {
+            this.badgeList = data
           }
       )
     },

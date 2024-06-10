@@ -4,6 +4,14 @@
       <div class="user-info">
         <div v-if="this.userId !== -1" style="display:flex; justify-content: end;align-content: center">
           <UserAvatar :userId="this.userId"></UserAvatar>
+          <span>
+            <v-chip v-for="badge in badgeList" size="xsmall"
+                    :key="badge.badgeId" :color="badge.badgeColor"
+                    :class="`cursor-pointer`"
+                    style="margin-left: 1%; margin-bottom: 5px;">
+            {{ badge.badgeName }}
+            </v-chip>
+          </span>
         </div>
         <div v-if="this.userId === -1" style="display:flex; justify-content: end;align-content: center">
           <v-avatar style="margin-top:8px">
@@ -148,6 +156,7 @@ import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
 import {deleteCommentByCommentId, submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
 import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "ReplyShow",
@@ -206,17 +215,26 @@ export default {
       menuCLick: false,
       showComplainWin: false,
       complainCause: "",
-      isCurUser: false
+      isCurUser: false,
+      badgeList: []
     };
   },
 
   created() {
     this.isCurUser = UserStateStore().getUserId === this.userId
+    this.fetchBadgeInfo()
   },
 
   methods: {
     userStateStore,
     useDisplay,
+    fetchBadgeInfo() {
+      getBadgesByUserId(this.userId).then(
+          (data) => {
+            this.badgeList = data
+          }
+      )
+    },
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
