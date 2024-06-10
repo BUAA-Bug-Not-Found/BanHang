@@ -205,7 +205,7 @@ def download_log(current_user: Optional[dict] = Depends(authorize), db: Session 
         return UniException(key='isSuccess', value=False, others={'description': ' 日志地址错误'})
     if not os.path.exists('./tmp'):
         os.mkdir('./tmp')
-    with open(os.getenv('BANHANG_LOG_PATH'), 'r') as f:
+    with open(os.getenv('BANHANG_LOG_PATH'), 'r', errors='ignore') as f:
         lines = f.readlines()
         lines = lines[-1000:]
     file_lock.acquire()
