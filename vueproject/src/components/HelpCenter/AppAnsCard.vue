@@ -13,6 +13,7 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import router from "@/router";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import SubAppAnsCard from "@/components/HelpCenter/AppSubAnsCard.vue";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "AppAnsCard",
@@ -29,6 +30,13 @@ export default {
             likeSum.value = res.answer.likeSum
             isUser.value = UserStateStore().getUserId === ans.value.userId
             subAnsIdList.value = res.answer.subAnsIdList
+            getBadgesByUserId(ans.value.userId).then(
+                (res) => {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
           }
       )
     }
@@ -191,6 +199,8 @@ export default {
       subAnsIdList.value.push(ansId)
     }
 
+    const badges = ref([])
+
     return {
       ans,
       ansIdRef,
@@ -217,7 +227,8 @@ export default {
       getUserName,
       reportReason,
       truncate,
-      receiveSubAnsCard
+      receiveSubAnsCard,
+      badges
     };
   },
 };
@@ -241,7 +252,19 @@ export default {
         <v-col cols="10">
           <div style="margin-top: 10px">
             <div style="font-size: 15px">
-              <span style="font-size: 15px">{{ ans.userName }}</span>
+              <span style="font-size: 15px;margin-right: 3px">{{ ans.userName }}</span>
+              <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                <template v-slot:activator="{ props }">
+                  <v-chip
+                      size="x-small"
+                      :style="{ color: badge.badgeColor }"
+                      label
+                      v-bind="props"
+                  >
+                    {{ badge.badgeName }}
+                  </v-chip>
+                </template>
+              </v-tooltip>
             </div>
             <div style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</div>
           </div>

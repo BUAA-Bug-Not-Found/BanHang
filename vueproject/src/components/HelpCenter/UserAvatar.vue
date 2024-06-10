@@ -12,6 +12,22 @@
               <v-img :src="url"></v-img>
             </v-avatar>
             <h3>{{ nickname }}</h3>
+            <v-row style="margin: 1px">
+              <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                <template v-slot:activator="{ props }">
+                  <v-chip
+                      size="x-small"
+                      class="ma-2"
+                      :style="{ color: badge.badgeColor }"
+                      label
+                      v-bind="props"
+                  >
+                    {{ badge.badgeName }}
+                  </v-chip>
+                </template>
+              </v-tooltip>
+            </v-row>
+
             <p class="text-caption mt-1">
               {{ sign }}
             </p>
@@ -36,6 +52,7 @@ import {getInfoByUserIdAPI} from "@/components/HelpCenter/api";
 import {ref} from "vue";
 import UserStateStore from "@/store";
 import router from "@/router";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "UserAvatar",
@@ -59,6 +76,7 @@ export default {
       }
     }
 
+    const badges = ref([])
     const init = () => {
       getInfoByUserIdAPI(props.userId).then(
           (res) => {
@@ -69,6 +87,13 @@ export default {
             context.emit('returnUserName', nickname.value)
           }
       )
+      getBadgesByUserId(props.userId).then(
+          (res) => {
+            if(res) {
+              badges.value = res
+            }
+          }
+      )
     }
 
     init()
@@ -77,7 +102,8 @@ export default {
       nickname,
       sign,
       url,
-      goHomePage
+      goHomePage,
+      badges
     }
   }
 }

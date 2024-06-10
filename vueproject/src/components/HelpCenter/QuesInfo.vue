@@ -22,6 +22,7 @@ import UserStateStore, {userStateStore} from "@/store";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {api as viewerApi} from "v-viewer";
 import {Plus} from "@element-plus/icons-vue";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "QuesInfo",
@@ -104,6 +105,13 @@ export default {
               console.log(e)
             }
             isUser.value = UserStateStore().getUserId === question.value.userId
+            getBadgesByUserId(question.value.userId).then(
+                (res)=> {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
             disTags.value = []
             for (let i = 0; i < question.value.tagIdList.length; i++) {
               for (let j = 0; j < tags.value.length; j++) {
@@ -117,6 +125,8 @@ export default {
     }
 
     const avatarShow = ref(false)
+
+    const badges = ref([])
 
     const init = () => {
       let router = useRouter()
@@ -137,6 +147,13 @@ export default {
               console.log(e)
             }
             isUser.value = UserStateStore().getUserId === question.value.userId
+            getBadgesByUserId(question.value.userId).then(
+                (res)=> {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
             getTagsApi().then(
                 (data) => {
                   tags.value = data.tags
@@ -522,7 +539,8 @@ export default {
       getUserName,
       userName,
       reportReason,
-      ansIdList
+      ansIdList,
+      badges
     };
   },
 };
@@ -571,10 +589,27 @@ export default {
                     </div>
                   </v-col>
                 </v-row>
-                <div style="display: flex; align-items: center;margin-left: 10px">
+                <div style="display: flex; align-items: center;margin-left: 10px;width: 100%">
                   <UserAvatar v-if="avatarShow" :userId="question.userId" @returnUserName="getUserName"></UserAvatar>
-                  <v-col cols="7">
-                    <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
+                  <v-col cols="10">
+                    <v-row style="margin: 1px" :align="'baseline'">
+                      <span style="font-size: 20px;margin-top: 10px">
+                      {{ question.userName }}
+                    </span>
+                      <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                        <template v-slot:activator="{ props }">
+                          <v-chip
+                              size="x-small"
+                              class="ma-2"
+                              :style="{ color: badge.badgeColor }"
+                              label
+                              v-bind="props"
+                          >
+                            {{ badge.badgeName }}
+                          </v-chip>
+                        </template>
+                      </v-tooltip>
+                    </v-row>
                     <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
                   </v-col>
                 </div>
@@ -782,7 +817,24 @@ export default {
                 <UserAvatar :userId="question.userId" @returnUserName="getUserName"/>
               </div>
               <div style="margin-left: 5px">
-                <p style="font-size: 15px;margin-top: 10px">{{ question.userName }}</p>
+                <v-row style="margin: 1px" :align="'baseline'">
+                      <span style="font-size: 20px;margin-top: 10px">
+                      {{ question.userName }}
+                    </span>
+                  <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                    <template v-slot:activator="{ props }">
+                      <v-chip
+                          size="x-small"
+                          class="ma-2"
+                          :style="{ color: badge.badgeColor }"
+                          label
+                          v-bind="props"
+                      >
+                        {{ badge.badgeName }}
+                      </v-chip>
+                    </template>
+                  </v-tooltip>
+                </v-row>
                 <p style="font-size: 10px;color: gray">{{ formatDate(question.quesTime) }}</p>
               </div>
             </div>
