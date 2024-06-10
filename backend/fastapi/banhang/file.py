@@ -201,7 +201,22 @@ def download_log(current_user: Optional[dict] = Depends(authorize), db: Session 
     user = crud.get_user_by_id(db, current_user['uid'])
     if user.privilege <= 0:
         raise UniException(key='isSuccess', value=False, others={'description': ' 您不是管理员'})
-    return FileResponse(
-        os.getenv('BANHANG_LOG_PATH'),
-        filename='banhang_log.txt'
-    )
+    if not os.path.exists(os.getenv('BANHANG_LOG_PATH')):
+        return UniException(key='isSuccess', value=False, others={'description': ' 日志地址错误'})
+    if not os.path.exists('./tmp'):
+        os.mkdir('./tmp')
+    with open(os.getenv('BANHANG_LOG_PATH'), 'r') as f:
+        lines = f.readlines()
+        lines = lines[-1000:]
+    file_lock.acquire()
+    try:
+        with open(f'./tmp/tmplog', 'w', encoding='utf-8') as f:
+            f.write("".join(lines))
+        return FileResponse(
+            f'./tmp/tmplog',
+            filename=f"banhang_log.txt",
+            background=BackgroundTask(lambda: os.remove(f'./tmp/tmplog')),
+        )
+    finally:
+        file_lock.release()
+        print('release')
