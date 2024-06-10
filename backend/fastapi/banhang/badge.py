@@ -56,7 +56,7 @@ def get_badges_by_user_id(user_id: UserId, db: Session = Depends(get_db)):
         return {"response": "error", "description": "No corresponding user ID exists"}
     badges = []
     for db_badge in db_user.badges:
-        badges.append(BadgeShow(**get_badge_from_db_badge(db_badge.badges)))
+        badges.append(BadgeShow(**get_badge_from_db_badge(db_badge)))
     return {"response": "success", "badges": badges}
 
 @router.post("/buyBadge")
