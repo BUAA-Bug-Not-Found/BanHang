@@ -53,7 +53,7 @@ def get_badges_by_user_id(userId: int, db: Session = Depends(get_db)):
         badges.append(BadgeShow(**get_badge_from_db_badge(db_badge)))
     return {"response": "success", "badges": badges}
 
-@router.post("/bugBadge")
+@router.post("/buyBadge")
 def buy_badge(badge_id: int, current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
     if current_user == None:
         return {"response": "error", "description": "Please login first"}
