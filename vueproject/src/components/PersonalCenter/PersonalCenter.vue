@@ -655,7 +655,7 @@ export default {
               this.buyBadgeDialog = false
               router.go(0)
             } else {
-              ElMessage.success("购买失败，请检查您的积分余额，或者稍后再试")
+              ElMessage.error(res.description)
             }
           }
       )
