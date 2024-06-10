@@ -891,6 +891,7 @@ def get_user_badge_by_id(db: Session, user_id: int, badge_id: int):
 
 def refund_user_badge_by_id(db: Session, user_id: int, badge_id: int):
     affected = db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).delete()
+    db.commit()
     if affected != 0:
         return True
     else:
