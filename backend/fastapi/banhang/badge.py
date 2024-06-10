@@ -63,10 +63,10 @@ def get_badges_by_user_id(user_id: UserId, db: Session = Depends(get_db)):
 def buy_badge(badge_id: BadgeId, current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
     if current_user == None:
         return {"response": "error", "description": "Please login first"}
-    db_badge = crud.get_badge_by_id(badge_id.badgeId)
+    db_badge = crud.get_badge_by_id(db, badge_id.badgeId)
     if db_badge == None:
         return {"response": "error", "description": "No corresponding badge ID exists"}
-    db_user = crud.get_user_by_id(current_user['uid'])
+    db_user = crud.get_user_by_id(db, current_user['uid'])
     if db_user.coin < db_badge.cost:
         return {"response": "error", "description": "You didn't have enough coin."}
     if crud.buy_badge(db, db_user, db_badge):
