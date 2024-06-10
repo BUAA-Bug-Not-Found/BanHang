@@ -44,8 +44,8 @@ def get_all_badges(db: Session = Depends(get_db)):
     return {"response": "success", "badges": badges}
 
 @router.post("/getBadgesByUserId")
-def get_badges_by_user_id(user_id: int, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_id(user_id)
+def get_badges_by_user_id(userId: int, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_id(userId)
     if db_user == None:
         return {"response": "error", "description": "No corresponding user ID exists"}
     badges = []
