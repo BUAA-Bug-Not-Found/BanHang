@@ -883,3 +883,7 @@ def create_badge(db : Session, creater_id: int,
     else:
         db.commit()
     return db_badge
+
+
+def get_user_badge_by_id(db: Session, user_id: int, badge_id: int):
+    return db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).scalar()

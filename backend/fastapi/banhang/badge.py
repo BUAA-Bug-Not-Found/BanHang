@@ -51,7 +51,7 @@ class UserId(BaseModel):
 
 @router.post("/getBadgesByUserId")
 def get_badges_by_user_id(user_id: UserId, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_id(user_id.userId)
+    db_user = crud.get_user_by_id(db, user_id.userId)
     if db_user == None:
         return {"response": "error", "description": "No corresponding user ID exists"}
     badges = []
@@ -66,6 +66,8 @@ def buy_badge(badge_id: BadgeId, current_user: Optional[dict] = Depends(authoriz
     db_badge = crud.get_badge_by_id(db, badge_id.badgeId)
     if db_badge == None:
         return {"response": "error", "description": "No corresponding badge ID exists"}
+    if crud.get_user_badge_by_id(db, current_user['uid'], badge_id.badgeId) != None:
+        return {"response": "error", "description": "You already have this badge"}
     db_user = crud.get_user_by_id(db, current_user['uid'])
     if db_user.coin < db_badge.cost:
         return {"response": "error", "description": "You didn't have enough coin."}
