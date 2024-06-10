@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime, Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime, Table, text
 from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy.sql import func
 
@@ -25,7 +25,7 @@ class User(Base):
     userAvatarURL = Column(String(256), nullable=False,
                            default="https://banhang.oss-cn-beijing.aliyuncs.com/3bda01f4fce948d88ee72babced0a3c0.png")
     sign = Column(String, nullable=False, default="快来设置个性签名叭~~")
-    coin = Column(Integer, nullable=False, default=0)
+    coin = Column(Integer, nullable=False, server_default=text('1'))
     create_at = Column(DateTime, server_default=func.now())
 
     activate_time = Column(DateTime, nullable=True, server_default=func.now())
