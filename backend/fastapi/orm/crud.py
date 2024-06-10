@@ -845,10 +845,11 @@ def get_badge_by_id(db: Session, badge_id: int):
 def buy_badge(db: Session, db_user: User, db_badge: Badge):
     db_user_badge = UserBadge(user_id = db_user.id, badge_id = db_badge.id)
     try:
-        db_user.coin = db_user.coin - db_badge.cost
-        if db_user.coin < 0:
-            return False
-        db.add(db_user)
+        if db_user.privilege == 0:
+            db_user.coin = db_user.coin - db_badge.cost
+            if db_user.coin < 0:
+                return False
+            db.add(db_user)
         db_user_badge = UserBadge(user_id=db_user.id, badge_id=db_badge.id)
         db.add(db_user_badge)
     except:
@@ -862,14 +863,20 @@ def create_badge(db : Session, creater_id: int,
                       full_name: str,
                       background_color: str,
                       icon_url: str,
-                      cost=1000):
+                      cost=500):
     db_badge = Badge(creater_id=creater_id,
                      short_name=short_name,
                      full_name=full_name,
                      background_color=background_color,
                      icon_url=icon_url,
                      cost=cost)
-    try:
+    try:    
+        db_user = get_user_by_id(db, creater_id)
+        if db_user.privilege == 0:
+            db_user.coin = db_user.coin - 1000
+            if db_user.coin < 0:
+                return None
+            db.add(db_user)
         db.add(db_badge)
     except:
         db.rollback()
