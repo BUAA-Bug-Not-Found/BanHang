@@ -119,7 +119,7 @@
                   :value="1"
               >
                 <v-row>
-                  <v-col cols="4" v-for="badge in mall_badges" :key="badge.badgeId">
+                  <v-col :cols="useDisplay().smAndDown.value? 6 : 4" v-for="badge in mall_badges" :key="badge.badgeId">
                     <v-card style="margin: 10px" elevation="1">
                       <v-row justify="center" style="margin-top: 10px">
                         <v-avatar color="surface-variant"
@@ -170,7 +170,7 @@
                   预览效果：
                 </div>
                 <v-row>
-                  <v-col :cols="4" :offset="4">
+                  <v-col :cols="useDisplay().smAndDown.value? 6 : 4" :offset="useDisplay().smAndDown.value? 3 : 4">
                     <el-form :style="'width: 100%'">
                       <el-upload
                           class="avatar-uploader1"
@@ -457,6 +457,7 @@ import {api as viewerApi} from "v-viewer";
 import {ElMessage} from "element-plus";
 import {Plus} from "@element-plus/icons-vue";
 import {uploadFileApi} from "@/components/HelpCenter/api";
+import {useDisplay} from "vuetify";
 
 export default {
   components: {Plus},
@@ -568,6 +569,7 @@ export default {
     };
   },
   methods: {
+    useDisplay,
     clickDelBadge() {
       // 删除掉curBadgeId
       delUserBadge(this.curBadgeId).then((r) => {
