@@ -655,6 +655,8 @@ export default {
               this.buyBadgeDialog = false
               router.go(0)
             } else {
+              this.badgeDialog = false
+              this.buyBadgeDialog = false
               ElMessage.error(res.description)
             }
           }
@@ -754,5 +756,4 @@ export default {
   height: 100%;
   text-align: center;
 }
-
 </style>
