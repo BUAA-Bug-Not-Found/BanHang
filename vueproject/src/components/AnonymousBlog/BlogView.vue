@@ -7,10 +7,10 @@
         <span class="username">{{ userName }}</span>
         <div
             style="margin-left: 5px; margin-bottom: 10px; margin-top: 30px; display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
-          <v-chip v-for="badge in badgeList" size="small"
+          <v-chip v-for="badge in badgeList" size="x-small"
                   :key="badge.badgeId" :color="badge.badgeColor"
                   :class="`cursor-pointer`"
-                  style="margin-left: 10px; margin-bottom: 5px;">
+                  style="margin-bottom: 5px; border-radius: 5px">
             {{ badge.badgeName }}
           </v-chip>
         </div>

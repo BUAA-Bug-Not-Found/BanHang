@@ -14,28 +14,30 @@
           <div v-if="topCommentId === replyToCommentId">
             <span class="username-and-badge">
               <span class="user-name">{{ userName }}</span>
-              <div v-show="this.userId !== -1" style="margin-left: 2px">
-                <v-chip v-for="badge in badgeList" size="x-small"
-                        :key="badge.badgeId" :color="badge.badgeColor"
-                        :class="`cursor-pointer`"
-                        style="margin-left: 10px; margin-bottom: 5px;">
-                        {{ badge.badgeName }}
-                </v-chip>
-              </div>
+<!--              <div v-show="this.userId !== -1" style="margin-left: 2px">-->
+<!--                <v-chip v-for="badge in badgeList" size="x-small"-->
+<!--                        :key="badge.badgeId" :color="badge.badgeColor"-->
+<!--                        :class="`cursor-pointer`"-->
+<!--                        style="margin-left: 10px; margin-bottom: 5px;">-->
+<!--                        {{ badge.badgeName }}-->
+<!--                </v-chip>-->
+<!--              </div>-->
             </span>
           </div>
           <div v-else>
             <span class="username-and-badge">
               <span class="user-name">{{ userName }}</span>
-              <div v-show="this.userId !== -1" style="margin-left: 2px">
-                <v-chip v-for="badge in badgeList" size="x-small"
-                        :key="badge.badgeId" :color="badge.badgeColor"
-                        :class="`cursor-pointer`"
-                        style="margin-left: 10px; margin-bottom: 5px;">
-                      {{ badge.badgeName }}
-                </v-chip>
-              </div>
-              →
+<!--              <div v-show="this.userId !== -1" style="margin-left: 2px">-->
+<!--                <v-chip v-for="badge in badgeList" size="x-small"-->
+<!--                        :key="badge.badgeId" :color="badge.badgeColor"-->
+<!--                        :class="`cursor-pointer`"-->
+<!--                        style="margin-left: 10px; margin-bottom: 5px;">-->
+<!--                      {{ badge.badgeName }}-->
+<!--                </v-chip>-->
+<!--              </div>-->
+              <span style="font-size: 12px; color: #9e9e9e; margin-left: 8px; margin-right: 2px">
+                ➡
+              </span>
             <span class="reply-to-user-name">{{
                 replyToCommentName
               }}</span>
