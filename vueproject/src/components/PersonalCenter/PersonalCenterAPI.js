@@ -1,5 +1,5 @@
 import axios from "axios";
-import { showTip } from "../AccountManagement/AccountManagementAPI";
+import {showTip} from "../AccountManagement/AccountManagementAPI";
 
 export function queryStar(_a, _b) {
     // a b email
@@ -13,7 +13,7 @@ export function queryStar(_a, _b) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -60,7 +60,7 @@ export function setSign(_a, _id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -77,7 +77,7 @@ export function setHeadImage(_id, _url) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -105,7 +105,7 @@ export function getWaterBlogs(_id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -133,7 +133,7 @@ export function getFans(_id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -158,8 +158,7 @@ export function getComplainAmount() {
     return axios.request({
         url: "/getComplainAmount",
         method: "get",
-        params: {
-        }
+        params: {}
     }).then((reply) => {
         return reply.data // 返回一个整数
     }).catch(() => {
@@ -224,8 +223,7 @@ export function getComplainList() {
     return axios.request({
         url: "/getComplainList",
         method: "get",
-        params: {
-        }
+        params: {}
     }).then((r) => {
         return r.data
     }).catch(() => {
@@ -261,31 +259,22 @@ export function getCurrentExpById(_id) {
     })
 }
 
-export function uploadBadgeAPI(badgeName, badgeDescription, file, color, cost) {
-    let form = new FormData
-    form.append("file", file)
-    return axios({
-        method: "post",
-        url: "/uploadBadgeImage",
-        data: form,
-        headers: {'Content-Type': 'multipart/form-data'}
-    }).then(response1 => {
-        return axios.request(
-            {
-                url: '/uploadBadge',
-                method: 'post',
-                headers: {'Content-Type': 'application/json'},
-                data: JSON.stringify({
-                    badgeName: badgeName,
-                    badgeDesc: badgeDescription,
-                    badgeUrl: response1.data.fileUrl,
-                    badgeColor: color,
-                    badgeCost: cost,
-                })
-            }
-        ).then(response2 => {
-            return response2.data
-        })
+export function uploadBadgeAPI(badgeName, badgeDescription, badgeUrl, color, cost) {
+    return axios.request(
+        {
+            url: '/uploadBadge',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                badgeName: badgeName,
+                badgeDesc: badgeDescription,
+                badgeUrl: badgeUrl,
+                badgeColor: color,
+                badgeCost: cost,
+            })
+        }
+    ).then(response2 => {
+        return response2.data
     })
 }
 
@@ -295,12 +284,12 @@ export function getBadgesByUserId(userId) {
         url: "getBadgesByUserId",
         method: "post",
         data: {
-            "userId": userId,
+            "user_id": userId,
         }
     }).then((r) => {
         if (r.data.response == 'success')
             return r.data.badges // 表示成功
-        else 
+        else
             return false
     }).catch(() => {
         return false
@@ -319,7 +308,9 @@ export function setBadgeShowState(userId, badgeId, state) {
     }).then(r => {
         if (r.data.response == 'success') return true
         else return false
-    }).catch(() => { return false })
+    }).catch(() => {
+        return false
+    })
 }
 
 export function getBadges() {
@@ -328,8 +319,7 @@ export function getBadges() {
             url: '/getBadges',
             method: 'post',
             headers: {'Content-Type': 'application/json'},
-            data: JSON.stringify({
-            })
+            data: JSON.stringify({})
         }
     ).then(response => {
         return response.data
@@ -343,7 +333,6 @@ export function uploadBuyBadge(userId, badgeId) {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             data: JSON.stringify({
-                userId: userId,
                 badgeId: badgeId
             })
         }
