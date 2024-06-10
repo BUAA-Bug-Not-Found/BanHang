@@ -12,12 +12,34 @@
         </div>
         <div class="user-details">
           <div v-if="topCommentId === replyToCommentId">
-            <span class="user-name">{{ userName }}</span>
+            <span class="username-and-badge">
+              <span class="user-name">{{ userName }}</span>
+              <div v-show="this.userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-left: 10px; margin-bottom: 5px;">
+                        {{ badge.badgeName }}
+                </v-chip>
+              </div>
+            </span>
           </div>
           <div v-else>
-            <span class="user-name">{{ userName }}</span> → <span class="reply-to-user-name">{{
-              replyToCommentName
-            }}</span>
+            <span class="username-and-badge">
+              <span class="user-name">{{ userName }}</span>
+              <div v-show="this.userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-left: 10px; margin-bottom: 5px;">
+                      {{ badge.badgeName }}
+                </v-chip>
+              </div>
+              →
+            <span class="reply-to-user-name">{{
+                replyToCommentName
+              }}</span>
+            </span>
           </div>
           <span class="time">{{ formatDate(time) }}</span>
         </div>
@@ -55,6 +77,10 @@
               <v-list-item density="compact">
                 <div style="color: black; font-size: 16px" @click="showComplainWindow">
                   举报
+                </div>
+                <div v-if="userStateStore().isManager || this.isCurUser"
+                     style="color: red; font-size: 16px" @click="delComment">
+                  删除
                 </div>
               </v-list-item>
             </v-list>
@@ -142,8 +168,9 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {useDisplay} from "vuetify";
 import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
-import {submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
+import {deleteCommentByCommentId, submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
 import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "ReplyShow",
@@ -201,12 +228,27 @@ export default {
       bottomSheet: false,
       menuCLick: false,
       showComplainWin: false,
-      complainCause: ""
+      complainCause: "",
+      isCurUser: false,
+      badgeList: []
     };
   },
 
+  created() {
+    this.isCurUser = UserStateStore().getUserId === this.userId
+    this.fetchBadgeInfo()
+  },
+
   methods: {
+    userStateStore,
     useDisplay,
+    fetchBadgeInfo() {
+      getBadgesByUserId(this.userId).then(
+          (data) => {
+            this.badgeList = data
+          }
+      )
+    },
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
@@ -266,7 +308,7 @@ export default {
             (res) => {
               if (res.response == "success") {
                 ElMessage({
-                  message: '评论成功',
+                  message: '评论成功 ' + res.description,
                   showClose: true,
                   type: 'success',
                 })
@@ -330,6 +372,32 @@ export default {
         )
       }
     },
+
+    delComment() {
+      deleteCommentByCommentId(this.commentId).then(
+          (res) => {
+            if (res.response == "success") {
+              ElMessage({
+                message: '删除成功',
+                showClose: true,
+                type: 'success',
+              })
+              // this.$router.push({name: 'blogList', params: {tagId: -1}})
+              location.reload()
+            } else {
+              ElMessage({
+                message: '删除失败，请先登录或稍后再试',
+                showClose: true,
+                type: 'error',
+              })
+            }
+          }
+      )
+    },
+
+    replyShowHandleNewComment(comment) {
+      this.$emit('reply-list-show-new-comment', comment);
+    }
   }
 }
 </script>
@@ -363,7 +431,13 @@ export default {
 .user-details {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   margin-left: 3px;
+}
+
+.username-and-badge {
+  display: flex;
+  flex-direction: row;
 }
 
 .user-name {
@@ -375,6 +449,7 @@ export default {
 .reply-to-user-name {
   font-size: 12px;
   font-weight: bold;
+  margin-left: 6px;
   color: #00b0ff; /* 可根据需要更改颜色 */
 }
 

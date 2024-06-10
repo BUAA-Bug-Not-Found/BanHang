@@ -5,6 +5,15 @@
       <div v-if="userId !== -1" class="avatar-with-username">
         <UserAvatar :userId="userId"></UserAvatar>
         <span class="username">{{ userName }}</span>
+        <div
+            style="margin-left: 5px; margin-bottom: 10px; margin-top: 30px; display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
+          <v-chip v-for="badge in badgeList" size="small"
+                  :key="badge.badgeId" :color="badge.badgeColor"
+                  :class="`cursor-pointer`"
+                  style="margin-left: 10px; margin-bottom: 5px;">
+            {{ badge.badgeName }}
+          </v-chip>
+        </div>
       </div>
       <div v-else class="avatar-with-username">
         <v-avatar>
@@ -116,7 +125,7 @@
   </v-card>
 
   <!-- 评论列表 -->
-  <CommentList :comments="comments"/>
+  <CommentList :comments="comments" @new-comment="handleNewComment"/>
 
 
   <v-bottom-sheet
@@ -159,6 +168,7 @@ import {api as viewerApi} from "v-viewer";
 import {useDisplay} from "vuetify";
 import router from "@/router";
 import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 
 export default {
@@ -190,7 +200,8 @@ export default {
       showCommentInput: false,
       newComment: '',
       commentAnonymous: true,
-      bottomSheet: false
+      bottomSheet: false,
+      badgeList: []
     };
   },
 
@@ -227,6 +238,7 @@ export default {
             this.time = data.time
             this.tagList = data.tagList
             this.userId = data.userId
+            this.fetchBadgeInfo()
           }
       )
     },
@@ -245,6 +257,13 @@ export default {
               time: comment.time,
               replyToCommentId: comment.replyToCommentId,
             }))
+          }
+      )
+    },
+    fetchBadgeInfo() {
+      getBadgesByUserId(this.userId).then(
+          (data) => {
+            this.badgeList = data
           }
       )
     },
@@ -311,7 +330,7 @@ export default {
                     (res) => {
                       if (res.response == "success") {
                         ElMessage({
-                          message: '评论成功',
+                          message: '评论成功 ' + res.description,
                           showClose: true,
                           type: 'success',
                         })
@@ -333,6 +352,12 @@ export default {
       )
 
     },
+
+    handleNewComment(comment) {
+      // 将新评论添加到评论列表
+      this.comments.push(comment);
+    },
+
     gotoBlogList(tagId) {
       this.$router.push({name: 'blogList', params: {tagId: tagId}})
     }
@@ -343,6 +368,7 @@ export default {
 <style scoped>
 .avatar-with-username {
   display: flex;
+  flex-direction: row;
   align-items: center;
 }
 

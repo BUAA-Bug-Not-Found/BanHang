@@ -1,5 +1,5 @@
 import axios from "axios";
-import { showTip } from "../AccountManagement/AccountManagementAPI";
+import {showTip} from "../AccountManagement/AccountManagementAPI";
 
 export function queryStar(_a, _b) {
     // a b email
@@ -13,7 +13,7 @@ export function queryStar(_a, _b) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -60,7 +60,7 @@ export function setSign(_a, _id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -77,7 +77,7 @@ export function setHeadImage(_id, _url) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -105,7 +105,7 @@ export function getWaterBlogs(_id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -133,7 +133,7 @@ export function getFans(_id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -158,8 +158,7 @@ export function getComplainAmount() {
     return axios.request({
         url: "/getComplainAmount",
         method: "get",
-        params: {
-        }
+        params: {}
     }).then((reply) => {
         return reply.data // 返回一个整数
     }).catch(() => {
@@ -224,8 +223,7 @@ export function getComplainList() {
     return axios.request({
         url: "/getComplainList",
         method: "get",
-        params: {
-        }
+        params: {}
     }).then((r) => {
         return r.data
     }).catch(() => {
@@ -261,21 +259,22 @@ export function getCurrentExpById(_id) {
     })
 }
 
-export function uploadBadgeAPI(badgeName, badgeDescription, file, color, cost) {
-    let form = new FormData
-    form.append("name", badgeName)
-    form.append("description", badgeDescription)
-    form.append("file", file)
-    form.append("color", color)
-    form.append("cost", cost)
-    console.log("color => " + color)
-    return axios({
-        method: "post",
-        url: "https://banhang.lyhtool.com:8000/uploadBadge",
-        data: form,
-        headers: {'Content-Type': 'multipart/form-data'}
-    }).then(response => {
-        return response.data
+export function uploadBadgeAPI(badgeName, badgeDescription, badgeUrl, color, cost) {
+    return axios.request(
+        {
+            url: '/uploadBadge',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                badgeName: badgeName,
+                badgeDesc: badgeDescription,
+                badgeUrl: badgeUrl,
+                badgeColor: color,
+                badgeCost: cost,
+            })
+        }
+    ).then(response2 => {
+        return response2.data
     })
 }
 
@@ -285,12 +284,12 @@ export function getBadgesByUserId(userId) {
         url: "getBadgesByUserId",
         method: "post",
         data: {
-            "userId": userId,
+            userId: userId,
         }
     }).then((r) => {
         if (r.data.response == 'success')
             return r.data.badges // 表示成功
-        else 
+        else
             return false
     }).catch(() => {
         return false
@@ -309,5 +308,35 @@ export function setBadgeShowState(userId, badgeId, state) {
     }).then(r => {
         if (r.data.response == 'success') return true
         else return false
-    }).catch(() => { return false })
+    }).catch(() => {
+        return false
+    })
+}
+
+export function getBadges() {
+    return axios.request(
+        {
+            url: '/getBadges',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({})
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function uploadBuyBadge(userId, badgeId) {
+    return axios.request(
+        {
+            url: '/buyBadge',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: {
+                badgeId: badgeId
+            }
+        }
+    ).then(response => {
+        return response.data
+    })
 }

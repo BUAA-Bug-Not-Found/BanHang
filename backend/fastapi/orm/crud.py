@@ -9,7 +9,7 @@ from orm import models, schemas
 from sqlalchemy import or_, and_, desc, func, case, distinct, exists
 
 from orm.database import SessionLocal
-from orm.models import Message, Conversation, ConversationMessage, User, ReportedIssue
+from orm.models import Message, Conversation, ConversationMessage, User, ReportedIssue, Badge, UserBadge
 
 import bs4 as beautifulsoup
 
@@ -832,3 +832,66 @@ def create_boya_entrust(db: Session, uid: int, campus: List[str], type: List[str
 
 def get_all_boya_entrusts(db: Session):
     return db.query(models.BoyaEntrust).all()
+
+
+def get_badges(db: Session):
+    return db.query(Badge).all()
+
+
+def get_badge_by_id(db: Session, badge_id: int):
+    return db.query(Badge).filter(Badge.id == badge_id).scalar()
+
+
+def buy_badge(db: Session, db_user: User, db_badge: Badge):
+    try:
+        if db_user.privilege == 0:
+            db_user.coin = db_user.coin - db_badge.cost
+            if db_user.coin < 0:
+                return False
+            db.add(db_user)
+        db_user_badge = UserBadge(user_id=db_user.id, badge_id=db_badge.id)
+        db.add(db_user_badge)
+    except:
+        db.rollback()
+    else:
+        db.commit()
+    return True
+
+def create_badge(db : Session, creater_id: int,
+                      short_name: str,
+                      full_name: str,
+                      background_color: str,
+                      icon_url: str,
+                      cost=500):
+    db_badge = Badge(creater_id=creater_id,
+                     short_name=short_name,
+                     full_name=full_name,
+                     background_color=background_color,
+                     icon_url=icon_url,
+                     cost=cost)
+    try:    
+        db_user = get_user_by_id(db, creater_id)
+        if db_user.privilege == 0:
+            db_user.coin = db_user.coin - 1000
+            if db_user.coin < 0:
+                return None
+            db.add(db_user)
+        db.add(db_badge)
+    except:
+        db.rollback()
+        db_badge = None
+    else:
+        db.commit()
+    return db_badge
+
+
+def get_user_badge_by_id(db: Session, user_id: int, badge_id: int):
+    return db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).scalar()
+
+
+def refund_user_badge_by_id(db: Session, user_id: int, badge_id: int):
+    affected = db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).delete()
+    if affected != 0:
+        return True
+    else:
+        return False

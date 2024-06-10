@@ -2,7 +2,7 @@ import uvicorn
 from debug_toolbar.middleware import DebugToolbarMiddleware
 from fastapi import FastAPI
 
-from banhang import user, blog, question, file, message
+from banhang import user, blog, question, file, message, badge
 
 from scripts import recreate_db, buaa_api_renewer
 
@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 from banhang.BanHangException import UniException
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()  # 如果需要开启开发者工具栏，请在其中传入debug=True。 注意提交到dev前一定要改回False或删去debug参数
+app = FastAPI(debug=False)  # 如果需要开启开发者工具栏，请在其中传入debug=True。 注意提交到dev前一定要改回False或删去debug参数
 
 
 @app.exception_handler(UniException)
@@ -28,6 +28,7 @@ app.include_router(blog.router)
 app.include_router(question.router)
 app.include_router(file.router)
 app.include_router(message.router)
+app.include_router(badge.router)
 
 app.add_middleware(
     CORSMiddleware,

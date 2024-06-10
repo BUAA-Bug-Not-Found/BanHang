@@ -310,7 +310,12 @@ class UpdateAnswer(BaseModel):
     ansContent: AnsContent
 
 
-@router.post("/answerQues", tags=["Question"], response_model=successResponse,
+class AnsQuesResponse(successResponse):
+    getPoints: bool
+    ansId: int
+
+
+@router.post("/answerQues", tags=["Question"], response_model=AnsQuesResponse,
              responses={400: {"model": excResponse}})
 def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Session = Depends(get_db),
                     current_user: Optional[dict] = Depends(authorize)):
@@ -325,7 +330,7 @@ def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Ses
     review_result = review_text(soup.get_text())
     if len(review_result) != 0:
         raise UniException(key="isSuccess", value=False, others={"description": ",".join(review_result)})
-    
+
     comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(
         content=ans.ansContent.content,
         userId=current_user['uid'],
@@ -339,7 +344,7 @@ def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Ses
         questionCommentImageids=ans.ansContent.imageList,
         questionId=ans.quesId
     ))
-    return {"isSuccess": True}
+    return AnsQuesResponse(ansId=comment.id, getPoints=False)
 
 
 class ReplyAnswerRequest(BaseModel):
@@ -347,7 +352,12 @@ class ReplyAnswerRequest(BaseModel):
     ansContent: AnsContent
 
 
-@router.post("/replyComment", tags=["Question"], response_model=successResponse)
+class ReplyAnswerResponse(successResponse):
+    getPoints: bool
+    ansId: int
+
+
+@router.post("/replyComment", tags=["Question"], response_model=ReplyAnswerResponse)
 def reply_comment(ans_req: ReplyAnswerRequest, background_tasks: BackgroundTasks,
                   db: Session = Depends(get_db), current_user: Optional[dict] = Depends(authorize)):
     if not current_user:
@@ -361,7 +371,7 @@ def reply_comment(ans_req: ReplyAnswerRequest, background_tasks: BackgroundTasks
     review_result = review_text(soup.get_text())
     if len(review_result) != 0:
         raise UniException(key="isSuccess", value=False, others={"description": ",".join(review_result)})
-    
+
     comment = crud.create_question_comment(db, schemas.QuestionCommentCreat(
         content=ans_req.ansContent.content,
         userId=current_user['uid'],
@@ -377,7 +387,7 @@ def reply_comment(ans_req: ReplyAnswerRequest, background_tasks: BackgroundTasks
         questionId=target_comment.question_id,
         replyCommentId=target_comment.id
     ))
-    return successResponse()
+    return ReplyAnswerResponse(ansId=comment.id, getPoints=False)
 
 
 @router.post("/updateAns", tags=["Question"], response_model=successResponse,
