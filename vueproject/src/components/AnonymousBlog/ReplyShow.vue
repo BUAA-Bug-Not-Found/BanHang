@@ -12,12 +12,34 @@
         </div>
         <div class="user-details">
           <div v-if="topCommentId === replyToCommentId">
-            <span class="user-name">{{ userName }}</span>
+            <span class="username-and-badge">
+              <span class="user-name">{{ userName }}</span>
+              <div v-show="this.userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-left: 10px; margin-bottom: 5px;">
+                        {{ badge.badgeName }}
+                </v-chip>
+              </div>
+            </span>
           </div>
           <div v-else>
-            <span class="user-name">{{ userName }}</span> → <span class="reply-to-user-name">{{
-              replyToCommentName
-            }}</span>
+            <span class="username-and-badge">
+              <span class="user-name">{{ userName }}</span>
+              <div v-show="this.userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-left: 10px; margin-bottom: 5px;">
+                      {{ badge.badgeName }}
+                </v-chip>
+              </div>
+              →
+            <span class="reply-to-user-name">{{
+                replyToCommentName
+              }}</span>
+            </span>
           </div>
           <span class="time">{{ formatDate(time) }}</span>
         </div>
@@ -148,6 +170,7 @@ import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
 import {deleteCommentByCommentId, submitComplainForBlogComment, uploadComment} from "@/components/AnonymousBlog/api";
 import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "ReplyShow",
@@ -206,17 +229,26 @@ export default {
       menuCLick: false,
       showComplainWin: false,
       complainCause: "",
-      isCurUser: false
+      isCurUser: false,
+      badgeList: []
     };
   },
 
   created() {
     this.isCurUser = UserStateStore().getUserId === this.userId
+    this.fetchBadgeInfo()
   },
 
   methods: {
     userStateStore,
     useDisplay,
+    fetchBadgeInfo() {
+      getBadgesByUserId(this.userId).then(
+          (data) => {
+            this.badgeList = data
+          }
+      )
+    },
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
@@ -399,7 +431,13 @@ export default {
 .user-details {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   margin-left: 3px;
+}
+
+.username-and-badge {
+  display: flex;
+  flex-direction: row;
 }
 
 .user-name {
@@ -411,6 +449,7 @@ export default {
 .reply-to-user-name {
   font-size: 12px;
   font-weight: bold;
+  margin-left: 6px;
   color: #00b0ff; /* 可根据需要更改颜色 */
 }
 

@@ -11,7 +11,17 @@
           </v-avatar>
         </div>
         <div class="user-details">
-          <span class="user-name">{{ userName }}</span>
+          <span class="username-and-badge">
+            <span class="user-name">{{ userName }}</span>
+            <div v-show="userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-left: 10px; margin-bottom: 5px;">
+                        {{ badge.badgeName }}
+                </v-chip>
+            </div>
+          </span>
           <span class="time">{{ formatDate(time) }}</span>
         </div>
       </div>
@@ -161,6 +171,7 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import UserStateStore, {userStateStore} from "@/store";
 import {useDisplay} from "vuetify";
 import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "CommentShow",
@@ -213,17 +224,26 @@ export default {
       menuCLick: false,
       showComplainWin: false,
       complainCause: "",
+      badgeList: []
     };
   },
 
   created() {
     this.isCurUser = UserStateStore().getUserId === this.userId
+    this.fetchBadgeInfo()
   },
 
   methods: {
     userStateStore,
     useDisplay,
     goToOtherUser,
+    fetchBadgeInfo() {
+      getBadgesByUserId(this.userId).then(
+          (data) => {
+            this.badgeList = data
+          }
+      )
+    },
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
@@ -407,6 +427,12 @@ export default {
   display: flex;
   flex-direction: column;
   margin-left: 3px;
+  align-items: flex-start;
+}
+
+.username-and-badge {
+  display: flex;
+  flex-direction: row;
 }
 
 .user-name {
