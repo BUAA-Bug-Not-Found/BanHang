@@ -4,11 +4,16 @@ import uuid
 import os
 
 from PIL import Image
+from sqlalchemy.orm import Session
+
+from orm import crud
 from tools.check_user import check_user, authorize
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from typing import Optional
 from starlette.background import BackgroundTask
+from banhang.BanHangException import UniException
+from orm.database import get_db
 
 import threading
 
@@ -76,7 +81,7 @@ async def upload_file(file: UploadFile, current_user: Optional[dict] = Depends(a
     if result.status == 200:
         return {"response": "success",
                 "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (
-                            oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + oss_file_path}
+                        oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + oss_file_path}
     else:
         return {"response": "error"}
 
@@ -108,7 +113,7 @@ async def upload_avatar(file: UploadFile, current_user: Optional[dict] = Depends
     if result.status == 200:
         return {"response": "success",
                 "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (
-                            oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + oss_file_path}
+                        oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + oss_file_path}
     else:
         return {"response": "error"}
 
@@ -146,7 +151,7 @@ async def upload_badge_image(file: UploadFile, current_user: Optional[dict] = De
     if result.status == 200:
         return {"response": "success",
                 "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (
-                            oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + oss_file_path}
+                        oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + oss_file_path}
     else:
         return {"response": "error"}
 
@@ -165,7 +170,7 @@ def get_app_last_version():
     return {"response": "success",
             "version": version,
             "fileUrl": "https://" + (oss_config.CNAME if oss_config.CNAME else (
-                        oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + file_path}
+                    oss_config.BUCKET_NAME + "." + oss_config.ENDPOINT)) + "/" + file_path}
 
 
 file_lock = threading.Lock()
@@ -187,3 +192,16 @@ def gen_file(filename: str, content: str):
     finally:
         file_lock.release()
         print('release')
+
+
+@router.get('/log', tags=['Admin'])
+def download_log(current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
+    if not current_user or not os.getenv('BANHANG_LOG_PATH'):
+        raise UniException(key='isSuccess', value=False)
+    user = crud.get_user_by_id(db, current_user['uid'])
+    if user.privilege <= 0:
+        raise UniException(key='isSuccess', value=False, others={'description': ' 您不是管理员'})
+    return FileResponse(
+        os.getenv('BANHANG_LOG_PATH'),
+        filename='banhang_log.txt'
+    )
