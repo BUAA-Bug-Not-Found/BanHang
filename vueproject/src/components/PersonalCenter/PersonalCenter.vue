@@ -30,7 +30,10 @@
         <span style="margin-left:14px; color:grey; margin-top:8px;">
             {{ curDesc }}
           </span>
-        <!-- <v-card-actions>
+          <div style="justify-content:center; align-items:center; text-align:center;">
+            <v-btn @click="clickDelBadge" style="width:50%; background-color:#2a9af3; color:aliceblue; margin-top:16px; width:auto; height:30px;">删除本徽章</v-btn>
+          </div>
+          <!-- <v-card-actions>
           <v-btn color="error" @click="clickQuitLogin">确认</v-btn>
           <v-btn color="blue darken-1" @click="showDialog = false">取消</v-btn>
         </v-card-actions> -->
@@ -324,7 +327,7 @@
           <span class="signature">{{ sign }}</span>
         </div>
 
-        <v-container v-if="badges" style="display:flex; justify-content:center;">
+        <v-container v-if="badges" style="display:flex; justify-content:center; padding-top:0px;">
           <v-slide-group show-arrows>
             <v-slide-item
                 v-for="(content, index) in badges"
@@ -439,6 +442,7 @@
 import router from '@/router';
 import userStateStore from '../../store';
 import {
+  delUserBadge,
   getBadges,
   getBadgesByUserId,
   getComplainAmount,
@@ -541,6 +545,8 @@ export default {
       badgeSrc: "",
       isShowBadgeDesc: false,
       curDesc: "",
+      curBadgeId: 0,
+      curBadgeIndex: -1,
       posts: [
         {content: "这是第一条动态"},
       ],
@@ -562,8 +568,24 @@ export default {
     };
   },
   methods: {
+    clickDelBadge() {
+      // 删除掉curBadgeId
+      delUserBadge(this.curBadgeId).then((r) => {
+        if (r == false) {
+          this.isShowBadgeDesc = false
+          showTip("出现异常，操作失败！", false)
+        } else {
+          // 维护前端显示
+          this.badges.splice(this.curIndex, 1);
+          this.isShowBadgeDesc = false
+          showTip("操作成功！", true)
+        }
+      })
+    },
     clickBadge(index) {
       this.curDesc = this.badges[index].badgeDesc
+      this.curBadgeId = this.badges[index].badgeId
+      this.curBadgeIndex = index
       this.isShowBadgeDesc = true
     },
     // 可以添加其他方法
