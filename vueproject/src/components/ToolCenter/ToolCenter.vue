@@ -84,7 +84,8 @@
             </v-card>
         </v-dialog>
         <v-card v-for="(post, index) in this.toolList" :key="index" @click="clickToolItem(index)" style="
-         height: 70px;
+         /* height: 70px; */
+         min-height: 70px;
          border-top: 10px;
          border-radius: 0px;
          margin-bottom: 1px;"
