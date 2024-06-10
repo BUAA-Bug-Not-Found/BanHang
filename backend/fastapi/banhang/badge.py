@@ -43,9 +43,15 @@ def get_all_badges(db: Session = Depends(get_db)):
         badges.append(BadgeShow(**get_badge_from_db_badge(db_badge)))
     return {"response": "success", "badges": badges}
 
+class BadgeId(BaseModel):
+    badgeId: int
+
+class UserId(BaseModel):
+    userId: int
+
 @router.post("/getBadgesByUserId")
-def get_badges_by_user_id(userId: int, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_id(userId)
+def get_badges_by_user_id(user_id: UserId, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_id(user_id.userId)
     if db_user == None:
         return {"response": "error", "description": "No corresponding user ID exists"}
     badges = []
@@ -54,10 +60,10 @@ def get_badges_by_user_id(userId: int, db: Session = Depends(get_db)):
     return {"response": "success", "badges": badges}
 
 @router.post("/buyBadge")
-def buy_badge(badge_id: int, current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
+def buy_badge(badge_id: BadgeId, current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
     if current_user == None:
         return {"response": "error", "description": "Please login first"}
-    db_badge = crud.get_badge_by_id(badge_id)
+    db_badge = crud.get_badge_by_id(badge_id.badgeId)
     if db_badge == None:
         return {"response": "error", "description": "No corresponding badge ID exists"}
     db_user = crud.get_user_by_id(current_user['uid'])
