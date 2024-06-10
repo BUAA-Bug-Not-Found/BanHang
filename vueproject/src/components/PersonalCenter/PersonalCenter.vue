@@ -101,60 +101,65 @@
 
           <v-divider class="mb-4"></v-divider>
           <v-card-text>
-          <v-tabs
-              v-model="tab2"
-              align-tabs="center"
-              color="deep-purple-accent-4"
-              style="margin-bottom: 10px"
-          >
-            <v-tab :value="1">勋章商城</v-tab>
-            <v-tab :value="2">自定义勋章</v-tab>
-          </v-tabs>
-
-          <v-window v-model="tab2" height="700" class="overflow-y-auto">
-            <v-window-item
-                :value="1"
+            <v-tabs
+                v-model="tab2"
+                align-tabs="center"
+                color="deep-purple-accent-4"
+                style="margin-bottom: 10px"
             >
-                  <v-row>
-                    <v-col cols="4" v-for="badge in badges" :key="badge.badgeId">
-                      <v-card style="margin: 10px" elevation="1">
-                        <v-row justify="center" style="margin-top: 10px">
-                          <v-avatar color="surface-variant"
-                                    style="margin-top: 5px; margin-bottom: 10px;"
-                                    size="100"
-                                    :image="badge.badgeUrl">
-                          </v-avatar>
-                        </v-row>
-                        <div style="width: 100%;display: flex;justify-content: center;">
-                          <v-tooltip :text="badge.badgeDesc">
-                            <template v-slot:activator="{ props }">
-                              <v-chip
-                                  size="small"
-                                  class="ma-2"
-                                  :style="{ color: badge.badgeColor }"
-                                  v-bind="props"
-                                  label
-                              >
-                                {{ badge.badgeName }}
-                              </v-chip>
-                            </template>
-                          </v-tooltip>
-                        </div>
-                      </v-card>
+              <v-tab :value="1">勋章商城</v-tab>
+              <v-tab :value="2">自定义勋章</v-tab>
+            </v-tabs>
+
+            <v-window v-model="tab2" height="700" class="overflow-y-auto">
+              <v-window-item
+                  :value="1"
+              >
+                <v-row>
+                  <v-col cols="4" v-for="badge in mall_badges" :key="badge.badgeId">
+                    <v-card style="margin: 10px" elevation="1">
+                      <v-row justify="center" style="margin-top: 10px">
+                        <v-avatar color="surface-variant"
+                                  style="margin-top: 5px; margin-bottom: 10px;"
+                                  size="100"
+                                  :image="badge.badgeUrl">
+                        </v-avatar>
+                      </v-row>
                       <div style="width: 100%;display: flex;justify-content: center;">
-                        <v-btn prepend-icon="mdi-star-four-points-circle-outline" size="small" color="primary"
-                               @click="buyBadge(badge)">
-                          100
-                        </v-btn>
+                        <v-tooltip :text="badge.badgeDesc">
+                          <template v-slot:activator="{ props }">
+                            <v-chip
+                                size="small"
+                                class="ma-2"
+                                :style="{ color: badge.badgeColor }"
+                                v-bind="props"
+                                label
+                            >
+                              {{ badge.badgeName }}
+                            </v-chip>
+                          </template>
+                        </v-tooltip>
                       </div>
-                    </v-col>
-                  </v-row>
+                    </v-card>
+                    <div style="width: 100%;display: flex;justify-content: center;">
+                      <v-btn prepend-icon="mdi-star-four-points-circle-outline" size="small" color="primary"
+                             @click="buyBadge(badge)">
+                        <span v-if="badge.badgeCost != 0">
+                          {{badge.badgeCost}}
+                        </span>
+                        <span v-else>
+                          免费获取
+                        </span>
+                      </v-btn>
+                    </div>
+                  </v-col>
+                </v-row>
                 <div style="height: 100px"></div>
-            </v-window-item>
+              </v-window-item>
 
-            <v-window-item
-                :value="2"
-            >
+              <v-window-item
+                  :value="2"
+              >
                 <div class="mb-2"
                      style="width: 100%;display: flex;font-weight: bold;
                    font-size: 18px;margin-bottom: 3px"
@@ -211,26 +216,26 @@
                             placeholder="请输入徽章介绍" show-word-limit/>
                 </div>
 
-              <v-divider class="mt-2"></v-divider>
-              <v-card-actions class="my-2 d-flex justify-end">
-                <v-btn
-                    class="text-none"
-                    rounded="xl"
-                    text="取消"
-                    @click="isActive.value = false"
-                ></v-btn>
+                <v-divider class="mt-2"></v-divider>
+                <v-card-actions class="my-2 d-flex justify-end">
+                  <v-btn
+                      class="text-none"
+                      rounded="xl"
+                      text="取消"
+                      @click="isActive.value = false"
+                  ></v-btn>
 
-                <v-btn
-                    class="text-none"
-                    color="primary"
-                    rounded="xl"
-                    text="创建"
-                    variant="flat"
-                    @click="uploadBadge"
-                ></v-btn>
-              </v-card-actions>
-            </v-window-item>
-          </v-window>
+                  <v-btn
+                      class="text-none"
+                      color="primary"
+                      rounded="xl"
+                      text="创建"
+                      variant="flat"
+                      @click="uploadBadge"
+                  ></v-btn>
+                </v-card-actions>
+              </v-window-item>
+            </v-window>
           </v-card-text>
         </v-card>
       </template>
@@ -323,7 +328,7 @@
           <v-slide-group show-arrows>
             <v-slide-item
                 v-for="(content, index) in badges"
-                :key="index"
+                :key="content.badgId"
                 :style="'padding:4px;'"
             >
               <v-card outlined @click="clickBadge(index)" style="cursor:pointer">
@@ -434,7 +439,7 @@
 import router from '@/router';
 import userStateStore from '../../store';
 import {
-  //getBadges,
+  getBadges,
   getBadgesByUserId,
   getComplainAmount,
   getCurrentExpById,
@@ -447,6 +452,7 @@ import {showTip} from '../AccountManagement/AccountManagementAPI';
 import {api as viewerApi} from "v-viewer";
 import {ElMessage} from "element-plus";
 import {Plus} from "@element-plus/icons-vue";
+import {uploadFileApi} from "@/components/HelpCenter/api";
 
 export default {
   components: {Plus},
@@ -466,11 +472,12 @@ export default {
     }
     // 加载一下匿名贴和互助贴
 
-    // getBadges().then(
-    //     (res) => {
-    //       this.badges = res.badges
-    //     }
-    // )
+    getBadges().then(
+        (res) => {
+          this.mall_badges = res.badges
+        }
+    )
+
 
     getHelpBlogs(userStateStore().user_id).then((res) => {
       this.helpBlogs = res
@@ -536,85 +543,8 @@ export default {
       ],
       helpBlogs: [],
       waterBlogs: [],
-      badges: [
-        {
-          "badgeUrl": "https://banhang.oss.chlience.com/2/file/36d9d47635d84ef4967b5ed610aa96ba.jpg",
-          "badgeName": "举哥哥",
-          "badgeDesc": "举哥哥太帅了",
-          "badgeColor": "#ec0e84",
-          "isShow": false
-        },
-        {
-          "badgeUrl": "https://banhang.oss.chlience.com/2/file/36d9d47635d84ef4967b5ed610aa96ba.jpg",
-          "badgeName": "举哥哥",
-          "badgeDesc": "举哥哥太帅了",
-          "badgeColor": "#1779da",
-          "isShow": false
-        },
-        {
-          "badgeUrl": "https://banhang.oss.chlience.com/2/file/36d9d47635d84ef4967b5ed610aa96ba.jpg",
-          "badgeName": "举哥哥",
-          "badgeDesc": "举哥哥太帅了",
-          "badgeColor": "#0eec20",
-          "isShow": false
-        },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下2222",
-        //   "badgeColor": "#8f90bb",
-        //   "isShow": false
-        // },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下33333",
-        //   "badgeColor": "#123456",
-        //   "isShow": false
-        // },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下",
-        //   "badgeColor": "#123456",
-        //   "isShow": false
-        // },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下",
-        //   "badgeColor": "#123456",
-        //   "isShow": false
-        // },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下",
-        //   "badgeColor": "#123456",
-        //   "isShow": false
-        // },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下",
-        //   "badgeColor": "#123456",
-        //   "isShow": false
-        // },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下",
-        //   "badgeColor": "#123456",
-        //   "isShow": false
-        // },
-        // {
-        //   "badgeUrl": "https://via.placeholder.com/150",
-        //   "badgeName": "最强王者",
-        //   "badgeDesc": "测试一下",
-        //   "badgeColor": "#123456",
-        //   "isShow": false
-        // },
-      ],
+      badges: [],
+      mall_badges: [],
       images: [
         'https://via.placeholder.com/150',
         // 添加更多图片链接...
@@ -654,16 +584,20 @@ export default {
       return true;
     },
     uploadBadge() {
-      uploadBadgeAPI(this.badgeName, this.badgeDescription,
-          this.badgeImage, this.badgeColor, this.badgeCost).then(
+      uploadFileApi(this.badgeImage).then(
           (res) => {
-            if (res.response == 'success') {
-              ElMessage.success("徽章创建成功")
-              this.badgeDialog = false
-            } else {
-              // 图片上传失败给一个弹窗
-              ElMessage.success("徽章创建失败，请稍后再试")
-            }
+            uploadBadgeAPI(this.badgeName, this.badgeDescription,
+                res.fileUrl, this.badgeColor, this.badgeCost).then(
+                (res) => {
+                  if (res.response == 'success') {
+                    ElMessage.success("徽章创建成功")
+                    this.badgeDialog = false
+                  } else {
+                    // 图片上传失败给一个弹窗
+                    ElMessage.success("徽章创建失败，请稍后再试")
+                  }
+                }
+            )
           }
       )
     },
@@ -716,10 +650,11 @@ export default {
     uploadBuyBadge() {
       uploadBuyBadge(userStateStore().user_id, this.currentBuyBadge.badgeId).then(
           (res) => {
-            if(res.response == 'success') {
+            if (res.response == 'success') {
               ElMessage.success("购买勋章成功")
               this.buyBadgeDialog = false
-            } else{
+              router.go(0)
+            } else {
               ElMessage.success("购买失败，请检查您的积分余额，或者稍后再试")
             }
           }
