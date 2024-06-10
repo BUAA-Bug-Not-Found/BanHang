@@ -17,7 +17,7 @@
                 <v-chip v-for="badge in badgeList" size="x-small"
                         :key="badge.badgeId" :color="badge.badgeColor"
                         :class="`cursor-pointer`"
-                        style="margin-left: 10px; margin-bottom: 5px;">
+                        style="margin-bottom: 5px; border-radius: 5px">
                         {{ badge.badgeName }}
                 </v-chip>
             </div>
