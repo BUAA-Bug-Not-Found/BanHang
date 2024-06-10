@@ -7,7 +7,7 @@ from tools.mail import MailSender
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-ENABLE = False
+ENABLE = True
 
 scheduler = BackgroundScheduler()
 data = {"vacant_classroom": {'sh': {}, 'xyl': {}}, "boya": []}

@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy.sql import func
 
 from orm.database import Base
-from typing import Optional, List
+from typing import Optional, List, Set
 
 user_user_stars = Table(
     'user_user_stars',
@@ -47,7 +47,10 @@ class User(Base):
         secondaryjoin=(user_user_stars.c.user2 == id),
         lazy="dynamic",
         backref=backref('followers', lazy='dynamic'))
-    badges = relationship("UserBadge", back_populates="users")
+    # badges = relationship("UserBadge", back_populates="users")
+    badges: Mapped[List["Badge"]] = relationship(
+        secondary="user_badges", back_populates="owners"
+    )
 
 
 class CheckCode(Base):
@@ -313,7 +316,10 @@ class Badge(Base):
     cost = Column(Integer, nullable=False, default=0)
 
     creater = relationship("User", foreign_keys=[creater_id])
-    users = relationship("UserBadge", back_populates="badges")
+    # users = relationship("UserBadge", back_populates="badges")
+    owners: Mapped[List[User]] = relationship(
+        secondary="user_badges", back_populates="badges"
+    )
 
 
 class UserBadge(Base):
@@ -321,6 +327,3 @@ class UserBadge(Base):
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     badge_id = Column(Integer, ForeignKey('badges.id'), primary_key=True)
     create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
-
-    users = relationship("User", foreign_keys=[user_id], back_populates="badges")
-    badges = relationship("Badge", foreign_keys=[badge_id], back_populates="users")
