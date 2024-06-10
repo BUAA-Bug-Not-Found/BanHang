@@ -284,7 +284,7 @@ export function getBadgesByUserId(userId) {
         url: "getBadgesByUserId",
         method: "post",
         data: {
-            "user_id": userId,
+            userId: userId,
         }
     }).then((r) => {
         if (r.data.response == 'success')
@@ -332,9 +332,9 @@ export function uploadBuyBadge(userId, badgeId) {
             url: '/buyBadge',
             method: 'post',
             headers: {'Content-Type': 'application/json'},
-            data: JSON.stringify({
+            data: {
                 badgeId: badgeId
-            })
+            }
         }
     ).then(response => {
         return response.data
