@@ -843,7 +843,6 @@ def get_badge_by_id(db: Session, badge_id: int):
 
 
 def buy_badge(db: Session, db_user: User, db_badge: Badge):
-    db_user_badge = UserBadge(user_id = db_user.id, badge_id = db_badge.id)
     try:
         if db_user.privilege == 0:
             db_user.coin = db_user.coin - db_badge.cost
@@ -856,7 +855,7 @@ def buy_badge(db: Session, db_user: User, db_badge: Badge):
         db.rollback()
     else:
         db.commit()
-
+    return True
 
 def create_badge(db : Session, creater_id: int,
                       short_name: str,
