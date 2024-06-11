@@ -303,7 +303,7 @@ export default {
             (res) => {
               if (res.response == "success") {
                 ElMessage({
-                  message: '评论成功 ' + res.description,
+                  message: '评论成功',
                   showClose: true,
                   type: 'success',
                 })
