@@ -165,3 +165,15 @@ export function checkLogin(checkManager=false) {
         }
     }
 }
+
+export function getCoinsByUserId(userId) {
+    return axios.request({
+        url: '/getCoinsById',
+        params: {
+            id: userId,
+        },
+        method: "get",
+    }).then(response => {
+        return response.data
+    })
+}

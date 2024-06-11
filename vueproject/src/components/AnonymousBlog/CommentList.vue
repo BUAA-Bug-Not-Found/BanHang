@@ -12,6 +12,7 @@
         :time="comment.time"
         :reply-to-comment-id="comment.replyToCommentId"
         :replies="getReplies(comment.commentId)"
+        @comment-list-new-comment="commentListHandleNewComment"
     />
   </div>
 </template>
@@ -48,6 +49,10 @@ export default {
       findReplies(commentId);
 
       return replies;
+    },
+
+    commentListHandleNewComment(comment) {
+      this.$emit('new-comment', comment);
     }
 
   }

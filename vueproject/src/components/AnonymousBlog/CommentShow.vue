@@ -11,7 +11,17 @@
           </v-avatar>
         </div>
         <div class="user-details">
-          <span class="user-name">{{ userName }}</span>
+          <span class="username-and-badge">
+            <span class="user-name">{{ userName }}</span>
+            <div v-show="userId !== -1" style="margin-left: 2px">
+                <v-chip v-for="badge in badgeList" size="x-small"
+                        :key="badge.badgeId" :color="badge.badgeColor"
+                        :class="`cursor-pointer`"
+                        style="margin-bottom: 5px; border-radius: 5px">
+                        {{ badge.badgeName }}
+                </v-chip>
+            </div>
+          </span>
           <span class="time">{{ formatDate(time) }}</span>
         </div>
       </div>
@@ -50,6 +60,10 @@
                 <div style="color: black; font-size: 16px" @click="showComplainWindow">
                   举报
                 </div>
+                <div v-if="userStateStore().isManager || this.isCurUser"
+                     style="color: red; font-size: 16px" @click="delComment">
+                  删除
+                </div>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -87,7 +101,8 @@
       </div>
 
       <div v-show="isOpen && replies.length > 0">
-        <ReplyList :comments="replies" :top-comment-id="this.commentId"/>
+        <ReplyList :comments="replies" :top-comment-id="this.commentId"
+                   @comment-show-new-comment="commentShowHandleNewComment"/>
       </div>
 
     </v-card>
@@ -146,14 +161,17 @@
 <script>
 import ReplyList from "@/components/AnonymousBlog/ReplyList.vue";
 import {
+  deleteCommentByCommentId,
   goToOtherUser,
   submitComplainForBlogComment,
   uploadComment
 } from "@/components/AnonymousBlog/api";
 import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
-import UserStateStore from "@/store";
+import UserStateStore, {userStateStore} from "@/store";
 import {useDisplay} from "vuetify";
+import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "CommentShow",
@@ -206,12 +224,26 @@ export default {
       menuCLick: false,
       showComplainWin: false,
       complainCause: "",
+      badgeList: []
     };
   },
 
+  created() {
+    this.isCurUser = UserStateStore().getUserId === this.userId
+    this.fetchBadgeInfo()
+  },
+
   methods: {
+    userStateStore,
     useDisplay,
     goToOtherUser,
+    fetchBadgeInfo() {
+      getBadgesByUserId(this.userId).then(
+          (data) => {
+            this.badgeList = data
+          }
+      )
+    },
     formatDate(time) {
       let date = new Date(Date.parse(time))
       let year = date.getFullYear();
@@ -231,7 +263,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.isInputVisible = !this.isInputVisible;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.isInputVisible = !this.isInputVisible;
+            }
+          }
+      )
     },
     showBottomSheet() {
       const state = UserStateStore()
@@ -239,7 +279,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.bottomSheet = !this.bottomSheet;
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.bottomSheet = !this.bottomSheet;
+            }
+          }
+      )
     },
     sendReply() {
       // 将回复内容和是否匿名发送提交给后端或其他逻辑处理
@@ -262,7 +310,7 @@ export default {
                 location.reload()
               } else {
                 ElMessage({
-                  message: '评论失败，请修改内容或稍后再试',
+                  message: "内容违规：" + res.description,
                   showClose: true,
                   type: 'error',
                 })
@@ -293,7 +341,8 @@ export default {
       const confirmSubmit = window.confirm("确定提交举报？我们承诺不向对方提供您的任何信息，但保留追究滥用举报行为的权力⚠");
       if (confirmSubmit) {
         let json_set = {
-          "blogId": this.commentId,
+          "blogId": this.blogId,
+          "commentId": this.commentId,
           "cause": this.complainCause
         }
         submitComplainForBlogComment(json_set).then(
@@ -318,6 +367,31 @@ export default {
       }
     },
 
+    delComment() {
+      deleteCommentByCommentId(this.commentId).then(
+          (res) => {
+            if (res.response == "success") {
+              ElMessage({
+                message: '删除成功',
+                showClose: true,
+                type: 'success',
+              })
+              // this.$router.push({name: 'blogList', params: {tagId: -1}})
+              location.reload()
+            } else {
+              ElMessage({
+                message: '删除失败，请先登录或稍后再试',
+                showClose: true,
+                type: 'error',
+              })
+            }
+          }
+      )
+    },
+
+    commentShowHandleNewComment(comment) {
+      this.$emit('comment-list-new-comment', comment);
+    }
 
   }
 
@@ -353,6 +427,12 @@ export default {
   display: flex;
   flex-direction: column;
   margin-left: 3px;
+  align-items: flex-start;
+}
+
+.username-and-badge {
+  display: flex;
+  flex-direction: row;
 }
 
 .user-name {

@@ -195,14 +195,14 @@ export default {
             (res) => {
               if (res.response == "success") {
                 ElMessage({
-                  message: '帖子发布成功',
+                  message: '帖子发布成功 | ' + res.description,
                   showClose: true,
                   type: 'success',
                 })
                 this.$router.push({name: 'blogList', params: {tagId: -1}})
               } else {
                 ElMessage({
-                  message: '发帖失败，请修改内容或稍后再试',
+                  message: '内容违规：' + res.description,
                   showClose: true,
                   type: 'error',
                 })

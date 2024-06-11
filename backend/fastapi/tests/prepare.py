@@ -89,5 +89,15 @@ def mock_question_comment_data():
     }
 
 @pytest.fixture
+def mock_badge_data():
+    # 提供一个模拟的用户数据
+    return {
+        "badgeName": "name",
+        "badgeDesc": "desc",
+        "badgeColor": "color",
+        "badgeUrl": "url",
+    }
+
+@pytest.fixture
 def new_database():
     database_handler.regenerate_database()

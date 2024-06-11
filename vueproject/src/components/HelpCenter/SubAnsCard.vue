@@ -13,13 +13,14 @@ import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
 import router from "@/router";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "SubAnsCard",
   methods: {userStateStore, formatDate},
   components: {Editor, Toolbar, UserAvatar},
   props: ["quesId", "ansId", "index"],
-  emits: ["delComment", "editComment", "replyComment"],
+  emits: ["delComment", "editComment", "replyComment", "uploadSubAnsCard"],
   setup(props, context) {
 
     const init = () => {
@@ -29,9 +30,18 @@ export default {
             userLike.value = res.answer.ifUserLike
             likeSum.value = res.answer.likeSum
             isUser.value = UserStateStore().getUserId === ans.value.userId
+            getBadgesByUserId(ans.value.userId).then(
+                (res) => {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
           }
       )
     }
+
+    const badges = ref([])
 
     init()
 
@@ -73,7 +83,7 @@ export default {
           (res) => {
             if (res.isSuccess === true) {
               ElMessage.success("删除成功")
-              context.emit("delAns", {index: props.index})
+              context.emit("delComment", {index: props.index})
               delDialog.value = false
             } else {
               ElMessage.error("删除失败，请稍后再试")
@@ -124,12 +134,16 @@ export default {
                   replyComment(props.ansId, commentHtml.value, imageList.value).then(
                       (res) => {
                         if (res.isSuccess === true) {
-                          ElMessage.success("回答已上传")
+                          if(res.getPoints === true) {
+                            ElMessage.success("回答已上传，经验+2")
+                          } else {
+                            ElMessage.success("回答已上传")
+                          }
                           commentHtml.value = ''
                           imageList.value = []
-                          router.go(0)
+                          context.emit("uploadSubAnsCard", res.ansId)
                         } else {
-                          ElMessage.error("回答失败，请稍后再试")
+                          ElMessage.error(res.description)
                         }
                       }
                   )
@@ -197,7 +211,8 @@ export default {
       userName,
       getUserName,
       reportReason,
-      truncate
+      truncate,
+      badges
     };
   },
 };
@@ -214,48 +229,6 @@ export default {
         width="w-100"
         elevation="0"
     >
-      <v-row>
-        <!--        <v-col cols="1" style="display: flex;justify-content: end;">-->
-        <!--          <UserAvatar :userId="ans.userId"/>-->
-        <!--        </v-col>-->
-        <!--        <v-col cols="11">-->
-        <!--          <div style="display: flex; justify-content: space-between;margin-top: 10px">-->
-        <!--            <span style="font-size: 15px">{{ ans.userName }}-->
-        <!--              <span v-if="ans.replyAnsId != -1">-->
-        <!--                <v-icon>mdi-menu-right</v-icon> {{ans.replyAnsUserName}}-->
-        <!--              </span>-->
-        <!--            </span>-->
-        <!--            <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>-->
-        <!--          </div>-->
-        <!--          <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>-->
-        <!--          <div style="margin-bottom: 5px">-->
-        <!--            <v-btn-->
-        <!--                :prepend-icon=" !userLike ?-->
-        <!--              'mdi-thumb-up-outline' : 'mdi-thumb-up'" variant="text" size="small"-->
-        <!--                color="blue-grey-lighten-2"-->
-        <!--                @click="setAnsLike"-->
-        <!--            >-->
-        <!--              {{ likeSum }}-->
-        <!--            </v-btn>-->
-        <!--            <v-btn-->
-        <!--                :prepend-icon="'mdi-message-reply-text'" variant="text" size="small"-->
-        <!--                @click="openEditor = !openEditor"-->
-        <!--                color="blue-grey-lighten-2">-->
-        <!--            </v-btn>-->
-        <!--            <v-btn v-if="isUser"-->
-        <!--                   :icon="'mdi-delete-circle'" variant="text" size="small"-->
-        <!--                   color="blue-grey-lighten-2"-->
-        <!--                   @click="delDialog = !delDialog">-->
-        <!--            </v-btn>-->
-        <!--            &lt;!&ndash;            <v-btn v-if="isUser"&ndash;&gt;-->
-        <!--            &lt;!&ndash;                   :icon="'mdi-file-edit'" variant="text" size="small"&ndash;&gt;-->
-        <!--            &lt;!&ndash;                   color="blue-grey-lighten-2">&ndash;&gt;-->
-        <!--            &lt;!&ndash;            </v-btn>&ndash;&gt;-->
-        <!--          </div>-->
-        <!--        </v-col>-->
-
-
-      </v-row>
       <div style="display: flex;width: 100%;margin-top: 20px">
         <div style="flex: 1; display: flex; justify-content: flex-end;margin-right: 10px">
           <UserAvatar :userId="ans.userId" @returnUserName="getUserName"/>
@@ -263,9 +236,21 @@ export default {
         <div style="flex: 10;">
           <div style="display: flex; justify-content: space-between;margin-top: 10px">
             <span style="font-size: 15px">{{ ans.userName }}
-              <span v-if="ans.replyAnsId != -1">
+              <span v-if="ans.replyAnsId != -1" style="margin-right: 10px">
                 <v-icon>mdi-menu-right</v-icon> {{ ans.replyAnsUserName }}
               </span>
+              <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                <template v-slot:activator="{ props }">
+                  <v-chip
+                      size="x-small"
+                      :style="{ color: badge.badgeColor }"
+                      label
+                      v-bind="props"
+                  >
+                    {{ badge.badgeName }}
+                  </v-chip>
+                </template>
+              </v-tooltip>
             </span>
             <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>
           </div>

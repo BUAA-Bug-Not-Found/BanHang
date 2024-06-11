@@ -5,7 +5,7 @@ import orm.schemas as schemas
 import orm.crud as crud
 from pydantic import BaseModel
 from tools.check_user import check_user
-from typing import List
+from typing import List, Optional
 
 router = APIRouter()
 
@@ -20,6 +20,8 @@ class ConversationShow(BaseModel):
 @router.post("/getReletedUser", tags=["Message"], response_model=List[ConversationShow])
 @check_user
 def get_recent_message_conversation(uid: int, db: Session = Depends(get_db)):
+	if uid == None:
+		return {"status": "error"}
 	db_conversations = crud.get_recent_conversation(db, uid)
 	conversations = []
 	for db_conversation in db_conversations:
@@ -40,6 +42,8 @@ class MessageGet(BaseModel):
 @router.post("/getHistoryMessage", tags=["Message"], response_model=List[schemas.MessageShow])
 @check_user
 def get_history_message(uid: int, message_get: MessageGet, db: Session = Depends(get_db)):
+	if uid == None:
+		return {"status": "error"}
 	db_conversation = crud.get_conversation(db, uid, message_get.targetUserId)
 	db_conversation.unread_message_num = 0
 	db.add(db_conversation)
@@ -65,7 +69,9 @@ class MessageCreate(BaseModel):
 
 @router.post("/sendMessage", tags=["Message"])
 @check_user
-def send_message(uid: int, message_create: MessageCreate, db: Session = Depends(get_db)):
+def send_message(uid: Optional[int], message_create: MessageCreate, db: Session = Depends(get_db)):
+	if uid == None:
+		return {"status": "error"}
 	if len(message_create.content) == 0:
 		return {"status": "error", "description": "Empty message"}
 	res = crud.send_message(db, uid, message_create.targetUserId, message_create.content)
@@ -76,6 +82,8 @@ def send_message(uid: int, message_create: MessageCreate, db: Session = Depends(
 
 @router.post("/getUnreadMessageNum", tags=["Message"])
 @check_user
-def get_unread_message_num(uid: int, db: Session = Depends(get_db)):
+def get_unread_message_num(uid: Optional[int], db: Session = Depends(get_db)):
+	if uid is None:
+		return {"status": "failure", "num": 0}
 	num = crud.get_unread_message_num(db, uid)
-	return {"status": "success", "num": num}
+	return {"status": "success", "num": num if num else 0}

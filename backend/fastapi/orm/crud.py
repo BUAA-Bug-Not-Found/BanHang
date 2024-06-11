@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from typing import List, Type, Dict
 
@@ -8,7 +9,7 @@ from orm import models, schemas
 from sqlalchemy import or_, and_, desc, func, case, distinct, exists
 
 from orm.database import SessionLocal
-from orm.models import Message, Conversation, ConversationMessage, User, ReportedIssue
+from orm.models import Message, Conversation, ConversationMessage, User, ReportedIssue, Badge, UserBadge
 
 import bs4 as beautifulsoup
 
@@ -220,7 +221,7 @@ def get_blog_comments_by_blog_id(db: Session, blog_id: int):
 
 
 def get_blog_comment_by_id(db: Session, blog_comment_id: int):
-    return db.query(models.BlogComment).filter(models.commitComment.id == blog_comment_id).first()
+    return db.query(models.BlogComment).filter(models.BlogComment.id == blog_comment_id).first()
 
 
 def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, is_anonymous: bool,
@@ -509,7 +510,7 @@ def create_question_comment_image(db: Session, image: schemas.QuestionCommentIma
 
 def delete_question_comment_by_id(db: Session, id: int):
     comment = get_question_comment_by_id(db, id)
-    db.delete(comment)
+    comment.content = '【此回答已删除】'
     db.commit()
 
 
@@ -808,4 +809,90 @@ def send_message(db: Session, host_user_id: int, guest_user_id: int, content: st
         return True
     except Exception as e:
         db.rollback()
+        return False
+
+
+def get_boya_entrust_by_uid(db: Session, uid: int):
+    return db.query(models.BoyaEntrust).filter(models.BoyaEntrust.user_id == uid).first()
+
+
+def delete_boya_entrust_by_uid(db: Session, uid: int):
+    db.delete(get_boya_entrust_by_uid(db, uid))
+    db.commit()
+
+
+def create_boya_entrust(db: Session, uid: int, campus: List[str], type: List[str]):
+    if cur_entrust:=get_boya_entrust_by_uid(db, uid):
+        db.delete(cur_entrust)
+        db.commit()
+    entrust = models.BoyaEntrust(user_id = uid, campus = json.dumps(campus), type = json.dumps(type))
+    db.add(entrust)
+    db.commit()
+
+
+def get_all_boya_entrusts(db: Session):
+    return db.query(models.BoyaEntrust).all()
+
+
+def get_badges(db: Session):
+    return db.query(Badge).all()
+
+
+def get_badge_by_id(db: Session, badge_id: int):
+    return db.query(Badge).filter(Badge.id == badge_id).scalar()
+
+
+def buy_badge(db: Session, db_user: User, db_badge: Badge):
+    try:
+        if db_user.privilege == 0:
+            db_user.coin = db_user.coin - db_badge.cost
+            if db_user.coin < 0:
+                return False
+            db.add(db_user)
+        db_user_badge = UserBadge(user_id=db_user.id, badge_id=db_badge.id)
+        db.add(db_user_badge)
+    except:
+        db.rollback()
+    else:
+        db.commit()
+    return True
+
+def create_badge(db : Session, creater_id: int,
+                      short_name: str,
+                      full_name: str,
+                      background_color: str,
+                      icon_url: str,
+                      cost=500):
+    db_badge = Badge(creater_id=creater_id,
+                     short_name=short_name,
+                     full_name=full_name,
+                     background_color=background_color,
+                     icon_url=icon_url,
+                     cost=cost)
+    try:    
+        db_user = get_user_by_id(db, creater_id)
+        if db_user.privilege == 0:
+            db_user.coin = db_user.coin - 1000
+            if db_user.coin < 0:
+                return None
+            db.add(db_user)
+        db.add(db_badge)
+    except:
+        db.rollback()
+        db_badge = None
+    else:
+        db.commit()
+    return db_badge
+
+
+def get_user_badge_by_id(db: Session, user_id: int, badge_id: int):
+    return db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).scalar()
+
+
+def refund_user_badge_by_id(db: Session, user_id: int, badge_id: int):
+    affected = db.query(UserBadge).filter(UserBadge.user_id == user_id, UserBadge.badge_id == badge_id).delete()
+    db.commit()
+    if affected != 0:
+        return True
+    else:
         return False

@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from datetime import datetime
@@ -17,6 +18,7 @@ from tools.check_user import generate_jwt_token, authorize, check_user
 from tools.mail import MailSender, is_valid_email
 import banhang.BanHangException as EXC
 import random
+from tools.review import review_text
 
 router = APIRouter()
 
@@ -110,6 +112,10 @@ def register(req: registerRequest, db: Session = Depends(get_db)):
     if not checkNickname(req.username):
         raise EXC.UniException(key="isSuccess", value=False,
                                others={"description": "用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
+    review_result = review_text(req.username)
+    if len(review_result) != 0:
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户名不符合要求：" + ",".join(review_result)})
     crud.create_user(db, schemas.UserCreate(username=req.username, password=update_password_to_hash(req.password),
                                             email=req.email))
     return {"isSuccess": True}
@@ -194,6 +200,10 @@ def set_sign_by_id(req: SetSignRequestNew, current_user: Optional[dict] = Depend
     current_user_instance = crud.get_user_by_id(db, current_user['uid'])
     if current_user_instance.privilege == 0 and current_user_instance.email != user.email:
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "用户无权限"})
+    review_result = review_text(req.sign)
+    if len(review_result) != 0:
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "签名不符合要求：" + ",".join(review_result)})
     user = crud.set_sign_by_id(db, req.id, req.sign)
     return successResponse()
 
@@ -216,6 +226,10 @@ def set_nickname_by_id(req: SetNicknameRequestNew, current_user: Optional[dict] 
     if not checkNickname(req.nickname):
         raise EXC.UniException(key="isSuccess", value=False,
                                others={"description": "用户名不符合要求，只允许包含中文、字母、数字、英文下划线和连字符"})
+    review_result = review_text(req.nickname)
+    if len(review_result) != 0:
+        raise EXC.UniException(key="isSuccess", value=False,
+                               others={"description": "用户名不符合要求：" + ",".join(review_result)})
     user = crud.set_username_by_id(db, req.id, req.nickname)
     return successResponse()
 
@@ -669,8 +683,47 @@ def submit_complain_for_blog(req: ComplainForBlogCommentRequest, db: Session = D
     if not current_user:
         raise EXC.UniException(key='isSuccess', value=False)
     user = crud.get_user_by_id(db, current_user['uid'])
-    comment = crud.get_blog_comment_by_id(db, req.blogId)
+    comment = crud.get_blog_comment_by_id(db, req.commentId)
     if not comment:
         raise EXC.UniException(key='isSuccess', value=False, others={"description": "blog comment 不存在"})
     crud.report_blog_comment(db, comment.blog_id, comment.id, user.id, req.cause)
     return {'response': 'success'}
+
+
+class CreateBoyaEntrust(BaseModel):
+    campus: List[str]
+    type: List[str]
+
+
+@router.post('/createBoyaEntrust', tags=['工具箱'], response_model=successResponse)
+def create_boya_entrust(req: CreateBoyaEntrust, db: Session = Depends(get_db),
+                        current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    crud.create_boya_entrust(db, current_user['uid'], req.campus, req.type)
+    return successResponse()
+
+
+@router.post('/deleteBoyaEntrust', tags=['工具箱'], response_model=successResponse)
+def delete_boya_entrust(db: Session = Depends(get_db),
+                        current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    crud.delete_boya_entrust_by_uid(db, current_user['uid'])
+    return successResponse()
+
+
+class BoyaEntrustResponse(BaseModel):
+    campus: List[str]
+    type: List[str]
+
+
+@router.post('/getBoyaEntrust', response_model=BoyaEntrustResponse, tags=['工具箱'])
+def get_boya_entrust(db: Session = Depends(get_db),
+                     current_user: Optional[dict] = Depends(authorize)):
+    if not current_user:
+        raise EXC.UniException(key='isSuccess', value=False)
+    boya = crud.get_boya_entrust_by_uid(db, current_user['uid'])
+    if not boya:
+        return {'campus': [], 'type': []}
+    return {'campus': json.loads(boya.campus), 'type': json.loads(boya.type)}

@@ -1,11 +1,11 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime, Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, DateTime, Table, text
 from sqlalchemy.orm import relationship, backref, Mapped
 from sqlalchemy.sql import func
 
 from orm.database import Base
-from typing import Optional, List
+from typing import Optional, List, Set
 
 user_user_stars = Table(
     'user_user_stars',
@@ -25,6 +25,7 @@ class User(Base):
     userAvatarURL = Column(String(256), nullable=False,
                            default="https://banhang.oss-cn-beijing.aliyuncs.com/3bda01f4fce948d88ee72babced0a3c0.png")
     sign = Column(String, nullable=False, default="快来设置个性签名叭~~")
+    coin = Column(Integer, nullable=False, server_default=text('1'))
     create_at = Column(DateTime, server_default=func.now())
 
     activate_time = Column(DateTime, nullable=True, server_default=func.now())
@@ -46,6 +47,10 @@ class User(Base):
         secondaryjoin=(user_user_stars.c.user2 == id),
         lazy="dynamic",
         backref=backref('followers', lazy='dynamic'))
+    # badges = relationship("UserBadge", back_populates="users")
+    badges: Mapped[List["Badge"]] = relationship(
+        secondary="user_badges", back_populates="owners"
+    )
 
 
 class CheckCode(Base):
@@ -290,3 +295,35 @@ class ConversationMessage(Base):
 
     message = relationship("Message", foreign_keys=[message_id])
     conversation = relationship("Conversation", back_populates="messages", foreign_keys=[conversation_id])
+
+
+class BoyaEntrust(Base):
+    __tablename__ = 'boya_entrusts'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    campus = Column(String, nullable=False)
+    type = Column(String, nullable=False)
+
+
+class Badge(Base):
+    __tablename__ = 'badges'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    creater_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    short_name = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
+    background_color = Column(String, nullable=False)
+    icon_url = Column(String, nullable=False)
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
+    cost = Column(Integer, nullable=False, default=0)
+
+    creater = relationship("User", foreign_keys=[creater_id])
+    # users = relationship("UserBadge", back_populates="badges")
+    owners: Mapped[List[User]] = relationship(
+        secondary="user_badges", back_populates="badges"
+    )
+
+
+class UserBadge(Base):
+    __tablename__ = 'user_badges'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    badge_id = Column(Integer, ForeignKey('badges.id'), primary_key=True)
+    create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成

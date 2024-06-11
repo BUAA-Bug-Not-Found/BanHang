@@ -120,9 +120,10 @@
 import BlogShow from './BlogShow.vue';
 import {getBlogs, getTags} from "@/components/AnonymousBlog/api";
 import {useDisplay} from "vuetify";
-import UserStateStore from "@/store";
+import UserStateStore, {userStateStore} from "@/store";
 import {ElMessage} from "element-plus";
 import {useRouter} from "vue-router";
+import {isShutUpByUserIdAPI} from "@/components/HelpCenter/api";
 
 
 export default {
@@ -225,7 +226,15 @@ export default {
         ElMessage.error("请先登录")
         return
       }
-      this.$router.push({path: `/blogNew`});
+      isShutUpByUserIdAPI(userStateStore().user_id).then(
+          (res) => {
+            if (res.isShutUp) {
+              ElMessage.error("您正处于禁言中，不能发布回答，请注意您的言论！")
+            } else {
+              this.$router.push({path: `/blogNew`});
+            }
+          }
+      )
     },
   }
 

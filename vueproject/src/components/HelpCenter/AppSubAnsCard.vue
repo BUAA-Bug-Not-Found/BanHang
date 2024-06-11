@@ -13,13 +13,14 @@ import {ElMessage} from "element-plus";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import router from "@/router";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "SubAppAnsCard",
   methods: {userStateStore, formatDate},
   components: {Editor, Toolbar, UserAvatar},
   props: ["quesId", "ansId", "index"],
-  emits: ["delAns"],
+  emits: ["delAns", "uploadSubAns"],
   setup(props, context) {
 
     const init = () => {
@@ -29,9 +30,18 @@ export default {
             userLike.value = res.answer.ifUserLike
             likeSum.value = res.answer.likeSum
             isUser.value = UserStateStore().getUserId === ans.value.userId
+            getBadgesByUserId(ans.value.userId).then(
+                (res) => {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
           }
       )
     }
+
+    const badges = ref([])
 
     init()
 
@@ -126,12 +136,16 @@ export default {
                   replyComment(props.ansId, commentHtml.value, imageList.value).then(
                       (res) => {
                         if (res.isSuccess === true) {
-                          ElMessage.success("回答已上传")
+                          if(res.getPoints === true) {
+                            ElMessage.success("回答已上传，经验+2")
+                          } else {
+                            ElMessage.success("回答已上传")
+                          }
                           commentHtml.value = ''
                           imageList.value = []
-                          router.go(0)
+                          context.emit("uploadSubAns", res.ansId)
                         } else {
-                          ElMessage.error("回答失败，请稍后再试")
+                          ElMessage.error(res.description)
                         }
                       }
                   )
@@ -197,7 +211,8 @@ export default {
       userName,
       getUserName,
       reportReason,
-      truncate
+      truncate,
+      badges
     };
   },
 };
@@ -221,11 +236,23 @@ export default {
         <v-col cols="10">
           <div style="margin-top: 10px">
             <div style="font-size: 15px">
-              <span style="font-size: 15px">{{ ans.userName }}
+              <span style="font-size: 15px;margin-right: 5px">{{ ans.userName }}
               <span v-if="ans.replyAnsId != -1">
                 <v-icon>mdi-menu-right</v-icon> {{ ans.replyAnsUserName }}
               </span>
-            </span>
+              </span>
+              <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                <template v-slot:activator="{ props }">
+                  <v-chip
+                      size="x-small"
+                      :style="{ color: badge.badgeColor }"
+                      label
+                      v-bind="props"
+                  >
+                    {{ badge.badgeName }}
+                  </v-chip>
+                </template>
+              </v-tooltip>
             </div>
             <div style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</div>
           </div>

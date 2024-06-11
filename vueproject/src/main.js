@@ -14,6 +14,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
+
 router.beforeEach((to, from, next) => {
     // 如果当前路由为'/'，则跳转到'/blogList'路由
     if (to.path === '/') {
@@ -65,6 +66,23 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 import 'viewerjs/dist/viewer.css'
 import VueViewer from 'v-viewer'
+import userStateStore from './store';
+import { showTip, tryLogin } from './components/AccountManagement/AccountManagementAPI';
+
+if (userStateStore().email) {
+  // 登录一下
+  tryLogin(userStateStore().email, userStateStore().hashPassword).then((res) => {
+    if (!res.isSuccess) {
+      userStateStore().resetUserInfo()
+      router.replace({path: "/loginPage"})
+      showTip("出现异常，请尝试重新登录！", false)
+    }
+  }).catch(() => {
+    userStateStore().resetUserInfo()
+    router.replace({path: "/loginPage"})
+    showTip("出现异常，请尝试重新登录！", false)
+  })
+}
 
 app.use(VueViewer, {
     defaultOptions: {

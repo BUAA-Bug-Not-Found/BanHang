@@ -14,6 +14,7 @@ import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import SubAnsCard from "@/components/HelpCenter/SubAnsCard.vue";
 import router from "@/router";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "AnsCard",
@@ -31,9 +32,18 @@ export default {
             likeSum.value = res.answer.likeSum
             isUser.value = UserStateStore().getUserId === ans.value.userId
             subAnsIdList.value = res.answer.subAnsIdList
+            getBadgesByUserId(ans.value.userId).then(
+                (res)=> {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
           }
       )
     }
+
+    const badges = ref([])
 
     init()
 
@@ -77,6 +87,9 @@ export default {
           (res) => {
             if (res.isSuccess === true) {
               ElMessage.success("删除成功")
+              console.log(props.index)
+              console.log(props.index)
+              console.log(props.index)
               context.emit("delAns", {index: props.index})
               delDialog.value = false
             } else {
@@ -134,12 +147,16 @@ export default {
               replyComment(props.ansId, commentHtml.value, imageList.value).then(
                   (res) => {
                     if (res.isSuccess === true) {
-                      ElMessage.success("回答已上传")
+                      if(res.getPoints === true) {
+                        ElMessage.success("回答已上传，经验+2")
+                      } else {
+                        ElMessage.success("回答已上传")
+                      }
                       commentHtml.value = ''
                       imageList.value = []
-                      router.go(0)
+                      subAnsIdList.value.push(res.ansId)
                     } else {
-                      ElMessage.error("回答失败，请稍后再试")
+                      ElMessage.error(res.description)
                     }
                   }
               )
@@ -157,6 +174,9 @@ export default {
     const reportReason = ref('')
 
     const reportAnswer = () => {
+      console.log(props.quesId)
+      console.log(props.ansId)
+      console.log(reportReason.value)
       reportAnswerAPI(props.quesId, props.ansId, reportReason.value).then(
           (res) => {
             if(res.isSuccess) {
@@ -183,6 +203,10 @@ export default {
       return strippedContent;
     };
 
+    const receiveSubAnsCard = (index) => {
+      subAnsIdList.value.push(index)
+    }
+
     return {
       ans,
       ansIdRef,
@@ -207,7 +231,9 @@ export default {
       userName,
       getUserName,
       reportReason,
-      truncate
+      truncate,
+      receiveSubAnsCard,
+      badges
     };
   },
 };
@@ -221,15 +247,32 @@ export default {
         elevation="0"
     >
       <v-row>
-        <v-col cols="1" style="display: flex;margin-left: 10px;justify-content: end;">
-          <UserAvatar :userId="ans.userId" @returnUserName="getUserName"/>
-        </v-col>
-        <v-col cols="10">
-          <div style="display: flex; justify-content: space-between;margin-top: 10px">
-            <span style="font-size: 15px">{{ ans.userName }}</span>
-            <span style="font-size: 12px;color: gray">回答于{{ formatDate(ans.ansTime) }}</span>
+        <v-col cols="10" style="margin-left: 30px;margin-right: 10px">
+          <div style="display: flex; align-items: center;margin-left: 10px;width: 100%">
+            <UserAvatar :userId="ans.userId" @returnUserName="getUserName"></UserAvatar>
+            <v-col cols="10">
+              <v-row style="margin: 1px" :align="'baseline'">
+                      <span style="font-size: 20px;margin-top: 10px">
+                      {{ ans.userName }}
+                    </span>
+                <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                  <template v-slot:activator="{ props }">
+                    <v-chip
+                        size="x-small"
+                        class="ma-2"
+                        :style="{ color: badge.badgeColor }"
+                        label
+                        v-bind="props"
+                    >
+                      {{ badge.badgeName }}
+                    </v-chip>
+                  </template>
+                </v-tooltip>
+              </v-row>
+              <p style="font-size: 15px;color: gray">{{ formatDate(ans.ansTime) }}</p>
+            </v-col>
           </div>
-          <div style="margin-top: 3px" v-dompurify-html="ans.ansContent"/>
+          <div style="margin-top: 3px;margin-left: 3px" v-dompurify-html="ans.ansContent"/>
           <div style="margin-bottom: 5px">
             <v-btn
                 :prepend-icon=" !userLike ?
@@ -289,6 +332,7 @@ export default {
                           :index="index" :ansId="ansId"
                           :key="ansId + '-ans'"
                           :quesId="quesId"
+                          @uploadSubAnsCard="receiveSubAnsCard"
                           @delComment="delComment"
               ></SubAnsCard>
             </div>

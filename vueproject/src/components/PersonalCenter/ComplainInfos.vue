@@ -83,7 +83,7 @@
                     </div>
                     
                     <div style="text-align: right; margin-top: 10px; margin-bottom: 5px;">
-                        <v-text class="time" style="color: grey; margin-right: 5px;">{{ this.formatDateTime(content.time) }}</v-text>
+                        <v-text class="time" style="color: grey; margin-right: 5px;">举报时间： {{ this.formatDateTime(content.time) }}</v-text>
                     </div>
                     <div style="margin-bottom: 10px; text-align: left;">
                         <v-btn style="vertical-align: center; background-color: #f6f6f6;" @click.stop="clickDeleteComplain(index)">
@@ -134,7 +134,7 @@ import router from '@/router';
 import { checkLogin } from '../AccountManagement/AccountManagementAPI';
 import { delAnswerAPI, delQuestionAPI } from '../HelpCenter/api';
 import { deleteComplainItem, getComplainList, shutUpUser } from './PersonalCenterAPI';
-import { deleteBlogByBlogId } from '../AnonymousBlog/api';
+import { deleteBlogByBlogId, deleteCommentByCommentId } from '../AnonymousBlog/api';
 
 export default {
     components: { },
@@ -162,62 +162,62 @@ export default {
             selectedMinutes: 0,
             currentShutUpId: 0,
             helpInfos: [
-                {
-                    "complainId": 0,
-                    "blogTitle": "", // 如果是匿名区举报，匿名贴有title要返回
-                    "blogId": 7, // 举报对应的帖子id
-                    "blogContent": "捞人教教python", // 帖子的内容
-                    "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
-                    "comment": "滚!", // 评论内容
-                    "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
-                    "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取
-                    "cause": "他连python都不会", // 举报的原因
-                    "time": "", // 发起举报的时间
-                    "isComment": false, // 是否是对评论的举报
-                    "isAno": false // 是否是匿名区举报
-                },
-                {
-                    "complainId": 0, // 加id, 便于删除
-                    "blogTitle": "", // 如果是匿名区举报，匿名贴有title要返回
-                    "blogId": 7, // 举报对应的帖子id
-                    "blogContent": "捞人教教python", // 帖子的内容
-                    "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
-                    "comment": "滚!", // 评论内容
-                    "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
-                    "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取 "cause": "乱说脏话", // 举报的原因
-                    "cause": "说脏话",
-                    "time": "", // 发起举报的时间
-                    "isComment": true, // 是否是对评论的举报
-                    "isAno": false // 是否是匿名区举报
-                },
-                {
-                    "complainId": 0, // 加id, 便于删除
-                    "blogTitle": "匿名举报！！", // 如果是匿名区举报，匿名贴有title要返回
-                    "blogId": 7, // 举报对应的帖子id
-                    "blogContent": "捞人教教python", // 帖子的内容
-                    "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
-                    "comment": "滚!", // 评论内容
-                    "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
-                    "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取 "cause": "乱说脏话", // 举报的原因
-                    "cause": "说脏话",
-                    "time": "", // 发起举报的时间
-                    "isComment": true, // 是否是对评论的举报
-                    "isAno": true // 是否是匿名区举报
-                },
-                {
-                    "complainId": 0, // 加id, 便于删除
-                    "blogTitle": "匿名举报xxx！！", // 如果是匿名区举报，匿名贴有title要返回
-                    "blogId": 7, // 举报对应的帖子id
-                    "blogContent": "把猫猫的头割下来何尝不是一种乐趣呢", // 帖子的内容
-                    "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
-                    "comment": "滚!", // 评论内容
-                    "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
-                    "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取 "cause": "乱说脏话", // 举报的原因
-                    "cause": "他这条帖子在虐待猫！",
-                    "time": "", // 发起举报的时间
-                    "isComment": false, // 是否是对评论的举报
-                    "isAno": true // 是否是匿名区举报
-                },
+                // {
+                //     "complainId": 0,
+                //     "blogTitle": "", // 如果是匿名区举报，匿名贴有title要返回
+                //     "blogId": 7, // 举报对应的帖子id
+                //     "blogContent": "捞人教教python", // 帖子的内容
+                //     "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
+                //     "comment": "滚!", // 评论内容
+                //     "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
+                //     "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取
+                //     "cause": "他连python都不会", // 举报的原因
+                //     "time": "", // 发起举报的时间
+                //     "isComment": false, // 是否是对评论的举报
+                //     "isAno": false // 是否是匿名区举报
+                // },
+                // {
+                //     "complainId": 0, // 加id, 便于删除
+                //     "blogTitle": "", // 如果是匿名区举报，匿名贴有title要返回
+                //     "blogId": 7, // 举报对应的帖子id
+                //     "blogContent": "捞人教教python", // 帖子的内容
+                //     "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
+                //     "comment": "滚!", // 评论内容
+                //     "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
+                //     "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取 "cause": "乱说脏话", // 举报的原因
+                //     "cause": "说脏话",
+                //     "time": "", // 发起举报的时间
+                //     "isComment": true, // 是否是对评论的举报
+                //     "isAno": false // 是否是匿名区举报
+                // },
+                // {
+                //     "complainId": 0, // 加id, 便于删除
+                //     "blogTitle": "匿名举报！！", // 如果是匿名区举报，匿名贴有title要返回
+                //     "blogId": 7, // 举报对应的帖子id
+                //     "blogContent": "捞人教教python", // 帖子的内容
+                //     "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
+                //     "comment": "滚!", // 评论内容
+                //     "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
+                //     "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取 "cause": "乱说脏话", // 举报的原因
+                //     "cause": "说脏话",
+                //     "time": "", // 发起举报的时间
+                //     "isComment": true, // 是否是对评论的举报
+                //     "isAno": true // 是否是匿名区举报
+                // },
+                // {
+                //     "complainId": 0, // 加id, 便于删除
+                //     "blogTitle": "匿名举报xxx！！", // 如果是匿名区举报，匿名贴有title要返回
+                //     "blogId": 7, // 举报对应的帖子id
+                //     "blogContent": "把猫猫的头割下来何尝不是一种乐趣呢", // 帖子的内容
+                //     "commentId": 0, // 评论id, 如果不是举报评论则随便返回一个值即可(不会用到这个值)
+                //     "comment": "滚!", // 评论内容
+                //     "blogAuthorId": 0, // 发帖人的id, 非举报帖子则值随便取
+                //     "commentAuthorId": 0, // 评论人的id, 非举报评论则值随便取 "cause": "乱说脏话", // 举报的原因
+                //     "cause": "他这条帖子在虐待猫！",
+                //     "time": "", // 发起举报的时间
+                //     "isComment": false, // 是否是对评论的举报
+                //     "isAno": true // 是否是匿名区举报
+                // },
             ],
         }
     },
@@ -260,7 +260,14 @@ export default {
         },
         clickDeleteComment(commentId, isAno) {
             if (isAno) {
-                // TODO 删除匿名评论
+                deleteCommentByCommentId(commentId).then((res) => {
+                    if (res.response == 'success')
+                        showTip("删除回复成功！", true)
+                    else 
+                        showTip("出现异常，删除失败！", false)
+                }).catch(() => {
+                    showTip("出现异常，删除失败！", false)
+                })
             } else {
                 delAnswerAPI(commentId).then((res) => {
                     if (res.isSuccess)
@@ -268,12 +275,13 @@ export default {
                     else 
                         showTip("出现异常，删除失败!", false)
                 }).catch(() => {
-                    showTip("删除失败!", false)
+                    showTip("出现异常，删除失败!", false)
                 })
             }
         },
         clickDeleteBlog(blogId, isAno) {
             if (isAno) {
+                console.log("准备删除匿名贴！！")
                 deleteBlogByBlogId(blogId).then((r) => {
                     if (r.response == 'success')
                         showTip('删除成功！', true)

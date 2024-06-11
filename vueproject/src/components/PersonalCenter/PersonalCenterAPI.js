@@ -1,5 +1,5 @@
 import axios from "axios";
-import { showTip } from "../AccountManagement/AccountManagementAPI";
+import {showTip} from "../AccountManagement/AccountManagementAPI";
 
 export function queryStar(_a, _b) {
     // a b email
@@ -13,7 +13,7 @@ export function queryStar(_a, _b) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -60,7 +60,7 @@ export function setSign(_a, _id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -77,7 +77,7 @@ export function setHeadImage(_id, _url) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -105,7 +105,7 @@ export function getWaterBlogs(_id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -133,7 +133,7 @@ export function getFans(_id) {
     }).then((reply) => {
         return reply.data
     }).catch(() => {
-        
+
     })
 }
 
@@ -158,8 +158,7 @@ export function getComplainAmount() {
     return axios.request({
         url: "/getComplainAmount",
         method: "get",
-        params: {
-        }
+        params: {}
     }).then((reply) => {
         return reply.data // 返回一个整数
     }).catch(() => {
@@ -175,11 +174,20 @@ export function isShutUpByUserId(_id) {
             id: _id
         }
     }).then((r) => {
+        console.log("r.data")
+        console.log(r.data)
+        console.log(r.data.isShutUp)
         return r.data.isShutUp;
     }).catch(() => {
 
     })
 }
+
+// export function isShutUpByUserId(_id) {
+//     isShutUpByUserId1(_id).then((r) => {
+//         return r
+//     })
+// }
 
 export function shutUpUser(_id, _d, _h, _m) {
     return axios.request({
@@ -215,8 +223,7 @@ export function getComplainList() {
     return axios.request({
         url: "/getComplainList",
         method: "get",
-        params: {
-        }
+        params: {}
     }).then((r) => {
         return r.data
     }).catch(() => {
@@ -224,3 +231,133 @@ export function getComplainList() {
     })
 }
 
+export function getCurrentLevelById(_id) {
+    return axios.request({
+        url: "getCurrentLevelById",
+        method: "get",
+        params: {
+            "id": _id
+        }
+    }).then((r) => {
+        return r.data.exp
+    }).catch(() => {
+        return false
+    })
+}
+
+export function getCurrentExpById(_id) {
+    return axios.request({
+        url: "getCurrentExpById",
+        method: "get",
+        params: {
+            "id": _id
+        }
+    }).then((r) => {
+        return r.data.level
+    }).catch(() => {
+        return false
+    })
+}
+
+export function uploadBadgeAPI(badgeName, badgeDescription, badgeUrl, color, cost) {
+    return axios.request(
+        {
+            url: '/uploadBadge',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({
+                badgeName: badgeName,
+                badgeDesc: badgeDescription,
+                badgeUrl: badgeUrl,
+                badgeColor: color,
+                badgeCost: cost,
+            })
+        }
+    ).then(response2 => {
+        return response2.data
+    })
+}
+
+// export function getBadgesByUserId(userId, isOnlyShow) {
+export function getBadgesByUserId(userId) {
+    return axios.request({
+        url: "getBadgesByUserId",
+        method: "post",
+        data: {
+            userId: userId,
+        }
+    }).then((r) => {
+        if (r.data.response == 'success')
+            return r.data.badges // 表示成功
+        else
+            return false
+    }).catch(() => {
+        return false
+    })
+}
+
+export function setBadgeShowState(userId, badgeId, state) {
+    return axios({
+        url: '/setBadgeShowState',
+        method: "post",
+        data: {
+            "userId": userId,
+            "badgeId": badgeId,
+            "state": state
+        }
+    }).then(r => {
+        if (r.data.response == 'success') return true
+        else return false
+    }).catch(() => {
+        return false
+    })
+}
+
+export function getBadges() {
+    return axios.request(
+        {
+            url: '/getBadges',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: JSON.stringify({})
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+export function uploadBuyBadge(userId, badgeId) {
+    return axios.request(
+        {
+            url: '/buyBadge',
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            data: {
+                badgeId: badgeId
+            }
+        }
+    ).then(response => {
+        return response.data
+    })
+}
+
+
+export function delUserBadge(badgeId) {
+    return axios.request(
+        {
+            url: '/refundBadge',
+            method: 'post',
+            data: {
+                badgeId: badgeId
+            }
+        }
+    ).then(r => {
+        console.log("RRRRRRRRRRRRRR=>")
+        console.log(r.data)
+        console.log(r.data.response)
+        if (r.data.response == 'success') return true
+        else return false
+    }).catch(() => {
+        return false
+    })
+}

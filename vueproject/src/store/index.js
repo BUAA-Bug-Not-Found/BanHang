@@ -19,7 +19,9 @@ export const userStateStore = defineStore("user", {
                     isManager: perviousData['isManager'],
                     nickname: perviousData['nickname'],
                     headImage: perviousData['headImage'],
-                    sign: perviousData['sign']
+                    hashPassword: perviousData['hashPassword'],
+                    sign: perviousData['sign'],
+                    coins: perviousData['coins']
                 }
             }
         // }
@@ -29,9 +31,11 @@ export const userStateStore = defineStore("user", {
             register_date: "default",
             isAuthentic: false,
             email: "",
+            hashPassword: "",
             nickname: "",
             headImage: "",
-            sign: ""
+            sign: "",
+            coins: 0
         }
     },
 
@@ -57,12 +61,13 @@ export const userStateStore = defineStore("user", {
     },
 
     actions: {
-        async login_store_info(accountInfo, _email, _id) {
+        async login_store_info(accountInfo, _email, _id, hashPassword) {
             this.email = _email;
             this.headImage = accountInfo.url;
             this.nickname = accountInfo.nickname;
             this.sign = accountInfo.sign;
             this.isManager = accountInfo.isManager;
+            this.hashPassword = hashPassword
             this.user_id = _id;
             this.user_name = this.nickname;
             this.isAuthentic = true;
@@ -77,28 +82,42 @@ export const userStateStore = defineStore("user", {
                 register_date: this.register_date,
                 isAuthentic: this.isAuthentic,
                 email: this.email,
+                hashPassword: this.hashPassword,
                 isManager: this.isManager,
                 nickname: this.nickname,
                 headImage: this.headImage,
-                sign: this.sign
+                sign: this.sign,
+                coins: 0
             }))
         },
-        // async logout() {
-        //     this.isAuthentic = false
-        //     $bus.emit("updateIndexData", {
-        //         isLogin: false,
-        //         user_name: '未登录',
-        //         avatar: "src/assets/images/default-avatar.png",
-        //     })
-        //     localStorage.clear()
-        // },
+        async coins_info(coins) {
+            this.coins = coins
+            localStorage.setItem("userInfo", JSON.stringify({
+                user_id: this.user_id,
+                user_name: this.user_name,
+                register_date: this.register_date,
+                isAuthentic: this.isAuthentic,
+                email: this.email,
+                hashPassword: this.hashPassword,
+                isManager: this.isManager,
+                nickname: this.nickname,
+                headImage: this.headImage,
+                sign: this.sign,
+                coins: this.coins
+            }))
+        },
         async resetUserInfo() {
             this.email = ""
             this.headImage = ""
             this.nickname = ""
+            this.user_name = ""
+            this.register_date = ""
+            this.isAuthentic = false
             this.sign = ""
             this.user_id = 1
             this.isManager = false
+            this.hashPassword = ''
+            this.coins = 0
             localStorage.clear()
             $bus.emit("updateIndexData", {
                 isLogin: false,
@@ -114,12 +133,30 @@ export const userStateStore = defineStore("user", {
                     register_date: this.register_date,
                     isAuthentic: this.isAuthentic,
                     email: this.email,
+                    hashPassword: this.hashPassword,
                     isManager: this.isManager,
                     nickname: _nickname,
                     headImage: _url,
-                    sign: _sign
+                    sign: _sign,
+                    coins: this.coins
                 }))
             // }
+        },
+        async updateCoins(coins) {
+            this.coins = coins
+            localStorage.setItem("userInfo", JSON.stringify({
+                user_id: this.user_id,
+                user_name: this.user_name,
+                register_date: this.register_date,
+                isAuthentic: this.isAuthentic,
+                email: this.email,
+                hashPassword: this.hashPassword,
+                isManager: this.isManager,
+                nickname: this.nickname,
+                headImage: this.headImage,
+                sign: this.sign,
+                coins: coins
+            }))
         }
     }
 })

@@ -22,6 +22,7 @@ import UserStateStore, {userStateStore} from "@/store";
 import UserAvatar from "@/components/HelpCenter/UserAvatar.vue";
 import {api as viewerApi} from "v-viewer";
 import {Plus} from "@element-plus/icons-vue";
+import {getBadgesByUserId} from "@/components/PersonalCenter/PersonalCenterAPI";
 
 export default {
   name: "QuesInfo",
@@ -87,13 +88,14 @@ export default {
 
     const refresh = (index) => {
       qid.value = index
-      question.value.ansIdList = []
+      ansIdList.value = []
       avatarShow.value = false
       getQuesByIdApi(qid.value).then(
           (res) => {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            ansIdList.value = res.question.ansIdList
             recommendQues.value = []
             avatarShow.value = true
             ifFocus.value = res.question.ifUserFocus
@@ -103,6 +105,13 @@ export default {
               console.log(e)
             }
             isUser.value = UserStateStore().getUserId === question.value.userId
+            getBadgesByUserId(question.value.userId).then(
+                (res)=> {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
             disTags.value = []
             for (let i = 0; i < question.value.tagIdList.length; i++) {
               for (let j = 0; j < tags.value.length; j++) {
@@ -117,6 +126,8 @@ export default {
 
     const avatarShow = ref(false)
 
+    const badges = ref([])
+
     const init = () => {
       let router = useRouter()
       qid.value = router.currentRoute.value.params.qid
@@ -126,6 +137,7 @@ export default {
             question.value = res.question
             userLike.value = res.question.ifUserLike
             likeSum.value = res.question.likeSum
+            ansIdList.value = res.question.ansIdList
             avatarShow.value = true
             ifFocus.value = res.question.ifUserFocus
             recommendQues.value = []
@@ -135,6 +147,13 @@ export default {
               console.log(e)
             }
             isUser.value = UserStateStore().getUserId === question.value.userId
+            getBadgesByUserId(question.value.userId).then(
+                (res)=> {
+                  if(res) {
+                    badges.value = res
+                  }
+                }
+            )
             getTagsApi().then(
                 (data) => {
                   tags.value = data.tags
@@ -228,13 +247,17 @@ export default {
                   uploadAnsApi(qid.value, replyHtml.value, imageList.value).then(
                       (res) => {
                         if (res.isSuccess === true) {
-                          ElMessage.success("回答已上传")
+                          if(res.getPoints === true) {
+                            ElMessage.success("回答已上传，经验+4")
+                          } else {
+                            ElMessage.success("回答已上传")
+                          }
                           replyHtml.value = ''
                           imageList.value = []
                           sheet2.value = false
-                          router.go(0)
+                          ansIdList.value.push(res.ansId)
                         } else {
-                          ElMessage.error("回答失败，请稍后再试")
+                          ElMessage.error(res.description)
                         }
                       }
                   )
@@ -248,6 +271,8 @@ export default {
     const delPic = (index) => {
       editImgList.value.splice(index, 1)
     }
+
+    const ansIdList = ref([])
 
     const setLikeQues = () => {
       const state = UserStateStore()
@@ -288,7 +313,11 @@ export default {
     const isUser = ref(false);
 
     const delAns = (index) => {
-      question.value.ansIdList.splice(index, 1)
+      //ansIdList.value = ansIdList.value.filter(ans => ans != index.index);
+      var temp = ansIdList.value
+      ansIdList.value = []
+      temp.splice(index.index, 1)
+      ansIdList.value = temp
     }
 
     const editHtml = ref("")
@@ -356,7 +385,7 @@ export default {
                 editTagList.value = []
                 sheet1.value = !sheet1.value
               } else {
-                ElMessage.error("上传修改失败，请稍后再试")
+                ElMessage.error(res.description)
               }
             }
         )
@@ -509,7 +538,9 @@ export default {
       reportQues,
       getUserName,
       userName,
-      reportReason
+      reportReason,
+      ansIdList,
+      badges
     };
   },
 };
@@ -558,10 +589,27 @@ export default {
                     </div>
                   </v-col>
                 </v-row>
-                <div style="display: flex; align-items: center;margin-left: 10px">
+                <div style="display: flex; align-items: center;margin-left: 10px;width: 100%">
                   <UserAvatar v-if="avatarShow" :userId="question.userId" @returnUserName="getUserName"></UserAvatar>
-                  <v-col cols="7">
-                    <p style="font-size: 20px;margin-top: 10px">{{ question.userName }}</p>
+                  <v-col cols="10">
+                    <v-row style="margin: 1px" :align="'baseline'">
+                      <span style="font-size: 20px;margin-top: 10px">
+                      {{ question.userName }}
+                    </span>
+                      <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                        <template v-slot:activator="{ props }">
+                          <v-chip
+                              size="x-small"
+                              class="ma-2"
+                              :style="{ color: badge.badgeColor }"
+                              label
+                              v-bind="props"
+                          >
+                            {{ badge.badgeName }}
+                          </v-chip>
+                        </template>
+                      </v-tooltip>
+                    </v-row>
                     <p style="font-size: 15px;color: gray">{{ formatDate(question.quesTime) }}</p>
                   </v-col>
                 </div>
@@ -584,7 +632,7 @@ export default {
                   </v-btn>
                   <v-btn variant="text" prepend-icon="mdi-message-reply-text"
                          @click="openAns = true;openComment = false" color="blue-grey-lighten-2">
-                    {{ question.ansIdList.length }} 条回答
+                    {{ ansIdList.length }} 条回答
                   </v-btn>
                   <v-menu v-show="menuClick" :location="'bottom'">
                     <template v-slot:activator="{ props }">
@@ -655,13 +703,13 @@ export default {
 
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部回答 </span>
-              <span style="color: gray">{{ question.ansIdList.length }}</span>
+              <span style="color: gray">{{ ansIdList.length }}</span>
             </div>
-            <div v-if="question.ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
+            <div v-if="ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
               问题正在等待你的答复哦~
             </div>
-            <AnsCard v-for="(ans,index) in question.ansIdList" :key="'ans1-' + index"
-                     :quesId="question.quesId"
+            <AnsCard v-for="(ans,index) in ansIdList" :key="'ans1-' + ans"
+                     :quesId="qid"
                      :ansId="ans" :index="index" @delAns="delAns"/>
             <div style="height: 100px"></div>
           </v-card>
@@ -745,8 +793,7 @@ export default {
           />
         </div>
       </div>
-      <v-row>
-        <v-col cols="12">
+      <div>
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px;font-size: 25px;font-weight: bold;"
                  v-dompurify-html="question.quesContent.content"/>
@@ -769,7 +816,24 @@ export default {
                 <UserAvatar :userId="question.userId" @returnUserName="getUserName"/>
               </div>
               <div style="margin-left: 5px">
-                <p style="font-size: 15px;margin-top: 10px">{{ question.userName }}</p>
+                <v-row style="margin: 1px" :align="'baseline'">
+                      <span style="font-size: 20px;margin-top: 10px">
+                      {{ question.userName }}
+                    </span>
+                  <v-tooltip v-for="badge in badges" :key="badge.badgeId" :text="badge.badgeDesc">
+                    <template v-slot:activator="{ props }">
+                      <v-chip
+                          size="x-small"
+                          class="ma-2"
+                          :style="{ color: badge.badgeColor }"
+                          label
+                          v-bind="props"
+                      >
+                        {{ badge.badgeName }}
+                      </v-chip>
+                    </template>
+                  </v-tooltip>
+                </v-row>
                 <p style="font-size: 10px;color: gray">{{ formatDate(question.quesTime) }}</p>
               </div>
             </div>
@@ -785,7 +849,7 @@ export default {
             <v-row style="margin-left: 10px;height:60px;font-size:12px;color: grey">
               <v-col cols="4">
                 <span style="margin-right: 4px;color: black">{{ likeSum }}</span> 点赞 ·
-                <span style="margin-right: 4px;margin-left: 3px;color: black">{{ question.ansIdList.length }}</span> 回复
+                <span style="margin-right: 4px;margin-left: 3px;color: black">{{ ansIdList.length }}</span> 回复
               </v-col>
               <v-col offset="4">
                 <v-btn :prepend-icon="'mdi-focus-field'"
@@ -805,17 +869,16 @@ export default {
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="transform: translateX(3%);margin-top: 10px">
               <span style="font-weight: bold;font-size: 20px">全部回答 </span>
-              <span style="color: gray">{{ question.ansIdList.length }}</span>
+              <span style="color: gray">{{ ansIdList.length }}</span>
             </div>
-            <div v-if="question.ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
+            <div v-if="ansIdList.length == 0" style="width: 100%;display: flex;justify-content: center">
               问题正在等待你的答复哦~
             </div>
-            <div v-for="(ans,index) in question.ansIdList" :key="'ans2-' + index">
-              <AppAnsCard :quesId="question.quesId" :ansId="ans" :index="index" @delAns="delAns"/>
+            <div v-for="(ans,index) in ansIdList" :key="'ans2-' + ans">
+              <AppAnsCard :quesId="qid" :ansId="ans" :index="index" @delAns="delAns"/>
             </div>
           </v-card>
-        </v-col>
-      </v-row>
+      </div>
       <div style="height: 200px"></div>
     </div>
   </div>
