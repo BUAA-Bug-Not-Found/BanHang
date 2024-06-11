@@ -13,6 +13,7 @@ from orm.models import Message, Conversation, ConversationMessage, User, Reporte
 
 import bs4 as beautifulsoup
 
+
 def get_user_by_id(db: Session, user_id: int) -> models.User:
     return db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -822,10 +823,10 @@ def delete_boya_entrust_by_uid(db: Session, uid: int):
 
 
 def create_boya_entrust(db: Session, uid: int, campus: List[str], type: List[str]):
-    if cur_entrust:=get_boya_entrust_by_uid(db, uid):
+    if cur_entrust := get_boya_entrust_by_uid(db, uid):
         db.delete(cur_entrust)
         db.commit()
-    entrust = models.BoyaEntrust(user_id = uid, campus = json.dumps(campus), type = json.dumps(type))
+    entrust = models.BoyaEntrust(user_id=uid, campus=json.dumps(campus), type=json.dumps(type))
     db.add(entrust)
     db.commit()
 
@@ -857,19 +858,20 @@ def buy_badge(db: Session, db_user: User, db_badge: Badge):
         db.commit()
     return True
 
-def create_badge(db : Session, creater_id: int,
-                      short_name: str,
-                      full_name: str,
-                      background_color: str,
-                      icon_url: str,
-                      cost=500):
+
+def create_badge(db: Session, creater_id: int,
+                 short_name: str,
+                 full_name: str,
+                 background_color: str,
+                 icon_url: str,
+                 cost=500):
     db_badge = Badge(creater_id=creater_id,
                      short_name=short_name,
                      full_name=full_name,
                      background_color=background_color,
                      icon_url=icon_url,
                      cost=cost)
-    try:    
+    try:
         db_user = get_user_by_id(db, creater_id)
         if db_user.privilege == 0:
             db_user.coin = db_user.coin - 1000
@@ -896,3 +898,94 @@ def refund_user_badge_by_id(db: Session, user_id: int, badge_id: int):
         return True
     else:
         return False
+
+
+def get_user_all_exp(db: Session, user_id: int):
+    user = get_user_by_id(db, user_id)
+    return user.exp
+
+
+exp_level = [0, 100, 600, 2100, 5100, 11100, 21600, 23400, 53400, 107400]
+
+
+def get_user_level(db: Session, user_id: int):
+    # Lv.0 =>(100) Lv.1（2天） =>(500) Lv.2（10天） =>(1500) Lv.3（30天） =>(3000) Lv.4 （60天）=>(6000) Lv.5（120天） =>(10500) Lv.6（210天） =>(18000) Lv.7 （360天）=>(30000) Lv.8 （600天）=>(54000) Lv.9（1080天）
+    global exp_level
+    exp = get_user_all_exp(db, user_id)
+    level = 0
+    while level < len(exp_level) - 1 and exp_level[level + 1] <= exp:
+        level += 1
+    return level
+
+
+def get_user_level_exp(db: Session, user_id: int):
+    exp = get_user_all_exp(db, user_id)
+    level = get_user_level(db, user_id)
+    return exp - exp_level[level]
+
+
+user_max_exp_add = 500
+
+
+def update_user_today_exp(db: Session, user_id: int):
+    user = get_user_by_id(db, user_id)
+    if user.last_exp_add_time.day < datetime.datetime.now().day:
+        user.today_exp_add_sum = 0
+        db.commit()
+        db.refresh(user)
+    return user
+
+
+def add_exp_for_upload_blog(db: Session, user_id: int) -> bool:
+    user = update_user_today_exp(db, user_id)
+    if user.today_exp_add_sum > user_max_exp_add:
+        return False
+    user.today_exp_add_sum += 10
+    user.exp += 10
+    db.commit()
+    db.refresh(user)
+    return True
+
+
+def add_exp_for_upload_blog_comment(db: Session, user_id: int) -> bool:
+    user = update_user_today_exp(db, user_id)
+    if user.today_exp_add_sum > user_max_exp_add:
+        return False
+    user.today_exp_add_sum += 2
+    user.exp += 2
+    db.commit()
+    db.refresh(user)
+    return True
+
+
+def add_exp_for_upload_ques(db: Session, user_id: int) -> bool:
+    user = update_user_today_exp(db, user_id)
+    if user.today_exp_add_sum > user_max_exp_add:
+        return False
+    user.today_exp_add_sum += 5
+    user.exp += 5
+    db.commit()
+    db.refresh(user)
+    return True
+
+
+def add_exp_for_answer_ques(db: Session, user_id: int) -> bool:
+    user = update_user_today_exp(db, user_id)
+    if user.today_exp_add_sum > user_max_exp_add:
+        return False
+    user.today_exp_add_sum += 4
+    user.exp += 4
+    db.commit()
+    db.refresh(user)
+    return True
+
+
+def add_exp_for_reply_question_comment(db: Session, user_id: int) -> bool:
+    user = update_user_today_exp(db, user_id)
+    if user.today_exp_add_sum > user_max_exp_add:
+        return False
+    user.today_exp_add_sum += 2
+    user.exp += 2
+    db.commit()
+    db.refresh(user)
+    return True

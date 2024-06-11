@@ -26,7 +26,10 @@ class User(Base):
                            default="https://banhang.oss-cn-beijing.aliyuncs.com/3bda01f4fce948d88ee72babced0a3c0.png")
     sign = Column(String, nullable=False, default="快来设置个性签名叭~~")
     coin = Column(Integer, nullable=False, server_default=text('1'))
+    exp = Column(Integer, nullable=False, server_default=text('0'))
     create_at = Column(DateTime, server_default=func.now())
+    last_exp_add_time = Column(DateTime, nullable=False, server_default=func.now())
+    today_exp_add_sum = Column(Integer, nullable=False, server_default=text('0'))
 
     activate_time = Column(DateTime, nullable=True, server_default=func.now())
 

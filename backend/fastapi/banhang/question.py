@@ -221,6 +221,7 @@ def upload_question(question: UploadQuestion, db: Session = Depends(get_db),
                                                                      userId=current_user["uid"],
                                                                      questionTagids=tagid,
                                                                      questionImageids=question.quesContent.imageList))
+    crud.add_exp_for_upload_ques(db, current_user['uid'])
     return {"isSuccess": True}
 
 
@@ -344,7 +345,7 @@ def answer_question(ans: AnsQuestion, background_tasks: BackgroundTasks, db: Ses
         questionCommentImageids=ans.ansContent.imageList,
         questionId=ans.quesId
     ))
-    return AnsQuesResponse(ansId=comment.id, getPoints=False)
+    return AnsQuesResponse(ansId=comment.id, getPoints=crud.add_exp_for_answer_ques(db, current_user['uid']))
 
 
 class ReplyAnswerRequest(BaseModel):
@@ -387,7 +388,8 @@ def reply_comment(ans_req: ReplyAnswerRequest, background_tasks: BackgroundTasks
         questionId=target_comment.question_id,
         replyCommentId=target_comment.id
     ))
-    return ReplyAnswerResponse(ansId=comment.id, getPoints=False)
+    return ReplyAnswerResponse(ansId=comment.id,
+                               getPoints=crud.add_exp_for_reply_question_comment(db, current_user['uid']))
 
 
 @router.post("/updateAns", tags=["Question"], response_model=successResponse,
