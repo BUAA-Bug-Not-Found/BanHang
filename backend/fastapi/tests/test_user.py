@@ -154,9 +154,9 @@ def test_original_exp(mock_user_data, new_database):
     register_login_user(client, mock_user_data)
     user = client.get("check_login_state").json()
     user_id = user['uid']
-    levelreq = client.post('/getCurrentLevelById', json={'id': user_id})
+    levelreq = client.get('/getCurrentLevelById', params={'id': user_id})
     assert levelreq.status_code == 200
     assert levelreq.json()['level'] == 0
-    expreq = client.post('/getCurrentExpById', json={'id': user_id})
+    expreq = client.get('/getCurrentExpById', params={'id': user_id})
     assert expreq.status_code == 200
     assert expreq.json()['exp'] == 0

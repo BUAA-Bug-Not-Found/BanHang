@@ -729,35 +729,26 @@ def get_boya_entrust(db: Session = Depends(get_db),
     return {'campus': json.loads(boya.campus), 'type': json.loads(boya.type)}
 
 
-class GetCurrentLevelRequest(BaseModel):
-    id: int
-
-
 class GetCurrentLevelResponse(BaseModel):
     level: int
 
 
-@router.post('/getCurrentLevelById', response_model=GetCurrentLevelResponse, tags=['等级'])
-def get_current_level(req: GetCurrentLevelRequest,
+@router.get('/getCurrentLevelById', response_model=GetCurrentLevelResponse, tags=['等级'])
+def get_current_level(id: int,
                       db: Session = Depends(get_db)):
-    if not (user := crud.get_user_by_id(db, req.id)):
+    if not (user := crud.get_user_by_id(db, id)):
         raise EXC.UniException(key='isSuccess', value=False, others={'description': '用户不存在'})
     level = crud.get_user_level(db, user.id)
     return GetCurrentLevelResponse(level=level)
-
-
-class GetCurrentExpRequest(BaseModel):
-    id: int
 
 
 class GetCurrentExpResponse(BaseModel):
     exp: int
 
 
-@router.post('/getCurrentExpById', response_model=GetCurrentExpResponse, tags=['等级'])
-def get_current_exp(req: GetCurrentExpRequest,
-                    db: Session = Depends(get_db)):
-    if not (user := crud.get_user_by_id(db, req.id)):
+@router.get('/getCurrentExpById', response_model=GetCurrentExpResponse, tags=['等级'])
+def get_current_exp(id: int, db: Session = Depends(get_db)):
+    if not (user := crud.get_user_by_id(db, id)):
         raise EXC.UniException(key='isSuccess', value=False, others={'description': '用户不存在'})
     exp = crud.get_user_level_exp(db, user.id)
     return GetCurrentExpResponse(exp=exp)
