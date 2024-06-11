@@ -96,8 +96,8 @@ def create_blog(blog: schemas.BlogBase,
     soup = BeautifulSoup(html, "html.parser")
     review_result = review_text(soup.get_text())
     if len(review_result) != 0:
-        return {"response":"error",
-          "description": ",".join(review_result)}
+        return {"response": "error",
+                "description": ",".join(review_result)}
     db_blog = crud.create_blog(db,
                                user_id=uid,
                                title=blog.title,
@@ -108,6 +108,7 @@ def create_blog(blog: schemas.BlogBase,
     if db_blog == None:
         return {"response": "error"}
     else:
+        crud.add_exp_for_upload_blog(db, uid)
         return {"response": "success"}
 
 
@@ -182,8 +183,8 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
     soup = BeautifulSoup(html, "html.parser")
     review_result = review_text(soup.get_text())
     if len(review_result) != 0:
-        return {"response":"error",
-          "description": ",".join(review_result)}
+        return {"response": "error",
+                "description": ",".join(review_result)}
     db_blog_comment = crud.create_blog_comment(db,
                                                user_id=uid,
                                                blog_id=blog_comment.blogId,
@@ -201,8 +202,9 @@ def create_blog_comment(blog_comment: schemas.BlogCommentBase,
             guest_user_id = db_blog_comment.reply_to_comment.user_id
             content = f"您在帖子「{db_blog.title}」的评论有了新回复：{blog_comment.commentContent}"
         crud.send_message(db, host_user_id, guest_user_id, content)
+        crud.add_exp_for_upload_blog_comment(db, uid)
         return {"response": "success"}
-    
+
 
 class CommentId(BaseModel):
     commentId: int
@@ -211,8 +213,8 @@ class CommentId(BaseModel):
 @router.post("/blog/deleteCommentByCommentId", tags=["Blog"])
 @check_user
 def delete_blog_comment_by_blog_comment_id(comment_id: CommentId,
-                           uid: int,
-                           db: Session = Depends(get_db)):
+                                           uid: int,
+                                           db: Session = Depends(get_db)):
     if uid == None:
         return {"response": "error", "description": "Please login first"}
     db_blog_comment = crud.get_blog_comment_by_id(db, comment_id.commentId)
