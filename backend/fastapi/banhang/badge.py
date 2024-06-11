@@ -94,7 +94,7 @@ def upload_badge(badge: BadgeBase, current_user: Optional[dict] = Depends(author
 def refund_badge(badge_id: BadgeId, current_user: Optional[dict] = Depends(authorize), db: Session = Depends(get_db)):
     if current_user == None:
         return {"response": "error", "description": "Please login first"}
-    if crud.get_user_badge_by_id(db, current_user['uid'], badge_id.badgeId) != None:
+    if crud.get_user_badge_by_id(db, current_user['uid'], badge_id.badgeId) == None:
         return {"response": "error", "description": "You didn't have this badge"}
     if crud.refund_user_badge_by_id(db, current_user['uid'], badge_id.badgeId):
         return {"response": "success"}
