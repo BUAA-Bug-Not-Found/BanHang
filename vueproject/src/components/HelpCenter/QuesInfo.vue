@@ -257,7 +257,8 @@ export default {
                           sheet2.value = false
                           ansIdList.value.push(res.ansId)
                         } else {
-                          ElMessage.error(res.description)
+                          console.log(res)
+                          ElMessage.error("请检查您的言论，维护健康网络空间")
                         }
                       }
                   )
@@ -385,7 +386,7 @@ export default {
                 editTagList.value = []
                 sheet1.value = !sheet1.value
               } else {
-                ElMessage.error(res.description)
+                ElMessage.error("请检查您的言论，维护健康网络空间")
               }
             }
         )
