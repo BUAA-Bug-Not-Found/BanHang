@@ -3,7 +3,7 @@ import mitt from "mitt"
 
 export const $bus = mitt();
 export const isApp = false;
-export const version = ['v0.0.3', 'alpha']
+export const version = ['v0.1.1', 'beta']
 export const userStateStore = defineStore("user", {
     state: () => {
         // if (isApp) {

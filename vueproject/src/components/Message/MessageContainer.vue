@@ -35,7 +35,8 @@
           <div v-if="message.senderId == myId" class="message-right">
             <span style="display: grid; justify-items: end;">
               <div class="time">{{ this.formatDateTime(message.time) }}</div>
-              <img v-if="isValidImg(message.content)" :src="message.content" class="content-image" @click="showPic(message.content)"/>
+              <img v-if="isValidImg(message.content)" :src="message.content" class="content-image"
+                @click="showPic(message.content)" @load="imgLoaded()" />
               <div class="content" v-else>
                 {{ message.content }}
               </div>
@@ -47,7 +48,8 @@
             <img :src="curAvatar" class="profile-photo" @click="gotoIndex()" />
             <span style="display: grid; justify-items: start;">
               <div class="time">{{ this.formatDateTime(message.time) }}</div>
-              <img v-if="isValidImg(message.content)" :src="message.content" class="content-image" @click="showPic(message.content)"/>
+              <img v-if="isValidImg(message.content)" :src="message.content" class="content-image"
+                @click="showPic(message.content)" @load="imgLoaded()" />
               <div v-else class="content">
                 {{ message.content }}
               </div>
@@ -88,7 +90,7 @@ import userStateStore from '@/store';
 import { useDisplay } from 'vuetify'
 import { $bus } from '@/store';
 import router from "@/router";
-import {api as viewerApi} from "v-viewer";
+import { api as viewerApi } from "v-viewer";
 
 export default {
   name: "MessageContainer",
@@ -113,7 +115,8 @@ export default {
       display: useDisplay(),
       init: false,
       isLogin: store.isAuthentic,
-      dataLoaded: false
+      dataLoaded: false,
+      imgNum: 0,
     };
   },
   mounted() {
@@ -201,8 +204,11 @@ export default {
             .then(response => {
               this.messages = response.data
               if (!this.init) {
+                this.imgNum = this.messages.filter(x => this.isValidImg(x.content)).length
                 this.scrollToBottom()
-                this.init = true
+                if (this.imgNum == 0) {
+                  this.init = true
+                }
               }
               this.dataLoaded = true
             })
@@ -230,6 +236,7 @@ export default {
       this.curUserName = user_name
       this.curAvatar = avatar
       this.init = false
+      this.messages = []
       this.updateData()
       setTimeout(() => {
         $bus.emit('updateUnreadData')
@@ -257,6 +264,7 @@ export default {
       }
     },
     scrollToBottom() {
+      //console.log("scroll")
       var container = this.$refs.container;
       if (container) {
         this.$nextTick(() => {
@@ -268,13 +276,15 @@ export default {
       let imgList = this.messages.filter(x => this.isValidImg(x.content)).map(x => x.content)
       let index = imgList.indexOf(firstImg)
       console.log(index)
-      viewerApi({images: imgList, options: {
-        initialViewIndex:index,
-      }})
+      viewerApi({
+        images: imgList, options: {
+          initialViewIndex: index,
+        }
+      })
     },
     isValidImg(content) {
-      let urlPattern = /^https:\/\/banhang\.oss\.chlience\.com\/\d+\/file\/[a-fA-F0-9]{32}\.(png|jpe?g)$/; 
-      return urlPattern.test(content)  
+      let urlPattern = /^https:\/\/banhang\.oss\.chlience\.com\/\d+\/file\/[a-fA-F0-9]{32}\.(png|jpe?g)$/;
+      return urlPattern.test(content)
     },
     formatDateTime(dateTimeStr) {
       // 创建 Date 对象
@@ -293,6 +303,13 @@ export default {
 
       return formattedDateTime;
     },
+    imgLoaded() {
+      this.imgNum--
+      if (this.imgNum == 0 && !this.init) {
+        this.scrollToBottom()
+        this.init = true
+      }
+    }
   }
 }
 </script>
@@ -382,11 +399,12 @@ export default {
   text-align: left;
   max-width: 85%;
 }
+
 .content-image {
-    max-width: 60%;
-    max-height: 300px;
-    width: auto;
-    height: auto;
+  max-width: 60%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
 }
 
 .profile-photo {

@@ -793,8 +793,7 @@ export default {
           />
         </div>
       </div>
-      <v-row>
-        <v-col cols="12">
+      <div>
           <v-card elevation="1" style="margin-top: 10px;text-align: left">
             <div style="margin-left: 20px;margin-right: 20px;margin-bottom: 15px;font-size: 25px;font-weight: bold;"
                  v-dompurify-html="question.quesContent.content"/>
@@ -879,8 +878,7 @@ export default {
               <AppAnsCard :quesId="qid" :ansId="ans" :index="index" @delAns="delAns"/>
             </div>
           </v-card>
-        </v-col>
-      </v-row>
+      </div>
       <div style="height: 200px"></div>
     </div>
   </div>
