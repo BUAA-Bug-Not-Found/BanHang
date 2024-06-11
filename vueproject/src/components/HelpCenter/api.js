@@ -74,6 +74,15 @@ export function uploadQuesApi(content, imageList, quesTags) {
         })
     }).then(response => {
         return response.data
+    }).catch(error => {
+        // 错误处理
+        const { response } = error;
+        if (response && response.status === 400) {
+            return response.data
+        } else {
+            // 其他错误按原样抛出
+            throw error;
+        }
     })
 }
 
@@ -92,6 +101,15 @@ export function updateQuesApi(quesId, content, imageList, quesTags) {
         })
     }).then(response => {
         return response.data
+    }).catch(error => {
+        // 错误处理
+        const { response } = error;
+        if (response && response.status === 400) {
+            return response.data
+        } else {
+            // 其他错误按原样抛出
+            throw error;
+        }
     })
 }
 
@@ -139,7 +157,16 @@ export function uploadAnsApi(quesId, content, imageList) {
         }
     ).then(response => {
         return response.data
-    })
+    }).catch(error => {
+        // 错误处理
+        const { response } = error;
+        if (response && response.status === 400) {
+            return response.data
+        } else {
+            // 其他错误按原样抛出
+            throw error;
+        }
+    });
 }
 
 export function getAnsById(ansId) {
@@ -276,6 +303,15 @@ export function replyComment(replyCommentId, content, imageList) {
         }
     ).then(response => {
         return response.data
+    }).catch(error => {
+        // 错误处理
+        const { response } = error;
+        if (response && response.status === 400) {
+            return response.data
+        } else {
+            // 其他错误按原样抛出
+            throw error;
+        }
     })
 }
 

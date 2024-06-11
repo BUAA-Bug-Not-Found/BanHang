@@ -143,7 +143,7 @@ export default {
                           imageList.value = []
                           context.emit("uploadSubAnsCard", res.ansId)
                         } else {
-                          ElMessage.error(res.description)
+                          ElMessage.error("请检查您的言论，维护健康网络空间")
                         }
                       }
                   )
