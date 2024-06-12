@@ -125,8 +125,17 @@
   </v-card>
 
   <!-- 评论列表 -->
-  <CommentList :comments="comments" @new-comment="handleNewComment"/>
-
+  <v-card>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin: 2%;">
+      <h3 style="color: #0d47a1; text-align: left; margin: 0;">
+        所有评论
+      </h3>
+      <button @click="toggleReverse" style="margin-left: auto;">
+        <v-icon>{{ ifReverse ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+      </button>
+    </div>
+    <CommentList :comments="comments" :if-reverse="ifReverse" @new-comment="handleNewComment"/>
+  </v-card>
 
   <v-bottom-sheet
       v-model="bottomSheet"
@@ -201,7 +210,8 @@ export default {
       newComment: '',
       commentAnonymous: true,
       bottomSheet: false,
-      badgeList: []
+      badgeList: [],
+      ifReverse: false
     };
   },
 
@@ -360,7 +370,11 @@ export default {
 
     gotoBlogList(tagId) {
       this.$router.push({name: 'blogList', params: {tagId: tagId}})
-    }
+    },
+
+    toggleReverse() {
+      this.ifReverse = !this.ifReverse;
+    },
   }
 };
 </script>

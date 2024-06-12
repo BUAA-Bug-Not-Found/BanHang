@@ -1,7 +1,7 @@
 <template>
   <div class="comment-list">
     <CommentShow
-        v-for="(comment, index) in comments.filter(comment => comment.replyToCommentId === null).slice().reverse()"
+        v-for="(comment, index) in filteredComments"
         :key="index"
         :blog-id="comment.blogId"
         :comment-id="comment.commentId"
@@ -28,6 +28,16 @@ export default {
       type: Array,
       required: true,
     },
+    ifReverse: {
+      type: Boolean,
+      default: false,
+    }
+  },
+  computed: {
+    filteredComments() {
+      let comments = this.comments.filter(comment => comment.replyToCommentId === null);
+      return this.ifReverse ? comments.slice().reverse() : comments;
+    }
   },
   methods: {
     getReplies(commentId) {
