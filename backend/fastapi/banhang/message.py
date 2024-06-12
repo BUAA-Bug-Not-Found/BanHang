@@ -60,7 +60,7 @@ def get_history_message(uid: int, message_get: MessageGet, db: Session = Depends
 		message['time'] = db_message.create_at
 		message['read'] = False
 		messages.append(schemas.MessageShow(**message))
-	return messages
+	return reversed(messages) # 迫于无奈返回顺序的 message
 
 class MessageCreate(BaseModel):
 	targetUserId: int
