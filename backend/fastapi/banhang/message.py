@@ -49,9 +49,7 @@ def get_history_message(uid: int, message_get: MessageGet, db: Session = Depends
 	db.add(db_conversation)
 	db.commit()
 	messages = []
-	for db_message_assoc in db_conversation.messages:
-		db_message = db_message_assoc.message
-		db_message_assoc.is_read = True
+	for db_message in crud.get_conversation_messages(db, db_conversation.id):
 		message = {}
 		message['senderName'] = db_message.sender.username
 		message['senderId'] = db_message.sender_id
@@ -59,7 +57,7 @@ def get_history_message(uid: int, message_get: MessageGet, db: Session = Depends
 		message['receiverId'] = db_message.receiver_id
 		message['content'] = db_message.content
 		message['time'] = db_message.create_at
-		message['read'] = db_message_assoc.is_read
+		message['read'] = False
 		messages.append(schemas.MessageShow(**message))
 	return messages
 

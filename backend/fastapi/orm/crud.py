@@ -687,6 +687,13 @@ def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
     return db.query(Conversation).filter(
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
 
+def get_conversation_messages(db: Session, conversation_id: int):
+    return (db.query(Message)
+            .join(ConversationMessage).join(Conversation)
+            .filter(Conversation.id == conversation_id)
+            .order_by(Message.create_at.desc())
+            .all())
+
 
 def pretty_html(html: str):
     bs = beautifulsoup.BeautifulSoup(html, 'html.parser')
