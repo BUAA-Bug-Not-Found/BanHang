@@ -140,9 +140,8 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
         return {"response": "error", "description": "No corresponding blog ID exists"}
     if db_blog.status == "deleted":
         return {"response": "error", "description": "Blog has been deleted"}
-    db_comments = db_blog.comments
     comments = []
-    for db_comment in db_comments:
+    for db_comment in crud.get_blog_comments_by_blog_id(db, db_blog.id):
         comment = {}
         if db_comment.is_anonymous:
             comment['userId'] = -1
