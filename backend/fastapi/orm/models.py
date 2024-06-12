@@ -74,6 +74,7 @@ class Blog(Base):
     content = Column(String, nullable=False, default="")
     status = Column(Enum('normal', 'archived', 'deleted', name='post_status'), default='normal')
     create_at = Column(DateTime, nullable=False, server_default=func.now())  # 根据服务器时间自动生成
+    reply_at = Column(DateTime, nullable=False, server_default=func.now())
 
     images = relationship("BlogImage", back_populates="blog")
     user = relationship("User", back_populates="blogs")
