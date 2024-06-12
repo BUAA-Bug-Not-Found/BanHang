@@ -130,9 +130,10 @@
       <h3 style="color: #0d47a1; text-align: left; margin: 0;">
         所有评论
       </h3>
-      <button @click="toggleReverse" style="margin-left: auto;">
+      <v-btn @click="toggleReverse" style="margin-left: auto; height: 25px; color: #00bcd4">
         <v-icon>{{ ifReverse ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-      </button>
+        {{ifReverse ? '时间逆序' : '时间顺序'}}
+      </v-btn>
     </div>
     <CommentList :comments="comments" :if-reverse="ifReverse" @new-comment="handleNewComment"/>
   </v-card>
