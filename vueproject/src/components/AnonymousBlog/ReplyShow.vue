@@ -14,81 +14,102 @@
           <div v-if="topCommentId === replyToCommentId">
             <span class="username-and-badge">
               <span class="user-name">{{ userName }}</span>
-<!--              <div v-show="this.userId !== -1" style="margin-left: 2px">-->
-<!--                <v-chip v-for="badge in badgeList" size="x-small"-->
-<!--                        :key="badge.badgeId" :color="badge.badgeColor"-->
-<!--                        :class="`cursor-pointer`"-->
-<!--                        style="margin-left: 10px; margin-bottom: 5px;">-->
-<!--                        {{ badge.badgeName }}-->
-<!--                </v-chip>-->
-<!--              </div>-->
+              <!--              <div v-show="this.userId !== -1" style="margin-left: 2px">-->
+              <!--                <v-chip v-for="badge in badgeList" size="x-small"-->
+              <!--                        :key="badge.badgeId" :color="badge.badgeColor"-->
+              <!--                        :class="`cursor-pointer`"-->
+              <!--                        style="margin-left: 10px; margin-bottom: 5px;">-->
+              <!--                        {{ badge.badgeName }}-->
+              <!--                </v-chip>-->
+              <!--              </div>-->
+              <v-menu v-show="isHovering || this.menuCLick" :location="'bottom'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                      size="28px"
+                      v-bind="props"
+                      variant="text"
+                      @click="this.menuCLick = !this.menuCLick"
+                      class="rounded-circle"
+                  >
+                    <template v-slot:prepend>
+                      <v-icon size="15">mdi-dots-vertical</v-icon>
+                    </template>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item density="compact">
+                    <div style="color: black; font-size: 16px" @click="showComplainWindow">
+                      举报
+                    </div>
+                    <div v-if="userStateStore().isManager || this.isCurUser"
+                         style="color: red; font-size: 16px" @click="delComment">
+                      删除
+                    </div>
+                  </v-list-item>
+                </v-list>
+            </v-menu>
             </span>
           </div>
           <div v-else>
             <span class="username-and-badge">
               <span class="user-name">{{ userName }}</span>
-<!--              <div v-show="this.userId !== -1" style="margin-left: 2px">-->
-<!--                <v-chip v-for="badge in badgeList" size="x-small"-->
-<!--                        :key="badge.badgeId" :color="badge.badgeColor"-->
-<!--                        :class="`cursor-pointer`"-->
-<!--                        style="margin-left: 10px; margin-bottom: 5px;">-->
-<!--                      {{ badge.badgeName }}-->
-<!--                </v-chip>-->
-<!--              </div>-->
+              <!--              <div v-show="this.userId !== -1" style="margin-left: 2px">-->
+              <!--                <v-chip v-for="badge in badgeList" size="x-small"-->
+              <!--                        :key="badge.badgeId" :color="badge.badgeColor"-->
+              <!--                        :class="`cursor-pointer`"-->
+              <!--                        style="margin-left: 10px; margin-bottom: 5px;">-->
+              <!--                      {{ badge.badgeName }}-->
+              <!--                </v-chip>-->
+              <!--              </div>-->
               <span style="font-size: 12px; color: #9e9e9e; margin-left: 8px; margin-right: 2px">
                 ➡
               </span>
             <span class="reply-to-user-name">{{
                 replyToCommentName
               }}</span>
+              <v-menu v-show="isHovering || this.menuCLick" :location="'bottom'">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                      size="28px"
+                      v-bind="props"
+                      variant="text"
+                      @click="this.menuCLick = !this.menuCLick"
+                      class="rounded-circle"
+                  >
+                    <template v-slot:prepend>
+                      <v-icon size="15">mdi-dots-vertical</v-icon>
+                    </template>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item density="compact">
+                    <div style="color: black; font-size: 16px" @click="showComplainWindow">
+                      举报
+                    </div>
+                    <div v-if="userStateStore().isManager || this.isCurUser"
+                         style="color: red; font-size: 16px" @click="delComment">
+                      删除
+                    </div>
+                  </v-list-item>
+                </v-list>
+            </v-menu>
             </span>
           </div>
           <span class="time">{{ formatDate(time) }}</span>
         </div>
       </div>
 
-      <v-row>
-        <v-col :cols="useDisplay().smAndDown.value ? 10:10">
-          <div v-if="!useDisplay().smAndDown.value">
-            <div class="content" @click="showInput">
-              {{ content }}
-            </div>
+      <v-row style="margin-bottom: 3px; margin-top: 3px; margin-left: 1%; margin-right: 1%">
+        <div v-if="!useDisplay().smAndDown.value">
+          <div class="content" @click="showInput">
+            {{ content }}
           </div>
-          <div v-else>
-            <div class="content" @click="showBottomSheet">
-              {{ content }}
-            </div>
+        </div>
+        <div v-else>
+          <div class="content" @click="showBottomSheet">
+            {{ content }}
           </div>
-        </v-col>
-        <v-col cols="2" style="text-align: right; justify-content: end; margin-top: 3px">
-          <v-menu v-show="isHovering || this.menuCLick" :location="'bottom'">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                  size="28px"
-                  v-bind="props"
-                  variant="text"
-                  @click="this.menuCLick = !this.menuCLick"
-                  class="rounded-circle"
-              >
-                <template v-slot:prepend>
-                  <v-icon size="15">mdi-dots-vertical</v-icon>
-                </template>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item density="compact">
-                <div style="color: black; font-size: 16px" @click="showComplainWindow">
-                  举报
-                </div>
-                <div v-if="userStateStore().isManager || this.isCurUser"
-                     style="color: red; font-size: 16px" @click="delComment">
-                  删除
-                </div>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-
-        </v-col>
+        </div>
       </v-row>
 
       <div v-show="isInputVisible" class="reply-input">

@@ -21,27 +21,7 @@
                         {{ badge.badgeName }}
                 </v-chip>
             </div>
-          </span>
-          <span class="time">{{ formatDate(time) }}</span>
-        </div>
-      </div>
-      <v-row style="margin-bottom: 4px">
-        <v-col :cols="useDisplay().smAndDown.value ? 10:10">
-          <div v-if="!useDisplay().smAndDown.value">
-            <div class="content" @click="showInput">
-              <!--      <span style="white-space: pre-line" v-html="content"></span>-->
-              <div style="white-space: pre-line" v-dompurify-html="content"/>
-            </div>
-          </div>
-          <div v-else>
-            <div class="content" @click="showBottomSheet">
-              <!--      <span style="white-space: pre-line" v-html="content"></span>-->
-              <div style="white-space: pre-line" v-dompurify-html="content"/>
-            </div>
-          </div>
-        </v-col>
-        <v-col cols="2" style="text-align: right; justify-content: end; margin-top: 3px">
-          <v-menu v-show="isHovering || this.menuCLick" :location="'bottom'">
+            <v-menu v-show="isHovering || this.menuCLick" :location="'bottom'">
             <template v-slot:activator="{ props }">
               <v-btn
                   size="28px"
@@ -55,7 +35,8 @@
                 </template>
               </v-btn>
             </template>
-            <v-list>
+
+            <v-list style="align-items: flex-end">
               <v-list-item density="compact">
                 <div style="color: black; font-size: 16px" @click="showComplainWindow">
                   举报
@@ -67,8 +48,25 @@
               </v-list-item>
             </v-list>
           </v-menu>
+          </span>
+          <span class="time">{{ formatDate(time) }}</span>
+        </div>
 
-        </v-col>
+      </div>
+      <v-row style="margin-left: 2%; margin-bottom: 4px; margin-right: 2%">
+        <div v-if="!useDisplay().smAndDown.value">
+          <div class="content" @click="showInput">
+            <!--      <span style="white-space: pre-line" v-html="content"></span>-->
+            <div style="white-space: pre-line" v-dompurify-html="content"/>
+          </div>
+        </div>
+        <div v-else>
+          <div class="content" @click="showBottomSheet">
+            <!--      <span style="white-space: pre-line" v-html="content"></span>-->
+            <div style="white-space: pre-line" v-dompurify-html="content"/>
+          </div>
+        </div>
+
       </v-row>
       <div v-show="replyToCommentId === null && replies.length > 0" class="expand-button">
         <button @click="toggleReplies" style="font-size: 12px; color: darkgray">{{
