@@ -276,6 +276,10 @@ class Message(Base):
     sender = relationship("User", foreign_keys=[sender_id])
     receiver = relationship("User", foreign_keys=[receiver_id])
 
+    conversation: Mapped["Conversation"] = relationship(
+        secondary="conversation_messages", back_populates="messages"
+    )
+
 
 class Conversation(Base):
     __tablename__ = 'conversations'
@@ -288,17 +292,17 @@ class Conversation(Base):
 
     host_user = relationship("User", foreign_keys=[host_user_id])
     guest_user = relationship("User", foreign_keys=[guest_user_id])
-    messages = relationship("ConversationMessage", back_populates="conversation")
+
+    messages: Mapped[List["Message"]] = relationship(
+        secondary="conversation_messages", back_populates="conversation"
+    )
 
 
 class ConversationMessage(Base):
     __tablename__ = 'conversation_messages'
     conversation_id = Column(Integer, ForeignKey('conversations.id'), primary_key=True)
     message_id = Column(Integer, ForeignKey('messages.id'), primary_key=True)
-    is_read = Column(Boolean, nullable=False, default=False)
-
-    message = relationship("Message", foreign_keys=[message_id])
-    conversation = relationship("Conversation", back_populates="messages", foreign_keys=[conversation_id])
+    is_read = Column(Boolean, nullable=False, default=False) # 目前没有使用
 
 
 class BoyaEntrust(Base):
