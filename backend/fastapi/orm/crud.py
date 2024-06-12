@@ -218,7 +218,10 @@ def get_blog_images_by_blog_id(db: Session, blog_id: int):
 
 
 def get_blog_comments_by_blog_id(db: Session, blog_id: int):
-    return db.query(models.BlogComment).filter(models.BlogComment.blog_id == blog_id).all()
+    return (db.query(models.BlogComment)
+            .filter(models.BlogComment.blog_id == blog_id)
+            .order_by(models.BlogComment.create_at.asc())
+            .all())
 
 
 def get_blog_comment_by_id(db: Session, blog_comment_id: int):
@@ -686,6 +689,13 @@ def get_report_issues(db: Session) -> list[Type[ReportedIssue]]:
 def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
     return db.query(Conversation).filter(
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
+
+def get_conversation_messages(db: Session, conversation_id: int):
+    return (db.query(Message)
+            .join(ConversationMessage).join(Conversation)
+            .filter(Conversation.id == conversation_id)
+            .order_by(Message.create_at.desc())
+            .all())
 
 
 def pretty_html(html: str):

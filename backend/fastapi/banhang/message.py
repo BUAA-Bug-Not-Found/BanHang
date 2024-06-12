@@ -32,7 +32,8 @@ def get_recent_message_conversation(uid: int, db: Session = Depends(get_db)):
 		conversation['userId'] = db_conversation.guest_user.id
 		conversation['hasUnreadMessage'] = db_conversation.is_read
 		conversation['unreadMessageNum'] = db_conversation.unread_message_num
-		conversation['lastMessage'] = db_conversation.messages[-1].message.content if len(db_conversation.messages) > 0 else ""
+		db_messages = crud.get_conversation_messages(db, db_conversation.id)
+		conversation['lastMessage'] = db_messages[0].content if len(db_messages) > 0 else ""
 		conversations.append(ConversationShow(**conversation))
 	return conversations
 
@@ -49,9 +50,7 @@ def get_history_message(uid: int, message_get: MessageGet, db: Session = Depends
 	db.add(db_conversation)
 	db.commit()
 	messages = []
-	for db_message_assoc in db_conversation.messages:
-		db_message = db_message_assoc.message
-		db_message_assoc.is_read = True
+	for db_message in crud.get_conversation_messages(db, db_conversation.id):
 		message = {}
 		message['senderName'] = db_message.sender.username
 		message['senderId'] = db_message.sender_id
@@ -59,9 +58,9 @@ def get_history_message(uid: int, message_get: MessageGet, db: Session = Depends
 		message['receiverId'] = db_message.receiver_id
 		message['content'] = db_message.content
 		message['time'] = db_message.create_at
-		message['read'] = db_message_assoc.is_read
+		message['read'] = False
 		messages.append(schemas.MessageShow(**message))
-	return messages
+	return reversed(messages) # 迫于无奈返回顺序的 message
 
 class MessageCreate(BaseModel):
 	targetUserId: int
