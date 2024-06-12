@@ -229,14 +229,18 @@ def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, i
                         reply_to_comment_id: int = None):
     db_blog_comment = models.BlogComment(user_id=user_id, blog_id=blog_id, content=content, is_anonymous=is_anonymous,
                                          reply_to_comment_id=reply_to_comment_id)
+    db_blog = get_blog_by_blog_id(db, blog_id=blog_id)
     try:
         db.add(db_blog_comment)
-        db.commit()
-        db.refresh(db_blog_comment)
+        db.flush()
+        db_blog.reply_at = db_blog_comment.create_at
+        db.add(db_blog)
     except Exception as e:
         db.rollback()
         db_blog_comment = None
         # print("Error during commit: ", e)
+    else:
+        db.commit()
     return db_blog_comment
 
 
