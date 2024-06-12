@@ -218,7 +218,10 @@ def get_blog_images_by_blog_id(db: Session, blog_id: int):
 
 
 def get_blog_comments_by_blog_id(db: Session, blog_id: int):
-    return db.query(models.BlogComment).filter(models.BlogComment.blog_id == blog_id).all()
+    return (db.query(models.BlogComment)
+            .filter(models.BlogComment.blog_id == blog_id)
+            .order_by(models.BlogComment.create_at.asc())
+            .all())
 
 
 def get_blog_comment_by_id(db: Session, blog_comment_id: int):
