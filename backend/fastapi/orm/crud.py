@@ -188,7 +188,7 @@ def get_blogs_by_user_id(db: Session, id: int, not_deleted: bool = False):
 def get_blogs(db: Session, offset: int = 0, limit: int = 10, asc: bool = False, not_deleted: bool = False):
     return (db.query(models.Blog)
             .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
-            .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
+            .order_by(models.Blog.reply_at.asc() if asc else models.Blog.reply_at.desc())
             .offset(offset).limit(limit).all())
 
 
@@ -198,7 +198,7 @@ def get_blogs_by_tag_id(db: Session, blog_tag_id: int, offset: int = 0, limit: i
             .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
             .join(models.BlogTag, models.Blog.tags)
             .filter(models.BlogTag.id == blog_tag_id)
-            .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
+            .order_by(models.Blog.reply_at.asc() if asc else models.Blog.reply_at.desc())
             .offset(offset).limit(limit).all())
 
 
@@ -209,7 +209,7 @@ def get_blogs_by_search_content(db: Session, search_content: str, offset: int, l
             .filter(or_(not_deleted == False, models.Blog.status != "deleted"))
             .filter(
         or_(*[or_(models.Blog.content.like(f"%{word}%"), models.Blog.title.like(f"%{word}%")) for word in word_list]))
-            .order_by(models.Blog.create_at.asc() if asc else models.Blog.create_at.desc())
+            .order_by(models.Blog.reply_at.asc() if asc else models.Blog.reply_at.desc())
             .offset(offset).limit(limit).all())
 
 
