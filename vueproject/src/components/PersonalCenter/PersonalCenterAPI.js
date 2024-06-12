@@ -239,7 +239,7 @@ export function getCurrentLevelById(_id) {
             "id": _id
         }
     }).then((r) => {
-        return r.data.exp
+        return r.data.level
     }).catch(() => {
         return false
     })
@@ -253,7 +253,7 @@ export function getCurrentExpById(_id) {
             "id": _id
         }
     }).then((r) => {
-        return r.data.level
+        return r.data.exp
     }).catch(() => {
         return false
     })
