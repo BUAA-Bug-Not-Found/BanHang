@@ -304,9 +304,6 @@ class ConversationMessage(Base):
     message_id = Column(Integer, ForeignKey('messages.id'), primary_key=True)
     is_read = Column(Boolean, nullable=False, default=False) # 目前没有使用
 
-    message = relationship("Message", foreign_keys=[message_id])
-    conversation = relationship("Conversation", back_populates="messages", foreign_keys=[conversation_id])
-
 
 class BoyaEntrust(Base):
     __tablename__ = 'boya_entrusts'

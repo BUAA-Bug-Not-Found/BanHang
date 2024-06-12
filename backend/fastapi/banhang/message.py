@@ -32,7 +32,8 @@ def get_recent_message_conversation(uid: int, db: Session = Depends(get_db)):
 		conversation['userId'] = db_conversation.guest_user.id
 		conversation['hasUnreadMessage'] = db_conversation.is_read
 		conversation['unreadMessageNum'] = db_conversation.unread_message_num
-		conversation['lastMessage'] = db_conversation.messages[-1].message.content if len(db_conversation.messages) > 0 else ""
+		db_messages = crud.get_conversation_messages(db, db_conversation.id)
+		conversation['lastMessage'] = db_messages[0].content if len(db_messages) > 0 else ""
 		conversations.append(ConversationShow(**conversation))
 	return conversations
 
