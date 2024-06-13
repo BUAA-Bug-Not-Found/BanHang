@@ -105,7 +105,7 @@
         </v-col>
       </v-row>
 
-      <div style="margin-left: 5%; margin-bottom: 3px; font-size: 12px; color: gray" @click="goToBlogCardView">
+      <div style="margin-left: 5%; margin-right: 2%;margin-bottom: 3px; font-size: 12px; color: gray" @click="goToBlogCardView">
         {{ truncatedContent }}
       </div>
 
