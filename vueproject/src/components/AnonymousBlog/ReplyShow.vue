@@ -99,7 +99,7 @@
         </div>
       </div>
 
-      <v-row style="margin-bottom: 3px; margin-top: 3px; margin-left: 1%; margin-right: 1%">
+      <div style="margin-bottom: 3px; margin-top: 3px; margin-left: 1%; margin-right: 1%">
         <div v-if="!useDisplay().smAndDown.value">
           <div class="content" @click="showInput">
             {{ content }}
@@ -110,7 +110,7 @@
             {{ content }}
           </div>
         </div>
-      </v-row>
+      </div>
 
       <div v-show="isInputVisible" class="reply-input">
         <v-textarea

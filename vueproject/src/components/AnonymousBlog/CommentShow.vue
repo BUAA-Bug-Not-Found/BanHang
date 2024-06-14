@@ -53,7 +53,7 @@
         </div>
 
       </div>
-      <v-row style="margin-left: 2%; margin-bottom: 4px; margin-right: 2%">
+      <div style="margin-left: 2%; margin-bottom: 4px; margin-right: 2%">
         <div v-if="!useDisplay().smAndDown.value">
           <div class="content" @click="showInput">
             <!--      <span style="white-space: pre-line" v-html="content"></span>-->
@@ -67,7 +67,7 @@
           </div>
         </div>
 
-      </v-row>
+      </div>
       <div v-show="replyToCommentId === null && replies.length > 0" class="expand-button">
         <button @click="toggleReplies" style="font-size: 12px; color: darkgray">{{
             isOpen ? '收起回复' : '展开回复'
