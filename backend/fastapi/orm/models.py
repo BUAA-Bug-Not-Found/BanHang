@@ -135,8 +135,23 @@ class BlogUserAnonyInfo(Base):
     __tablename__ = 'blog_user_anony_info'
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
     blog_id = Column(Integer, ForeignKey('blogs.id'), primary_key=True)
-    anony_name = Column(String, nullable=False)
-    anony_avatar_url = Column(String, nullable=False)
+    anony_id = Column(Integer, ForeignKey('anony_infos.id'), nullable=True, default=None)
+    anony_name = Column(String, nullable=True)
+    anony_avatar_url = Column(String, nullable=True)
+
+    def __init__(self, blog_id: int, user_id: int, anony_id: int = None, anony_name: str = "匿名用户", anony_avatar_url: str = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"):
+        self.user_id = user_id
+        self.blog_id = blog_id
+        self.anony_id = anony_id
+        self.anony_name = anony_name
+        self.anony_avatar_url = anony_avatar_url
+
+
+class AnonyInfo(Base):
+    __tablename__ = 'anony_infos'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    avatar_url = Column(String, nullable=False)
 
 
 class Question(Base):

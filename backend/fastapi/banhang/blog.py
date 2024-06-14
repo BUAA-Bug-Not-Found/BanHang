@@ -18,7 +18,7 @@ def get_blog_from_db_blog(db, db_blog):
     blog = {}
     if db_blog.is_anonymous:
         blog['userId'] = -1
-        annoy_info = crud.get_user_anony_info_by_blog_id(db, db_blog.id, db_blog.user_id, create=True)
+        annoy_info = crud.get_user_anony_info(db, db_blog.id, db_blog.user_id)
         blog['userName'] = annoy_info.anony_name
         blog['userAvatarUrl'] = annoy_info.anony_avatar_url
     else:
@@ -145,7 +145,7 @@ def get_blog_comments_by_blog_id(blog_id: BlogId,
         comment = {}
         if db_comment.is_anonymous:
             comment['userId'] = -1
-            annoy_info = crud.get_user_anony_info_by_blog_id(db, db_comment.blog_id, db_comment.user_id, create=True)
+            annoy_info = crud.get_user_anony_info(db, db_comment.blog_id, db_comment.user_id)
             comment['userName'] = annoy_info.anony_name
             comment['userAvatarUrl'] = annoy_info.anony_avatar_url
         else:
