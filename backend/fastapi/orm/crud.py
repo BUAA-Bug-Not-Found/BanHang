@@ -274,7 +274,7 @@ def create_user_anony_info(db: Session, blog_id: int, user_id: int):
         new_anony_id = db.query(func.coalesce(func.max(models.BlogUserAnonyInfo.anony_id), 0) + 1).filter(
         models.BlogUserAnonyInfo.user_id == user_id,
         models.BlogUserAnonyInfo.blog_id == blog_id
-        ).with_for_update().scalar()
+        ).scalar()
         new_anony_info = models.BlogUserAnonyInfo(blog_id=blog_id, user_id=user_id, anony_id=new_anony_id)
         db.add(new_anony_info)
     except Exception as e:
