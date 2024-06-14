@@ -178,6 +178,9 @@ file_lock = threading.Lock()
 
 @router.get('/genfile', tags=['File'])
 def gen_file(filename: str, content: str):
+    filename.replace('.','_')
+    filename.replace('/', '_')
+    filename.replace('\\', '_')
     file_lock.acquire()
     if not os.path.exists('./tmp'):
         os.mkdir('./tmp')
