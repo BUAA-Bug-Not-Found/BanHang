@@ -1,7 +1,7 @@
 <template>
   <div class="comment-list">
     <ReplyShow
-        v-for="(comment, index) in comments.slice().reverse()"
+        v-for="(comment, index) in comments"
         :key="index"
         :blog-id="comment.blogId"
         :comment-id="comment.commentId"
