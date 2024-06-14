@@ -169,9 +169,6 @@ def get_user_anony_info(db: Session, blog_id: int, user_id: int):
     if user_anony_info is None:
         return None
 
-     # 截断，防止对原始数据产生影响
-    user_anony_info = models.BlogUserAnonyInfo(blog_id=user_anony_info.blog_id, user_id=user_anony_info.user_id)
-    
     if user_anony_info.anony_id is not None:
         anony_info = get_anony_info(db, user_anony_info.anony_id)
         user_anony_info.anony_name = anony_info.name
