@@ -83,6 +83,13 @@ def is_valid_checkCode(db: Session, checkcode: str, email: str):
     return False
 
 
+def in_email_protect_time(db: Session, email: str):
+    if checkcode_rec := db.query(models.CheckCode).filter(models.CheckCode.email == email).first():
+        if datetime.datetime.now() < checkcode_rec.create_at + datetime.timedelta(minutes=1):
+            return True
+    return False
+
+
 def set_password_by_email(db: Session, password: str, email: str):
     user = get_user_by_email(db, email)
     user.password = password
@@ -241,7 +248,7 @@ def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, i
     except Exception as e:
         db.rollback()
         db_blog_comment = None
-        # print("Error during commit: ", e)
+    # print("Error during commit: ", e)
     else:
         db.commit()
     return db_blog_comment
@@ -689,6 +696,7 @@ def get_report_issues(db: Session) -> list[Type[ReportedIssue]]:
 def get_conversation(db: Session, host_user_id: int, guest_user_id: int):
     return db.query(Conversation).filter(
         and_(Conversation.host_user_id == host_user_id, Conversation.guest_user_id == guest_user_id)).first()
+
 
 def get_conversation_messages(db: Session, conversation_id: int):
     return (db.query(Message)

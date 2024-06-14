@@ -141,6 +141,8 @@ def send_check_code(req: emailRequest, db: Session = Depends(get_db)):
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "invalid email"})
     if not req.email.endswith("buaa.edu.cn"):
         raise EXC.UniException(key="isSuccess", value=False, others={"description": "邮箱不是北航邮箱，目前仅北航使用"})
+    if crud.in_email_protect_time(db, req.email):
+        raise EXC.UniException(key='isSuccess', value=False, others={'description': '仍在邮件保护时间内，请等待一分钟'})
     try:
         if os.environ.get("CHECKCODE") is None:
             MailSender.send_by_buaa_mail(req.email, checkcode)
