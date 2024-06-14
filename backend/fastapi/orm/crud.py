@@ -173,6 +173,9 @@ def get_user_anony_info(db: Session, blog_id: int, user_id: int):
         anony_info = get_anony_info(db, user_anony_info.anony_id)
         user_anony_info.anony_name = anony_info.name
         user_anony_info.anony_avatar_url = anony_info.avatar_url
+
+    db.commit()
+
     return user_anony_info
 
 
