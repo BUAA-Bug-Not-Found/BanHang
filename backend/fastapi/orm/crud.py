@@ -177,7 +177,18 @@ def get_user_anony_info(db: Session, blog_id: int, user_id: int):
 
 
 def get_anony_info(db: Session, anony_id: int):
-    return db.query(models.AnonyInfo).filter(models.AnonyInfo.id == anony_id).scalar()
+    anony_info = db.query(models.AnonyInfo).filter(models.AnonyInfo.id == anony_id).scalar()
+    if anony_info is None:
+        anony_name = None
+        anony_avatar_url = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+        id = anony_id - 1
+        while id != 0:
+            last_id = id % 26 + 1
+            info = db.query(models.AnonyInfo).filter(models.AnonyInfo.id == last_id).scalar()
+            anony_name = info.name + " " + anony_name if anony_name is not None else info.name
+            id = id / 26
+        anony_info = models.AnonyInfo(id=None, name=anony_name, avatar_url=anony_avatar_url)
+    return anony_info
 
 
 def get_blog_by_blog_id(db: Session, blog_id: int) -> models.Blog:
