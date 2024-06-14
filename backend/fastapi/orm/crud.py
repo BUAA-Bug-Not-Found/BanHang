@@ -142,42 +142,42 @@ def create_blog(db: Session, user_id: int, title: str, content: str, is_anonymou
                           is_anonymous=is_anonymous)
     try:
         db.add(db_blog)
-        db.commit()
-        db.refresh(db_blog)
+        db.flush()
+        if is_anonymous:
+            user_anony_info = models.BlogUserAnonyInfo(blog_id=db_blog.id, user_id=user_id, anony_id=0)
+            db.add(user_anony_info)
         for image_url in image_urls:
             db_image = models.BlogImage(blog_id=db_blog.id, image_url=image_url)
             db.add(db_image)
         for tag_id in tag_ids:
             db_blog_tag = models.BlogBlogTag(blog_id=db_blog.id, blog_tag_id=tag_id)
             db.add(db_blog_tag)
-        db.commit()
-        db.refresh(db_blog)
     except Exception as e:
+        print("Error during commit: ", e)
         db.rollback()
         db_blog = None
+    else:
+        db.commit()
     return db_blog
 
 
-def get_user_anony_info_by_blog_id(db: Session, blog_id: int, user_id: int, create: bool = False):
-    anony_info = (db.query(models.BlogUserAnonyInfo)
+def get_user_anony_info(db: Session, blog_id: int, user_id: int):
+    user_anony_info = (db.query(models.BlogUserAnonyInfo)
                   .filter(models.BlogUserAnonyInfo.blog_id == blog_id, models.BlogUserAnonyInfo.user_id == user_id)
-                  .first())
+                  .scalar())
+    
+    if user_anony_info is None:
+        return None
 
-    def random_hex(length):
-        import random
-        return random.randint(0, 16 ** length)
+    if user_anony_info.anony_id is not None:
+        anony_info = get_anony_info(db, user_anony_info.anony_id)
+        user_anony_info.anony_name = anony_info.name
+        user_anony_info.anony_avatar_url = anony_info.avatar_url
+    return user_anony_info
 
-    if create and anony_info == None:
-        try:
-            anony_info = models.BlogUserAnonyInfo(blog_id=blog_id, user_id=user_id,
-                                                  anony_name=f"匿名用户 #{random_hex(6):06X}",
-                                                  anony_avatar_url="https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png")
-            db.add(anony_info)
-            db.commit()
-            db.refresh(anony_info)
-        except Exception as e:
-            db.rollback()
-    return anony_info
+
+def get_anony_info(db: Session, anony_id: int):
+    return db.query(models.AnonyInfo).filter(models.AnonyInfo.id == anony_id).scalar()
 
 
 def get_blog_by_blog_id(db: Session, blog_id: int) -> models.Blog:
@@ -243,15 +243,36 @@ def create_blog_comment(db: Session, user_id: int, blog_id: int, content: str, i
     try:
         db.add(db_blog_comment)
         db.flush()
+        if is_anonymous:
+            user_anony_info = get_user_anony_info(db, blog_id=blog_id, user_id=user_id)
+            if user_anony_info is None:
+                create_user_anony_info(db, blog_id=blog_id, user_id=user_id)
         db_blog.reply_at = db_blog_comment.create_at
         db.add(db_blog)
     except Exception as e:
+        print("Error during commit: ", e)
         db.rollback()
         db_blog_comment = None
-    # print("Error during commit: ", e)
     else:
         db.commit()
     return db_blog_comment
+
+
+def create_user_anony_info(db: Session, blog_id: int, user_id: int):
+    try:
+        new_anony_id = db.query(func.coalesce(func.max(models.BlogUserAnonyInfo.anony_id), 0) + 1).filter(
+        models.BlogUserAnonyInfo.user_id == user_id,
+        models.BlogUserAnonyInfo.blog_id == blog_id
+        ).with_for_update().scalar()
+        new_anony_info = models.BlogUserAnonyInfo(blog_id=blog_id, user_id=user_id, anony_id=new_anony_id)
+        db.add(new_anony_info)
+    except Exception as e:
+        print("Error during commit: ", e)
+        db.rollback()
+        new_anony_info = None
+    else:
+        db.commit()
+    return new_anony_info
 
 
 def get_all_blog_tags(db: Session):
