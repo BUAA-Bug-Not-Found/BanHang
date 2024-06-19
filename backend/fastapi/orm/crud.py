@@ -424,7 +424,7 @@ def get_questions_by_tag(db: Session, offset: int = 0, limit: int = 10, asc: boo
     if asc:
         return sorted(questions, key=lambda q: q.question_create_at)[offset:offset + limit]
     else:
-        return sorted(questions, key=lambda q: q.question_create_at)[offset:offset + limit]
+        return sorted(questions, key=lambda q: q.question_create_at)[offset:offset + limit][::-1]
 
 
 def get_question_sum_by_tag_id(db: Session, tagId):
